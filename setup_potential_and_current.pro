@@ -6,8 +6,10 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
                                 potName,potTitleStr, $
                                 USE_JE_CURRENT=use_je_current, $
                                 USE_JMAG_CURRENT=use_jMag_current, $
-                                USE_CHARE_POT=use_charE_pot, $
+                                ;; USE_CHARE_POT=use_charE_pot, $
                                 USE_BULKENERGY_POT=use_bulkEnergy_pot, $
+                                BOTH_USE_KAPPA_BULKENERGY=both_use_kappa_bulkenergy, $
+                                BOTH_USE_MAXWELL_BULKENERGY=both_use_maxwell_bulkenergy, $
                                 NO_CHARI_FOR_POT=no_charI_for_pot
 
   COMPILE_OPT idl2
@@ -25,9 +27,21 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
   ;;Get potential, suffixes for plot name
   potTitleStr        = "Potential: "
   CASE 1 OF
+     KEYWORD_SET(both_use_maxwell_bulkenergy): BEGIN
+        gaussPot     = setup.GaussS.bulk_energy
+        kappaPot     = setup.GaussS.bulk_energy
+        potName      = 'Gauss_bulkE'
+        potTitleStr += 'Maxwell fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+     END
+     KEYWORD_SET(both_use_kappa_bulkenergy): BEGIN
+        gaussPot     = setup.KappaS.bulk_energy
+        kappaPot     = setup.KappaS.bulk_energy
+        potName      = 'kappa_bulkE'
+        potTitleStr += 'Kappa fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+     END
      KEYWORD_SET(use_bulkEnergy_pot): BEGIN
-        gaussPot     = Setup.GaussS.bulk_energy
-        kappaPot     = Setup.KappaS.bulk_energy
+        gaussPot     = setup.GaussS.bulk_energy
+        kappaPot     = setup.KappaS.bulk_energy
         potName      = 'bulkE'
         potTitleStr += 'Fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
      END
