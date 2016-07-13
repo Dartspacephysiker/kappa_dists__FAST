@@ -1,0 +1,65 @@
+;2016/07/13
+;To be used as part of plotting kappa model- and Maxwellian model-derived currents versus observed currents (cf. PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT)
+PRO SETUP_POTENTIAL_AND_CURRENT,setup, $ 
+                                obs_current,obsName,obsSuff, $
+                                kappaPot,gaussPot, $
+                                potName,potTitleStr, $
+                                USE_JE_CURRENT=use_je_current, $
+                                USE_JMAG_CURRENT=use_jMag_current, $
+                                USE_CHARE_POT=use_charE_pot, $
+                                USE_BULKENERGY_POT=use_bulkEnergy_pot, $
+                                NO_CHARI_FOR_POT=no_charI_for_pot
+
+  COMPILE_OPT idl2
+
+  ;; setup = {kappaS:Astruct, $
+  ;;          gaussS:AStructGauss, $
+  ;;          charE:charE_kappa_interp, $
+  ;;          charI:charI_kappa_interp, $
+  ;;          charTot:charTot_kappa_interp, $
+  ;;          Jtot:Jtot_kappa_interp, $
+  ;;          JMag:jMag_kappa_interp, $
+  ;;          Je:Je_kappa_interp, $
+  ;;          Ji:Ji_kappa_interp}
+
+  ;;Get potential, suffixes for plot name
+  potTitleStr        = "Potential: "
+  CASE 1 OF
+     KEYWORD_SET(use_bulkEnergy_pot): BEGIN
+        gaussPot     = Setup.GaussS.bulk_energy
+        kappaPot     = Setup.KappaS.bulk_energy
+        potName      = 'bulkE'
+        potTitleStr += 'Fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+     END
+     ELSE: BEGIN
+        gaussPot     = setup.charE
+        kappaPot     = setup.charE
+        potName      = 'charE'
+        potTitleStr += 'Char. e!U-!N' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + ion') + ' energy'
+     END
+  ENDCASE
+
+  IF ~KEYWORD_SET(no_charI_for_pot) THEN BEGIN
+     gaussPot       += setup.charI
+     kappaPot       += setup.charI
+     potName        += '_charI'
+  ENDIF
+
+  ;;Get current, suffixes for plot name
+  IF KEYWORD_SET(use_je_current) THEN BEGIN
+     obs_current     = setup.Je
+     obsName         = 'e- ESA'
+     obsSuff         = 'e_ESA'
+  ENDIF ELSE BEGIN
+     IF KEYWORD_SET(use_jMag_current) THEN BEGIN
+        obs_current  = setup.jMag
+        obsName      = 'Fluxgate Mag-derived'
+        obsSuff      = 'fluxgate'
+     ENDIF ELSE BEGIN
+        obs_current  = setup.Jtot
+        obsName      = 'e- and i+ ESA'
+        obsSuff      = 'both_ESAs'
+     ENDELSE
+  ENDELSE
+
+END
