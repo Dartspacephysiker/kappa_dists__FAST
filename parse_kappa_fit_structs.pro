@@ -26,7 +26,7 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
              'N', $
              'delta_t', $       ;bogus
              'mass', $          ;(eV/(km/s)^2)
-             'Bulk angle']
+             'Bulk_angle']
   Astruct = CREATE_STRUCT(A_names, $
                           REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]), $
                           REFORM(A[4,*]),REFORM(A[5,*]),REFORM(A[6,*]))

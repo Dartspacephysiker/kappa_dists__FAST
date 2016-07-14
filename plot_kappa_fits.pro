@@ -7,6 +7,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     YLOG=yLog, $
                     STRINGS=strings, $
                     ADD_FITPARAMS_TEXT=add_fitParams_text, $
+                    ADD_ANGLE_LABEL=add_angle_label, $
                     ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                     SAVE_FITPLOTS=save_fitPlots, $
                     PLOT_FULL_FIT=plot_full_fit, $
@@ -19,7 +20,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ;;Need to know if OMNI2D is responsible for this, or something else
   pref                 = KEYWORD_SET(using_sdt_data) ? '--nFlux_fit__SDT_data--' : '--nFlux_fit--'
 
-  plotSN               = STRING(FORMAT='(A0,A0,A0,"--",A0,A0,"--orb_",I0,"__",A0,A0,".png")', $
+  plotSN               = STRING(FORMAT='(A0,A0,A0,"--",A0,A0,"--orb_",I0,"__",A0,A0)', $
                                 strings.today, $
                                 pref, $
                                 strings.timeFNStrs[bounds_i], $
@@ -28,6 +29,10 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                 strings.orbStr, $
                                 strings.orbDate[bounds_i], $
                                 strings.angleStr)
+  IF KEYWORD_SET(add_angle_label) THEN BEGIN
+     plotSN           += STRING(FORMAT='("--angle_",F0.1)',kappaFit.A[6])
+  ENDIF
+  plotSN              += '.png'
 
   title                = STRING(FORMAT='("Loss-cone e!U-!N # flux, (Orbit ",I0,", ",A0,")")', $
                                 strings.orbStr, $
@@ -122,17 +127,23 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   legend               = LEGEND(TARGET=plotArr[*],POSITION=[0.55,0.85],/NORMAL)
 
   IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
-     fitTitle          = ["Bulk energy (eV)","Plasma temp. (eV)","Kappa","Density (cm^-3)"]
+     fitTitle          = ["Bulk energy (eV)","Plasma temp. (eV)","Kappa","Density (cm^-3)","Angle (deg)"]
      fitInfoStr        = [STRING(FORMAT='(F-15.2)',kappaFit.A[0]), $
                           STRING(FORMAT='(F-15.2)',kappaFit.A[1]), $
                           STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
                           STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
+     IF KEYWORD_SET(add_angle_label) THEN BEGIN
+        fitTitle = [fitTitle,"Angle (deg)"]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
+     ENDIF
 
      fitParamsText     = TEXT(0.2,0.25, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
+                              (KEYWORD_SET(add_angle_label) ? $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $
@@ -145,11 +156,18 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                           STRING(FORMAT='(F-7.3)',gaussFit.A[2]), $
                           STRING(FORMAT='(F-8.4)',gaussFit.A[3])]
 
+        IF KEYWORD_SET(add_angle_label) THEN BEGIN
+           fitTitle    = [fitTitle,"Angle (deg)"]
+           fitInfoStr  = [fitInfoStr,STRING(FORMAT='(F-8.4)',gaussFit.A[6])]
+        ENDIF
+
         fitParamsText  = TEXT(0.52,0.25, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
+                              (KEYWORD_SET(add_angle_label) ? $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $

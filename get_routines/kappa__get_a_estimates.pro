@@ -1,9 +1,74 @@
+;+
+; NAME:
+;
+;
+;
+; PURPOSE:
+;
+;
+;
+; CATEGORY:
+;
+;
+;
+; CALLING SEQUENCE:
+;
+;
+;
+; INPUTS:
+;
+;
+;
+; OPTIONAL INPUTS:
+;
+;
+;
+; KEYWORD PARAMETERS:
+;
+;                     E_ANGLE            : This wants to be the range of angles (i.e., two elements) over which
+;                                          we're estimating temperature, density, etc.                  
+;
+;
+; OUTPUTS:
+;
+;
+;
+; OPTIONAL OUTPUTS:
+;
+;
+;
+; COMMON BLOCKS:
+;
+;
+;
+; SIDE EFFECTS:
+;
+;
+;
+; RESTRICTIONS:
+;
+;
+;
+; PROCEDURE:
+;
+;
+;
+; EXAMPLE:
+;
+;
+;
+; MODIFICATION HISTORY:
+;
+;-
+;;
+
 PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            minEInd,maxEInd,nEnergies, $
                            peak_ind,peak_energy,eRange_peak, $
                            ANGLES=angles, $
+                           BULKANGLE_STRUCT=angleStr, $
                            KAPPA_EST=kappa, $
-                           E_ANGLE=e_angle, $
+                           E_ANGLE=e_angle_range, $
                            ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                            USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                            ESTFACS=estFacs, $
@@ -32,9 +97,33 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   eRange_peak     = [min_energy,max_energy]
 
   bulk_energy     = peak_energy*estFacs.B_E
-  T               = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle))[3]*estFacs.T ;T_avg
-  n_est           = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle)*estFacs.N
-  A               = DOUBLE([bulk_energy,T,kappa,n_est,dat.integ_t,dat.mass,MEAN(angles)]) 
+
+  ;;So we estimate the temperature and density based on the full range of angles being considered 
+  T               = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[3]*estFacs.T ;T_avg
+  n_est           = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range)*estFacs.N
+
+  ;;Decide on angle range
+  IF N_ELEMENTS(angleStr) GT 0 THEN BEGIN
+     IF angleStr.useMe THEN BEGIN
+        bulkAngle = angleStr.bulkAngle
+        bulkAngleProvided = 1
+     ENDIF ELSE BEGIN
+        bulkAngleProvided = 0
+     ENDELSE
+  ENDIF ELSE BEGIN
+     bulkAngleProvided    = 0
+  ENDELSE
+
+  CASE bulkAngleProvided OF
+     0: BEGIN
+        angleOffset = 0         ;Just assume stuff is field aligned
+     END
+     1: BEGIN
+        angleOffset  = MEAN(angles)-bulkAngle
+     END
+  ENDCASE
+
+  A               = DOUBLE([bulk_energy,T,kappa,n_est,dat.integ_t,dat.mass,angleOffset]) 
   
   PRINT,"Here's my initial estimate based on spectral properties: "
   PRINT_KAPPA_FLUX_FIT_PARAMS,A
@@ -57,13 +146,13 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
         bulk_EGauss  = peak_energy*estFacs.B_EGauss
 
-        TGauss       = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle))[3]*estFacs.TGauss
-        n_estGauss   = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle)*estFacs.NGauss
+        TGauss       = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[3]*estFacs.TGauss
+        n_estGauss   = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range)*estFacs.NGauss
         
         kappaGauss   = 100
 
         AGauss       = DOUBLE([bulk_EGauss,TGauss,kappaGauss,n_estGauss, $
-                               dat.integ_t,dat.mass,MEAN(angles)])
+                               dat.integ_t,dat.mass,angleOffset])
 
         PRINT,"Here's my initial Gaussian estimate based on spectral properties: "
         PRINT_KAPPA_FLUX_FIT_PARAMS,AGauss

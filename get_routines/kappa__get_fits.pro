@@ -18,6 +18,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
                     OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
                     ADD_FULL_FITS=add_full_fits, $
+                    ADD_ANGLESTR=add_angleStr, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
                     OUT_PARAMSTR=out_paramStr
 
@@ -101,6 +102,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
      KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F,Xorig,A,yFull
      kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",Xorig,"yFull",yFull)
   ENDIF
+
+  IF KEYWORD_SET(add_angleStr) THEN BEGIN
+     ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
+  ENDIF
+
 
   ;; out_kappa_fit_structs       = N_ELEMENTS(out_kappa_fit_structs) EQ 0 ? kappaFit : [out_kappa_fit_structs,kappaFit]
   IF N_ELEMENTS(out_kappa_fit_structs) EQ 0 THEN BEGIN
@@ -221,6 +227,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
         gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",Xorig,"yFull",yGaussFull)
 
      ENDIF
+
+     IF KEYWORD_SET(add_angleStr) THEN BEGIN
+        ADD_STR_ELEMENT,gaussFit,'bulkAngleInf',add_angleStr
+     ENDIF
+
 
      ;; out_gauss_fit_structs    = N_ELEMENTS(out_gauss_fit_structs) EQ 0 ? gaussFit : [out_gauss_fit_structs,gaussFit]
      IF N_ELEMENTS(out_gauss_fit_structs) EQ 0 THEN BEGIN
