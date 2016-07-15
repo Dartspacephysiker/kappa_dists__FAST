@@ -27,7 +27,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                     FIT_EACH_ANGLE=fit_each_angle, $
                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
-                    FIT_EACH__SYNTH_SDT_STRUCT=fit_each__synth_sdt_struct, $
+                    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     EACH_ANGLE_DATA=diff_eFlux, $
                     EACH_ANGLE_ONECOUNT_DATA=dEF_oneCount, $
                     ELECTRON_ANGLERANGE=electron_angleRange, $
@@ -86,7 +86,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                     FIT_EACH_ANGLE=fit_each_angle, $
                                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
-                                    FIT_EACH__SYNTH_SDT_STRUCT=fit_each__synth_sdt_struct, $
+                                    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     NO_PLOTS=no_plots, $
                                     SAVE_FITPLOTS=save_fitplots, $

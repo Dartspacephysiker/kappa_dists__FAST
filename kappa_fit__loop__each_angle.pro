@@ -28,7 +28,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                 FIT_EACH_ANGLE=fit_each_angle, $
                                 FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
-                                FIT_EACH__SYNTH_SDT_STRUCT=fit_each__synth_sdt_struct, $
+                                FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                                 ADD_ANGLE_LABEL=add_angle_label, $
                                 ELECTRON_ANGLERANGE=electron_angleRange, $
                                 NO_PLOTS=no_plots, $
@@ -61,8 +61,14 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
   oneCount_data                     = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
   angles                            = TRANSPOSE(diff_eFlux.theta,[1,0,2])
 
-  IF KEYWORD_SET(fit_each__synth_sdt_struct) THEN BEGIN
-     synth                          = diff_eFlux
+  ;;In order to get back to how things were, just 
+  IF KEYWORD_SET(synthPackage) THEN BEGIN
+     synthKappa                     = diff_eFlux
+     synthKappa.data[*]             = 0.0
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+        synthGauss                  = diff_eFlux
+        synthGauss.data[*]          = 0.0
+     ENDIF
   ENDIF
 
   ;;Loop over provided indices, plot data as well as fit, and optionally save
@@ -100,19 +106,20 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
 
   FOR i=0,N_ELEMENTS(bounds)-1 DO BEGIN
 
-     t                                     = times[bounds[i]]
+     iTime                                 = bounds[i]
+     t                                     = times[iTime]
 
      IF KEYWORD_SET(diag) THEN BEGIN
         PRINT,"Time: " + TIME_TO_STR(t,/MS)
      ENDIF
 
      ;;And now the order becomes [angle,energy] for each of these arrays
-     XorigArr                              = energies[*,*,bounds[i]]
-     YorigArr                              = data[*,*,bounds[i]]
+     XorigArr                              = energies[*,*,iTime]
+     YorigArr                              = data[*,*,iTime]
      IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
-        oneCountArr                        = oneCount_data[*,*,bounds[i]]
+        oneCountArr                        = oneCount_data[*,*,iTime]
      END
-     AngleArr                              = angles[*,*,bounds[i]]
+     AorigArr                              = angles[*,*,iTime]
      nEnergies                             = N_ELEMENTS(XorigArr[0,*])
 
      IF KEYWORD_SET(min_peak_energy) THEN BEGIN
@@ -124,17 +131,17 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
         min_peak_ind                       = 0
      ENDELSE
 
-     dat                                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[i])
+     dat                                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
      ;;Just get the angles for this time, and we'll assume the middle of the energy range is representative
-     tempAngles                            = angleArr[*,nEnergies/2]
+     tempAllAngles                         = AorigArr[*,nEnergies/2]
 
      CASE alleyOop OF
         0: BEGIN
-           angleBins                       = tempAngles GE tempRange[0] AND tempAngles LE tempRange[1]
+           angleBins                       = tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1]
         END
         1: BEGIN
-           angleBins                       = tempAngles GE tempRange[0] OR tempAngles LE tempRange[1]
+           angleBins                       = tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1]
         END
         
      ENDCASE
@@ -158,10 +165,10 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
      tempDat                               = (REVERSE(dat.data,1))[min_peak_ind:-1,angleBin_i]
      angleDist                             = TOTAL(tempDat,1)/TOTAL(tempDat)
      testRatio                             = MAX(angleDist,maxInd_angleDist)/MIN(angleDist,minInd_angleDist)
-     angleStr                              = {bulkAngle:angleArr[maxInd_angleDist,nEnergies/2], $
+     angleStr                              = {bulkAngle:AorigArr[maxInd_angleDist,nEnergies/2], $
                                               useMe:testRatio GE threshRatio, $
                                               dist:angleDist, $
-                                              angles:tempAngles[angleBin_i], $
+                                              angles:tempAllAngles[angleBin_i], $
                                               maxInd:maxInd_angleDist, $
                                               minInd:minInd_angleDist, $
                                               min_peak_ind:min_peak_ind}
@@ -170,24 +177,27 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
      ;; checkitout                         = plot(total(tangles,1),angleDist,symbol='*',linestyle=6)
 
      ;;Here's some code for checking it out
-     ;; this                               = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[i])
+     ;; this                               = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
      ;;For orbit 1849 (JOURNAL__20160714), these are informative pitch angle dists
      ;; contour2d,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[41]),/polar
      ;; contour2d,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[65]),/polar
 
 
      ;;Now loop over each angle and fit, possibly plot
-     FOR iAngle=0,nAngles-1 DO BEGIN
+     FOR iiAngle=0,nAngles-1 DO BEGIN
+
+        iAngle                             = angleBin_i[iiAngle]
 
         ;;Here's the data we're working with for this loop iteration
-        Xorig                              = REVERSE(REFORM(XorigArr[angleBin_i[iAngle],*]))
-        Yorig                              = REVERSE(REFORM(YorigArr[angleBin_i[iAngle],*]))
-        tempAngle                          = tempAngles[angleBin_i[iAngle]]
+        Xorig                              = REVERSE(REFORM(XorigArr[iAngle,*]))
+        Yorig                              = REVERSE(REFORM(YorigArr[iAngle,*]))
+        Aorig                              = REVERSE(REFORM(AorigArr[iAngle,*]))
+        tempAngle                          = tempAllAngles[iAngle]
         tempAngleEstRange                  = [tempAngle-0.5,tempAngle+0.5]
 
         IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
            oneCurve                        = {x:Xorig, $
-                                     y:REVERSE(REFORM(oneCountArr[angleBin_i[iAngle],*])), $
+                                     y:REVERSE(REFORM(oneCountArr[iAngle,*])), $
                                      NAME:"One Count"}
         ENDIF
 
@@ -256,7 +266,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                         orig,kappaFit,gaussFit, $
                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                         USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
-                        BOUNDS_I=bounds[i], $
+                        BOUNDS_I=iTime, $
                         ENERGY_INDS=[minEInd,maxEInd], $
                         ERANGE_PEAK=eRange_peak, $
                         PEAK_IND=peak_ind, $
@@ -284,7 +294,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
         IF ~KEYWORD_SET(no_plots) THEN BEGIN
            PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                            ;; TITLE=title, $
-                           BOUNDS_I=bounds[i], $
+                           BOUNDS_I=iTime, $
                            XRANGE=xRange, $
                            YRANGE=yRange, $
                            XLOG=xLog, $
@@ -298,14 +308,42 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                            USING_SDT_DATA=using_sdt_data, $
                            PLOTDIR=plotDir
         ENDIF
-     ENDFOR
 
-     IF KEYWORD_SET(fit_each__synth_sdt_struct) THEN BEGIN
-        synth = this
+     ;;Now that we've finished with all these angles, let's see about recovering them
+     IF KEYWORD_SET(synthPackage) THEN BEGIN
+
+        ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,bounds[i+1]]),tempAllAngles)
+        ;;0
+        ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,iTime]),tempAllAngles)
+        ;;1
+     
+        synthKappa.data[*,iAngle,iTime] =   REVERSE(kappaFit.yFull)
+        synthKappa.energy[*,iAngle,iTime] = REVERSE(kappaFit.xFull)
+
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           synthGauss.data[*,iAngle,iTime] =   REVERSE(gaussFit.yFull)
+           synthGauss.energy[*,iAngle,iTime] = REVERSE(gaussFit.xFull)
+        ENDIF
 
      ENDIF
 
+     ENDFOR
   ENDFOR
+
+  IF KEYWORD_SET(synthPackage) THEN BEGIN
+     synthPackage = LIST(MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(diff_eFlux, $
+                                                                     TIME_INDS=bounds), $
+                         MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(synthKappa, $
+                                                                      TIME_INDS=bounds, $
+                                                                      /RECALCULATE_DDATA, $
+                                                                      APPEND_DATA_NAME=' (Kappa fits)'))
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+        synthPackage.Add,MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(synthGauss, $
+                                                                      TIME_INDS=bounds, $
+                                                                      /RECALCULATE_DDATA, $
+                                                                      APPEND_DATA_NAME=' (Gauss fits)')
+     ENDIF
+  ENDIF
 
   PRINT,'Done!'
 

@@ -42,7 +42,7 @@ PRO KAPPA_FLUX__FIT_ABOVE_PEAK__BULKANGLE_0__EFLUX_UNITS, $ ;X,A,F,pders, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    FIT_EACH_ANGLE=fit_each_angle, $
    FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
-   FIT_EACH__SYNTH_SDT_STRUCT=fit_each__synth_sdt_struct, $
+   FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
    MIN_PEAK_ENERGY=min_peak_energy, $
@@ -292,7 +292,7 @@ PRO KAPPA_FLUX__FIT_ABOVE_PEAK__BULKANGLE_0__EFLUX_UNITS, $ ;X,A,F,pders, $
                   ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                   FIT_EACH_ANGLE=fit_each_angle, $
                   FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
-                  FIT_EACH__SYNTH_SDT_STRUCT=fit_each__synth_sdt_struct, $
+                  FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                   EACH_ANGLE_DATA=diff_eFlux, $
                   EACH_ANGLE_ONECOUNT_DATA=dEF_oneCount, $
                   ELECTRON_ANGLERANGE=electron_angleRange, $
