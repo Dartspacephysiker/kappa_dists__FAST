@@ -14,6 +14,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 N_ENERGIES_AFTER_PEAK=n_after_peak, $
                                 ENERGY_ELECTRONS=energy_electrons, $
                                 ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+                                DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                 E_ANGLE=e_angle, $
                                 BULK_OFFSET=bulk_offset, $
                                 CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
@@ -29,6 +30,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 FIT_EACH_ANGLE=fit_each_angle, $
                                 FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                                 FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
+                                FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                                 ADD_ANGLE_LABEL=add_angle_label, $
                                 ELECTRON_ANGLERANGE=electron_angleRange, $
                                 NO_PLOTS=no_plots, $
@@ -103,6 +105,10 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
         ENDELSE
      END
   ENDCASE
+
+  IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
+     keeper_bounds_i                       = !NULL
+  ENDIF
 
   FOR i=0,N_ELEMENTS(bounds)-1 DO BEGIN
 
@@ -183,6 +189,9 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
      ;; contour2d,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[65]),/polar
 
 
+     nGoodFits_tempK                       = 0
+     nGoodFits_tempG                       = 0
+
      ;;Now loop over each angle and fit, possibly plot
      FOR iiAngle=0,nAngles-1 DO BEGIN
 
@@ -197,8 +206,8 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
 
         IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
            oneCurve                        = {x:Xorig, $
-                                     y:REVERSE(REFORM(oneCountArr[iAngle,*])), $
-                                     NAME:"One Count"}
+                                              y:REVERSE(REFORM(oneCountArr[iAngle,*])), $
+                                              NAME:"One Count"}
         ENDIF
 
 
@@ -215,11 +224,11 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
            nAbove                          = nEnergies-1-maxEInd
            killIt                          = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
            IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
-              PRINT,'Old nAbove : ' + STRCOMPRESS(nAbove,/REMOVE_ALL)
-              PRINT,'Old maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
+              ;; PRINT,'Old nAbove : ' + STRCOMPRESS(nAbove,/REMOVE_ALL)
+              ;; PRINT,'Old maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
               maxEInd                      = maxEInd < MIN(killIt)
-              PRINT,'New nAbove: ' + STRCOMPRESS(nEnergies-1-maxEInd,/REMOVE_ALL)
-              PRINT,'New maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
+              ;; PRINT,'New nAbove: ' + STRCOMPRESS(nEnergies-1-maxEInd,/REMOVE_ALL)
+              ;; PRINT,'New maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
 
            ENDIF
         ENDIF
@@ -239,7 +248,9 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                   USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                                   ESTFACS=estFacs, $
                                   A_OUT=A, $
-                                  AGAUSS_OUT=AGauss
+                                  AGAUSS_OUT=AGauss, $
+                                  DONT_PRINT_ESTIMATES=dont_print_estimates
+
 
         ENDIF ELSE BEGIN
            A                               = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
@@ -284,7 +295,8 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                         ADD_FULL_FITS=KEYWORD_SET(add_full_fits) OR KEYWORD_SET(plot_full_fit), $
                         ADD_ANGLESTR=angleStr, $
                         OUT_ERANGE_PEAK=out_eRange_peak, $
-                        OUT_PARAMSTR=out_paramStr
+                        OUT_PARAMSTR=out_paramStr, $
+                        DONT_PRINT_ESTIMATES=dont_print_estimates
 
         ;;Update yRange based on fits
         yRange[1]                          = yRange[1] > yMax
@@ -304,42 +316,72 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                            ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                            ADD_ANGLE_LABEL=add_angle_label, $
                            SAVE_FITPLOTS=save_fitPlots, $ ;, $
+                           SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                            PLOT_FULL_FIT=plot_full_fit, $
                            USING_SDT_DATA=using_sdt_data, $
                            PLOTDIR=plotDir
         ENDIF
 
-     ;;Now that we've finished with all these angles, let's see about recovering them
-     IF KEYWORD_SET(synthPackage) THEN BEGIN
+        ;;Now that we've finished with all these angles, let's see about recovering them
+        IF KEYWORD_SET(synthPackage) THEN BEGIN
 
-        ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,bounds[i+1]]),tempAllAngles)
-        ;;0
-        ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,iTime]),tempAllAngles)
-        ;;1
-     
-        synthKappa.data[*,iAngle,iTime] =   REVERSE(kappaFit.yFull)
-        synthKappa.energy[*,iAngle,iTime] = REVERSE(kappaFit.xFull)
+           ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,bounds[i+1]]),tempAllAngles)
+           ;;0
+           ;;ARRAY_EQUAL(REFORM(diff_eFlux.theta[nEnergies/2,*,iTime]),tempAllAngles)
+           ;;1
+           
+           ;;Determine whether we're keeping this guy or not, for plotting purposes and for building synthetic SDT structs
+           skipKappa  = (kappaFit.fitStatus GT 0) AND KEYWORD_SET(fit_each__skip_bad_fits)
 
-        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-           synthGauss.data[*,iAngle,iTime] =   REVERSE(gaussFit.yFull)
-           synthGauss.energy[*,iAngle,iTime] = REVERSE(gaussFit.xFull)
+           IF ~skipKappa THEN BEGIN
+              synthKappa.data[*,iAngle,iTime] =   REVERSE(kappaFit.yFull)
+              synthKappa.energy[*,iAngle,iTime] = REVERSE(kappaFit.xFull)
+              nGoodFits_tempK++
+           ENDIF
+
+           IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+              skipGauss  = (gaussFit.fitStatus GT 0) AND KEYWORD_SET(fit_each__skip_bad_fits)
+
+              IF ~skipGauss THEN BEGIN
+                 synthGauss.data[*,iAngle,iTime] =   REVERSE(gaussFit.yFull)
+                 synthGauss.energy[*,iAngle,iTime] = REVERSE(gaussFit.xFull)
+                 nGoodFits_tempG++
+              ENDIF
+           ENDIF
         ENDIF
 
+     ENDFOR
+
+     PRINT
+     ;;Decide whether we're going to keep this time in the synthetic structs
+     IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
+        PRINT,'ngoodfitsK ',nGoodFits_tempK
+        PRINT,'ngoodfitsG ',nGoodFits_tempG
+        IF (nGoodFits_tempK GT 0) OR (nGoodFits_tempG GT 0) THEN BEGIN
+           keeper_bounds_i = [keeper_bounds_i,iTime]
+        ENDIF
      ENDIF
 
-     ENDFOR
   ENDFOR
 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
+     
+
+     IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
+        tmpTime_i = keeper_bounds_i
+     ENDIF ELSE BEGIN
+        tmpTime_i = bounds
+     ENDELSE
+
      synthPackage = LIST(MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(diff_eFlux, $
-                                                                     TIME_INDS=bounds), $
+                                                                     TIME_INDS=tmpTime_i), $
                          MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(synthKappa, $
-                                                                      TIME_INDS=bounds, $
+                                                                      TIME_INDS=tmpTime_i, $
                                                                       /RECALCULATE_DDATA, $
                                                                       APPEND_DATA_NAME=' (Kappa fits)'))
      IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
         synthPackage.Add,MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(synthGauss, $
-                                                                      TIME_INDS=bounds, $
+                                                                      TIME_INDS=tmpTime_i, $
                                                                       /RECALCULATE_DDATA, $
                                                                       APPEND_DATA_NAME=' (Gauss fits)')
      ENDIF

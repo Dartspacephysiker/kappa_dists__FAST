@@ -20,7 +20,8 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     ADD_FULL_FITS=add_full_fits, $
                     ADD_ANGLESTR=add_angleStr, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
-                    OUT_PARAMSTR=out_paramStr
+                    OUT_PARAMSTR=out_paramStr, $
+                    DONT_PRINT_ESTIMATES=dont_print_estimates
 
   COMMON FIT_MASS,mass
 
@@ -55,9 +56,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
   ;;need to adjust Y bounds?
   yMax                        = MAX(yFit) 
 
-  PRINT,"Fitted spectral properties: "
-  PRINT_KAPPA_FLUX_FIT_PARAMS,A
-  PRINT,''
+  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+     PRINT,"Fitted spectral properties: "
+     PRINT_KAPPA_FLUX_FIT_PARAMS,A
+     PRINT,''
+  ENDIF
   out_fitted_params           = N_ELEMENTS(out_fitted_params) GT 0 ? $
                                 [[out_fitted_params],[A]] : A
   out_eRange_peak             = N_ELEMENTS(out_eRange_peak) GT 0 ? $
@@ -69,20 +72,19 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                        strings.orbStr, $
                                        strings.orbDate)
 
-  CASE fitStatus OF 
-     0: BEGIN 
-        PRINT,'Fit success!' 
-        fitFail               = 0 
-     END 
-     1: BEGIN 
-        PRINT,'Fit failure! Chi-square increasing without bound!' 
-        fitFail               = 1 
-     END 
-     2: BEGIN 
-        PRINT,'Fit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
-        fitFail               = 1 
-     END 
-  ENDCASE
+  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+     CASE fitStatus OF 
+        0: BEGIN 
+           PRINT,'Fit success!' 
+        END 
+        1: BEGIN 
+           PRINT,'Fit failure! Chi-square increasing without bound!' 
+        END 
+        2: BEGIN 
+           PRINT,'Fit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
+        END 
+     ENDCASE
+  ENDIF
 
   kappaFit                    = {x:X, $
                                  y:yFit, $
@@ -90,6 +92,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                  A:A, $
                                  ;; time:STR_TO_TIME(strings.yearstr[bounds_i]+'/'+strings.plotTimes[bounds_i]), $
                                  time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
+                                 time_index:bounds_i, $
                                  ;; XRANGE:xRange, $
                                  ;; YRANGE:yRange, $
                                  ;; XLOG:1, $
@@ -132,7 +135,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                          CHI2=chi2, $
                                          TOL=KEYWORD_SET(fit_tol) ? fit_tol : 1e-3, $
                                          STATUS=gaussFitStatus)
-           PRINT,'Final fit     : afit=',AGauss
+
+           IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+              PRINT,'Final fit     : afit=',AGauss
+           ENDIF
+
            IF FINITE(chi2) THEN BEGIN
               pValGauss       = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X_SDT)-2) ;2 for the 2 params that participated in this fit
               real_chi2       = TOTAL((yGaussFit-Y_SDT)^2*weights)/(N_ELEMENTS(yGaussFit) - 3) ; 3 for the number that could have participated
@@ -166,20 +173,19 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
      PRINT,''
 
-     CASE gaussFitStatus OF 
-        0: BEGIN 
-           PRINT,'GaussFit success!' 
-           gaussFitFail       = 0 
-        END 
-        1: BEGIN 
-           PRINT,'GaussFit failure! Chi-square increasing without bound!' 
-           gaussFitFail       = 1 
-        END 
-        2: BEGIN 
-           PRINT,'GaussFit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
-           gaussFitFail       = 1 
-        END 
-     ENDCASE
+     IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+        CASE gaussFitStatus OF 
+           0: BEGIN 
+              PRINT,'GaussFit success!' 
+           END 
+           1: BEGIN 
+              PRINT,'GaussFit failure! Chi-square increasing without bound!' 
+           END 
+           2: BEGIN 
+              PRINT,'GaussFit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
+           END 
+        ENDCASE
+     ENDIF
 
      IF KEYWORD_SET(use_SDT_Gaussian_fit) THEN BEGIN
         T  = -1./AGauss[1]
@@ -193,8 +199,10 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
      ENDIF
 
-     PRINT,"Gaussian fitted spectral properties: "
-     PRINT_KAPPA_FLUX_FIT_PARAMS,AGauss
+     IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+        PRINT,"Gaussian fitted spectral properties: "
+        PRINT_KAPPA_FLUX_FIT_PARAMS,AGauss
+     ENDIF
 
      gaussFit                 = {x:KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
                                  y:yGaussFit, $
@@ -202,6 +210,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                  A:AGauss, $
                                  ;; time:STR_TO_TIME(strings.yearstr[bounds_i]+'/'+strings.plotTimes[bounds_i]), $
                                  time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
+                                 time_index:bounds_i, $
                                  ;; XRANGE:xRange, $
                                  ;; YRANGE:yRange, $
                                  ;; XLOG:1, $

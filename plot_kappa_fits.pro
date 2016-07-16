@@ -11,11 +11,14 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                     SAVE_FITPLOTS=save_fitPlots, $
                     PLOT_FULL_FIT=plot_full_fit, $
+                    SKIP_BAD_FITS=skip_bad_fits, $
                     USING_SDT_DATA=using_SDT_data, $
                     ;; PLOT_SAVENAME=plotSN, $
                     PLOTDIR=plotDir
 
   COMPILE_OPT idl2
+
+  skipping             = KEYWORD_SET(skip_bad_fits)
 
   ;;Need to know if OMNI2D is responsible for this, or something else
   pref                 = KEYWORD_SET(using_sdt_data) ? '--nFlux_fit__SDT_data--' : '--nFlux_fit--'
@@ -72,42 +75,50 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
 
   ;;Kappa fit
   IF N_ELEMENTS(kappaFit) GT 0 THEN BEGIN
-     plotArr[iPlot]    = PLOT(KEYWORD_SET(plot_full_fit) ? kappaFit.xFull : kappaFit.x, $ ;x, $
-                              KEYWORD_SET(plot_full_fit) ? kappaFit.yFull : kappaFit.y, $
-                              ;; TITLE=title, $
-                              NAME=kappaFit.name, $
-                              ;; XTITLE=xTitle, $
-                              ;; YTITLE=yTitle, $
-                              ;; XRANGE=kappaFit.xRange, $
-                              ;; YRANGE=kappaFit.yRange, $
-                              ;; YLOG=kappaFit.yLog, $
-                              ;; XLOG=kappaFit.xLog, $
-                              THICK=2.2, $
-                              LINESTYLE=lineStyle[1], $
-                              COLOR=colorList[1], $
-                              /OVERPLOT, $
-                              CURRENT=window) 
-     iPlot++
+     keep = skipping ? (kappaFit.fitStatus EQ 0) : 1
+
+     IF keep THEN BEGIN
+        plotArr[iPlot]    = PLOT(KEYWORD_SET(plot_full_fit) ? kappaFit.xFull : kappaFit.x, $ ;x, $
+                                 KEYWORD_SET(plot_full_fit) ? kappaFit.yFull : kappaFit.y, $
+                                 ;; TITLE=title, $
+                                 NAME=kappaFit.name, $
+                                 ;; XTITLE=xTitle, $
+                                 ;; YTITLE=yTitle, $
+                                 ;; XRANGE=kappaFit.xRange, $
+                                 ;; YRANGE=kappaFit.yRange, $
+                                 ;; YLOG=kappaFit.yLog, $
+                                 ;; XLOG=kappaFit.xLog, $
+                                 THICK=2.2, $
+                                 LINESTYLE=lineStyle[1], $
+                                 COLOR=colorList[1], $
+                                 /OVERPLOT, $
+                                 CURRENT=window) 
+        iPlot++
+     ENDIF
   ENDIF
 
   ;;GaussFit
   IF N_ELEMENTS(gaussFit) GT 0 THEN BEGIN
-     plotArr[iPlot]    = PLOT(KEYWORD_SET(plot_full_fit) ? gaussFit.xFull : gaussFit.X, $
-                              KEYWORD_SET(plot_full_fit) ? gaussFit.yFull : gaussFit.y, $
-                              ;; TITLE=title, $
-                              NAME=gaussFit.name, $
-                              ;; XTITLE=xTitle, $
-                              ;; YTITLE=yTitle, $
-                              ;; XRANGE=gaussFit.xRange, $
-                              ;; YRANGE=gaussFit.yRange, $
-                              ;; YLOG=gaussFit.yLog, $
-                              ;; XLOG=gaussFit.xLog1, $
-                              THICK=2.2, $
-                              LINESTYLE=lineStyle[2], $
-                              COLOR=colorList[2], $
-                              /OVERPLOT, $
-                              CURRENT=window) 
-     iPlot++
+     keep = skipping ? (gaussFit.fitStatus EQ 0) : 1
+
+     IF keep THEN BEGIN
+        plotArr[iPlot]    = PLOT(KEYWORD_SET(plot_full_fit) ? gaussFit.xFull : gaussFit.X, $
+                                 KEYWORD_SET(plot_full_fit) ? gaussFit.yFull : gaussFit.y, $
+                                 ;; TITLE=title, $
+                                 NAME=gaussFit.name, $
+                                 ;; XTITLE=xTitle, $
+                                 ;; YTITLE=yTitle, $
+                                 ;; XRANGE=gaussFit.xRange, $
+                                 ;; YRANGE=gaussFit.yRange, $
+                                 ;; YLOG=gaussFit.yLog, $
+                                 ;; XLOG=gaussFit.xLog1, $
+                                 THICK=2.2, $
+                                 LINESTYLE=lineStyle[2], $
+                                 COLOR=colorList[2], $
+                                 /OVERPLOT, $
+                                 CURRENT=window) 
+        iPlot++
+     ENDIF
   ENDIF
 
   ;;OneCount curve

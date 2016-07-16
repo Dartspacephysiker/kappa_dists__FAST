@@ -12,6 +12,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     N_ENERGIES_AFTER_PEAK=n_after_peak, $
                     ENERGY_ELECTRONS=energy_electrons, $
                     ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+                    DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     E_ANGLE=e_angle, $
                     BULK_OFFSET=bulk_offset, $
                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
@@ -28,6 +29,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     FIT_EACH_ANGLE=fit_each_angle, $
                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
+                    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                     EACH_ANGLE_DATA=diff_eFlux, $
                     EACH_ANGLE_ONECOUNT_DATA=dEF_oneCount, $
                     ELECTRON_ANGLERANGE=electron_angleRange, $
@@ -71,6 +73,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     N_ENERGIES_AFTER_PEAK=n_after_peak, $
                                     ENERGY_ELECTRONS=energy_electrons, $
                                     ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+                                    DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                     E_ANGLE=e_angle, $
                                     BULK_OFFSET=bulk_offset, $
                                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
@@ -87,6 +90,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     FIT_EACH_ANGLE=fit_each_angle, $
                                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
+                                    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     NO_PLOTS=no_plots, $
                                     SAVE_FITPLOTS=save_fitplots, $
@@ -125,6 +129,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                    N_ENERGIES_AFTER_PEAK=n_after_peak, $
                                    ENERGY_ELECTRONS=energy_electrons, $
                                    ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+                                   DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                    E_ANGLE=e_angle, $
                                    BULK_OFFSET=bulk_offset, $
                                    CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $

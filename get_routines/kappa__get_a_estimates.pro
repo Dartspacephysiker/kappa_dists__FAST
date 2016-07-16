@@ -73,7 +73,9 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                            ESTFACS=estFacs, $
                            A_OUT=A, $
-                           AGAUSS_OUT=AGauss
+                           AGAUSS_OUT=AGauss, $
+                           DONT_PRINT_ESTIMATES=dont_print_estimates
+
 
   COMPILE_OPT idl2
 
@@ -125,9 +127,11 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
   A               = DOUBLE([bulk_energy,T,kappa,n_est,dat.integ_t,dat.mass,angleOffset]) 
   
-  PRINT,"Here's my initial estimate based on spectral properties: "
-  PRINT_KAPPA_FLUX_FIT_PARAMS,A
-  PRINT,''
+  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+     PRINT,"Here's my initial estimate based on spectral properties: "
+     PRINT_KAPPA_FLUX_FIT_PARAMS,A
+     PRINT,''
+  ENDIF
 
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
 
@@ -139,8 +143,10 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
         density = AGauss[0]*exp(AGauss[1]*Xorig[peak_ind])*1.e-15 * (-1.*2.*3.1416*1.6e-12/(AGauss[1]*(mass)))^1.5 
 
         ;;Get AGauss in the form we like it
-        PRINT,"Here's my initial Gaussian estimate based on spectral properties: "
-        PRINT_KAPPA_FLUX_FIT_PARAMS,[Xorig[peak_ind],T,999,density,A[4],A[5]]
+        IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+           PRINT,"Here's my initial Gaussian estimate based on spectral properties: "
+           PRINT_KAPPA_FLUX_FIT_PARAMS,[Xorig[peak_ind],T,999,density,A[4],A[5]]
+        ENDIF
 
      ENDIF ELSE BEGIN
 
@@ -154,9 +160,11 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
         AGauss       = DOUBLE([bulk_EGauss,TGauss,kappaGauss,n_estGauss, $
                                dat.integ_t,dat.mass,angleOffset])
 
-        PRINT,"Here's my initial Gaussian estimate based on spectral properties: "
-        PRINT_KAPPA_FLUX_FIT_PARAMS,AGauss
-        PRINT,''
+        IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+           PRINT,"Here's my initial Gaussian estimate based on spectral properties: "
+           PRINT_KAPPA_FLUX_FIT_PARAMS,AGauss
+           PRINT,''
+        ENDIF
      ENDELSE
   ENDIF
 
