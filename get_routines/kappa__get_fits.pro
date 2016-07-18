@@ -43,14 +43,15 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                  y:Yorig, $
                                  name:strings.plotTimes[bounds_i]}
   
-  CASE 1 OF
-     KEYWORD_SET(fit_fail__user_prompt): BEGIN
-        contKappa             = 0
-     END
-     ELSE: BEGIN
-        contKappa             = 1
-     END
-  ENDCASE
+  ;; CASE 1 OF
+  ;;    KEYWORD_SET(fit_fail__user_prompt): BEGIN
+  ;;       contKappa             = 0
+  ;;    END
+  ;;    ELSE: BEGIN
+  ;;       contKappa             = 1
+  ;;    END
+  ;; ENDCASE
+  contKappa             = 0
 
   WHILE ~contKappa DO BEGIN
 
