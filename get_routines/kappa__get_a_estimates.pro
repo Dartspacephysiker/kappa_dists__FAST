@@ -66,7 +66,9 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            minEInd,maxEInd,nEnergies, $
                            peak_ind,peak_energy,eRange_peak, $
                            ANGLES=angles, $
+                           N_ANGLES_IN_RANGE=n_angles_in_range, $
                            BULKANGLE_STRUCT=angleStr, $
+                           DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                            KAPPA_EST=kappa, $
                            E_ANGLE=e_angle_range, $
                            ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
@@ -101,8 +103,14 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   bulk_energy     = peak_energy*estFacs.B_E
 
   ;;So we estimate the temperature and density based on the full range of angles being considered 
-  T               = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[3]*estFacs.T ;T_avg
-  n_est           = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range)*estFacs.N
+  T               = (T_2D_FS(dat,ENERGY=eRange_peak, $
+                             ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[3]*estFacs.T ;T_avg
+  n_est           = N_2D_FS(dat,ENERGY=eRange_peak, $
+                            ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range)*estFacs.N
+
+  ;; IF KEYWORD_SET(dont_take_stock_of_bulkangle) THEN BEGIN
+  ;;    n_est        /= n_angles_in_range
+  ;; ENDIF
 
   ;;Decide on angle range
   IF N_ELEMENTS(angleStr) GT 0 THEN BEGIN

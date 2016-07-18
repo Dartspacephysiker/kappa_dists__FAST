@@ -46,7 +46,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
            peak_energy  = Xorig[peak_ind]
         END
      ENDCASE
-     PRINT,peak_ind
+     ;; PRINT,peak_ind
   ENDELSE
 
 END

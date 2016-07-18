@@ -22,6 +22,7 @@ PRO KAPPA_EFLUX_FIT, $
    FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+   FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
@@ -187,69 +188,16 @@ PRO KAPPA_EFLUX_FIT, $
   routine                              = 'get_fa_'+eeb_or_ees
   IF KEYWORD_SET(spectra_average_interval) THEN routine += '_ts'
 
- ;;  IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
- ;;     CASE 1 OF
- ;;        KEYWORD_SET(fit_each_angle): BEGIN
- ;;           dEF_oneCountMod                = REFORM(dEF_oneCount.data[*,*,bounds])
- ;;        END
- ;;        ELSE: BEGIN
- ;;           dEF_oneCountMod                = dEF_oneCount.y[bounds,*]
- ;;        END
- ;;     ENDCASE
- ;;     ;; dEF_oneCountMod                   = dEF_oneCount.data[bounds,*]
- ;;     yMin                              = MIN(dEF_oneCountMod[WHERE(dEF_oneCountMod GT 0)])
- ;;     yMin                              = 10.^(FLOOR(ALOG10(yMin)))
-
- ;;     IF KEYWORD_SET(try_synthetic_SDT_struct) THEN BEGIN
- ;;        dEF_oneCountModSDT             = dEF_oneCountSDT.data[bounds,*]
- ;;     ENDIF
- ;;  ENDIF ELSE BEGIN
- ;; ;; ELSE BEGIN
- ;;     CASE 1 OF
- ;;        KEYWORD_SET(fit_each_angle): BEGIN
- ;;           yMin                        = MIN(diff_eFlux.data[WHERE(diff_eFlux.data GT 0)])
- ;;        END
- ;;        ELSE: BEGIN
- ;;           yMin                        = MIN(diff_eFlux.y[WHERE(diff_eFlux.y GT 0)])
- ;;        END
- ;;     ENDCASE
- ;;     ;; ENDELSE
- ;;     IF KEYWORD_SET(try_synthetic_SDT_struct) THEN BEGIN
- ;;        yMinSDT                        = MIN(diff_eFluxSDT.data[WHERE(diff_eFluxSDT.data GT 0)])
- ;;     ENDIF
- ;;  ENDELSE
-
-
-     CASE 1 OF
-        KEYWORD_SET(fit_each_angle): BEGIN
-                 ;; energies                          = TRANSPOSE(diff_eFlux.x)
-                 ;; data                              = TRANSPOSE(diff_eFlux.y)
-                 ;; oneCount_data                     = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.y) : !NULL
-                 ;; angles                            = diff_eFlux.angles
-        END
-        ELSE: BEGIN
-           CASE 1 OF
-              ;; KEYWORD_SET(try_synthetic_SDT_struct): BEGIN 
-              ;;    energiesSDT                       = TRANSPOSE(diff_eFluxSDT.energy)
-              ;;    dataSDT                           = TRANSPOSE(diff_eFluxSDT.data)
-              ;;    oneCount_dataSDT                  = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCountSDT.data) : !NULL
-              ;;    anglesSDT                         = diff_eFluxSDT.theta
-
-              ;;    energies                       = TRANSPOSE(diff_eFluxSDT.energy)
-              ;;    data                           = TRANSPOSE(diff_eFluxSDT.data)
-              ;;    oneCount_data                  = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCountSDT.data) : !NULL
-              ;;    angles                         = diff_eFluxSDT.theta
-              ;; END
-              ELSE: BEGIN
-                 energies                          = TRANSPOSE(diff_eFlux.x)
-                 data                              = TRANSPOSE(diff_eFlux.y)
-                 oneCount_data                     = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.y) : !NULL
-                 angles                            = diff_eFlux.angles
-              END
-           ENDCASE
-        END
-     ENDCASE  
-
+  CASE 1 OF
+     KEYWORD_SET(fit_each_angle): BEGIN
+     END
+     ELSE: BEGIN
+        energies                          = TRANSPOSE(diff_eFlux.x)
+        data                              = TRANSPOSE(diff_eFlux.y)
+        oneCount_data                     = KEYWORD_SET(add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.y) : !NULL
+        angles                            = diff_eFlux.angles
+     END
+  ENDCASE  
 
   KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                   USING_SDT_DATA=0, $
@@ -285,6 +233,7 @@ PRO KAPPA_EFLUX_FIT, $
                   FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                   FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                   FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                  FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                   FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                   FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                   FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
@@ -310,24 +259,6 @@ PRO KAPPA_EFLUX_FIT, $
                   OUT_ERANGE_PEAK=out_eRange_peak, $
                   OUT_PARAMSTR=out_paramStr, $
                   TXTOUTPUTDIR=txtOutputDir
-
-  ;; IF KEYWORD_SET(try_synthetic_SDT_struct) THEN BEGIN 
-  ;;    IF ARG_PRESENT(synthStr_SDT_kappa) THEN BEGIN
-  ;;       synthStr_SDT_kappa = diff_eFluxSDT
-  ;;       FOR i=0,N_ELEMENTS(synthStr_SDT_kappa)-1 DO BEGIN
-  ;;          synthStr_SDT_kappa.energy[i,*] = TRANSPOSE(kappaFits[i].xFull)
-  ;;          synthStr_SDT_kappa.data[i,*] = TRANSPOSE(kappaFits[i].yFull)
-  ;;       ENDFOR
-  ;;    ENDIF
-
-  ;;    IF ARG_PRESENT(synthStr_SDT_gauss) THEN BEGIN
-  ;;       synthStr_SDT_gauss = diff_eFluxSDT
-  ;;       FOR i=0,N_ELEMENTS(synthStr_SDT_gauss)-1 DO BEGIN
-  ;;          synthStr_SDT_gauss.energy[i,*] = TRANSPOSE(gaussFits[i].xFull)
-  ;;          synthStr_SDT_gauss.data[i,*] = TRANSPOSE(gaussFits[i].yFull)
-  ;;       ENDFOR
-  ;;    ENDIF
-  ;; ENDIF
 
   PRINT,'DONE!'
 

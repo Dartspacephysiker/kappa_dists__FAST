@@ -32,6 +32,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                     FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
@@ -97,6 +98,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                                    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                                     FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $

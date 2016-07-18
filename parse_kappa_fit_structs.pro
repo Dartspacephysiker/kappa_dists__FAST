@@ -1,6 +1,8 @@
 PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
                             A=a, $
                             TIME=time, $
+                            TINDEX=tIndex, $
+                            BULKANGLEINF=bulkAngleInf, $
                             STRUCT_A=Astruct, $
                             NAMES_A=A_names, $
                             CHI2=chi2, $
@@ -16,6 +18,10 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
   STR_ELEMENT_FROM_LIST_OF_STRUCTS,fits,'pVal',VALUE=pVal
   STR_ELEMENT_FROM_LIST_OF_STRUCTS,fits,'fitStatus',VALUE=fitStatus
   STR_ELEMENT_FROM_LIST_OF_STRUCTS,fits,'time',VALUE=time
+  STR_ELEMENT_FROM_LIST_OF_STRUCTS,fits,'bulkAngleInf',VALUE=bulkAngleInf
+  IF ARG_PRESENT(tIndex) THEN BEGIN
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,fits,'time_index',VALUE=tIndex
+  ENDIF
 
   ;;Get A back in top shape
   A = REFORM(A,N_ELEMENTS(A)/NStructs,NStructs)
@@ -30,5 +36,6 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
   Astruct = CREATE_STRUCT(A_names, $
                           REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]), $
                           REFORM(A[4,*]),REFORM(A[5,*]),REFORM(A[6,*]))
+
 
 END
