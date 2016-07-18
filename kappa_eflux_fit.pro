@@ -33,7 +33,7 @@
 ;; RESTORE,restFile
 
 
-PRO KAPPA_FLUX__FIT_ABOVE_PEAK__BULKANGLE_0__EFLUX_UNITS, $ ;X,A,F,pders, $
+PRO KAPPA_EFLUX_FIT, $ ;X,A,F,pders, $
    T1=t1, $
    T2=t2, $
    ENERGY_ELECTRONS=energy_electrons, $
