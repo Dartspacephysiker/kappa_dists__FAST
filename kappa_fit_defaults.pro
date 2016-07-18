@@ -1,6 +1,7 @@
 PRO   KAPPA_FIT_DEFAULTS, $
    KAPPA=kappa, $
    BOUNDS=bounds, $
+   FIT_EACH_ANGLE=fit_each_angle, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    ROUTINE=routine, $
@@ -19,6 +20,10 @@ PRO   KAPPA_FIT_DEFAULTS, $
 
   IF ~KEYWORD_SET(bounds) THEN BEGIN
      bounds                    = 0 ;just do one
+  ENDIF
+
+  IF ~KEYWORD_SET(fit_each_angle) THEN BEGIN
+     fit_each_angle            = 1
   ENDIF
 
   IF ~KEYWORD_SET(eeb_or_ees) THEN BEGIN

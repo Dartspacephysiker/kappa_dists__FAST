@@ -1,6 +1,5 @@
 ;;The version for fitting to each angle
-PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
-                                diff_eFlux,dEF_oneCount, $
+PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,diff_eFlux,dEF_oneCount, $
                                 USING_SDT_DATA=using_sdt_data, $
                                 KAPPA=kappa, $
                                 BOUNDS=bounds, $
@@ -17,6 +16,8 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                 E_ANGLE=e_angle, $
                                 BULK_OFFSET=bulk_offset, $
+                                DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
+                                TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $
                                 CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
                                 MIN_PEAK_ENERGY=min_peak_energy, $
                                 STRINGS=strings, $
@@ -31,6 +32,9 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                                 FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                                 FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                                FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+                                FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+                                FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                                 ADD_ANGLE_LABEL=add_angle_label, $
                                 ELECTRON_ANGLERANGE=electron_angleRange, $
                                 NO_PLOTS=no_plots, $
@@ -45,10 +49,10 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                                 OUT_PEAK_DENS_STRUCT=out_peak_dens, $
                                 ;; OUT_DENS_FILEPREF=out_dens_filePref, $
                                 ONLY_DENS_ESTIMATES=only_dens_estimates, $
-                                OUT_FITTED_PARAMS=out_fitted_params, $
-                                OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                                OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                                OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                                OUT_FITTED_PARAMS=out_kappaParams, $
+                                OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                                OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                                OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                                 ADD_FULL_FITS=add_full_fits, $
                                 OUT_ERANGE_PEAK=out_eRange_peak, $
                                 OUT_PARAMSTR=out_paramStr, $
@@ -154,6 +158,25 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
 
      angleBin_i                            = WHERE(angleBins,nAngles)
 
+     IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
+        angleBin_sort_i                    = angleBin_i[SORT(tempAllangles[angleBin_i])] ;;Sort so they're ascending
+        fieldAlignedAngle                  = MIN(ABS(tempAllAngles),fieldAligned_i)
+
+        FA_angleBin_ii                     = WHERE(angleBin_sort_i EQ fieldAligned_i)
+        IF FA_angleBin_ii NE -1 THEN BEGIN
+           FA_angleBin_i                   = angleBin_sort_i[FA_angleBin_ii]
+           startPosSweep_i                 = FA_angleBin_ii+1
+           startNegSweep_i                 = FA_angleBin_ii-1
+        ENDIF
+
+        nAngles++
+        angle_order                        = [fieldAligned_i, $
+                                              anglebin_sort_i[startPosSweep_i:-1], $
+                                              fieldAligned_i, $
+                                              anglebin_sort_i[startNegSweep_i:0:-1]]
+        change_sweep_direction             = (WHERE(angle_order EQ fieldAligned_i))[1]
+     ENDIF
+
      IF KEYWORD_SET(fit_each__average_over_angleRange) THEN BEGIN
         tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
         FOR iAngle=0,nAngles-1 DO BEGIN
@@ -171,13 +194,32 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
      tempDat                               = (REVERSE(dat.data,1))[min_peak_ind:-1,angleBin_i]
      angleDist                             = TOTAL(tempDat,1)/TOTAL(tempDat)
      testRatio                             = MAX(angleDist,maxInd_angleDist)/MIN(angleDist,minInd_angleDist)
-     angleStr                              = {bulkAngle:AorigArr[maxInd_angleDist,nEnergies/2], $
-                                              useMe:testRatio GE threshRatio, $
+     CASE 1 OF
+        KEYWORD_SET(treat_fieldaligned_as_bulk): BEGIN
+           bulkAngle                       = fieldAlignedAngle
+           useMe                           = 1
+           angleTreatment                  = 'treat_fieldaligned_as_bulk'
+        END
+        KEYWORD_SET(dont_take_stock_of_bulkangle): BEGIN
+           bulkAngle                       = 0.00
+           useMe                           = 0S
+           angleTreatment                  = 'treat_all_as_bulk'
+        END
+        ELSE: BEGIN
+           bulkAngle                       = AorigArr[maxInd_angleDist,nEnergies/2]
+           useMe                           = testRatio GE threshRatio
+           angleTreatment                  = 'search_for_angleDist_peak'
+        END
+     ENDCASE
+     angleStr                              = {bulkAngle:bulkAngle, $
+                                              useMe:useMe, $
                                               dist:angleDist, $
                                               angles:tempAllAngles[angleBin_i], $
+                                              angleTreatment:angleTreatment, $
                                               maxInd:maxInd_angleDist, $
                                               minInd:minInd_angleDist, $
                                               min_peak_ind:min_peak_ind}
+           
      
      ;; tangles                            = (REVERSE(dat.theta,1))[min_peak_ind:-1,*]/N_ELEMENTS([min_peak_ind:47])
      ;; checkitout                         = plot(total(tangles,1),angleDist,symbol='*',linestyle=6)
@@ -195,7 +237,16 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
      ;;Now loop over each angle and fit, possibly plot
      FOR iiAngle=0,nAngles-1 DO BEGIN
 
-        iAngle                             = angleBin_i[iiAngle]
+        iAngle                             = (KEYWORD_SET(start_from_fieldaligned) ? angle_order : angleBin_i)[iiAngle]
+
+        ;;Start sweeping backwards, if we made it to swap location
+        IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
+           IF iAngle EQ change_sweep_direction THEN BEGIN
+              ;; tempEstFacs                  = 
+           ENDIF ELSE BEGIN
+
+           ENDELSE
+        ENDIF
 
         ;;Here's the data we're working with for this loop iteration
         Xorig                              = REVERSE(REFORM(XorigArr[iAngle,*]))
@@ -235,22 +286,50 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
 
         ;;estimate from the data!
         IF KEYWORD_SET(estimate_A_from_data) THEN BEGIN 
+           CASE 1 OF
+              KEYWORD_SET(start_from_fieldaligned): BEGIN
+                 IF (iiAngle EQ 0) THEN BEGIN ;Get field-aligned estimates
+                    KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
+                                           minEInd,maxEInd,nEnergies, $
+                                           peak_ind,peak_energy,eRange_peak, $
+                                           KAPPA_EST=kappa, $
+                                           ;; MASS=mass, $
+                                           E_ANGLE=electron_angleRange, $
+                                           ANGLES=tempAngle, $
+                                           BULKANGLE_STRUCT=angleStr, $
+                                           ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+                                           USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+                                           ESTFACS=estFacs, $
+                                           A_OUT=A, $
+                                           AGAUSS_OUT=AGauss, $
+                                           DONT_PRINT_ESTIMATES=dont_print_estimates
+                    A_FA_initEst       = A
+                    AGauss_FA_initEst  = AGauss
 
-           KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
-                                  minEInd,maxEInd,nEnergies, $
-                                  peak_ind,peak_energy,eRange_peak, $
-                                  KAPPA_EST=kappa, $
-                                  ;; MASS=mass, $
-                                  E_ANGLE=electron_angleRange, $
-                                  ANGLES=tempAngle, $
-                                  BULKANGLE_STRUCT=angleStr, $
-                                  ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
-                                  USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
-                                  ESTFACS=estFacs, $
-                                  A_OUT=A, $
-                                  AGAUSS_OUT=AGauss, $
-                                  DONT_PRINT_ESTIMATES=dont_print_estimates
+                 ENDIF ELSE BEGIN
+                    A = lastGood_A
+                    AGauss = lastGood_AGauss
+                 ENDELSE
+              END
+              ELSE: BEGIN
+                 KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
+                                        minEInd,maxEInd,nEnergies, $
+                                        peak_ind,peak_energy,eRange_peak, $
+                                        KAPPA_EST=kappa, $
+                                        ;; MASS=mass, $
+                                        E_ANGLE=electron_angleRange, $
+                                        ANGLES=tempAngle, $
+                                        BULKANGLE_STRUCT=angleStr, $
+                                        ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+                                        USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+                                        ESTFACS=estFacs, $
+                                        A_OUT=A, $
+                                        AGAUSS_OUT=AGauss, $
+                                        DONT_PRINT_ESTIMATES=dont_print_estimates
 
+
+              END
+           ENDCASE
 
         ENDIF ELSE BEGIN
            A                               = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
@@ -288,15 +367,17 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
                         FIT_TOL=fit_tol, $
                         STRINGS=strings, $
                         TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
-                        OUT_FITTED_PARAMS=out_fitted_params, $
-                        OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                        OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                        OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                        OUT_FITTED_PARAMS=out_kappaParams, $
+                        OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                        OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                        OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                         ADD_FULL_FITS=KEYWORD_SET(add_full_fits) OR KEYWORD_SET(plot_full_fit), $
                         ADD_ANGLESTR=angleStr, $
                         OUT_ERANGE_PEAK=out_eRange_peak, $
                         OUT_PARAMSTR=out_paramStr, $
-                        DONT_PRINT_ESTIMATES=dont_print_estimates
+                        DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                        FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+
 
         ;;Update yRange based on fits
         yRange[1]                          = yRange[1] > yMax
@@ -352,7 +433,6 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
 
      ENDFOR
 
-     PRINT
      ;;Decide whether we're going to keep this time in the synthetic structs
      IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
         PRINT,'ngoodfitsK ',nGoodFits_tempK
@@ -360,6 +440,81 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angle, $
         IF (nGoodFits_tempK GT 0) OR (nGoodFits_tempG GT 0) THEN BEGIN
            keeper_bounds_i = [keeper_bounds_i,iTime]
         ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(fit_each__show_and_prompt) THEN BEGIN
+        cont = 0
+        input = ''
+        showFit = nGoodFits_tempK GT 0
+
+        IF ~KEYWORD_SET(finish_and_save_all) THEN BEGIN
+           IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+           CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/POLAR,OVERPLOT=showFit
+        ENDIF
+
+        WHILE ~cont DO BEGIN
+           PRINT,"(C)ontinue    / S(T)op and inspect / Sp(E)ctrum            / (FE) Fitted spectrum / "
+           PRINT,"(P)itch angle / (S)ave             / (F)inish and save all / (Q)uit ?"
+           IF KEYWORD_SET(finish_and_save_all) THEN input = 's' ELSE READ,input
+           CASE STRLOWCASE(input) OF
+              "c": BEGIN
+                 cont = 1
+              END
+              "t": BEGIN
+                 STOP
+              END
+              "e": BEGIN
+                 cont = 0
+                 ;; tempFN = STRING(FORMAT='("contour2d--data_and_kappa_fit--orb_",A0,"--",A0)',strings.orbStr,strings.timeFNStrs[iTime])
+                 ;; PRINT,"Saving to " + tempFN + ' ...'
+                 ;; POPEN,(KEYWORD_SET(plotDir) ? plotDir : './') + tempFN
+                 ;; IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+                 SPEC2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/LABEL ;,/POLAR,OVERPLOT=showFit
+                 ;; PCLOSE
+              END
+              "fe": BEGIN
+                 cont = 0
+                 ;; tempFN = STRING(FORMAT='("contour2d--data_and_kappa_fit--orb_",A0,"--",A0)',strings.orbStr,strings.timeFNStrs[iTime])
+                 ;; PRINT,"Saving to " + tempFN + ' ...'
+                 ;; POPEN,(KEYWORD_SET(plotDir) ? plotDir : './') + tempFN
+                 ;; IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+                 IF showFit THEN SPEC2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/LABEL ELSE PRINT,"No good fits!"
+                 ;; PCLOSE
+              END
+              "p": BEGIN
+                 cont = 0
+                 IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+                 CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/POLAR,OVERPLOT=showFit
+              END
+              "s": BEGIN
+                 cont = 1
+                 tempFN = STRING(FORMAT='("contour2d--data_and_kappa_fit--orb_",A0,"--",A0)',strings.orbStr,strings.timeFNStrs[iTime])
+                 PRINT,"Saving to " + tempFN + ' ...'
+                 POPEN,(KEYWORD_SET(plotDir) ? plotDir : './') + tempFN
+                 IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+                 CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/POLAR,OVERPLOT=showFit
+                 PCLOSE
+              END
+              "f": BEGIN
+                 cont = 1
+                 finish_and_save_all = 1
+                 tempFN = STRING(FORMAT='("contour2d--data_and_kappa_fit--orb_",A0,"--",A0)',strings.orbStr,strings.timeFNStrs[iTime])
+                 PRINT,"Saving to " + tempFN + ' ...'
+                 POPEN,(KEYWORD_SET(plotDir) ? plotDir : './') + tempFN
+                 IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+                 CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/POLAR,OVERPLOT=showFit
+                 PCLOSE
+              END
+              "q": BEGIN
+                 PRINT,"Returning ..."
+                 RETURN
+              END
+              ELSE: BEGIN
+                 PRINT,"Invalid option: " + input
+              END
+           ENDCASE
+
+        ENDWHILE
      ENDIF
 
   ENDFOR

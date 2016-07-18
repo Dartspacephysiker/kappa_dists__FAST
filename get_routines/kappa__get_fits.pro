@@ -8,61 +8,285 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     BOUNDS_I=bounds_i, $
                     KAPPA_A=A, $
                     GAUSS_A=AGauss, $
+                    KAPPA_FIXA=kappa_fixA, $
+                    GAUSS_FIXA=gauss_fixA, $
                     YMAX=yMax, $
                     MAX_ITER=max_iter, $
                     FIT_TOL=fit_tol, $
                     STRINGS=strings, $
                     TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
-                    OUT_FITTED_PARAMS=out_fitted_params, $
-                    OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                    OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                    OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                    OUT_FITTED_PARAMS=out_kappaParams, $
+                    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                     ADD_FULL_FITS=add_full_fits, $
                     ADD_ANGLESTR=add_angleStr, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
                     OUT_PARAMSTR=out_paramStr, $
-                    DONT_PRINT_ESTIMATES=dont_print_estimates
+                    DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
 
   COMMON FIT_MASS,mass
 
   COMPILE_OPT idl2
 
+  IF N_ELEMENTS(kappa_fixA) EQ 0 THEN BEGIN
+     kappa_fixA               = [1,1,1,1,0,0,0] ;Vary bulk E [0], Temperature [1], kappa [2], and density [3]
+  ENDIF
+  
+  IF N_ELEMENTS(gauss_fixA) EQ 0 THEN BEGIN
+     gauss_fixA               = [1,1,0,1,0,0,0] ;Vary bulk E [0], Temperature [1], and density [3]
+  ENDIF
+  
+
   orig                        = {x:Xorig, $
                                  y:Yorig, $
                                  name:strings.plotTimes[bounds_i]}
   
-  ;;Trim energies vector if attempting to fit below peak
-  IF KEYWORD_SET(trim_energies_below_peak) THEN BEGIN 
-     X                        = Xorig[energy_inds[0]:energy_inds[1]] 
-     Y                        = Yorig[energy_inds[0]:energy_inds[1]] 
-  ENDIF
+  CASE 1 OF
+     KEYWORD_SET(fit_fail__user_prompt): BEGIN
+        contKappa             = 0
+     END
+     ELSE: BEGIN
+        contKappa             = 1
+     END
+  ENDCASE
 
-  weights                     = 1./ABS(Y)
-  yFit                        = CURVEFIT(X,Y,weights,A,SIGMA, $
-                                         FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
-                                         /DOUBLE, $
-                                         FITA=[1,1,1,1,0,0,0], $
-                                         ITMAX=KEYWORD_SET(max_iter) ? max_iter : 150, $
-                                         CHI2=chi2, $
-                                         ITER=itNum, $
-                                         TOL=KEYWORD_SET(fit_tol) ? fit_tol : 1e-3, $
-                                         STATUS=fitStatus)
-  IF FINITE(chi2) THEN BEGIN
-     pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-4) ;4 for the 4 params that were allowed to participate in this fit
-  ENDIF ELSE BEGIN
-     pVal                        = -1
-  ENDELSE
+  WHILE ~contKappa DO BEGIN
 
-  ;;need to adjust Y bounds?
-  yMax                        = MAX(yFit) 
+     ;;Trim energies vector if attempting to fit below peak
+     IF KEYWORD_SET(trim_energies_below_peak) THEN BEGIN 
+        X                        = Xorig[energy_inds[0]:energy_inds[1]] 
+        Y                        = Yorig[energy_inds[0]:energy_inds[1]] 
+     ENDIF
 
-  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
-     PRINT,"Fitted spectral properties: "
-     PRINT_KAPPA_FLUX_FIT_PARAMS,A
-     PRINT,''
-  ENDIF
-  out_fitted_params           = N_ELEMENTS(out_fitted_params) GT 0 ? $
-                                [[out_fitted_params],[A]] : A
+     weights                     = 1./ABS(Y)
+     yFit                        = CURVEFIT(X,Y,weights,A,SIGMA, $
+                                            FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
+                                            /DOUBLE, $
+                                            FITA=kappa_fixA, $
+                                            ITMAX=KEYWORD_SET(max_iter) ? max_iter : 150, $
+                                            CHI2=chi2, $
+                                            ITER=itNum, $
+                                            TOL=KEYWORD_SET(fit_tol) ? fit_tol : 1e-3, $
+                                            STATUS=fitStatus)
+     IF FINITE(chi2) THEN BEGIN
+        pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-4) ;4 for the 4 params that were allowed to participate in this fit
+     ENDIF ELSE BEGIN
+        pVal                        = -1
+     ENDELSE
+
+     ;;need to adjust Y bounds?
+     yMax                        = MAX(yFit) 
+
+     IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+        PRINT,"Fitted spectral properties: "
+        PRINT_KAPPA_FLUX_FIT_PARAMS,A
+        PRINT,''
+     ENDIF
+
+     IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+        CASE fitStatus OF 
+           0: BEGIN 
+              PRINT,'Fit success!' 
+           END 
+           1: BEGIN 
+              PRINT,'Fit failure! Chi-square increasing without bound!' 
+           END 
+           2: BEGIN 
+              PRINT,'Fit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
+           END 
+        ENDCASE
+     ENDIF
+
+     IF KEYWORD_SET(fit_fail__user_prompt) AND fitStatus GT 0 THEN BEGIN
+        
+        input = ''
+
+        cont  = 0
+        ;; IF ~KEYWORD_SET(finish_and_save_all) THEN BEGIN
+        ;;    IF showFit THEN CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime),/POLAR,/FILL
+        ;;    CONTOUR2D,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime),/POLAR,OVERPLOT=showFit
+        ;; ENDIF
+
+        WHILE ~cont DO BEGIN
+           PRINT,"(A)djust A  / Adjust (E) inds  / Adjust (F)ixed fit params /"
+           ;; PRINT,"(P)lot sitiation / (S)ave             / (F)inish and save all / (Q)uit ?"
+           PRINT,"(T)ry again / (P)lot sitiation / (S)top and inspect        / (C)ontinue to next fit?"
+           ;; IF KEYWORD_SET(finish_and_save_all) THEN input = 's' ELSE READ,input
+           READ,input
+           CASE STRLOWCASE(input) OF
+              "a": BEGIN
+                 PRINT,"Here are your failed fit params"
+                 PRINT_KAPPA_FLUX_FIT_PARAMS,A
+                 PRINT,""
+                 input2 = ''
+                 cont2  = 0
+                 WHILE ~cont2 DO BEGIN
+                    PRINT,'Edit (B)ulk energy  / Plasma (T)emp / (K)appa / (D)ensity / (A)ngle offset / '
+                    PRINT,'(P)rint A estimates / (F)inish editing '
+                    READ,input2
+                    CASE STRLOWCASE(input2) OF
+                       "b": BEGIN
+                          READ,newBulk,PROMPT="Enter new bulk energy estimate: "
+                          A[0] = newBulk
+                       END
+                       "t": BEGIN
+                          READ,newTemp,PROMPT="Enter new temperature estimate: "
+                          A[1] = newTemp
+                       END
+                       "k": BEGIN
+                          READ,newKappa,PROMPT="Enter new kappa estimate: "
+                          A[2] = newKappa
+                       END
+                       "d": BEGIN
+                          READ,newDens,PROMPT="Enter new density estimate: "
+                          A[3] = newDens
+                       END
+                       "a": BEGIN
+                          ;; READ,newAngle,PROMPT=STRING(FORMAT='(%"Enter new angle estimate: \r")','')
+                          READ,newAngle,PROMPT="Enter new angle estimate: "
+                          A[6] = newAngle
+                       END
+                       "p": BEGIN
+                          PRINT,"Current fit params"
+                          PRINT_KAPPA_FLUX_FIT_PARAMS,A
+                          ;; PRINT,STRING(FORMAT='(%"\r")','')
+                          PRINT,''
+                       END
+                       "f": BEGIN
+                          cont2  = 1
+                       END
+                       ELSE: BEGIN
+                       END
+                    ENDCASE
+                 ENDWHILE
+              END
+              "e": BEGIN
+                 input2 = ''
+                 cont2  = 0
+                 PRINT,FORMAT='("Current energy inds: [",I0,I0,"]")',energy_inds
+                 PRINT,FORMAT='("Current energies   : [",G0.2," ,",G0.2,"]")',Xorig[energy_inds]
+                 PRINT,'Edit (E)nergy inds  / (P)rint Current energy ind info / (C)ontinue '
+                 READ,input2
+                 CASE STRLOWCASE(input2) OF
+                    "e": BEGIN
+                       READ,newEnergyInd,PROMPT="Enter new energy ind 0: "
+                       energy_inds[0] = newEnergyInd
+                       READ,newEnergyInd,PROMPT="Enter new energy ind 1: "
+                       energy_inds[1] = newEnergyInd
+                    END
+                    "p": BEGIN
+                       PRINT,FORMAT='("Current energy inds: [",I0,I0,"]")',energy_inds
+                       PRINT,FORMAT='("Current energies   : [",G0.2," ,",G0.2,"]")',Xorig[energy_inds]
+                    END
+                    "c": BEGIN
+                       cont2  = 1
+                    END
+                 ENDCASE
+              END
+              "f": BEGIN
+                 PRINT,"Here are your currently variable params"
+                 PRINT_KAPPA_FLUX_FIT_PARAMS,kappa_fixA
+                 PRINT,""
+                 input2 = ''
+                 cont2  = 0
+                 WHILE ~cont2 DO BEGIN
+                    PRINT,'Vary (B)ulk energy  / Plasma (T)emp / (K)appa / (D)ensity / (A)ngle offset / '
+                    PRINT,'(P)rint Fixed params / (F)inish editing '
+                    READ,input2
+                    CASE STRLOWCASE(input2) OF
+                       "b": BEGIN
+                          READ,newBulk,PROMPT="Bulk energy can vary (1/0)?: "
+                          kappa_fixA[0] = newBulk
+                       END
+                       "t": BEGIN
+                          READ,newTemp,PROMPT="Temperature can vary (1/0)?: "
+                          kappa_fixA[1] = newTemp
+                       END
+                       "k": BEGIN
+                          READ,newKappa,PROMPT="Kappa can vary (1/0)?: "
+                          kappa_fixA[2] = newKappa
+                       END
+                       "d": BEGIN
+                          READ,newDens,PROMPT="Density can vary (1/0)? : "
+                          kappa_fixA[3] = newDens
+                       END
+                       "a": BEGIN
+                          ;; READ,newAngle,PROMPT=STRING(FORMAT='(%"Enter new angle estimate: \r")','')
+                          READ,newAngle,PROMPT="Angle can vary (1/0)?: "
+                          kappa_fixA[6] = newAngle
+                       END
+                       "p": BEGIN
+                          PRINT,"Current variable vals"
+                          PRINT_KAPPA_FLUX_FIT_PARAMS,kappa_fixA
+                          ;; PRINT,STRING(FORMAT='(%"\r")','')
+                          PRINT,''
+                       END
+                       "f": BEGIN
+                          cont2  = 1
+                       END
+                       ELSE: BEGIN
+                       END
+                    ENDCASE
+                 ENDWHILE
+              END
+              "t": BEGIN
+                 cont = 1
+              END
+              "p": BEGIN
+                 cont = 0
+                 ;; IF N_ELEMENTS(tempWindow) GT 0 THEN BEGIN
+                 ;;    tempPlot.Close
+                 ;;    tempPlot = !NULL
+                 ;; ENDIF
+                 ;; IF N_ELEMENTS(tempPlot2) GT 0 THEN BEGIN
+                 ;;    tempPlot2.Close
+                 ;;    tempPlot2 = !NULL
+                 ;; ENDIF
+                 IF N_ELEMENTS(tempWindow) EQ 0 THEN BEGIN
+                    tempWindow = WINDOW(DIMENSIONS=[900,700])
+                 ENDIF ELSE BEGIN
+                    tempWindow.Erase
+                 ENDELSE
+                 tempPlot  = PLOT(Xorig,Yorig,/XLOG,/YLOG, $
+                                  TITLE=strings.plotTimes[bounds_i], $
+                                  XTITLE='Energy (eV)',YTITLE='eFlux (eV/cm!U2!N-s-sr-eV)', $
+                                  NAME="eFlux Spectrum", $
+                                  COLOR='RED', $
+                                  CURRENT=tempWindow)
+                 tempPlot2 = PLOT(X,yFit, $
+                                  /XLOG,/YLOG, $
+                                  /OVERPLOT, $
+                                  NAME="Failed Kappa estimate", $
+                                  COLOR='BLACK', $
+                                  LINESTYLE='--', $
+                                  CURRENT=tempWindow)
+                 legend   = LEGEND(TARGET=[tempPlot,tempPlot2], $
+                                   /NORMAL, $
+                                   POSITION=[0.5,0.8])
+              END
+              "s": BEGIN
+                 STOP
+              END
+              "c": BEGIN
+                 cont      = 1
+                 contKappa = 1
+              END
+              ELSE: BEGIN
+                 PRINT,"Invalid option: " + input
+              END
+           ENDCASE
+        ENDWHILE
+     ENDIF ELSE BEGIN
+        contKappa                = 1
+     ENDELSE
+
+  ENDWHILE
+
+
+  out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
+                                [[out_kappaParams],[A]] : A
   out_eRange_peak             = N_ELEMENTS(out_eRange_peak) GT 0 ? $
                                 [[out_eRange_peak],[eRange_peak]] : eRange_peak
   out_paramStr                = STRING(FORMAT='(A0,"--",A0,A0,"--orb_",A0,"__",A0,"--",I0,"-",I0,".txt")', $
@@ -72,19 +296,6 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                                        strings.orbStr, $
                                        strings.orbDate)
 
-  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
-     CASE fitStatus OF 
-        0: BEGIN 
-           PRINT,'Fit success!' 
-        END 
-        1: BEGIN 
-           PRINT,'Fit failure! Chi-square increasing without bound!' 
-        END 
-        2: BEGIN 
-           PRINT,'Fit failure! No convergence in ' + STRCOMPRESS(itNum,/REMOVE_ALL) + ' iterations!' 
-        END 
-     ENDCASE
-  ENDIF
 
   kappaFit                    = {x:X, $
                                  y:yFit, $
@@ -111,11 +322,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
   ENDIF
 
 
-  ;; out_kappa_fit_structs       = N_ELEMENTS(out_kappa_fit_structs) EQ 0 ? kappaFit : [out_kappa_fit_structs,kappaFit]
-  IF N_ELEMENTS(out_kappa_fit_structs) EQ 0 THEN BEGIN
-     out_kappa_fit_structs    = LIST(kappaFit)
+  ;; kappaFits       = N_ELEMENTS(kappaFits) EQ 0 ? kappaFit : [kappaFits,kappaFit]
+  IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+     kappaFits    = LIST(kappaFit)
   ENDIF ELSE BEGIN
-     out_kappa_fit_structs.Add,kappaFit
+     kappaFits.Add,kappaFit
   ENDELSE
 
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
@@ -153,7 +364,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
         ELSE: BEGIN
            yGaussFit          = CURVEFIT(X, Y, weights, AGauss, sigma, FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
                                          /DOUBLE, $
-                                         FITA=[1,1,0,1,0,0,0], $
+                                         FITA=gauss_fixA, $
                                          ITMAX=KEYWORD_SET(max_iter) ? max_iter : 150, $
                                          ITER=itNum, $
                                          CHI2=chi2, $
@@ -242,15 +453,15 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
      ENDIF
 
 
-     ;; out_gauss_fit_structs    = N_ELEMENTS(out_gauss_fit_structs) EQ 0 ? gaussFit : [out_gauss_fit_structs,gaussFit]
-     IF N_ELEMENTS(out_gauss_fit_structs) EQ 0 THEN BEGIN
-        out_gauss_fit_structs    = LIST(gaussFit)
+     ;; gaussFits    = N_ELEMENTS(gaussFits) EQ 0 ? gaussFit : [gaussFits,gaussFit]
+     IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
+        gaussFits    = LIST(gaussFit)
      ENDIF ELSE BEGIN
-        out_gauss_fit_structs.Add,gaussFit
+        gaussFits.Add,gaussFit
      ENDELSE
 
-     out_fitted_Gauss_params  = N_ELEMENTS(out_fitted_Gauss_params) GT 0 ? $
-                                [[out_fitted_Gauss_params],[AGauss]] : $
+     out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $
+                                [[out_gaussParams],[AGauss]] : $
                                 AGauss
 
 
