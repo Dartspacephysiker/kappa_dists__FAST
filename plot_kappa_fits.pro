@@ -32,8 +32,9 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                 strings.orbStr, $
                                 strings.orbDate[bounds_i], $
                                 strings.angleStr)
-  IF KEYWORD_SET(add_angle_label) THEN BEGIN
-     plotSN           += STRING(FORMAT='("--angle_",F0.1)',kappaFit.A[6])
+  IF N_ELEMENTS(add_angle_label) GT 0  THEN BEGIN
+     ;; plotSN           += STRING(FORMAT='("--angle_",F0.1)',kappaFit.A[6])
+     plotSN           += STRING(FORMAT='("--angle_",F0.1)',add_angle_label)
   ENDIF
   plotSN              += '.png'
 
@@ -145,7 +146,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                           STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
      IF KEYWORD_SET(add_angle_label) THEN BEGIN
         fitTitle = [fitTitle,"Angle (deg)"]
-        fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
+        ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',add_angle_label)]
      ENDIF
 
      fitParamsText     = TEXT(0.2,0.25, $
@@ -169,7 +171,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
 
         IF KEYWORD_SET(add_angle_label) THEN BEGIN
            fitTitle    = [fitTitle,"Angle (deg)"]
-           fitInfoStr  = [fitInfoStr,STRING(FORMAT='(F-8.4)',gaussFit.A[6])]
+           ;; fitInfoStr  = [fitInfoStr,STRING(FORMAT='(F-8.4)',gaussFit.A[6])]
+           fitInfoStr  = [fitInfoStr,STRING(FORMAT='(F-8.4)',add_angle_label)]
         ENDIF
 
         fitParamsText  = TEXT(0.52,0.25, $

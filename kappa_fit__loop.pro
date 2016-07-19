@@ -15,6 +15,8 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     E_ANGLE=e_angle, $
                     BULK_OFFSET=bulk_offset, $
+                    DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
+                    TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $
                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
                     MIN_PEAK_ENERGY=min_peak_energy, $
                     STRINGS=strings, $
@@ -30,6 +32,10 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
+                    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+                    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+                    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                     EACH_ANGLE_DATA=diff_eFlux, $
                     EACH_ANGLE_ONECOUNT_DATA=dEF_oneCount, $
                     ELECTRON_ANGLERANGE=electron_angleRange, $
@@ -45,10 +51,10 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     OUT_PEAK_DENS_STRUCT=out_peak_dens, $
                     ;; OUT_DENS_FILEPREF=out_dens_filePref, $
                     ONLY_DENS_ESTIMATES=only_dens_estimates, $
-                    OUT_FITTED_PARAMS=out_fitted_params, $
-                    OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                    OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                    OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                    OUT_FITTED_PARAMS=out_kappaParams, $
+                    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                     ADD_FULL_FITS=add_full_fits, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
                     OUT_PARAMSTR=out_paramStr, $
@@ -58,8 +64,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
 
   CASE 1 OF
      KEYWORD_SET(fit_each_angle): BEGIN
-        KAPPA_FIT__LOOP__EACH_ANGLE,times,energies,data,oneCount_data,angles, $
-                                    diff_eFlux,dEF_oneCount, $
+        KAPPA_FIT__LOOP__EACH_ANGLE,times,diff_eFlux,dEF_oneCount, $
                                     USING_SDT_DATA=using_sdt_data, $
                                     KAPPA=kappa, $
                                     BOUNDS=bounds, $
@@ -76,6 +81,8 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                     E_ANGLE=e_angle, $
                                     BULK_OFFSET=bulk_offset, $
+                                    DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
+                                    TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $
                                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
                                     MIN_PEAK_ENERGY=min_peak_energy, $
                                     STRINGS=strings, $
@@ -91,6 +98,10 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                                    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
+                                    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+                                    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+                                    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     NO_PLOTS=no_plots, $
                                     SAVE_FITPLOTS=save_fitplots, $
@@ -104,10 +115,10 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                     OUT_PEAK_DENS_STRUCT=out_peak_dens, $
                                     ;; OUT_DENS_FILEPREF=out_dens_filePref, $
                                     ONLY_DENS_ESTIMATES=only_dens_estimates, $
-                                    OUT_FITTED_PARAMS=out_fitted_params, $
-                                    OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                                    OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                                    OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                                    OUT_FITTED_PARAMS=out_kappaParams, $
+                                    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                                    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                                    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                                     ADD_FULL_FITS=add_full_fits, $
                                     OUT_ERANGE_PEAK=out_eRange_peak, $
                                     OUT_PARAMSTR=out_paramStr, $
@@ -157,10 +168,10 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                                    OUT_PEAK_DENS_STRUCT=out_peak_dens, $
                                    ;; OUT_DENS_FILEPREF=out_dens_filePref, $
                                    ONLY_DENS_ESTIMATES=only_dens_estimates, $
-                                   OUT_FITTED_PARAMS=out_fitted_params, $
-                                   OUT_FITTED_GAUSS_PARAMS=out_fitted_Gauss_params, $
-                                   OUT_KAPPA_FIT_STRUCTS=out_kappa_fit_structs, $
-                                   OUT_GAUSS_FIT_STRUCTS=out_gauss_fit_structs, $
+                                   OUT_FITTED_PARAMS=out_kappaParams, $
+                                   OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                                   OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                                   OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                                    ADD_FULL_FITS=add_full_fits, $
                                    OUT_ERANGE_PEAK=out_eRange_peak, $
                                    OUT_PARAMSTR=out_paramStr, $
