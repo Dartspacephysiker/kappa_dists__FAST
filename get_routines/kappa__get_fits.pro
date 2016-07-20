@@ -1,3 +1,6 @@
+;2016/07/??
+; Mods:
+;       2016/07/20 Fixed weights so that if there are places where the data are zero, the weights are also zero.
 PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     orig,kappaFit,gaussFit, $
                     ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
@@ -66,6 +69,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
      ENDIF
 
      weights                     = 1./ABS(Y)
+     fixMe                       = WHERE(~FINITE(weights),nFixMe)
+     IF nFixMe GT 0 THEN BEGIN
+        weights[fixMe]           = 0.0
+     ENDIF
+
      yFit                        = CURVEFIT(X,Y,weights,A,SIGMA, $
                                             FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
                                             /DOUBLE, $
@@ -387,6 +395,10 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
      weights                  = 1./ABS(Y)
      ;; weights[0]            = SQRT(SQRT(weights[0]))
      ;; weights[0:-1]         = 1.
+     fixMe                       = WHERE(~FINITE(weights),nFixMe)
+     IF nFixMe GT 0 THEN BEGIN
+        weights[fixMe]           = 0.0
+     ENDIF
 
      CASE 1 OF
         KEYWORD_SET(use_SDT_Gaussian_fit): BEGIN

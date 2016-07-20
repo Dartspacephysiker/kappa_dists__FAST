@@ -7,7 +7,7 @@ PRO   KAPPA_FIT_DEFAULTS, $
    ROUTINE=routine, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
-   N_ENERGIES_AFTER_PEAK=n_after_peak, $
+   N_ENERGIES_ABOVE_PEAK=n_above_peak, $
    ENERGY_ELECTRONS=energy_electrons, $
    ESTIMATE_A_FROM_DATA=estimate_A_from_data
 
@@ -39,8 +39,8 @@ PRO   KAPPA_FIT_DEFAULTS, $
      IF N_ELEMENTS(n_below_peak) EQ 0 THEN BEGIN
         n_below_peak           = 4
      ENDIF
-     IF N_ELEMENTS(n_after_peak) EQ 0 THEN BEGIN
-        n_after_peak           = 10
+     IF N_ELEMENTS(n_above_peak) EQ 0 THEN BEGIN
+        n_above_peak           = 10
      ENDIF
 
   ENDIF

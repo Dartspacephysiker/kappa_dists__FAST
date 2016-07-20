@@ -42,7 +42,7 @@ PRO KAPPA_EFLUX_FIT, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
-   N_ENERGIES_AFTER_PEAK=n_after_peak, $
+   N_ENERGIES_ABOVE_PEAK=n_above_peak, $
    CHECK_FOR_HIGHER_FLUX_PEAKS__SET_CORRESPONDING_PEAK_ENERGY=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
    FIT_TOLERANCE=fit_tol, $
    MAX_ITERATIONS=max_iter, $
@@ -89,7 +89,7 @@ PRO KAPPA_EFLUX_FIT, $
      ROUTINE=routine, $
      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
      N_ENERGIES_BELOW_PEAK=n_below_peak, $
-     N_ENERGIES_AFTER_PEAK=n_after_peak, $
+     N_ENERGIES_ABOVE_PEAK=n_above_peak, $
      ENERGY_ELECTRONS=energy_electrons, $
      ESTIMATE_A_FROM_DATA=estimate_A_from_data
 
@@ -212,7 +212,7 @@ PRO KAPPA_EFLUX_FIT, $
                   TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
                   DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
                   N_ENERGIES_BELOW_PEAK=n_below_peak, $
-                  N_ENERGIES_AFTER_PEAK=n_after_peak, $
+                  N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                   ENERGY_ELECTRONS=energy_electrons, $
                   ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
                   DONT_PRINT_ESTIMATES=dont_print_estimates, $

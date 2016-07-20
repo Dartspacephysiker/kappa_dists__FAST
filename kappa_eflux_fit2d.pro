@@ -11,7 +11,6 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
-   ;; FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
    SDT_TIME_INDS=bounds, $
@@ -33,7 +32,9 @@ PRO KAPPA_EFLUX_FIT2D, $
    N_ENERGIES_ABOVE_PEAK=n_above_peak, $
    CHECK_FOR_HIGHER_FLUX_PEAKS__SET_CORRESPONDING_PEAK_ENERGY=check_for_higher_flux_peaks__set_corresponding_peak_energy, $
    FIT_TOLERANCE=fit_tol, $
+   FIT2D_TOLERANCE=fit2d_tol, $
    MAX_ITERATIONS=max_iter, $
+   FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
    USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
@@ -69,6 +70,8 @@ PRO KAPPA_EFLUX_FIT2D, $
   ;;Curve fitting options
   kCurvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS(FIT_TOLERANCE=fit_tol, $
                                               MAX_ITERATIONS=max_iter, $
+                                              FIT2D_TOLERANCE=fit2d_tol, $
+                                              FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                               N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                               N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                                               TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
@@ -175,7 +178,6 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                     FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
-                    ;; FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                     OUT_FITTED_PARAMS=out_kappaParams, $

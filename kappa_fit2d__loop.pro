@@ -26,8 +26,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   
   COMPILE_OPT idl2
 
-  ;; @compile_mpfit2dfun
-
   RESOLVE_ROUTINE,'mpfit2dfun',/IS_FUNCTION
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
@@ -211,8 +209,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      nGoodFits_tempK                       = 0
      nGoodFits_tempG                       = 0
-     winning_angleBin_i                    = !NULL
-     winning_kappaFits_i                   = !NULL
+     good_angleBin_i                       = !NULL
+     good_kappaFits_i                      = !NULL
      ;;Now loop over each angle and attemp to fit 
      ;;We'll keep all the good fits, and do a comparison among them at the end
      FOR iiAngle=0,nLoopAngles-1 DO BEGIN
@@ -258,12 +256,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            nAbove                          = nEnergies-1-maxEInd
            killIt                          = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
            IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
-              ;; PRINT,'Old nAbove : ' + STRCOMPRESS(nAbove,/REMOVE_ALL)
-              ;; PRINT,'Old maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
               maxEInd                      = maxEInd < MIN(killIt)
-              ;; PRINT,'New nAbove: ' + STRCOMPRESS(nEnergies-1-maxEInd,/REMOVE_ALL)
-              ;; PRINT,'New maxEInd: ' + STRCOMPRESS(maxEInd,/REMOVE_ALL)
-
            ENDIF
         ENDIF
 
@@ -433,8 +426,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               synthKappa.data[*,iAngle,iTime]   = REVERSE(kappaFit.yFull)
               synthKappa.energy[*,iAngle,iTime] = REVERSE(kappaFit.xFull)
               nGoodFits_tempK++
-              winning_angleBin_i                = [winning_angleBin_i,iAngle]
-              winning_kappaFits_i               = [winning_kappaFits_i,N_ELEMENTS(kappaFits)-1]
+              good_angleBin_i                   = [good_angleBin_i,iAngle]
+              good_kappaFits_i                  = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
            ENDIF
 
            IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
@@ -452,48 +445,35 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ENDFOR
 
      ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
-     
+     curKappaStr        = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
+     curDataStr         = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+
      ;;Make as many testArrays as we have successful fits
      testArrays         = MAKE_ARRAY(nEnergies,nTotAngles,nGoodFits_tempK,/FLOAT)
 
      chiArray           = !NULL
+     dofArray           = !NULL
      fitparams2dArray   = !NULL
+     errMsgArray        = !NULL
+     statusArray        = !NULL
      FOR iWin=0,nGoodFits_tempK-1 DO BEGIN
-        iAngle          = winning_angleBin_i[iWin]
 
-        testKappa       = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
-        testKappa       = CONV_UNITS(testKappa,'counts')
-        testKappa.ddata = (testKappa.data)^.5
-        testKappa       = CONV_UNITS(testKappa,units)
+        SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
+                               nEnergies,nTotAngles, $
+                               curKappaStr,kappaFits,curDataStr, $
+                               iAngle,iKappa,testKappa,testKappaFit,testArray, $
+                               craptest, $
+                               wts,X2D,Y2D,dataToFit, $
+                               fa,dens_param
 
-        testKappaFit    = kappaFits[winning_kappaFits_i[iWin]]
-        ;; testData        = synthKappa.data[*,iAngle,iTime]
-        testData        = testKappa.data[*,iAngle]
-
-        testArray       = MAKE_ARRAY(nEnergies,nTotAngles)
-        FOR k=0,nTotAngles-1 DO BEGIN
-           testArray[*,k] = testData
-        ENDFOR
-
-        ;;wts, calcked from fit
-        wts             = 1.D/(testKappa.ddata)^2
-
-        X2D             = testKappa.energy
-        Y2D             = testKappa.theta
-        fitMePlease     = diff_eFlux.data[*,*,iTime]
-
-        fa              = {kappa_1d_fitparams:testKappaFit.A}
-        Dens_param      = testKappaFit.A[3]
-
-        ;; Fitparams2D     = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,testArray, $
-        Fitparams2D     = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,fitMePlease, $
+        Fitparams2D     = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,dataToFit, $
                                      err, $
-                                     Dens_param, $
+                                     dens_param, $
                                      WEIGHTS=wts, $
                                      FUNCTARGS=fa, $
                                      BESTNORM=bestNorm, $
                                      NFEV=nfev, $
-                                     FTOL=kCurvefit_opt.fit_tol, $
+                                     FTOL=kCurvefit_opt.fit2d_tol, $
                                      STATUS=status, $
                                      best_resid=best_resid, $
                                      pfree_index=ifree, $
@@ -502,17 +482,44 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                      parinfo=parinfo, query=query, $
                                      npegged=npegged, nfree=nfree, dof=dof, $
                                      covar=covar, perror=perror, $
-                                     MAXITER=kCurvefit_opt.max_iter, $
+                                     MAXITER=kCurvefit_opt.fit2d_max_iter, $
                                      niter=niter, $
                                      YFIT=yfit, $
                                      quiet=quiet, $
-                                     ERRMSG=errmsg, $
+                                     ERRMSG=errMsg, $
                                      _EXTRA=extra)
 
+        errMsgArray      = [errMsgArray,errMsg]
+        statusArray      = [statusArray,status]
         chiArray         = [chiArray,bestNorm]
+        dofArray         = [dofArray,dof]
         fitparams2dArray = [fitparams2dArray,fitparams2d]
+        IF status GT 0 THEN BEGIN
+           testArrays[*,*,iWin] = yFit
+        ENDIF ELSE BEGIN
+           testArrays[*,*,iWin] = 0.0
+        ENDELSE
      ENDFOR
      
+     ;;Now decide who is most awesome
+     PRINT,"YOU"
+
+     testMe0                                 = curdataStr
+     testMe0.data                            = testArrays[*,*,0]
+     aDiffMe0                                = testMe0
+     aDiffMe0.data                           = ABS(testMe0.data-curDataStr.data)
+     diffMe0                                 = testMe0
+     diffMe0.data                            = testMe0.data-curDataStr.data
+     diffMe0.data[WHERE(diffMe0.data LE 0)]  = 0.0
+
+     testMe1                                 = curdataStr
+     testMe1.data                            = testArrays[*,*,1]
+     aDiffMe1                                = testMe1
+     aDiffMe1.data                           = ABS(testMe1.data-curDataStr.data)
+     diffMe1                                 = testMe1
+     diffMe1.data                            = testMe1.data-curDataStr.data
+     diffMe1.data[WHERE(diffMe1.data LE 0)]  = 0.0
+
      ;;Decide whether we're going to keep this time in the synthetic structs
      IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
         IF min_aFits_for_keep GT nAngles THEN BEGIN

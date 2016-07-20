@@ -9,7 +9,9 @@
 ; A[5]: m,         Particle mass (in this case electron mass), in eV/c^2
 ;2016/07/19
 FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
+                                     FIT2D_TOLERANCE=fit2d_tol, $
                                      MAX_ITERATIONS=max_iter, $
+                                     FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                                      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
@@ -27,7 +29,9 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
   COMPILE_OPT idl2
 
   defFit_tol                                 = 1.e-3
+  defFit2D_tol                               = 1.e-3
   defMax_iter                                = 1000
+  defFit2D_max_iter                          = 1000
   defNEn_below_peak                          = 2
   defNEn_above_peak                          = 7
   defMin_peak_energy                         = 300
@@ -37,7 +41,9 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
   defKappaFitA                               = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
 
   kCurvefit_opt                              = {fit_tol                  :defFit_tol, $
+                                                fit2d_tol                :defFit2D_tol, $
                                                 max_iter                 :defMax_iter, $
+                                                fit2d_max_iter           :defFit2D_max_iter, $
                                                 fita                     :defKappaFitA, $
                                                 n_below_peak             :defNEn_below_peak, $
                                                 n_above_peak             :defNEn_above_peak, $
@@ -55,6 +61,14 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(max_iter) GT 0 THEN BEGIN
      kCurvefit_opt.max_iter                  = max_iter
+  ENDIF
+
+  IF N_ELEMENTS(fit2d_max_iter) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2d_max_iter            = fit2d_max_iter
+  ENDIF
+
+  IF N_ELEMENTS(fit2d_tol) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2d_tol                 = fit2d_tol
   ENDIF
 
   IF N_ELEMENTS(n_below_peak) GT 0 THEN BEGIN
