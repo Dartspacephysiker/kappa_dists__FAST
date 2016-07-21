@@ -42,6 +42,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    ADD_ANGLE_LABEL=add_angle_label, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
+   FIT2D_DENSITY_ANGLERANGE=fit2D_density_angleRange, $
    NO_PLOTS=no_plots, $
    SAVE_FITPLOTS=save_fitplots, $
    PLOT_FULL_FIT=plot_full_fit, $
@@ -57,6 +58,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+   OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
+   OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
    ADD_FULL_FITS=add_full_fits, $
    OUT_ERANGE_PEAK=out_eRange_peak, $
    OUT_PARAMSTR=out_paramStr, $
@@ -89,10 +92,11 @@ PRO KAPPA_EFLUX_FIT2D, $
 
   ;;SDT data options
   kSDTData_opt  = INIT_KAPPA_SDTDATA_OPTIONS(EEB_OR_EES=eeb_or_ees, $
-                                            SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                                            DO_ALL_TIMES=do_all_times, $
-                                            ENERGY_ELECTRONS=energy_electrons, $
-                                            ELECTRON_ANGLERANGE=electron_angleRange)
+                                             SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                                             DO_ALL_TIMES=do_all_times, $
+                                             ENERGY_ELECTRONS=energy_electrons, $
+                                             ELECTRON_ANGLERANGE=electron_angleRange, $
+                                             FIT2D_DENSITY_ANGLERANGE=fit2D_density_angleRange)
 
   ;;Plot options
   kPlot_opt     = INIT_KAPPA_PLOT_OPTIONS(NO_PLOTS=no_plots, $
@@ -185,6 +189,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                     OUT_KAPPA_FIT_STRUCTS=kappaFits, $
                     OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                    OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
+                    OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
                     OUT_PARAMSTR=out_paramStr, $
                     TXTOUTPUTDIR=txtOutputDir

@@ -2,7 +2,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                                     DO_ALL_TIMES=do_all_times, $
                                     ENERGY_ELECTRONS=energy_electrons, $
-                                    ELECTRON_ANGLERANGE=electron_angleRange
+                                    ELECTRON_ANGLERANGE=electron_angleRange, $
+                                    FIT2D_DENSITY_ANGLERANGE=fit2D_density_angleRange
 
   COMPILE_OPT idl2
 
@@ -10,13 +11,16 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   defSpectra_average_interval               = 0
   defEnergy_electrons                       = [4,3.5e4]
   defElectron_angleRange                    = [-20,20]
+  defFit2D_dens_angleRange                  = [-20,20]
 
   kSDTData_opt                              = {eeb_or_ees          :defEEB_or_EES, $
                                                spec_avg_intvl      :defSpectra_average_interval, $
                                                do_all_times        :0, $
                                                energy_electrons    :[4,3.5e4], $
-                                               routine             : 'get_fa_' + defEEB_or_EES, $
-                                               electron_anglerange :defElectron_angleRange}
+                                               routine             :'get_fa_' + defEEB_or_EES, $
+                                               electron_anglerange :defElectron_angleRange, $
+                                               fit2D_dens_aRange   :defFit2D_dens_angleRange, $
+                                               densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
 
   IF N_ELEMENTS(eeb_or_ees) GT 0 THEN BEGIN
@@ -46,7 +50,9 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
      kSDTData_opt.electron_angleRange       = electron_angleRange
   ENDIF
   
-
+  IF N_ELEMENTS(fit2D_density_angleRange) GT 0 THEN BEGIN
+     kSDTData_opt.fit2D_dens_aRange         = fit2D_density_angleRange
+  ENDIF
 
   RETURN,kSDTData_opt
 

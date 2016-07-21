@@ -40,7 +40,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
   dataToFit          = curDataStr.data
 
   fa                 = {kappa_1d_fitparams:testKappaFit.A}
-  Dens_param         = testKappaFit.A[3]
+  dens_param         = testKappaFit.A[3]
 
 
 END
