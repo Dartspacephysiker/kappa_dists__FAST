@@ -11,9 +11,11 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+   FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
+   FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
    MIN_PEAK_ENERGY=min_peak_energy, $
@@ -76,6 +78,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                                               MAX_ITERATIONS=max_iter, $
                                               FIT2D_TOLERANCE=fit2d_tol, $
                                               FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
+                                              FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
                                               N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                               N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                                               TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
@@ -182,6 +185,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT_EACH__AVERAGE_OVER_ANGLERANGE=fit_each__average_over_angleRange, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
+                    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+                    FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                     FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $

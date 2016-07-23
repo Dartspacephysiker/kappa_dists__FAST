@@ -27,7 +27,11 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                             iAngle,iFit,testFitStr,testFitParams,testArray, $
                             craptest, $
                             wts,X2D,Y2D,dataToFit, $
-                            fa,dens_param
+                            fa,dens_param, $
+                            KCURVEFIT_OPT=kCurvefit_opt, $
+                            KSDTDATA_OPT=kSDTData_opt, $
+                            OUT_ANGLE_I=angle_i
+
 
      FitDens                                 = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,dataToFit, $
                                                           err, $
@@ -48,7 +52,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                                           MAXITER=kCurvefit_opt.fit2d_max_iter, $
                                                           NITER=niter, $
                                                           YFIT=yfit, $
-                                                          QUIET=quiet, $
+                                                          /QUIET, $
                                                           ERRMSG=errMsg, $
                                                           _EXTRA=extra)
 
@@ -63,7 +67,15 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
      dofArray                                    = [dofArray,dof]
      fitDensArray                                = [fitDensArray,fitDens]
      IF status GT 0 THEN BEGIN
-        testArrays[*,*,iWin]                     = yFit
+        CASE 1 OF
+           kCurvefit_opt.fit2d_only_dens_angles: BEGIN
+              testArrays[*,angle_i,iWin]         = yFit              
+           END
+           ELSE: BEGIN
+              testArrays[*,*,iWin]               = yFit
+           END
+        ENDCASE
+
      ENDIF ELSE BEGIN
         testArrays[*,*,iWin]                     = 0.0
      ENDELSE
@@ -79,6 +91,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
 
      iAngleWin                              = good_angleBin_i[win_i]
      fitWin                                 = fits[good_fits_i[win_i]]
+     densWin                                = densEstArray[win_i]
      winStruct                              = curDataStr
      winStruct.data                         = testArrays[*,*,win_i]
 
@@ -86,6 +99,8 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
 
      tmpKeeper                              = {bestFitStr      :winStruct, $
                                                bestFit1DParams :fitWin, $
+                                               bestAngle_i     :iAngleWin, $
+                                               bestDens        :densWin, $
                                                chiArray        :chiArray    , $
                                                dofArray        :dofArray    , $
                                                densEstArray    :densEstArray, $

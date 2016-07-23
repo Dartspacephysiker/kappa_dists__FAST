@@ -15,6 +15,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                       FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                       FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
+                      FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                       FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                       FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                       OUT_FITTED_PARAMS=out_kappaParams, $
@@ -140,6 +141,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
         distance_from_lastGood                      = 0
         distance_from_lastGood_gauss                = 0
+        gotFirst                                    = 0
 
         angleBin_sort_i                             = angleBin_i[SORT(tempAllangles[angleBin_i])] ;;Sort so they're ascending
         fieldAlignedAngle                           = MIN(ABS(tempAllAngles),fieldAligned_i)
@@ -226,7 +228,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      FOR iiAngle=0,nLoopAngles-1 DO BEGIN
 
         iAngle                                      = (KEYWORD_SET(start_from_fieldaligned) ? angle_order : angleBin_i)[iiAngle]
-        iAngle                                      = angleBin_i[iiAngle]
+        ;; iAngle                                      = angleBin_i[iiAngle]
 
         ;;Start sweeping backwards, if we made it to swap location
         IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
@@ -272,10 +274,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
         ;;estimate from the data!
         IF KEYWORD_SET(kCurvefit_opt.estimate_A_from_data) THEN BEGIN 
+
            CASE 1 OF
               KEYWORD_SET(start_from_fieldaligned): BEGIN
+
+                 tryNext                            = (iiAngle EQ 0) OR ~gotFirst
+
                  CASE 1 OF
-                    (iiAngle EQ 0): BEGIN ;Get field-aligned estimates
+                    tryNext: BEGIN ;Get field-aligned estimates
 
                        kappa_fixA                   = [1,1,1,1,0,0,0]
                        gauss_fixA                   = [1,1,0,1,0,0,0]
@@ -285,7 +291,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                               peak_ind,peak_energy,eRange_peak, $
                                               KAPPA_EST=kCurvefit_opt.fitA[2], $
                                               ;; MASS=mass, $
-                                              E_ANGLE=kCurvefit_opt.electron_angleRange, $
+                                              E_ANGLE=kSDTData_opt.electron_angleRange, $
                                               ANGLES=tempAngleEstRange, $
                                               N_ANGLES_IN_RANGE=nAngles, $
                                               BULKANGLE_STRUCT=angleStr, $
@@ -308,8 +314,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                        A                            = lastGood_A
                        AGauss                       = lastGood_AGauss
 
-                       kappa_fixA                   = [0,1,0,1,0,0,0]
-                       gauss_fixA                   = [0,1,0,1,0,0,0]
+                       kappa_fixA                   = [KEYWORD_SET(vary_bulk_energy),1,0,1,0,0,0]
+                       gauss_fixA                   = [KEYWORD_SET(vary_bulk_energy),1,0,1,0,0,0]
 
                     END
                  ENDCASE
@@ -381,6 +387,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               IF kappaFit.fitStatus EQ 0 THEN BEGIN
                  lastGood_A                         = kappaFit.A
                  distance_from_lastGood             = 0
+
+                 IF ~gotFirst THEN BEGIN
+                    gotFirst                        = gotFirst
+                 ENDIF
               ENDIF ELSE BEGIN
                  distance_from_lastGood++
               END
@@ -440,7 +450,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               good_kappaFits_i                      = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
            ENDIF
 
-           IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
               ;; skipGauss                          = (gaussFit.fitStatus GT 0) AND KEYWORD_SET(fit_each__skip_bad_fits)
               skipGauss                             = (gaussFit.fitStatus GT 0)
 
@@ -462,7 +472,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      curDataStr                                     = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
      ;;Make as many testArrays as we have successful fits
-     IF nGoodFits_tempK GT 1 THEN BEGIN ;skip if we lose
+     IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                   nEnergies,nTotAngles, $
@@ -472,91 +482,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                   KCURVEFIT_OPT=kCurvefit_opt, $
                                   KSDTDATA_OPT=kSDTData_opt, $
                                   FIT2D_INF_LIST=fit2DKappa_inf_list
-
-        ;; testArrays                                     = MAKE_ARRAY(nEnergies,nTotAngles,nGoodFits_tempK,/FLOAT)
-
-        ;; chiArray                                       = !NULL
-        ;; dofArray                                       = !NULL
-        ;; fitDensArray                                   = !NULL
-        ;; densEstArray                                   = !NULL
-        ;; errMsgArray                                    = !NULL
-        ;; statusArray                                    = !NULL
-        ;; FOR iWin=0,nGoodFits_tempK-1 DO BEGIN
-
-        ;;    SETUP_KAPPA_FIT2D_TEST,good_angleBinK_i,good_kappaFits_i,iWin, $
-        ;;                           nEnergies,nTotAngles, $
-        ;;                           curKappaStr,kappaFits,curDataStr, $
-        ;;                           iAngle,iKappa,testKappa,testKappaFit,testArray, $
-        ;;                           craptest, $
-        ;;                           wts,X2D,Y2D,dataToFit, $
-        ;;                           fa,dens_param
-
-        ;;    FitDens                                 = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,dataToFit, $
-        ;;                                                         err, $
-        ;;                                                         dens_param, $
-        ;;                                                         WEIGHTS=wts, $
-        ;;                                                         FUNCTARGS=fa, $
-        ;;                                                         BESTNORM=bestNorm, $
-        ;;                                                         NFEV=nfev, $
-        ;;                                                         FTOL=kCurvefit_opt.fit2d_tol, $
-        ;;                                                         STATUS=status, $
-        ;;                                                         BEST_RESID=best_resid, $
-        ;;                                                         PFREE_INDEX=ifree, $
-        ;;                                                         CALC_FJAC=calc_fjac, $
-        ;;                                                         BEST_FJAC=best_fjac, $
-        ;;                                                         PARINFO=parinfo, QUERY=query, $
-        ;;                                                         NPEGGED=npegged, NFREE=nfree, DOF=dof, $
-        ;;                                                         COVAR=covar, PERROR=perror, $
-        ;;                                                         MAXITER=kCurvefit_opt.fit2d_max_iter, $
-        ;;                                                         NITER=niter, $
-        ;;                                                         YFIT=yfit, $
-        ;;                                                         QUIET=quiet, $
-        ;;                                                         ERRMSG=errMsg, $
-        ;;                                                         _EXTRA=extra)
-
-        ;;    craptest.data                               = testArray
-        ;;    densEst                                     = CALL_FUNCTION(kSDTData_opt.densFunc,craptest, $
-        ;;                                                                ENERGY=kSDTData_opt.energy_electrons, $
-        ;;                                                                ANGLE=kSDTData_opt.fit2D_dens_aRange)
-        ;;    densEstArray                                = [densEstArray,densEst]
-        ;;    errMsgArray                                 = [errMsgArray,errMsg]
-        ;;    statusArray                                 = [statusArray,status]
-        ;;    chiArray                                    = [chiArray,bestNorm]
-        ;;    dofArray                                    = [dofArray,dof]
-        ;;    fitDensArray                                = [fitDensArray,fitDens]
-        ;;    IF status GT 0 THEN BEGIN
-        ;;       testArrays[*,*,iWin]                     = yFit
-        ;;    ENDIF ELSE BEGIN
-        ;;       testArrays[*,*,iWin]                     = 0.0
-        ;;    ENDELSE
-        ;; ENDFOR
-        
-        ;; ;;Now decide who is most awesome
-        ;; success_i                                      = WHERE(statusArray EQ 1,nSuccess)
-        ;; minTemp                                        = MIN(chiArray,minChi_i)
-        ;; win_i                                          = CGSETINTERSECTION(success_i,minChi_i,COUNT=haveWin)
-
-        ;; IF KEYWORD_SET(haveWin) THEN BEGIN
-        ;;    successesK++
-
-        ;;    iAngleWin                              = good_angleBinK_i[win_i]
-        ;;    kappaFitWin                            = kappaFits[good_kappaFits_i[win_i]]
-        ;;    winStruct                              = curDataStr
-        ;;    winStruct.data                         = testArrays[*,*,win_i]
-
-        ;;    keeper_bounds_i                        = [keeper_bounds_i,iTime]
-
-        ;;    tmpKeeper                              = {chiArray    :chiArray    , $
-        ;;                                              dofArray    :dofArray    , $
-        ;;                                              densEstArray:densEstArray, $
-        ;;                                              fitDensArray:fitDensArray, $
-        ;;                                              errMsgArray :errMsgArray , $
-        ;;                                              statusArray :statusArray}
-
-        ;;    fit2DKappa_inf_list.ADD,                 tmpKeeper                             
-        ;; ENDIF ELSE BEGIN
-        ;;    winStruct                              = !NULL
-        ;; ENDELSE
 
         PRINT,"KAPPA SUCCESSES : " + STRCOMPRESS(successesK,/REMOVE_ALL)
 
@@ -586,7 +511,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ENDIF
      ENDIF
 
-     IF nGoodFits_tempG GT 1 THEN BEGIN ;skip if we lose
+     IF nGoodFits_tempG GE 1 THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                     nEnergies,nTotAngles, $
@@ -596,84 +521,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                     KCURVEFIT_OPT=kCurvefit_opt, $
                                     KSDTDATA_OPT=kSDTData_opt, $
                                     FIT2D_INF_LIST=fit2DGauss_inf_list
-
-        ;; testArrays                                     = MAKE_ARRAY(nEnergies,nTotAngles,nGoodFits_tempG,/FLOAT)
-
-        ;; chiArray                                       = !NULL
-        ;; dofArray                                       = !NULL
-        ;; fitDensArray                                   = !NULL
-        ;; errMsgArray                                    = !NULL
-        ;; statusArray                                    = !NULL
-        ;; FOR iWin=0,nGoodFits_tempG-1 DO BEGIN
-
-        ;;    SETUP_KAPPA_FIT2D_TEST,good_angleBinG_i,good_gaussFits_i,iWin, $
-        ;;                           nEnergies,nTotAngles, $
-        ;;                           curGaussStr,gaussFits,curDataStr, $
-        ;;                           iAngle,iGauss,testGauss,testGaussFit,testArray, $
-        ;;                           craptest, $
-        ;;                           wts,X2D,Y2D,dataToFit, $
-        ;;                           fa,dens_param
-
-        ;;    FitDens                                 = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,dataToFit, $
-        ;;                                                         err, $
-        ;;                                                         dens_param, $
-        ;;                                                         WEIGHTS=wts, $
-        ;;                                                         FUNCTARGS=fa, $
-        ;;                                                         BESTNORM=bestNorm, $
-        ;;                                                         NFEV=nfev, $
-        ;;                                                         FTOL=kCurvefit_opt.fit2d_tol, $
-        ;;                                                         STATUS=status, $
-        ;;                                                         BEST_RESID=best_resid, $
-        ;;                                                         PFREE_INDEX=ifree, $
-        ;;                                                         CALC_FJAC=calc_fjac, $
-        ;;                                                         BEST_FJAC=best_fjac, $
-        ;;                                                         PARINFO=parinfo, QUERY=query, $
-        ;;                                                         NPEGGED=npegged, NFREE=nfree, DOF=dof, $
-        ;;                                                         COVAR=covar, PERROR=perror, $
-        ;;                                                         MAXITER=kCurvefit_opt.fit2d_max_iter, $
-        ;;                                                         NITER=niter, $
-        ;;                                                         YFIT=yfit, $
-        ;;                                                         QUIET=quiet, $
-        ;;                                                         ERRMSG=errMsg, $
-        ;;                                                         _EXTRA=extra)
-
-        ;;    errMsgArray                                 = [errMsgArray,errMsg]
-        ;;    statusArray                                 = [statusArray,status]
-        ;;    chiArray                                    = [chiArray,bestNorm]
-        ;;    dofArray                                    = [dofArray,dof]
-        ;;    fitDensArray                            = [fitDensArray,fitDens]
-        ;;    IF status GT 0 THEN BEGIN
-        ;;       testArrays[*,*,iWin]                     = yFit
-        ;;    ENDIF ELSE BEGIN
-        ;;       testArrays[*,*,iWin]                     = 0.0
-        ;;    ENDELSE
-        ;; ENDFOR
-        
-        ;; ;;Now decide who is most awesome
-        ;; success_i                                      = WHERE(statusArray EQ 1,nSuccess)
-        ;; minTemp                                        = MIN(chiArray,minChi_i)
-        ;; win_i                                          = CGSETINTERSECTION(success_i,minChi_i,COUNT=haveWin)
-
-        ;; IF KEYWORD_SET(haveWin) THEN BEGIN
-        ;;    successesG++
-
-        ;;    iAngleWin                              = good_angleBinG_i[win_i]
-        ;;    gaussFitWin                            = gaussFits[good_gaussFits_i[win_i]]
-        ;;    winStruct                              = curDataStr
-        ;;    winStruct.data                         = testArrays[*,*,win_i]
-
-        ;;    keeper_bounds_i                        = [keeper_bounds_i,iTime]
-
-        ;;    tmpKeeper                              = {chiArray    :chiArray    , $
-        ;;                                              dofArray    :dofArray    , $
-        ;;                                              fitDensArray:fitDensArray, $
-        ;;                                              errMsgArray :errMsgArray , $
-        ;;                                              statusArray :statusArray}
-
-        ;;    fit2DGauss_inf_list.ADD,                 tmpKeeper                             
-        ;; ENDIF ELSE BEGIN
-        ;;    winStruct                              = !NULL
-        ;; ENDELSE
 
         PRINT,"GAUSS SUCCESSES : " + STRCOMPRESS(successesG,/REMOVE_ALL)
 
@@ -743,7 +590,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                                                       TIME_INDS=tmpTime_i, $
                                                                       /RECALCULATE_DDATA, $
                                                                       APPEND_DATA_NAME=' (Kappa fits)'))
-     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
         synthPackage.Add,MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(synthGauss, $
                                                                       TIME_INDS=tmpTime_i, $
                                                                       /RECALCULATE_DDATA, $
