@@ -4,6 +4,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    T2=t2, $
    ENERGY_ELECTRONS=energy_electrons, $
    LOAD_DAT_FROM_FILE=loadFile, $
+   LOAD_DIR=loadDir, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    FIT_EACH_ANGLE=fit_each_angle, $
@@ -120,24 +121,26 @@ PRO KAPPA_EFLUX_FIT2D, $
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Get data
   ;; IF N_ELEMENTS(eSpec) EQ 0 OR N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
-  IF N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
-     GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
-                                 LOAD_DAT_FROM_FILE=loadFile, $
-                                 EEB_OR_EES=kSDTData_opt.eeb_or_ees, $
-                                 DIFF_EFLUX=diff_eFlux, $
-                                 SPECTRA_AVERAGE_INTERVAL=kSDTData_opt.spec_avg_intvl, $
-                                 OUT_ORB=orb, $
-                                 OUT_ANGLERANGE=e_angle, $
-                                 /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
-                                 CUSTOM_E_ANGLERANGE=kSDTData_opt.electron_angleRange, $
-                                 ANGLESTR=angleStr, $
-                                 ESPECUNITS=eSpecUnits, $
-                                 ELECTRON_ENERGY_LIMS=kSDTData_opt.energy_electrons
+  ;; IF N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
+  GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
+                              LOAD_DAT_FROM_FILE=loadFile, $
+                              LOAD_DIR=loadDir, $
+                              EEB_OR_EES=kSDTData_opt.eeb_or_ees, $
+                              DIFF_EFLUX=diff_eFlux, $
+                              SPECTRA_AVERAGE_INTERVAL=kSDTData_opt.spec_avg_intvl, $
+                              OUT_ORB=orb, $
+                              OUT_ANGLERANGE=e_angle, $
+                              /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
+                              CUSTOM_E_ANGLERANGE=kSDTData_opt.electron_angleRange, $
+                              ANGLESTR=angleStr, $
+                              ESPECUNITS=eSpecUnits, $
+                              ELECTRON_ENERGY_LIMS=kSDTData_opt.energy_electrons, $
+                              SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file
 
      orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
-  ENDIF ELSE BEGIN
-     orbStr                            = '???'
-  ENDELSE
+  ;; ENDIF ELSE BEGIN
+  ;;    orbStr                            = '???'
+  ;; ENDELSE
 
   IF KEYWORD_SET(do_all_times) THEN BEGIN
      PRINT,"Doing all times ..."
@@ -148,6 +151,7 @@ PRO KAPPA_EFLUX_FIT2D, $
   ;;Onecount curve?
   IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
      GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
+                                   ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
                                    EEB_OR_EES=kSDTData_opt.EEB_or_EES, $
                                    SPECTRA_AVERAGE_INTERVAL=kSDTData_opt.spec_avg_intvl, $
                                    IN_PROTOSTRUCT=diff_eFlux, $

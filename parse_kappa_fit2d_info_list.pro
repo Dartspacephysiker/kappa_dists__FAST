@@ -34,6 +34,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
   bestFit_angle        = !NULL
   bestFit_chi          = !NULL
   bestFit_2Dchi        = !NULL
+  dataDensArr          = !NULL
 
   nExcluded_highDens   = 0
   nExcluded_lKappa     = 0
@@ -71,6 +72,10 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
      bestFit_angle     = [bestFit_angle   ,fit2D_inf_list[k].bestfit1dparams.bulkangleinf.sdtangle]
      bestFit_chi       = [bestFit_chi     ,fit2D_inf_list[k].bestfit1dparams.chi2                 ]
      bestFit_2Dchi     = [bestFit_2Dchi   ,MIN(fit2D_inf_list[k].chiArray)                        ]
+
+     dataDensArr       = [dataDensArr,fit2D_inf_list[k].datDens]
+
+
   ENDFOR
 
   IF KEYWORD_SET(highDens_thresh) THEN BEGIN
@@ -91,6 +96,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
   best2DFit            = {SDT: bestFitStrs, $
                           params1D:bestFit_1DParams, $
                           dens:bestFit_dens, $
+                          dataDens:dataDensArr, $
                           angle:bestFit_angle, $
                           chi:bestFit_chi, $
                           chi2D:bestFit_2DChi}
