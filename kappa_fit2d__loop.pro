@@ -17,6 +17,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                       FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                       FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1dfit_to_density_at_each_angle, $
                       FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                       OUT_FITTED_PARAMS=out_kappaParams, $
                       OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
@@ -349,13 +350,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
         xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
         yRange                                      = [yMin,MAX(data)]
-
+        energy_inds                                 = [minEInd,maxEInd]
         KAPPA__GET_FITS,Xorig,Yorig, $
                         orig,kappaFit,gaussFit, $
                         ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
                         USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
                         BOUNDS_I=iTime, $
-                        ENERGY_INDS=[minEInd,maxEInd], $
+                        ENERGY_INDS=energy_inds, $
                         ERANGE_PEAK=eRange_peak, $
                         PEAK_IND=peak_ind, $
                         KAPPA_A=A, $
@@ -475,39 +476,54 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
-                                  nEnergies,nTotAngles, $
-                                  successesK, $
-                                  curKappaStr,kappaFits,curDataStr, $
-                                  good_angleBinK_i,good_kappaFits_i,iWin, $
-                                  KCURVEFIT_OPT=kCurvefit_opt, $
-                                  KSDTDATA_OPT=kSDTData_opt, $
+                                    nEnergies,nTotAngles, $
+                                    successesK, $
+                                    curKappaStr,kappaFits,curDataStr, $
+                                    good_angleBinK_i,good_kappaFits_i,iWin, $
+                                    KCURVEFIT_OPT=kCurvefit_opt, $
+                                    KSDTDATA_OPT=kSDTData_opt, $
+                                    FIT2D_INF_LIST=fit2DKappa_inf_list
+
+        IF KEYWORD_SET(fit_each__1dfit_to_density_at_each_angle) AND successesK GT 0 THEN BEGIN
+           KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curKappaStr, $
+                                  tempAllAngles, $
+                                  eRange_peak, $
+                                  CURVEFIT_OPT=kCurvefit_opt, $
+                                  ;; SDTDATA_OPT=SDTData_opt, $
                                   FIT2D_INF_LIST=fit2DKappa_inf_list
+        ENDIF
+        
 
         PRINT,"KAPPA SUCCESSES : " + STRCOMPRESS(successesK,/REMOVE_ALL)
 
         ;; showContour = 1
         IF KEYWORD_SET(showContour) THEN BEGIN
-           FOR ka=0,nGoodFits_tempK-1 DO BEGIN
-              PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
-              testMe                                 = curdataStr
-              testMe.data                            = testArrays[*,*,ka]
-              aDiffMe                                = testMe
-              aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
-              diffMe                                 = testMe
-              diffMe.data                            = testMe.data-curDataStr.data
-              diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
+           ;; FOR ka=0,nGoodFits_tempK-1 DO BEGIN
+              PRINT,'Check it out Kappa'
+              ;; PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
+              ;; testMe                                 = curdataStr
+              ;; testMe.data                            = testArrays[*,*,ka]
+              ;; aDiffMe                                = testMe
+              ;; aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
+              ;; diffMe                                 = testMe
+              ;; diffMe.data                            = testMe.data-curDataStr.data
+              ;; diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
 
-              testYu                                 = curdataStr
-              testYu.data                            = testArrays[*,*,ka]
-              aDiffYu                                = testYu
-              aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
-              diffYu                                 = testYu
-              diffYu.data                            = curDataStr.data-testYu.data
-              diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
+              ;; testYu                                 = curdataStr
+              ;; testYu.data                            = testArrays[*,*,ka]
+              ;; aDiffYu                                = testYu
+              ;; aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
+              ;; diffYu                                 = testYu
+              ;; diffYu.data                            = curDataStr.data-testYu.data
+              ;; diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
 
-              CONTOUR2D,diffYu,/POLAR
+              ;; CONTOUR2D,diffYu,/POLAR
+              ;; STOP
+
+              CONTOUR2D,curKappaStr,/POLAR,/FILL
+              CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
               STOP
-           ENDFOR
+           ;; ENDFOR
         ENDIF
      ENDIF
 
@@ -524,29 +540,45 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
         PRINT,"GAUSS SUCCESSES : " + STRCOMPRESS(successesG,/REMOVE_ALL)
 
+        IF KEYWORD_SET(fit_each__1dfit_to_density_at_each_angle) AND successesG GT 0 THEN BEGIN
+           KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curGaussStr, $
+                                         tempAllAngles, $
+                                         eRange_peak, $
+                                         CURVEFIT_OPT=kCurvefit_opt, $
+                                         ;; SDTDATA_OPT=SDTData_opt, $
+                                         FIT2D_INF_LIST=fit2DGauss_inf_list
+
+        ENDIF
+
         ;; showContour = 1
         IF KEYWORD_SET(showContour) THEN BEGIN
-           FOR ka=0,nGoodFits_tempG-1 DO BEGIN
-              PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
-              testMe                                 = curdataStr
-              testMe.data                            = testArrays[*,*,ka]
-              aDiffMe                                = testMe
-              aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
-              diffMe                                 = testMe
-              diffMe.data                            = testMe.data-curDataStr.data
-              diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
+           ;; FOR ka=0,nGoodFits_tempG-1 DO BEGIN
+              PRINT,'Check it out Gauss'
+              ;; PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
+              ;; testMe                                 = curdataStr
+              ;; testMe.data                            = testArrays[*,*,ka]
+              ;; aDiffMe                                = testMe
+              ;; aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
+              ;; diffMe                                 = testMe
+              ;; diffMe.data                            = testMe.data-curDataStr.data
+              ;; diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
 
-              testYu                                 = curdataStr
-              testYu.data                            = testArrays[*,*,ka]
-              aDiffYu                                = testYu
-              aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
-              diffYu                                 = testYu
-              diffYu.data                            = curDataStr.data-testYu.data
-              diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
+              ;; testYu                                 = curdataStr
+              ;; testYu.data                            = testArrays[*,*,ka]
+              ;; aDiffYu                                = testYu
+              ;; aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
+              ;; diffYu                                 = testYu
+              ;; diffYu.data                            = curDataStr.data-testYu.data
+              ;; diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
 
-              CONTOUR2D,diffYu,/POLAR
+              ;; CONTOUR2D,diffYu,/POLAR
+              ;; STOP
+
+              CONTOUR2D,curGaussStr,/POLAR,/FILL
+              CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
               STOP
-           ENDFOR
+
+           ;; ENDFOR
         ENDIF
      ENDIF
 
