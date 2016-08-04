@@ -1,6 +1,8 @@
 PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
    obs_current, $
    kappaPot,gaussPot, $
+   EXCLUDE_KAPPA_I=excludeK_i, $
+   EXCLUDE_GAUSS_I=excludeG_i, $
    DENSITY_KAPPA2D=kappaDens, $
    DENSITY_GAUSS2D=gaussDens, $
    RBCORRLUN=RBCorrLun
@@ -15,6 +17,24 @@ PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
 
   kLSArr      = !NULL
   gLSArr      = !NULL
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;And, some cleaning
+  IF N_ELEMENTS(excludeK_i) GT 0 THEN BEGIN
+     includeK_i = CGSETDIFFERENCE(INDGEN(N_ELEMENTS(AStruct.N)),excludeK_i)
+  ENDIF ELSE BEGIN
+     includeK_i = INDGEN(N_ELEMENTS(AStruct.N))
+  ENDELSE
+
+  IF N_ELEMENTS(excludeG_i) GT 0 THEN BEGIN
+     includeG_i = CGSETDIFFERENCE(INDGEN(N_ELEMENTS(AStructGauss.N)),excludeG_i)
+  ENDIF ELSE BEGIN
+     includeG_i = INDGEN(N_ELEMENTS(AStructGauss.N))
+  ENDELSE
+
+  obsCK        = obs_current[includeK_i]
+  obsCG        = obs_current[includeG_i]
+
   FOR r=0,nRBVals-1 DO BEGIN
 
      GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
@@ -26,15 +46,20 @@ PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
 
      KAPPA_FLIP_CURRENT,kappa_current,gauss_current,obs_current
 
-     sortC_i  = SORT(obs_current)
-     sortObsC = obs_current[sortC_i]
-     sortKapC = kappa_current[sortC_i]
-     sortGauC = gauss_current[sortC_i]
+     kc           = kappa_current[includeK_i]
+     gc           = gauss_current[includeG_i]
 
-     kappaFit     = LINFIT(sortObsC,sortKapC, $
+     sortCK_i  = SORT(obsCK)
+     sortCG_i  = SORT(obsCG)
+     sortObsCK = obsCK[sortCK_i]
+     sortObsCG = obsCG[sortCG_i]
+     sortKapC  = kc[sortCK_i]
+     sortGauC  = gc[sortCG_i]
+
+     kappaFit     = LINFIT(sortObsCK,sortKapC, $
                            PROB=kappaProb, $
                            CHISQR=kappaChi)
-     gaussFit     = LINFIT(sortObsC,sortGauC, $
+     gaussFit     = LINFIT(sortObsCG,sortGauC, $
                            PROB=gaussProb, $
                            CHISQR=gaussChi)
 
@@ -44,8 +69,8 @@ PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
      kLSArr      = [kLSArr,kLineString]
      gLSArr      = [gLSArr,gLineString]
 
-     kCorrArr[r] = CORRELATE(sortObsC,sortKapC)
-     gCorrArr[r] = CORRELATE(sortObsC,sortGauC)
+     kCorrArr[r] = CORRELATE(sortObsCK,sortKapC)
+     gCorrArr[r] = CORRELATE(sortObsCG,sortGauC)
   ENDFOR
 
   IF N_ELEMENTS(RBCorrLun) EQ 0 THEN RBCorrLun = -1 ;stdout

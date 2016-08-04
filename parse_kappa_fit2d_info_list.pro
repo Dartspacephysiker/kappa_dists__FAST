@@ -4,7 +4,11 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
                                      HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                      KAPPA_LOWTHRESHOLD=lKappa_thresh, $
                                      KAPPA_HIGHTHRESHOLD=hKappa_thresh, $
-                                     DESTROY_INFO_LIST=destroy
+                                     DESTROY_INFO_LIST=destroy, $
+                                     OUT_GOOD_I=include_i, $
+                                     OUT_GOOD_T=include_t, $
+                                     OUT_BAD_I=exclude_i, $
+                                     OUT_BAD_T=exclude_t
   
                                 ;; BESTFIT_SDTSTRUCTS=bestFitStrs, $
                                 ;; BESTFIT_1DPARAMS=bestFit_1DParams, $
@@ -39,28 +43,36 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
   nExcluded_highDens   = 0
   nExcluded_lKappa     = 0
   nExcluded_hKappa     = 0
+  exclude_i            = !NULL
   FOR k=0,nBestFits-1 DO BEGIN
+     excluded          = 0
      tmpDens           = fit2D_inf_list[k].bestDens
      tmpKappa          = fit2D_inf_list[k].bestFit1DParams.A[2]
 
      IF KEYWORD_SET(lKappa_thresh) THEN BEGIN
         IF tmpKappa LT lKappa_thresh THEN BEGIN
            nExcluded_lKappa++
-           CONTINUE
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
         ENDIF
      ENDIF
 
-     IF KEYWORD_SET(hKappa_thresh) THEN BEGIN
+     IF KEYWORD_SET(hKappa_thresh) AND ~excluded THEN BEGIN
         IF tmpKappa GT hKappa_thresh THEN BEGIN
            nExcluded_hKappa++
-           CONTINUE
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
         ENDIF
      ENDIF
 
-     IF KEYWORD_SET(highDens_thresh) THEN BEGIN
+     IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
         IF tmpDens GT highDens_thresh THEN BEGIN
            nExcluded_highDens++
-           CONTINUE
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
         ENDIF
      ENDIF
 
@@ -78,6 +90,19 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
 
   ENDFOR
 
+  IF N_ELEMENTS(exclude_i) GT 0 THEN BEGIN
+     include_i         = CGSETDIFFERENCE(INDGEN(nBestFits),exclude_i,COUNT=nKept)
+     include_t         = (bestFitStrs.time)[include_i]
+
+     exclude_t         = (bestFitStrs.time)[exclude_i]
+  ENDIF ELSE BEGIN
+     include_i         = INDGEN(nBestFits)
+     include_t         = bestFitStrs.time
+     nKept             = nBestFits
+
+     exclude_t         = !NULL
+  ENDELSE
+
   IF KEYWORD_SET(highDens_thresh) THEN BEGIN
      PRINT,'Excluded ' + STRCOMPRESS(nExcluded_highDens,/REMOVE_ALL) + $
            " fits on the basis of density threshold (dens LE " + STRCOMPRESS(highDens_thresh,/REMOVE_ALL) + ")"
@@ -92,6 +117,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
      PRINT,'Excluded ' + STRCOMPRESS(nExcluded_hKappa,/REMOVE_ALL) + $
            " fits on the basis of high kappa threshold (kappa LE " + STRCOMPRESS(hKappa_thresh,/REMOVE_ALL) + ")"
   ENDIF
+
+  PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)
 
   best2DFit            = {SDT: bestFitStrs, $
                           params1D:bestFit_1DParams, $

@@ -472,8 +472,19 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      curGaussStr                                    = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
      curDataStr                                     = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
+     CASE 1 OF
+        KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
+           proceed                                  = ((nGoodFits_tempK GT 0) AND $
+                                                       (nGoodFits_tempG GT 0))
+        END
+        ELSE: BEGIN
+           proceed                                  = nGoodFits_tempK GT 0
+        END
+     ENDCASE
+
      ;;Make as many testArrays as we have successful fits
-     IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
+     ;; IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
+     IF proceed THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepK_iTime,iTime, $
                                     nEnergies,eRange_peak, $
@@ -519,7 +530,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ENDIF
      ENDIF
 
-     IF nGoodFits_tempG GE 1 THEN BEGIN ;skip if we lose
+     ;; IF nGoodFits_tempG GE 1 THEN BEGIN ;skip if we lose
+     IF proceed THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepG_iTime,iTime, $
                                     nEnergies,eRange_peak, $

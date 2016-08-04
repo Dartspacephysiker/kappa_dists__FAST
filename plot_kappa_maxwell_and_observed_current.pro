@@ -1,4 +1,6 @@
 FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs_current, $
+   EXCLUDE_KAPPA_I=excludeK_i, $
+   EXCLUDE_GAUSS_I=excludeG_i, $
    ADD_LINEAR_FITS=add_linear_fits, $
    MAGRATIO=magRatio, $
    ORBIT=orbit, $
@@ -23,6 +25,27 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
    BUFFER=buffer
 
   COMPILE_OPT idl2
+
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;Clean things up
+  IF N_ELEMENTS(excludeK_i) GT 0 THEN BEGIN
+     includeK_i = CGSETDIFFERENCE(INDGEN(N_ELEMENTS(kappa_current)),excludeK_i)
+  ENDIF ELSE BEGIN
+     includeK_i = INDGEN(N_ELEMENTS(kappa_current))
+  ENDELSE
+
+  IF N_ELEMENTS(excludeG_i) GT 0 THEN BEGIN
+     includeG_i = CGSETDIFFERENCE(INDGEN(N_ELEMENTS(gauss_current)),excludeG_i)
+  ENDIF ELSE BEGIN
+     includeG_i = INDGEN(N_ELEMENTS(gauss_current))
+  ENDELSE
+
+  obsCK        = obs_current[includeK_i]
+  obsCG        = obs_current[includeG_i]
+  kc           = kappa_current[includeK_i]
+  gc           = gauss_current[includeG_i]
+
 
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -89,11 +112,11 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
      IF KEYWORD_SET(yLog) THEN BEGIN
         yRange    = [0.001,100]
      ENDIF ELSE BEGIN
-        yRange    = [MIN(kappa_current) < MIN(gauss_current), MAX(kappa_current) > MAX(gauss_current)]
+        yRange    = [MIN(kc) < MIN(gc), MAX(kc) > MAX(gc)]
      ENDELSE
   ENDIF
 
-  plotArr[0]   = PLOT(obs_current,kappa_current, $
+  plotArr[0]   = PLOT(obsCK,kc, $
                       NAME=kappaName, $
                       TITLE=plotTitle, $
                       XTITLE=xTitle, $
@@ -113,7 +136,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                       CURRENT=window, $
                       BUFFER=buffer)
 
-  plotArr[1]   = PLOT(obs_current,gauss_current, $
+  plotArr[1]   = PLOT(obsCG,gc, $
                       NAME=gaussName, $
                       TITLE=plotTitle, $
                       XTITLE=xTitle, $
@@ -136,20 +159,23 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
 
   IF KEYWORD_SET(add_linear_fits) THEN BEGIN
 
-     sortCur_i    = SORT(obs_current)
-     sortObsC     = obs_current[sortCur_i]
+     sortCurK_i   = SORT(obsCK)
+     sortObsCK    = obsCK[sortCurK_i]
 
-     kappaFit     = LINFIT(sortObsC,kappa_current[sortCur_i], $
+     sortCurG_i   = SORT(obsCG)
+     sortObsCG    = obsCG[sortCurG_i]
+
+     kappaFit     = LINFIT(sortObsCK,kc[sortCurK_i], $
                            YFIT=kappaLine, $
                            PROB=kappaProb, $
                            CHISQR=kappaChi)
-     gaussFit     = LINFIT(sortObsC,gauss_current[sortCur_i], $
+     gaussFit     = LINFIT(sortObsCG,gc[sortCurG_i], $
                            YFIT=gaussLine, $
                            PROB=gaussProb, $
                            CHISQR=gaussChi)
 
-     kappaCorr    = CORRELATE(sortObsC,kappa_current[sortCur_i])
-     gaussCorr    = CORRELATE(sortObsC,gauss_current[sortCur_i])
+     kappaCorr    = CORRELATE(sortObsCK,kc[sortCurK_i])
+     gaussCorr    = CORRELATE(sortObsCG,gc[sortCurG_i])
 
      kLineString  = STRING(FORMAT='("y=",F0.2,"x+",F0.2)',kappaFit[0],kappaFit[1])
      gLineString  = STRING(FORMAT='("y=",F0.2,"x+",F0.2)',gaussFit[0],gaussFit[1])
@@ -164,7 +190,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                                         gaussCorr, $
                                         gLineString)
 
-     plotArr[2]   = PLOT(sortObsC,kappaLine, $
+     plotArr[2]   = PLOT(sortObsCK,kappaLine, $
                          NAME=kLN, $
                          TITLE=plotTitle, $
                          XTITLE=xTitle, $
@@ -182,7 +208,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                          /OVERPLOT, $
                          BUFFER=buffer)
      
-     plotArr[3]   = PLOT(sortObsC,gaussLine, $
+     plotArr[3]   = PLOT(sortObsCG,gaussLine, $
                          NAME=gLN, $
                          TITLE=plotTitle, $
                          XTITLE=xTitle, $
