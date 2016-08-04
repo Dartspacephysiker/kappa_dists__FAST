@@ -31,25 +31,25 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
         gaussPot     = setup.GaussS.bulk_energy
         kappaPot     = setup.GaussS.bulk_energy
         potName      = 'Gauss_bulkE'
-        potTitleStr += 'Maxwell fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+        potTitleStr += 'Maxwell fit ' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. i!U+!N energy')
      END
      KEYWORD_SET(both_use_kappa_bulkenergy): BEGIN
         gaussPot     = setup.KappaS.bulk_energy
         kappaPot     = setup.KappaS.bulk_energy
         potName      = 'kappa_bulkE'
-        potTitleStr += 'Kappa fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+        potTitleStr += 'Kappa fit ' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. i!U+!N energy')
      END
      KEYWORD_SET(use_bulkEnergy_pot): BEGIN
         gaussPot     = setup.GaussS.bulk_energy
         kappaPot     = setup.KappaS.bulk_energy
         potName      = 'bulkE'
-        potTitleStr += 'Fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. ion energy')
+        potTitleStr += 'Fit-derived' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + Char. i!U+!N energy')
      END
      ELSE: BEGIN
         gaussPot     = setup.charE
         kappaPot     = setup.charE
         potName      = 'charE'
-        potTitleStr += 'Char. e!U-!N' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + ion') + ' energy'
+        potTitleStr += 'Char. e!U-!N' + (KEYWORD_SET(no_charI_for_pot) ? '' : ' + i!U+!N') + ' energy'
      END
   ENDCASE
 

@@ -13,6 +13,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
                                      MAX_ITERATIONS=max_iter, $
                                      FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                      FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
+                                     FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
                                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                                      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
@@ -47,6 +48,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
                                                 max_iter                 :defMax_iter, $
                                                 fit2d_max_iter           :defFit2D_max_iter, $
                                                 fita                     :defKappaFitA, $
+                                                fit1D_dens__each_angle   : 0, $
                                                 n_below_peak             :defNEn_below_peak, $
                                                 n_above_peak             :defNEn_above_peak, $
                                                 trim_energies_below_peak :1, $
@@ -104,6 +106,10 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(use_SDT_Gaussian_fit) GT 0 THEN BEGIN
      kCurvefit_opt.use_SDT_Gaussian_fit      = use_SDT_Gaussian_fit
+  ENDIF
+
+  IF KEYWORD_SET(fit1D_to_density_at_each_angle) THEN BEGIN
+     kCurvefit_opt.fit1D_dens__each_angle    = fit1D_to_density_at_each_angle
   ENDIF
 
   IF N_ELEMENTS(n_est) GT 0 THEN BEGIN

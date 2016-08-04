@@ -1,4 +1,5 @@
 FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs_current, $
+   ADD_LINEAR_FITS=add_linear_fits, $
    MAGRATIO=magRatio, $
    ORBIT=orbit, $
    POTTITLESTR=potTitleStr, $
@@ -9,12 +10,15 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
    SUPPRESS_AXIS_TITLES=suppress_axis_titles, $
    SUPPRESS_LEGEND=suppress_legend, $
    SUPPRESS_XTICKMARKS=suppress_xTickMarks, $
+   SUPPRESS_YTICKMARKS=suppress_yTickMarks, $
+   SUPPRESS_SCATTER_LEGEND=suppress_scatter_legend, $
    LEGEND__FONT_SIZE=legend__font_size, $
    XLOG=xLog, $
    YLOG=yLog, $
    XRANGE=xRange, $
    YRANGE=yRange, $
    ;; PLOTNAME=plotName, $
+   FOR_INTEGRATED_2DFIT_CURRENTS=for_2Dfit_currents, $
    WINDOW=window, $
    BUFFER=buffer
 
@@ -23,32 +27,38 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;All kinds of plot preliminaries
-  plotArr      = MAKE_ARRAY(2,/OBJ)
+  plotArr      = MAKE_ARRAY(2*(1+KEYWORD_SET(add_linear_fits)),/OBJ)
 
   ;;Titles
+  modName      = KEYWORD_SET(for_2Dfit_currents) ? '2DFit' : "Model"
+
   IF ~KEYWORD_SET(suppress_title) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(use_potStr_as_title): BEGIN
            plotTitle = potTitleStr
         END
         ELSE: BEGIN
-           plotTitle = 'Model Currents vs. ' + obsName + ' Current' + $
+           plotTitle = modName + ' Currents vs. ' + obsName + ' Current' + $
                        (KEYWORD_SET(orbit) ? '!C(FAST orbit ' +STRCOMPRESS(orbit,/REMOVE_ALL) + ')' : '')
         END
      ENDCASE
   ENDIF
   IF ~KEYWORD_SET(suppress_axis_titles) THEN BEGIN
      xTitle    = 'Observed Current (' + CGGREEK('mu') + 'A/m!U2!N)'
-     yTitle    = 'Model Current (' + CGGREEK('mu') + 'A/m!U2!N)'
+     yTitle    = modName + ' Current (' + CGGREEK('mu') + 'A/m!U2!N)'
   ENDIF
 
   ;;Names
-  kappaName    = "Kappa model"
-  gaussName    = "Maxwellian model"
+  kappaName    = modName + ' (Kappa)'
+  gaussName    = modName + ' (Maxwellian)'
+  
+  kappaLName   = "K "
+  gaussLName   = "G "
 
   ;;Bonus
   pSyms        = ['+','x']
   pColors      = ['blue','purple']
+  lStyles      = [0,2]
 
   IF N_ELEMENTS(legend__font_size) EQ 0 THEN BEGIN     
      legFontSize  = 16
@@ -57,7 +67,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
   ENDELSE
 
   legPos       = [0.06,0.85]
-  R_BPos       = [0.06,0.7]
+  R_BPos       = [0.88,0.88]
 
   ;;Logplots?
   IF N_ELEMENTS(xLog) EQ 0 THEN BEGIN
@@ -96,6 +106,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                       LINESTYLE=6, $
                       ;; XTICKNAME=KEYWORD_SET(suppress_xTickMarks) ? REPLICATE(' ',30) : !NULL, $
                       XSHOWTEXT=KEYWORD_SET(suppress_xTickMarks) ? 0 : !NULL, $
+                      YSHOWTEXT=KEYWORD_SET(suppress_yTickMarks) ? 0 : !NULL, $
                       XLOG=xLog, $
                       YLOG=yLog, $
                       POSITION=position, $
@@ -114,6 +125,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                       LINESTYLE=6, $
                       ;; XTICKNAME=KEYWORD_SET(suppress_xTickMarks) ? REPLICATE(' ',30) : !NULL, $
                       XSHOWTEXT=KEYWORD_SET(suppress_xTickMarks) ? 0 : !NULL, $
+                      YSHOWTEXT=KEYWORD_SET(suppress_yTickMarks) ? 0 : !NULL, $
                       XLOG=xLog, $
                       YLOG=yLog, $
                       POSITION=position, $
@@ -122,12 +134,89 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
                       BUFFER=buffer)
 
 
+  IF KEYWORD_SET(add_linear_fits) THEN BEGIN
+
+     sortCur_i    = SORT(obs_current)
+     sortObsC     = obs_current[sortCur_i]
+
+     kappaFit     = LINFIT(sortObsC,kappa_current[sortCur_i], $
+                           YFIT=kappaLine, $
+                           PROB=kappaProb, $
+                           CHISQR=kappaChi)
+     gaussFit     = LINFIT(sortObsC,gauss_current[sortCur_i], $
+                           YFIT=gaussLine, $
+                           PROB=gaussProb, $
+                           CHISQR=gaussChi)
+
+     kappaCorr    = CORRELATE(sortObsC,kappa_current[sortCur_i])
+     gaussCorr    = CORRELATE(sortObsC,gauss_current[sortCur_i])
+
+     kLineString  = STRING(FORMAT='("y=",F0.2,"x+",F0.2)',kappaFit[0],kappaFit[1])
+     gLineString  = STRING(FORMAT='("y=",F0.2,"x+",F0.2)',gaussFit[0],gaussFit[1])
+
+     ;; kLN          = kappaLName + STRING(FORMAT='(" (R=",F0.3,")")',kappaCorr)
+     ;; gLN          = gaussLName + STRING(FORMAT='(" (R=",F0.3,")")',gaussCorr)
+
+     kLN          = kappaLName + STRING(FORMAT='(" (R=",F0.2,", ",A0,")")', $
+                                        kappaCorr, $
+                                        kLineString)
+     gLN          = gaussLName + STRING(FORMAT='(" (R=",F0.2,", ",A0,")")', $
+                                        gaussCorr, $
+                                        gLineString)
+
+     plotArr[2]   = PLOT(sortObsC,kappaLine, $
+                         NAME=kLN, $
+                         TITLE=plotTitle, $
+                         XTITLE=xTitle, $
+                         YTITLE=yTitle, $
+                         XRANGE=xRange, $
+                         YRANGE=yRange, $
+                         LINESTYLE=lStyles[0], $
+                         COLOR=pColors[0], $
+                         XSHOWTEXT=KEYWORD_SET(suppress_xTickMarks) ? 0 : !NULL, $
+                         YSHOWTEXT=KEYWORD_SET(suppress_yTickMarks) ? 0 : !NULL, $
+                         XLOG=xLog, $
+                         YLOG=yLog, $
+                         POSITION=position, $
+                         CURRENT=window, $
+                         /OVERPLOT, $
+                         BUFFER=buffer)
+     
+     plotArr[3]   = PLOT(sortObsC,gaussLine, $
+                         NAME=gLN, $
+                         TITLE=plotTitle, $
+                         XTITLE=xTitle, $
+                         YTITLE=yTitle, $
+                         XRANGE=xRange, $
+                         YRANGE=yRange, $
+                         LINESTYLE=lStyles[1], $
+                         COLOR=pColors[1], $
+                         XSHOWTEXT=KEYWORD_SET(suppress_xTickMarks) ? 0 : !NULL, $
+                         YSHOWTEXT=KEYWORD_SET(suppress_yTickMarks) ? 0 : !NULL, $
+                         XLOG=xLog, $
+                         YLOG=yLog, $
+                         POSITION=position, $
+                         CURRENT=window, $
+                         /OVERPLOT, $
+                         BUFFER=buffer)
+     
+
+  ENDIF
+
   IF ~KEYWORD_SET(suppress_legend) THEN BEGIN
      IF N_ELEMENTS(position) GT 0 THEN BEGIN
         legPos[0] = position[0] + legPos[0]*(position[2]-position[0])
         legPos[1] = position[1] + legPos[1]*(position[3]-position[1])
      ENDIF
-     legend       = LEGEND(TARGET=plotArr[*], $
+     CASE 1 OF
+        (KEYWORD_SET(suppress_scatter_legend) AND KEYWORD_SET(add_linear_fits)): BEGIN
+           legTarg = plotArr[2:3]
+        END
+        ELSE: BEGIN
+           legTarg = plotArr[*]
+        END
+     ENDCASE
+     legend       = LEGEND(TARGET=legTarg[*], $
                            POSITION=legPos, $
                            HORIZONTAL_ALIGNMENT=0.0, $
                            /NORMAL, $

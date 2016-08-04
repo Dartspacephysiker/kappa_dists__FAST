@@ -1,5 +1,6 @@
-PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
-                                nEnergies,nTotAngles, $
+PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
+                                nEnergies,eRange_peak, $
+                                allAngles,nTotAngles, $
                                 successes, $
                                 curFitStr,fits,curDataStr, $
                                 good_angleBin_i,good_fits_i,iWin, $
@@ -8,6 +9,12 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                 FIT2D_INF_LIST=fit2D_inf_list
 
   COMPILE_OPT idl2
+
+  OKStatus          = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+
+  func              = KEYWORD_SET(kCurvefit_opt.fit1D_dens__each_angle) ? $
+                      'KAPPA_FLUX2D__SCALE_DENSITY__INDIVIDUAL_1D_ESTS' : $
+                      'KAPPA_FLUX2D__SCALE_DENSITY'
 
   nGoodFits         = N_ELEMENTS(good_fits_i)
 
@@ -22,7 +29,8 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
   FOR iWin=0,nGoodFits-1 DO BEGIN
 
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
-                            nEnergies,nTotAngles, $
+                            nEnergies,eRange_peak, $
+                            allAngles,nTotAngles, $
                             curFitStr,fits,curDataStr, $
                             iAngle,iFit,testFitStr,testFitParams,testArray, $
                             craptest, $
@@ -33,7 +41,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                             OUT_ANGLE_I=angle_i
 
 
-     FitDens        = MPFIT2DFUN('KAPPA_FLUX2D__SCALE_DENSITY',X2D,Y2D,dataToFit, $
+     FitDens        = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
                                  err, $
                                  dens_param, $
                                  WEIGHTS=wts, $
@@ -41,6 +49,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                  BESTNORM=bestNorm, $
                                  NFEV=nfev, $
                                  FTOL=kCurvefit_opt.fit2d_tol, $
+                                 GTOL=1e-13, $
                                  STATUS=status, $
                                  BEST_RESID=best_resid, $
                                  PFREE_INDEX=ifree, $
@@ -56,7 +65,8 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                  ERRMSG=errMsg, $
                                  _EXTRA=extra)
 
-     craptest.data  = testArray
+     ;; craptest.data  = testArray
+     craptest.data[*,angle_i]  = yFit
      densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,craptest, $
                                     ENERGY=kSDTData_opt.energy_electrons, $
                                     ANGLE=kSDTData_opt.fit2D_dens_aRange)
@@ -66,7 +76,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
      chiArray       = [chiArray,bestNorm]
      dofArray       = [dofArray,dof]
      fitDensArray   = [fitDensArray,fitDens]
-     IF status GT 0 THEN BEGIN
+     IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
         CASE 1 OF
            kCurvefit_opt.fit2d_only_dens_angles: BEGIN
               testArrays[*,angle_i,iWin]  = yFit              
@@ -86,11 +96,18 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
                                       ANGLE=kSDTData_opt.fit2D_dens_aRange)
 
   ;;Now decide who is most awesome
-  success_i           = WHERE(statusArray EQ 1,nSuccess)
-  minTemp             = MIN(chiArray,minChi_i)
-  win_i               = CGSETINTERSECTION(success_i,minChi_i,COUNT=haveWin)
+  success_i           = WHERE(statusArray EQ 1 OR $
+                              statusArray EQ 2 OR $ 
+                              statusArray EQ 3 OR $
+                              statusArray EQ 4, $
+                              nSuccess)
+  IF nSuccess GT 0 THEN BEGIN
+     minTemp          = MIN(chiArray[success_i],minChi_ii)
+     ;; win_i               = CGSETINTERSECTION(success_i,minChi_i,COUNT=haveWin)
+     win_i            = success_i[minChi_ii]
+  ;; ENDIF
 
-  IF KEYWORD_SET(haveWin) THEN BEGIN
+  ;; IF KEYWORD_SET(haveWin) THEN BEGIN
      successes++
 
      iAngleWin        = good_angleBin_i[win_i]
@@ -99,7 +116,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
      winStruct        = curDataStr
      winStruct.data   = testArrays[*,*,win_i]
 
-     keeper_bounds_i  = [keeper_bounds_i,iTime]
+     keep_iTime       = [keep_iTime,iTime]
 
      tmpKeeper        = {bestFitStr      :winStruct, $
                          bestFit1DParams :fitWin, $

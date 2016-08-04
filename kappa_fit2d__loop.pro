@@ -17,7 +17,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
                       FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                       FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
-                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1dfit_to_density_at_each_angle, $
                       FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                       OUT_FITTED_PARAMS=out_kappaParams, $
                       OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
@@ -83,7 +82,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   ENDCASE
 
   ;; IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
-  ;;    keeper_bounds_i                       = !NULL
+  ;;    keepK_iTime                       = !NULL
 
   ;;    IF KEYWORD_SET(min_anglefits_for_keep) THEN BEGIN
   ;;       min_aFits_for_keep                 = min_anglefits_for_keep
@@ -92,7 +91,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   ;;    ENDELSE
   ;; ENDIF
 
-  keeper_bounds_i                                   = !NULL ;Keep track of which fits get to come home with us
+  keepK_iTime                                       = !NULL ;Keep track of which fits get to come home with us
+  keepG_iTime                                       = !NULL ;Keep track of which fits get to come home with us
   successesK                                        = 0
   successesG                                        = 0
   fit2DKappa_inf_list                               = LIST()
@@ -475,8 +475,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;;Make as many testArrays as we have successful fits
      IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
 
-        KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
-                                    nEnergies,nTotAngles, $
+        KAPPA_FIT2D__TRY_EACH_1DFIT,keepK_iTime,iTime, $
+                                    nEnergies,eRange_peak, $
+                                    tempAllAngles,nTotAngles, $
                                     successesK, $
                                     curKappaStr,kappaFits,curDataStr, $
                                     good_angleBinK_i,good_kappaFits_i,iWin, $
@@ -484,17 +485,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                     KSDTDATA_OPT=kSDTData_opt, $
                                     FIT2D_INF_LIST=fit2DKappa_inf_list
 
-        IF KEYWORD_SET(fit_each__1dfit_to_density_at_each_angle) AND successesK GT 0 THEN BEGIN
-           KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curKappaStr, $
-                                  tempAllAngles, $
-                                  eRange_peak, $
-                                  CURVEFIT_OPT=kCurvefit_opt, $
-                                  ;; SDTDATA_OPT=SDTData_opt, $
-                                  FIT2D_INF_LIST=fit2DKappa_inf_list
-        ENDIF
-        
-
-        PRINT,"KAPPA SUCCESSES : " + STRCOMPRESS(successesK,/REMOVE_ALL)
+        PRINT,"KAPPA_FIT2D__TRY_EACH SUCCESSES : " + STRCOMPRESS(successesK,/REMOVE_ALL)
 
         ;; showContour = 1
         IF KEYWORD_SET(showContour) THEN BEGIN
@@ -520,7 +511,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               ;; CONTOUR2D,diffYu,/POLAR
               ;; STOP
 
-              CONTOUR2D,curKappaStr,/POLAR,/FILL
+              ;; CONTOUR2D,curKappaStr,/POLAR,/FILL
+              CONTOUR2D,fit2DKappa_inf_list[-1].bestFitStr,/POLAR,/FILL
               CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
               STOP
            ;; ENDFOR
@@ -529,8 +521,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      IF nGoodFits_tempG GE 1 THEN BEGIN ;skip if we lose
 
-        KAPPA_FIT2D__TRY_EACH_1DFIT,keeper_bounds_i,iTime, $
-                                    nEnergies,nTotAngles, $
+        KAPPA_FIT2D__TRY_EACH_1DFIT,keepG_iTime,iTime, $
+                                    nEnergies,eRange_peak, $
+                                    tempAllAngles,nTotAngles, $
                                     successesG, $
                                     curGaussStr,gaussFits,curDataStr, $
                                     good_angleBinG_i,good_gaussFits_i,iWin, $
@@ -538,17 +531,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                     KSDTDATA_OPT=kSDTData_opt, $
                                     FIT2D_INF_LIST=fit2DGauss_inf_list
 
-        PRINT,"GAUSS SUCCESSES : " + STRCOMPRESS(successesG,/REMOVE_ALL)
-
-        IF KEYWORD_SET(fit_each__1dfit_to_density_at_each_angle) AND successesG GT 0 THEN BEGIN
-           KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curGaussStr, $
-                                         tempAllAngles, $
-                                         eRange_peak, $
-                                         CURVEFIT_OPT=kCurvefit_opt, $
-                                         ;; SDTDATA_OPT=SDTData_opt, $
-                                         FIT2D_INF_LIST=fit2DGauss_inf_list
-
-        ENDIF
+        PRINT,"GAUSS_FIT2D__TRY_EACH SUCCESSES : " + STRCOMPRESS(successesG,/REMOVE_ALL)
 
         ;; showContour = 1
         IF KEYWORD_SET(showContour) THEN BEGIN
@@ -574,7 +557,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               ;; CONTOUR2D,diffYu,/POLAR
               ;; STOP
 
-              CONTOUR2D,curGaussStr,/POLAR,/FILL
+              ;; CONTOUR2D,curGaussStr,/POLAR,/FILL
+              CONTOUR2D,fit2DGauss_inf_list[-1].bestFitStr,/POLAR,/FILL
               CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
               STOP
 
@@ -590,7 +574,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;;    ENDIF
 
      ;;    IF (nGoodFits_tempK GT min_aFits_for_keep) OR (nGoodFits_tempG GT min_aFits_for_keep) THEN BEGIN
-     ;;       keeper_bounds_i = [keeper_bounds_i,iTime]
+     ;;       keepK_iTime = [keepK_iTime,iTime]
      ;;    ENDIF
      ;; ENDIF
 
@@ -611,9 +595,19 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      
 
      IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
-        tmpTime_i = keeper_bounds_i
+        tmpTimeK_i = keepK_iTime
+        tmpTimeG_i = keepG_iTime
+        tmpTime_i  = CGSETINTERSECTION(keepK_iTime,keepG_iTime,COUNT=nTotKeepTimes)
+
+        nKappaTimes = N_ELEMENTS(keepK_iTime)
+        nGaussTimes = N_ELEMENTS(keepG_iTime)
+
+        PRINT,"N KEEP TIMES"
+        PRINT,FORMAT='("Kappa",T15,"Gauss",T30,"Total")'
+        PRINT,FORMAT='(I0,T15,I0,T30,I0)',nKappaTimes,nGaussTimes,nTotKeepTimes
      ENDIF ELSE BEGIN
-        tmpTime_i = bounds
+        tmpTimeK_i = bounds
+        tmpTimeG_i = bounds
      ENDELSE
 
      synthPackage = LIST(MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX(diff_eFlux, $

@@ -15,7 +15,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
-   FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1dfit_to_density_at_each_angle, $
+   FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1DFit_to_density_at_each_angle, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
    FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
    SDT_TIME_INDS=bounds, $
@@ -81,6 +81,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                                               FIT2D_TOLERANCE=fit2d_tol, $
                                               FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                               FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
+                                              FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1DFit_to_density_at_each_angle, $
                                               N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                               N_ENERGIES_ABOVE_PEAK=n_above_peak, $
                                               TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
@@ -194,7 +195,6 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                     FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
-                    FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1dfit_to_density_at_each_angle, $
                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                     OUT_FITTED_PARAMS=out_kappaParams, $
                     OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $

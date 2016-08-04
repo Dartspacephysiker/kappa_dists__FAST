@@ -5,7 +5,8 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
                                      kappa_current,gauss_current,obs_current, $
                                      DENSITY_KAPPA2D=dens_kappa2D, $
                                      DENSITY_GAUSS2D=dens_gauss2D, $
-                                     MAKE_CURRENTS_POSITIVE=make_currents_positive
+                                     MAKE_CURRENTS_POSITIVE=make_currents_positive, $
+                                     QUIET=quiet
 
   COMPILE_OPT idl2
 
@@ -15,7 +16,7 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
            PRINT,"Number of 2D density estimates does not match number of 1D estimates!"
            STOP
         ENDIF
-        PRINT,'2D density estimate for kappa ...'
+        IF ~KEYWORD_SET(quiet) THEN PRINT,'2D density estimate for kappa ...'
         densK                    = dens_kappa2D
      END
      ELSE: BEGIN
@@ -29,7 +30,7 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
            PRINT,"Number of 2D density estimates does not match number of 1D estimates!"
            STOP
         ENDIF
-        PRINT,'2D density estimate for gauss ...'
+        IF ~KEYWORD_SET(quiet) THEN PRINT,'2D density estimate for gauss ...'
         densG                    = dens_gauss2D
      END
      ELSE: BEGIN
@@ -44,36 +45,9 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
                                                                                     gaussPot/DOUBLE(1.6e-19),magRatio)
 
   IF KEYWORD_SET(make_currents_positive) THEN BEGIN
-     ;;Flip current signs if they're negative
-     flipMeK                     = WHERE(kappa_current LT 0,nFlipK,COMPLEMENT=posK_i,NCOMPLEMENT=nPosK)
-     flipMeG                     = WHERE(gauss_current LT 0,nFlipG,COMPLEMENT=posG_i,NCOMPLEMENT=nPosG)
 
-     IF nFlipK GT 0 THEN BEGIN
-        IF nPosK GT 0 THEN BEGIN
-           PRINT,"What to do? The sign is different ..."
-           STOP
-        ENDIF
-        kappa_current[flipMeK]   = (-1.D)*kappa_current[flipMeK]
-     ENDIF
-     IF nFlipG GT 0 THEN BEGIN
-        IF nPosG GT 0 THEN BEGIN
-           PRINT,"What to do? The sign is different ..."
-           STOP
-        ENDIF
-        gauss_current[flipMeG]   = (-1.D)*gauss_current[flipMeG]
-     ENDIF
+     KAPPA_FLIP_CURRENT,kappa_current,gauss_current,obs_current
 
-     IF KEYWORD_SET(obs_current) THEN BEGIN
-        flipMeO                  = WHERE(obs_current LT 0,nFlipO,COMPLEMENT=posO_i,NCOMPLEMENT=nPosO)
-
-        IF nFlipO GT 0 THEN BEGIN
-           IF nPosO GT 0 THEN BEGIN
-              PRINT,"What to do? The sign is different ..."
-              STOP
-           ENDIF
-           obs_current[flipMeO]  = (-1.D)*obs_current[flipMeO]
-        ENDIF
-     ENDIF
   ENDIF
 
 END

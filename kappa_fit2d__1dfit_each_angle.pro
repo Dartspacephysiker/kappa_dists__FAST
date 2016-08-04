@@ -1,9 +1,11 @@
 PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
                                   allAngles, $
                                   eRange_peak, $
+                                  fitStr, $
                                   CURVEFIT_OPT=curvefit_opt, $
-                                  ;; SDTDATA_OPT=SDTData_opt, $
-                                  FIT2D_INF_LIST=fit2D_inf_list
+                                  SDTDATA_OPT=SDTData_opt, $
+                                  FIT2D_INF_LIST=fit2D_inf_list, $
+                                  OUT_1D_DENS_ESTS=out_1D_dens_ests
 
   COMPILE_OPT idl2
 
@@ -13,7 +15,9 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
   fixA__each_1dfit    = [0,0,0,1,0,0,0]
 
   good_1DFits      = 0
-  A_1D             = fit2D_inf_list[-1].bestFit1DParams.A
+  ;; A_1D             = fit2D_inf_list[-1].bestFit1DParams.A
+  A_1D             = fitStr.A
+  out_1D_dens_ests = MAKE_ARRAY(nTotAngles,VALUE=fitStr.A[3],/FLOAT)
   FOR iAngle=0,nTotAngles-1 DO BEGIN
 
      ;;Here's the data we're working with for this loop iteration
@@ -46,21 +50,21 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
         weights[fixMe]  = 0.0
      ENDIF
 
-     yFit               = CURVEFIT(X,Y,weights,A_1D,sigma, $
+     yFit               = CURVEFIT(X,Y,weights,tmpA_1D,sigma, $
                                    FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
                                    /DOUBLE, $
                                    FITA=fixA__each_1dfit, $
                                    ITMAX=1000, $
                                    CHI2=chi2, $
                                    ITER=itNum, $
-                                   ;; TOL=KEYWORD_SET(fit_tol) ? fit_tol : 1e-3, $
                                    TOL=1e-3, $
                                    STATUS=fitStatus)
      CASE fitStatus OF 
         0: BEGIN 
            good_1DFits++
-           KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F,Xorig,A_1D,yFull
+           KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F,Xorig,tmpA_1D,yFull
            curFitStr.data[*,iAngle] = yFull
+           out_1D_dens_ests[iAngle] = tmpA_1D[3]
         END 
         1: BEGIN 
         END 
@@ -70,7 +74,7 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
 
   ENDFOR
 
-  PRINT,FORMAT='(I0," dists at an angle, out of ",I0," in total, allowed me to do a 1D fit")', $
-        good_1DFits,nTotAngles
+  ;; PRINT,FORMAT='(I0," dists at an angle, out of ",I0," in total, allowed me to do a 1D fit")', $
+  ;;       good_1DFits,nTotAngles
 
 END
