@@ -7,7 +7,8 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
                             NAMES_A=A_names, $
                             CHI2=chi2, $
                             PVAL=pVal, $
-                            FITSTATUS=fitStatus
+                            FITSTATUS=fitStatus, $
+                            USE_MPFIT1D=use_mpFit1D
 
   COMPILE_OPT idl2
 
@@ -33,9 +34,18 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
              'delta_t', $       ;bogus
              'mass', $          ;(eV/(km/s)^2)
              'Bulk_angle']
-  Astruct = CREATE_STRUCT(A_names, $
-                          REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]), $
-                          REFORM(A[4,*]),REFORM(A[5,*]),REFORM(A[6,*]))
 
+  CASE KEYWORD_SET(use_mpFit1D) OF
+     1: BEGIN
+        Astruct = CREATE_STRUCT([A_names[0:3],A_names[6]], $
+                                REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]), $
+                                REFORM(A[4,*]))
+     END
+     ELSE: BEGIN
+        Astruct = CREATE_STRUCT(A_names, $
+                                REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]), $
+                                REFORM(A[4,*]),REFORM(A[5,*]),REFORM(A[6,*]))
+     END
+  ENDCASE
 
 END

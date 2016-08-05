@@ -1,5 +1,5 @@
 PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
-                                nEnergies,eRange_peak, $
+                                nEnergies,out_eRange_peak, $
                                 allAngles,nTotAngles, $
                                 successes, $
                                 curFitStr,fits,curDataStr, $
@@ -29,7 +29,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
   FOR iWin=0,nGoodFits-1 DO BEGIN
 
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
-                            nEnergies,eRange_peak, $
+                            nEnergies,out_eRange_peak, $
                             allAngles,nTotAngles, $
                             curFitStr,fits,curDataStr, $
                             iAngle,iFit,testFitStr,testFitParams,testArray, $

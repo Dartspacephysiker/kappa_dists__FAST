@@ -30,6 +30,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       BOUNDS=bounds, $
                       ESTFACS=estFacs, $
                       DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                      DONT_PRINT_FITINFO=dont_print_fitInfo, $
                       E_ANGLE=e_angle, $
                       DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                       TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $
@@ -105,164 +106,165 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      END
   ENDCASE
 
-  keepK_iTime                                       = !NULL ;Keep track of which fits get to come home with us
-  keepG_iTime                                       = !NULL ;Keep track of which fits get to come home with us
-  successesK                                        = 0
-  successesG                                        = 0
-  totSuccessesK                                     = 0
-  totSuccessesG                                     = 0
-  fit2DKappa_inf_list                               = LIST()
-  fit2DGauss_inf_list                               = LIST()
+  keepK_iTime                              = !NULL ;Keep track of which fits get to come home with us
+  keepG_iTime                              = !NULL ;Keep track of which fits get to come home with us
+  successesK                               = 0
+  successesG                               = 0
+  totSuccessesK                            = 0
+  totSuccessesG                            = 0
+  fit2DKappa_inf_list                      = LIST()
+  fit2DGauss_inf_list                      = LIST()
   FOR i=0,N_ELEMENTS(bounds)-1 DO BEGIN
 
-     successesK                                     = 0
-     successesG                                     = 0
+     successesK                            = 0
+     successesG                            = 0
 
-     iTime                                          = bounds[i]
-     t                                              = times[iTime]
+     iTime                                 = bounds[i]
+     t                                     = times[iTime]
 
      ;;And now the order becomes [angle,energy] for each of these arrays
-     XorigArr                                       = energies[*,*,iTime]
-     YorigArr                                       = data[*,*,iTime]
+     XorigArr                              = energies[*,*,iTime]
+     YorigArr                              = data[*,*,iTime]
      IF KEYWORD_SET(kPlot_opt.add_oneCount_curve) THEN BEGIN
-        oneCountArr                                 = oneCount_data[*,*,iTime]
+        oneCountArr                        = oneCount_data[*,*,iTime]
      END
-     AorigArr                                       = angles[*,*,iTime]
-     nEnergies                                      = N_ELEMENTS(XorigArr[0,*])
-     nTotAngles                                     = N_ELEMENTS(XorigArr[*,0])
+     AorigArr                              = angles[*,*,iTime]
+     nEnergies                             = N_ELEMENTS(XorigArr[0,*])
+     nTotAngles                            = N_ELEMENTS(XorigArr[*,0])
 
      IF KEYWORD_SET(kCurvefit_opt.min_peak_energy) THEN BEGIN
-        min_peak_ind                                = MIN(WHERE(REVERSE(REFORM(XorigArr[0,*])) GE kCurvefit_opt.min_peak_energy)) 
+        min_peak_ind                       = MIN(WHERE(REVERSE(REFORM(XorigArr[0,*])) GE kCurvefit_opt.min_peak_energy)) 
         IF min_peak_ind EQ -1 THEN BEGIN
            STOP
         ENDIF
      ENDIF ELSE BEGIN
-        min_peak_ind                                = 0
+        min_peak_ind                       = 0
      ENDELSE
 
-     dat                                            = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+     dat                                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
      ;;Just get the angles for this time, and we'll assume the middle of the energy range is representative
-     tempAllAngles                                  = AorigArr[*,nEnergies/2]
+     tempAllAngles                         = AorigArr[*,nEnergies/2]
 
      CASE alleyOop OF
         0: BEGIN
-           angleBins                                = tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1]
+           angleBins                       = tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1]
         END
         1: BEGIN
-           angleBins                                = tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1]
+           angleBins                       = tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1]
         END
         
      ENDCASE
 
-     angleBin_i                                     = WHERE(angleBins,nAngles)
-     nLoopAngles                                    = nAngles ;This needs to be distinguished from nAngles
+     angleBin_i                            = WHERE(angleBins,nAngles)
+     nLoopAngles                           = nAngles ;This needs to be distinguished from nAngles
 
      IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
-        distance_from_lastGood                      = 0
-        distance_from_lastGood_gauss                = 0
-        gotFirst                                    = 0
+        distance_from_lastGood             = 0
+        distance_from_lastGood_gauss       = 0
+        gotFirst                           = 0
 
-        angleBin_sort_i                             = angleBin_i[SORT(tempAllangles[angleBin_i])] ;;Sort so they're ascending
-        fieldAlignedAngle                           = MIN(ABS(tempAllAngles),fieldAligned_i)
+        angleBin_sort_i                    = angleBin_i[SORT(tempAllangles[angleBin_i])] ;;Sort so they're ascending
+        fieldAlignedAngle                  = MIN(ABS(tempAllAngles),fieldAligned_i)
 
-        FA_angleBin_ii                              = WHERE(angleBin_sort_i EQ fieldAligned_i)
+        FA_angleBin_ii                     = WHERE(angleBin_sort_i EQ fieldAligned_i)
         IF FA_angleBin_ii NE -1 THEN BEGIN
-           FA_angleBin_i                            = angleBin_sort_i[FA_angleBin_ii]
-           startPosSweep_i                          = FA_angleBin_ii+1
-           startNegSweep_i                          = FA_angleBin_ii-1
+           FA_angleBin_i                   = angleBin_sort_i[FA_angleBin_ii]
+           startPosSweep_i                 = FA_angleBin_ii+1
+           startNegSweep_i                 = FA_angleBin_ii-1
         ENDIF
 
         nLoopAngles++
         
-        angle_order                                 = [fieldAligned_i, $
-                                                       anglebin_sort_i[startPosSweep_i:-1], $
-                                                       fieldAligned_i, $
-                                                       anglebin_sort_i[startNegSweep_i:0:-1]]
-        change_sweep_i                              = (WHERE(angle_order EQ fieldAligned_i))[1]
+        angle_order                        = [fieldAligned_i, $
+                                              anglebin_sort_i[startPosSweep_i:-1], $
+                                              fieldAligned_i, $
+                                              anglebin_sort_i[startNegSweep_i:0:-1]]
+        change_sweep_i                     = (WHERE(angle_order EQ fieldAligned_i))[1]
      ENDIF
 
      IF KEYWORD_SET(fit_each__average_over_angleRange) THEN BEGIN
-        tempY                                       = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
+        tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
         FOR iAngle=0,nAngles-1 DO BEGIN
-           YorigArr[angleBin_i[iAngle],*]           = tempY
+           YorigArr[angleBin_i[iAngle],*]  = tempY
         ENDFOR
      ENDIF
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;See if there's a particular angle the deserves to be called the "bulk angle"
      ;;(i.e., the angle at which most of the electrons appear to be moving)
-     threshRatio                                    = 3
+     threshRatio                           = 3
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
      ;;In tempDat I'm just making the energies monotonically increase instead of decrease, and I'm including all angles with *
-     tempDat                                        = (REVERSE(dat.data,1))[min_peak_ind:-1,angleBin_i]
-     angleDist                                      = TOTAL(tempDat,1)/TOTAL(tempDat)
-     testRatio                                      = MAX(angleDist,maxInd_angleDist)/MIN(angleDist,minInd_angleDist)
+     tempDat                               = (REVERSE(dat.data,1))[min_peak_ind:-1,angleBin_i]
+     angleDist                             = TOTAL(tempDat,1)/TOTAL(tempDat)
+     testRatio                             = MAX(angleDist,maxInd_angleDist)/MIN(angleDist,minInd_angleDist)
      CASE 1 OF
         KEYWORD_SET(treat_fieldaligned_as_bulk): BEGIN
-           bulkAngle                                = fieldAlignedAngle
-           useMe                                    = 1
-           angleTreatment                           = 'treat_fieldaligned_as_bulk'
+           bulkAngle                       = fieldAlignedAngle
+           useMe                           = 1
+           angleTreatment                  = 'treat_fieldaligned_as_bulk'
         END
         KEYWORD_SET(dont_take_stock_of_bulkangle): BEGIN
-           bulkAngle                                = 0.00
-           useMe                                    = 0S
-           angleTreatment                           = 'treat_all_as_bulk'
+           bulkAngle                       = 0.00
+           useMe                           = 0S
+           angleTreatment                  = 'treat_all_as_bulk'
         END
         ELSE: BEGIN
-           bulkAngle                                = AorigArr[maxInd_angleDist,nEnergies/2]
-           useMe                                    = testRatio GE threshRatio
-           angleTreatment                           = 'search_for_angleDist_peak'
+           bulkAngle                       = AorigArr[maxInd_angleDist,nEnergies/2]
+           useMe                           = testRatio GE threshRatio
+           angleTreatment                  = 'search_for_angleDist_peak'
         END
      ENDCASE
-     angleStr                                       = {bulkAngle:bulkAngle, $
-                                                       useMe:useMe, $
-                                                       dist:angleDist, $
-                                                       angles:tempAllAngles[angleBin_i], $
-                                                       SDTAngle:FLOAT(0.0), $
-                                                       angleTreatment:angleTreatment, $
-                                                       maxInd:maxInd_angleDist, $
-                                                       minInd:minInd_angleDist, $
-                                                       min_peak_ind:min_peak_ind}
+     angleStr                              = {bulkAngle:bulkAngle, $
+                                              useMe:useMe, $
+                                              dist:angleDist, $
+                                              angles:tempAllAngles[angleBin_i], $
+                                              SDTAngle:FLOAT(0.0), $
+                                              angleTreatment:angleTreatment, $
+                                              maxInd:maxInd_angleDist, $
+                                              minInd:minInd_angleDist, $
+                                              min_peak_ind:min_peak_ind}
      
-     nGoodFits_tempK                                = 0
-     nGoodFits_tempG                                = 0
-     good_angleBinK_i                                = !NULL
-     good_angleBinG_i                                = !NULL
-     good_kappaFits_i                               = !NULL
-     good_gaussFits_i                               = !NULL
+     nGoodFits_tempK                       = 0
+     nGoodFits_tempG                       = 0
+     good_angleBinK_i                      = !NULL
+     good_angleBinG_i                      = !NULL
+     good_kappaFits_i                      = !NULL
+     good_gaussFits_i                      = !NULL
 
      ;;Now loop over each angle and attemp to fit 
      ;;We'll keep all the good fits, and do a comparison among them at the end
+     shoutOut                              = 1
      FOR iiAngle=0,nLoopAngles-1 DO BEGIN
 
-        iAngle                                      = (KEYWORD_SET(start_from_fieldaligned) ? angle_order : angleBin_i)[iiAngle]
-        ;; iAngle                                      = angleBin_i[iiAngle]
+        iAngle                        = (KEYWORD_SET(start_from_fieldaligned) ? angle_order : angleBin_i)[iiAngle]
+        ;; iAngle                     = angleBin_i[iiAngle]
 
         ;;Start sweeping backwards, if we made it to swap location
         IF KEYWORD_SET(start_from_fieldaligned) THEN BEGIN
            IF iAngle EQ change_sweep_i THEN BEGIN
-              change_sweep_direction                = 1
-              iAngle                                = angle_order[iiAngle++]
+              change_sweep_direction  = 1
+              iAngle                  = angle_order[iiAngle++]
            ENDIF ELSE BEGIN
-              change_sweep_direction                = 0
+              change_sweep_direction  = 0
            ENDELSE
         ENDIF
 
         ;;Here's the data we're working with for this loop iteration
-        Xorig                                       = REVERSE(REFORM(XorigArr[iAngle,*]))
-        Yorig                                       = REVERSE(REFORM(YorigArr[iAngle,*]))
-        Aorig                                       = REVERSE(REFORM(AorigArr[iAngle,*]))
+        Xorig                         = REVERSE(REFORM(XorigArr[iAngle,*]))
+        Yorig                         = REVERSE(REFORM(YorigArr[iAngle,*]))
+        Aorig                         = REVERSE(REFORM(AorigArr[iAngle,*]))
 
-        tempAngle                                   = tempAllAngles[iAngle]
-        tempAngleEstRange                           = [tempAngle-1.0,tempAngle+1.0]
-        angleStr.SDTAngle                           = tempAngle
+        tempAngle                     = tempAllAngles[iAngle]
+        tempAngleEstRange             = [tempAngle-1.0,tempAngle+1.0]
+        angleStr.SDTAngle             = tempAngle
 
         IF KEYWORD_SET(kPlot_opt.add_oneCount_curve) THEN BEGIN
-           oneCurve                                 = {x:Xorig, $
-                                                       y:REVERSE(REFORM(oneCountArr[iAngle,*])), $
-                                                       NAME:"One Count"}
+           oneCurve                   = {x:Xorig, $
+                                         y:REVERSE(REFORM(oneCountArr[iAngle,*])), $
+                                         NAME:"One Count"}
         ENDIF
 
         KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
@@ -273,14 +275,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         minEInd                                     = (peak_ind - kCurvefit_opt.n_below_peak) > 0
         maxEInd                                     = (peak_ind + kCurvefit_opt.n_above_peak) < nEnergies-1
 
-        IF KEYWORD_SET(dont_fit_below_thresh_value) THEN BEGIN
+        ;; IF KEYWORD_SET(kCurvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
            
-           nAbove                                   = nEnergies-1-maxEInd
-           killIt                                   = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
-           IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
-              maxEInd                               = maxEInd < MIN(killIt)
-           ENDIF
-        ENDIF
+        ;;    nAbove                                   = nEnergies-1-maxEInd
+        ;;    killIt                                   = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
+        ;;    IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
+        ;;       maxEInd                               = maxEInd < MIN(killIt)
+        ;;    ENDIF
+        ;; ENDIF
 
         ;;estimate from the data!
         IF KEYWORD_SET(kCurvefit_opt.estimate_A_from_data) THEN BEGIN 
@@ -361,34 +363,52 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         yRange                                      = [yMin,MAX(data)]
         energy_inds                                 = [minEInd,maxEInd]
         CASE 1 OF
-           KEYWORD_SET(USE_MPFIT1D): BEGIN
+           KEYWORD_SET(kCurvefit_opt.use_mpFit1D): BEGIN
+
+              IF shoutOut THEN BEGIN
+                 PRINT,"Time: " + kStrings.timeStrs[iTime]
+                 shoutOut = 0
+
+              ENDIF
+              A      = [A[0],A[1],A[2],A[3],A[6]]
+              AGauss = [AGauss[0],AGauss[1], $
+                        AGauss[2],AGauss[3], $
+                        AGauss[6]]
+
+              IF N_ELEMENTS(kappa_fixA) GE 7 THEN BEGIN
+                 kappa_fixA = [kappa_fixA[0],kappa_fixA[1], $
+                               kappa_fixA[2],kappa_fixA[3], $
+                               kappa_fixA[6]]
+              ENDIF
+              IF N_ELEMENTS(gauss_fixA) GE 7 THEN BEGIN
+                 gauss_fixA = [gauss_fixA[0],gauss_fixA[1], $
+                               gauss_fixA[2],gauss_fixA[3], $
+                               gauss_fixA[6]]
+              ENDIF
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
-                              orig,kappaFit,gaussFit, $
-                              ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
-                              USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
-                              BOUNDS_I=iTime, $
-                              ENERGY_INDS=energy_inds, $
-                              ERANGE_PEAK=eRange_peak, $
-                              PEAK_IND=peak_ind, $
-                              KAPPA_A=A, $
-                              GAUSS_A=AGauss, $
-                              KAPPA_FIXA=kappa_fixA, $
-                              GAUSS_FIXA=gauss_fixA, $
-                              YMAX=yMax, $
-                              MAX_ITER=kCurvefit_opt.max_iter, $
-                              FIT_TOL=kCurvefit_opt.fit_tol, $
-                              STRINGS=kStrings, $
-                              TRIM_ENERGIES_BELOW_PEAK=kCurvefit_opt.trim_energies_below_peak, $
-                              OUT_FITTED_PARAMS=out_kappaParams, $
-                              OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                              OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                              OUT_GAUSS_FIT_STRUCTS=gaussFits, $
-                              /ADD_FULL_FITS, $
-                              ADD_ANGLESTR=angleStr, $
-                              OUT_ERANGE_PEAK=out_eRange_peak, $
-                              OUT_PARAMSTR=out_paramStr, $
-                              DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+                                       orig,kappaFit,gaussFit, $
+                                       KCURVEFIT_OPT=kCurvefit_opt, $
+                                       ENERGY_INDS=energy_inds, $
+                                       ERANGE_PEAK=eRange_peak, $
+                                       PEAK_IND=peak_ind, $
+                                       BOUNDS_I=iTime, $
+                                       KAPPA_A=A, $
+                                       GAUSS_A=AGauss, $
+                                       KAPPA_FIXA=kappa_fixA, $
+                                       GAUSS_FIXA=gauss_fixA, $
+                                       YMAX=yMax, $
+                                       STRINGS=kStrings, $
+                                       OUT_FITTED_PARAMS=out_kappaParams, $
+                                       OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                                       OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                                       OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                                       /ADD_FULL_FITS, $
+                                       ADD_ANGLESTR=angleStr, $
+                                       OUT_ERANGE_PEAK=out_eRange_peak, $
+                                       OUT_PARAMSTR=out_paramStr, $
+                                       ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                                       DONT_PRINT_FITINFO=dont_print_fitInfo, $
+                                       FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
 
            END
            ELSE: BEGIN
@@ -417,7 +437,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                               ADD_ANGLESTR=angleStr, $
                               OUT_ERANGE_PEAK=out_eRange_peak, $
                               OUT_PARAMSTR=out_paramStr, $
-                              DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                              ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                              DONT_PRINT_FITINFO=dont_print_fitInfo, $
                               FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
 
            END
@@ -526,10 +547,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         END
      ENDCASE
 
-     IF proceed THEN BEGIN ;skip if we lose
+     IF proceed THEN BEGIN      ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepK_iTime,iTime, $
-                                    nEnergies,eRange_peak, $
+                                    nEnergies,out_eRange_peak, $
                                     tempAllAngles,nTotAngles, $
                                     successesK, $
                                     curKappaStr,kappaFits,curDataStr, $
@@ -553,7 +574,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      IF proceed AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepG_iTime,iTime, $
-                                    nEnergies,eRange_peak, $
+                                    nEnergies,out_eRange_peak, $
                                     tempAllAngles,nTotAngles, $
                                     successesG, $
                                     curGaussStr,gaussFits,curDataStr, $

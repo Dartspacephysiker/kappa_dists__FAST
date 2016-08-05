@@ -31,6 +31,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    ESTIMATE_FITPARAMS_FROM_SDT_DAT=estimate_A_from_data, $
    ESTIMATE_FACTORS=estFacs, $
    DONT_PRINT_ESTIMATES=dont_print_estimates, $
+   DONT_PRINT_FITINFO=dont_print_fitInfo, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
@@ -42,6 +43,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
    USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+   USE_MPFIT1D=use_mpFit1D, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    ADD_ANGLE_LABEL=add_angle_label, $
@@ -90,6 +92,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                                               ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
                                               ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                               USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+                                              USE_MPFIT1D=use_mpFit1D, $
                                               DENSITY_EST=n_est, $
                                               TEMPERATURE_EST=T, $
                                               KAPPA_EST=kappa, $
@@ -184,6 +187,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     BOUNDS=bounds, $
                     ESTFACS=estFacs, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                    DONT_PRINT_FITINFO=dont_print_fitInfo, $
                     E_ANGLE=e_angle, $
                     DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                     TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $

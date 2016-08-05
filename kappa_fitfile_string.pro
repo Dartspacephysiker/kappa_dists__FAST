@@ -4,7 +4,8 @@ PRO KAPPA_FITFILE_STRING,outSuff, $
                          SDT_CALC__NO_MODEL=SDT_calc__no_model, $
                          LKAPPA_THRESH=lKappa_thresh, $
                          HKAPPA_THRESH=hKappa_thresh, $
-                         HIGHDENS_THRESH=highDens_thresh
+                         HIGHDENS_THRESH=highDens_thresh, $
+                         USE_MPFIT1D=use_mpFit1D
 
   COMPILE_OPT idl2
 
@@ -26,6 +27,8 @@ PRO KAPPA_FITFILE_STRING,outSuff, $
      outSuff       += STRING(FORMAT='("--maxDens_",F0.1)',highDens_thresh)
   ENDIF
 
-
+  IF KEYWORD_SET(use_mpFit1D) THEN BEGIN
+     outSuff       += "--mpFit1D"
+  ENDIF
 
 END

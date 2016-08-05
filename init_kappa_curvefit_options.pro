@@ -22,6 +22,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
                                      ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
                                      ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                      USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+                                     USE_MPFIT1D=use_mpFit1D, $
                                      DENSITY_EST=n_est, $
                                      TEMPERATURE_EST=T, $
                                      KAPPA_EST=kappa, $
@@ -57,6 +58,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
                                                 estimate_A_from_data     :1, $
                                                 add_gaussian_estimate    :defAdd_gaussian_estimate, $
                                                 use_SDT_Gaussian_fit     : 0, $
+                                                use_mpFit1D              : 0, $
                                                 bulk_offset              : 0.0}
 
   IF N_ELEMENTS(fit_tol) GT 0 THEN BEGIN
@@ -106,6 +108,10 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(use_SDT_Gaussian_fit) GT 0 THEN BEGIN
      kCurvefit_opt.use_SDT_Gaussian_fit      = use_SDT_Gaussian_fit
+  ENDIF
+
+  IF N_ELEMENTS(use_mpFit1D) GT 0 THEN BEGIN
+     kCurvefit_opt.use_mpFit1D               = use_mpFit1D
   ENDIF
 
   IF KEYWORD_SET(fit1D_to_density_at_each_angle) THEN BEGIN

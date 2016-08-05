@@ -1,5 +1,5 @@
 PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
-                           nEnergies,eRange_peak, $
+                           nEnergies,out_eRange_peak, $
                            allAngles,nTotAngles, $
                            curKappaStr,kappaFits,curDataStr, $
                            iAngle,iKappa,testKappa,testKappaFit,testArray, $
@@ -17,6 +17,8 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
 
   testKappa          = curKappaStr
   testKappaFit       = kappaFits[iKappa]
+  eRange_peak        = out_eRange_peak[*,iKappa]
+
 
   testArray          = MAKE_ARRAY(nEnergies,nTotAngles)
   CASE 1 OF

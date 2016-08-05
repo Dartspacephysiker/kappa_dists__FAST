@@ -126,9 +126,9 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
            SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
         END
         "se": BEGIN
-           cont = 1
+           cont = 0
            tempFN = STRING(FORMAT='("spec2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
-                           fitString,strings.orbStr,strings.timeFNStrs[iTime])
+                           fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            SPEC2D,fit2DStruct.bestFitStr,/LABEL,/MS,LIMITS=spec2DLims
            SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
@@ -141,9 +141,9 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
                                          ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
         END
         "s": BEGIN
-           cont = 1
+           cont = 0
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
-                           fitString,strings.orbStr,strings.timeFNStrs[iTime])
+                           fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,curDataStr, $
                                          LIMITS=cont2DLims, $
