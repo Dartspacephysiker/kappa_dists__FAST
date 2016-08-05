@@ -112,22 +112,24 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
 
      iAngleWin        = good_angleBin_i[win_i]
      fitWin           = fits[good_fits_i[win_i]]
+     chi2win          = chiArray[win_i]
      densWin          = densEstArray[win_i]
      winStruct        = curDataStr
      winStruct.data   = testArrays[*,*,win_i]
 
      keep_iTime       = [keep_iTime,iTime]
 
-     tmpKeeper        = {bestFitStr      :winStruct, $
-                         bestFit1DParams :fitWin, $
-                         bestAngle_i     :iAngleWin, $
-                         bestDens        :densWin, $
-                         datDens         :datDens, $
-                         chiArray        :chiArray    , $
-                         dofArray        :dofArray    , $
-                         densEstArray    :densEstArray, $
-                         fitDensArray    :fitDensArray, $
-                         errMsgArray     :errMsgArray , $
+     tmpKeeper        = {bestFitStr      :winStruct    , $
+                         bestFit1DParams :fitWin       , $
+                         bestAngle_i     :iAngleWin    , $
+                         bestDens        :densWin      , $
+                         bestChi2        :chi2win      , $
+                         datDens         :datDens      , $
+                         chiArray        :chiArray     , $
+                         dofArray        :dofArray     , $
+                         densEstArray    :densEstArray , $
+                         fitDensArray    :fitDensArray , $
+                         errMsgArray     :errMsgArray  , $
                          statusArray     :statusArray}
 
      fit2D_inf_list.ADD,tmpKeeper                             

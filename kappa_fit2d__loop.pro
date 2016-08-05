@@ -1,3 +1,27 @@
+;+
+; NAME:               KAPPA_FIT2D__LOOP
+;
+; PURPOSE:            Get both kappa and Maxwellian fits of FAST electron ESA data, plot, etc.
+;
+; CATEGORY:           Kappa stuff
+;
+; CALLING SEQUENCE:   Gets called by KAPPA_EFLUX_FIT2D
+;
+; INPUTS:             A million
+;
+; OPTIONAL INPUTS:    A million
+;
+; KEYWORD PARAMETERS:
+;
+; OUTPUTS:
+;
+; OPTIONAL OUTPUTS:
+;
+; COMMON BLOCKS:
+;
+; MODIFICATION HISTORY: 2016/07 Born somewhere in here
+;
+;-
 PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       KSDTDATA_OPT=kSDTData_opt, $
                       KCURVEFIT_OPT=kCurvefit_opt, $
@@ -81,23 +105,18 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      END
   ENDCASE
 
-  ;; IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
-  ;;    keepK_iTime                       = !NULL
-
-  ;;    IF KEYWORD_SET(min_anglefits_for_keep) THEN BEGIN
-  ;;       min_aFits_for_keep                 = min_anglefits_for_keep
-  ;;    ENDIF ELSE BEGIN
-  ;;       min_aFits_for_keep                 = 0
-  ;;    ENDELSE
-  ;; ENDIF
-
   keepK_iTime                                       = !NULL ;Keep track of which fits get to come home with us
   keepG_iTime                                       = !NULL ;Keep track of which fits get to come home with us
   successesK                                        = 0
   successesG                                        = 0
+  totSuccessesK                                     = 0
+  totSuccessesG                                     = 0
   fit2DKappa_inf_list                               = LIST()
   fit2DGauss_inf_list                               = LIST()
   FOR i=0,N_ELEMENTS(bounds)-1 DO BEGIN
+
+     successesK                                     = 0
+     successesG                                     = 0
 
      iTime                                          = bounds[i]
      t                                              = times[iTime]
@@ -207,23 +226,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                                        minInd:minInd_angleDist, $
                                                        min_peak_ind:min_peak_ind}
      
-     
-     ;; tangles                                     = (REVERSE(dat.theta,1))[min_peak_ind:-1,*]/N_ELEMENTS([min_peak_ind:47])
-     ;; checkitout                                  = plot(total(tangles,1),angleDist,symbol='*',linestyle=6)
-
-     ;;Here's some code for checking it out
-     ;; this                                        = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
-     ;;For orbit 1849 (JOURNAL__20160714), these are informative pitch angle dists
-     ;; contour2d,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[41]),/polar
-     ;; contour2d,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,bounds[65]),/polar
-
-
      nGoodFits_tempK                                = 0
      nGoodFits_tempG                                = 0
      good_angleBinK_i                                = !NULL
      good_angleBinG_i                                = !NULL
      good_kappaFits_i                               = !NULL
      good_gaussFits_i                               = !NULL
+
      ;;Now loop over each angle and attemp to fit 
      ;;We'll keep all the good fits, and do a comparison among them at the end
      FOR iiAngle=0,nLoopAngles-1 DO BEGIN
@@ -351,33 +360,68 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
         yRange                                      = [yMin,MAX(data)]
         energy_inds                                 = [minEInd,maxEInd]
-        KAPPA__GET_FITS,Xorig,Yorig, $
-                        orig,kappaFit,gaussFit, $
-                        ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
-                        USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
-                        BOUNDS_I=iTime, $
-                        ENERGY_INDS=energy_inds, $
-                        ERANGE_PEAK=eRange_peak, $
-                        PEAK_IND=peak_ind, $
-                        KAPPA_A=A, $
-                        GAUSS_A=AGauss, $
-                        KAPPA_FIXA=kappa_fixA, $
-                        GAUSS_FIXA=gauss_fixA, $
-                        YMAX=yMax, $
-                        MAX_ITER=kCurvefit_opt.max_iter, $
-                        FIT_TOL=kCurvefit_opt.fit_tol, $
-                        STRINGS=kStrings, $
-                        TRIM_ENERGIES_BELOW_PEAK=kCurvefit_opt.trim_energies_below_peak, $
-                        OUT_FITTED_PARAMS=out_kappaParams, $
-                        OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                        OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                        OUT_GAUSS_FIT_STRUCTS=gaussFits, $
-                        /ADD_FULL_FITS, $
-                        ADD_ANGLESTR=angleStr, $
-                        OUT_ERANGE_PEAK=out_eRange_peak, $
-                        OUT_PARAMSTR=out_paramStr, $
-                        DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                        FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+        CASE 1 OF
+           KEYWORD_SET(USE_MPFIT1D): BEGIN
+              KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
+                              orig,kappaFit,gaussFit, $
+                              ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
+                              USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
+                              BOUNDS_I=iTime, $
+                              ENERGY_INDS=energy_inds, $
+                              ERANGE_PEAK=eRange_peak, $
+                              PEAK_IND=peak_ind, $
+                              KAPPA_A=A, $
+                              GAUSS_A=AGauss, $
+                              KAPPA_FIXA=kappa_fixA, $
+                              GAUSS_FIXA=gauss_fixA, $
+                              YMAX=yMax, $
+                              MAX_ITER=kCurvefit_opt.max_iter, $
+                              FIT_TOL=kCurvefit_opt.fit_tol, $
+                              STRINGS=kStrings, $
+                              TRIM_ENERGIES_BELOW_PEAK=kCurvefit_opt.trim_energies_below_peak, $
+                              OUT_FITTED_PARAMS=out_kappaParams, $
+                              OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                              OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                              OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                              /ADD_FULL_FITS, $
+                              ADD_ANGLESTR=angleStr, $
+                              OUT_ERANGE_PEAK=out_eRange_peak, $
+                              OUT_PARAMSTR=out_paramStr, $
+                              DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+
+           END
+           ELSE: BEGIN
+              KAPPA__GET_FITS,Xorig,Yorig, $
+                              orig,kappaFit,gaussFit, $
+                              ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
+                              USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
+                              BOUNDS_I=iTime, $
+                              ENERGY_INDS=energy_inds, $
+                              ERANGE_PEAK=eRange_peak, $
+                              PEAK_IND=peak_ind, $
+                              KAPPA_A=A, $
+                              GAUSS_A=AGauss, $
+                              KAPPA_FIXA=kappa_fixA, $
+                              GAUSS_FIXA=gauss_fixA, $
+                              YMAX=yMax, $
+                              MAX_ITER=kCurvefit_opt.max_iter, $
+                              FIT_TOL=kCurvefit_opt.fit_tol, $
+                              STRINGS=kStrings, $
+                              TRIM_ENERGIES_BELOW_PEAK=kCurvefit_opt.trim_energies_below_peak, $
+                              OUT_FITTED_PARAMS=out_kappaParams, $
+                              OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                              OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                              OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                              /ADD_FULL_FITS, $
+                              ADD_ANGLESTR=angleStr, $
+                              OUT_ERANGE_PEAK=out_eRange_peak, $
+                              OUT_PARAMSTR=out_paramStr, $
+                              DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+
+           END
+        ENDCASE
 
 
         ;;Update yRange based on fits
@@ -482,8 +526,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         END
      ENDCASE
 
-     ;;Make as many testArrays as we have successful fits
-     ;; IF nGoodFits_tempK GE 1 THEN BEGIN ;skip if we lose
      IF proceed THEN BEGIN ;skip if we lose
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepK_iTime,iTime, $
@@ -496,42 +538,19 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                     KSDTDATA_OPT=kSDTData_opt, $
                                     FIT2D_INF_LIST=fit2DKappa_inf_list
 
-        PRINT,"KAPPA_FIT2D__TRY_EACH SUCCESSES : " + STRCOMPRESS(successesK,/REMOVE_ALL)
+        totSuccessesK += successesK
 
-        ;; showContour = 1
-        IF KEYWORD_SET(showContour) THEN BEGIN
-           ;; FOR ka=0,nGoodFits_tempK-1 DO BEGIN
-              PRINT,'Check it out Kappa'
-              ;; PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
-              ;; testMe                                 = curdataStr
-              ;; testMe.data                            = testArrays[*,*,ka]
-              ;; aDiffMe                                = testMe
-              ;; aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
-              ;; diffMe                                 = testMe
-              ;; diffMe.data                            = testMe.data-curDataStr.data
-              ;; diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
+        PRINT,FORMAT='("KAPPA_FIT2D__TRY_EACH SUCCESSES (TOT) : ",I0," (",I0,")")', $
+              successesK, $
+              totSuccessesK
 
-              ;; testYu                                 = curdataStr
-              ;; testYu.data                            = testArrays[*,*,ka]
-              ;; aDiffYu                                = testYu
-              ;; aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
-              ;; diffYu                                 = testYu
-              ;; diffYu.data                            = curDataStr.data-testYu.data
-              ;; diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
+        kBest = fit2DKappa_inf_list[-1].bestFit1DParams.A[2]
 
-              ;; CONTOUR2D,diffYu,/POLAR
-              ;; STOP
+     ENDIF ELSE BEGIN
+        kBest       = 999
+     ENDELSE
 
-              ;; CONTOUR2D,curKappaStr,/POLAR,/FILL
-              CONTOUR2D,fit2DKappa_inf_list[-1].bestFitStr,/POLAR,/FILL
-              CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
-              STOP
-           ;; ENDFOR
-        ENDIF
-     ENDIF
-
-     ;; IF nGoodFits_tempG GE 1 THEN BEGIN ;skip if we lose
-     IF proceed THEN BEGIN ;skip if we lose
+     IF proceed AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
 
         KAPPA_FIT2D__TRY_EACH_1DFIT,keepG_iTime,iTime, $
                                     nEnergies,eRange_peak, $
@@ -543,62 +562,41 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                     KSDTDATA_OPT=kSDTData_opt, $
                                     FIT2D_INF_LIST=fit2DGauss_inf_list
 
-        PRINT,"GAUSS_FIT2D__TRY_EACH SUCCESSES : " + STRCOMPRESS(successesG,/REMOVE_ALL)
+        totSuccessesG += successesG
 
-        ;; showContour = 1
-        IF KEYWORD_SET(showContour) THEN BEGIN
-           ;; FOR ka=0,nGoodFits_tempG-1 DO BEGIN
-              PRINT,'Check it out Gauss'
-              ;; PRINT,'Check it out #' + STRCOMPRESS(ka+1,/REMOVE_ALL)
-              ;; testMe                                 = curdataStr
-              ;; testMe.data                            = testArrays[*,*,ka]
-              ;; aDiffMe                                = testMe
-              ;; aDiffMe.data                           = ABS(testMe.data-curDataStr.data)
-              ;; diffMe                                 = testMe
-              ;; diffMe.data                            = testMe.data-curDataStr.data
-              ;; diffMe.data[WHERE(diffMe.data LE 0)]   = 0.0
+        PRINT,FORMAT='("GAUSS_FIT2D__TRY_EACH SUCCESSES (TOT) : ",I0," (",I0,")")', $
+              successesG, $
+              totSuccessesG
 
-              ;; testYu                                 = curdataStr
-              ;; testYu.data                            = testArrays[*,*,ka]
-              ;; aDiffYu                                = testYu
-              ;; aDiffYu.data                           = ABS(testYu.data-curDataStr.data)
-              ;; diffYu                                 = testYu
-              ;; diffYu.data                            = curDataStr.data-testYu.data
-              ;; diffYu.data[WHERE(diffYu.data LE 0)]   = 0.0
-
-              ;; CONTOUR2D,diffYu,/POLAR
-              ;; STOP
-
-              ;; CONTOUR2D,curGaussStr,/POLAR,/FILL
-              CONTOUR2D,fit2DGauss_inf_list[-1].bestFitStr,/POLAR,/FILL
-              CONTOUR2D,curDataStr,/POLAR,/OVERPLOT
-              STOP
-
-           ;; ENDFOR
-        ENDIF
      ENDIF
 
-     ;;Decide whether we're going to keep this time in the synthetic structs
-     ;; IF KEYWORD_SET(fit_each__skip_bad_fits) THEN BEGIN
-     ;;    IF min_aFits_for_keep GT nAngles THEN BEGIN
-     ;;       PRINT,"min_aFits can't be greater than nAngles (= " + STRCOMPRESS(nAngles,/REMOVE_ALL) + ")!"
-     ;;       min_aFits_for_keep = nAngles
-     ;;    ENDIF
+     IF proceed AND KEYWORD_SET(fit_each__show_and_prompt) AND kBest LT 3.0 THEN BEGIN
 
-     ;;    IF (nGoodFits_tempK GT min_aFits_for_keep) OR (nGoodFits_tempG GT min_aFits_for_keep) THEN BEGIN
-     ;;       keepK_iTime = [keepK_iTime,iTime]
-     ;;    ENDIF
-     ;; ENDIF
-
-     IF KEYWORD_SET(fit_each__show_and_prompt) THEN BEGIN
-        ;;Doesn't exist yet
-
-        ;; KAPPA_FIT2D__SHOW_AND_PROMPT,diff_eFlux,synthKappa, $
-        ;;                            iTime,nGoodFits_tempK, $
-        ;;                            kStrings,kPlot_opt, $
-        ;;                            PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
-        ;;                            PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-        ;;                            FINISH_AND_SAVE_ALL=finish_and_save_all
+        KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DKappa_inf_list[-1], $
+                                     totSuccessesK, $
+                                     iTime, $
+                                     IS_MAXWELLIAN_FIT=0, $
+                                     KSTRINGS=kStrings, $
+                                     KPLOT_OPT=kPlot_opt, $
+                                     KCURVEFIT_OPT=kCurvefit_opt, $
+                                     PROMPT__CONT_TO_NEXT_FIT=Kprompt__cont_to_next_fit, $
+                                     PROMPT__CONT_UNTIL_FIT_EQ=Kprompt__cont_until_fit_eq, $
+                                     FINISH_AND_SAVE_ALL=Kfinish_and_save_all, $
+                                     KAPPA_FIT__SHOW__QUIT=Kshow__quit
+        
+        IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+           KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DGauss_inf_list[-1], $
+                                        totSuccessesG, $
+                                        iTime, $
+                                        IS_MAXWELLIAN_FIT=1, $
+                                        KSTRINGS=kStrings, $
+                                        KPLOT_OPT=kPlot_opt, $
+                                        KCURVEFIT_OPT=kCurvefit_opt, $
+                                        PROMPT__CONT_TO_NEXT_FIT=Gprompt__cont_to_next_fit, $
+                                        PROMPT__CONT_UNTIL_FIT_EQ=Gprompt__cont_until_fit_eq, $
+                                        FINISH_AND_SAVE_ALL=Gfinish_and_save_all, $
+                                        KAPPA_FIT__SHOW__QUIT=Gshow__quit
+        ENDIF
      ENDIF
 
   ENDFOR
