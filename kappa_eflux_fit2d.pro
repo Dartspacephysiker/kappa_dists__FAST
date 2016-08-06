@@ -15,6 +15,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+   FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
    FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1DFit_to_density_at_each_angle, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
    FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
@@ -199,6 +200,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
                     FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
+                    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                     FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                     OUT_FITTED_PARAMS=out_kappaParams, $
                     OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $

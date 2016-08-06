@@ -57,7 +57,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      IF KEYWORD_SET(kCurvefit_opt.thresh_eFlux) THEN BEGIN
         
-        thresh                   = 1e6
+        thresh                   = 1e4
         badBoys                  = WHERE(Y LE thresh, $
                                          nBad, $
                                          COMPLEMENT=goodBoys, $
@@ -69,11 +69,15 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ENDIF
      ENDIF
 
-     weights                     = 1./ABS(Y)
-     fixMe                       = WHERE(~FINITE(weights),nFixMe)
-     IF nFixMe GT 0 THEN BEGIN
-        weights[fixMe]           = 0.0
-     ENDIF
+     ;; weights                     = 1./ABS(Y)^2
+     ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)
+     ;; IF nFixMe GT 0 THEN BEGIN
+     ;;    weights[fixMe]           = 0.0
+     ;; ENDIF
+
+     ;;Alternate
+     weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+     weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
      kappaParams = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
                                             ERANGE_PEAK=eRange_peak)
@@ -121,6 +125,16 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         pValGauss       = -1
      ENDIF ELSE BEGIN
 
+        chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) )
+
+     IF FINITE(chi2) THEN BEGIN
+        pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-N_ELEMENTS(WHERE(~kappa_fixA))) ;Subtract number of free params
+        checkMath = CHECK_MATH()
+        IF (checkMath AND 16) OR (checkMath AND 32) THEN STOP
+     ENDIF ELSE BEGIN
+        pVal                        = -1
+     ENDELSE
+
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;;Calculate chi and things if it checks out
 
@@ -131,16 +145,6 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
            PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,A
            PRINT,''
         ENDIF
-     ENDELSE
-
-     chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) )
-
-     IF FINITE(chi2) THEN BEGIN
-        pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-N_ELEMENTS(WHERE(~kappa_fixA))) ;Subtract number of free params
-        checkMath = CHECK_MATH()
-        IF (checkMath AND 16) OR (checkMath AND 32) THEN STOP
-     ENDIF ELSE BEGIN
-        pVal                        = -1
      ENDELSE
 
      IF KEYWORD_SET(fit_fail__user_prompt) AND fitStatus GT 0 THEN BEGIN
@@ -194,11 +198,15 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   ;; ENDIF
 
   IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
-     weights                  = 1./ABS(Y)
-     fixMe                       = WHERE(~FINITE(weights),nFixMe)
-     IF nFixMe GT 0 THEN BEGIN
-        weights[fixMe]           = 0.0
-     ENDIF
+     ;; weights                  = 1./ABS(Y)^2
+     ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)
+     ;; IF nFixMe GT 0 THEN BEGIN
+     ;;    weights[fixMe]           = 0.0
+     ;; ENDIF
+
+     ;;Alternate
+     weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+     weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
      gaussParams = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
                                             ERANGE_PEAK=eRange_peak)
@@ -255,7 +263,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;;need to adjust Y bounds?
         yMax               = MAX(yGaussFit) > yMax
 
-        chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) )
+        chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) )
 
         IF FINITE(chi2) THEN BEGIN
            pValGauss       = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-3) ;3 for the 3 params that were allowed to participate in this fit

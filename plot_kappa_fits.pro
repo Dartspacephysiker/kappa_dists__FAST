@@ -6,15 +6,19 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     XLOG=xLog, $
                     YLOG=yLog, $
                     STRINGS=strings, $
+                    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                     ADD_FITPARAMS_TEXT=add_fitParams_text, $
                     ADD_ANGLE_LABEL=add_angle_label, $
-                    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+                    ADD_CHI_VALUE=add_chi_value, $
+                    ADD_WINTITLE=add_winTitle, $
                     SAVE_FITPLOTS=save_fitPlots, $
                     PLOT_FULL_FIT=plot_full_fit, $
                     SKIP_BAD_FITS=skip_bad_fits, $
                     USING_SDT_DATA=using_SDT_data, $
                     ;; PLOT_SAVENAME=plotSN, $
-                    PLOTDIR=plotDir
+                    USE_PSYM_FOR_DATA=psymData, $
+                    PLOTDIR=plotDir, $
+                    OUT_WINDOWARR=windowArr
 
   COMPILE_OPT idl2
 
@@ -44,7 +48,21 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
 
   ;;plot things
   nPlots               = KEYWORD_SET(orig)+KEYWORD_SET(kappaFit)+KEYWORD_SET(gaussFit)+KEYWORD_SET(oneCurve)
-  window               = WINDOW(DIMENSION=[800,600])
+
+  IF KEYWORD_SET(add_winTitle) THEN BEGIN
+     winTitle          = STRING(FORMAT='(A0)', $
+                                   strings.orbDate[bounds_i])
+     IF KEYWORD_SET(add_angle_label) THEN BEGIN
+        winTitle       = winTitle + ', Angle ' + STRING(FORMAT='(F-8.1)',add_angle_label)
+     ENDIF
+
+     IF KEYWORD_SET(add_chi_value) THEN BEGIN
+        winTitle       = winTitle + ', chi^2 ' + STRING(FORMAT='(G-9.4)',add_chi_value)
+     ENDIF
+  ENDIF
+  window               = WINDOW(DIMENSION=[800,600],TITLE=winTitle)
+  windowArr            = N_ELEMENTS(windowArr) GT 0 ? [windowArr,window] : window
+
   plotArr              = MAKE_ARRAY(nPlots,/OBJ) 
 
   colorList            = LIST('RED','BLACK','BLUE','GRAY')
@@ -68,6 +86,9 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               YLOG=1, $
                               XLOG=1, $
                               THICK=2.2, $
+                              LINESTYLE=KEYWORD_SET(psymData) ? 6 : !NULL, $
+                              SYMBOL=KEYWORD_SET(psymData) ? 1 : !NULL, $
+                              SYM_COLOR=KEYWORD_SET(psymData) ? colorList[0] : !NULL, $
                               COLOR=colorList[0], $
                               ;; OVERPLOT=i GT 0, $
                               CURRENT=window) 
@@ -139,7 +160,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   legend               = LEGEND(TARGET=plotArr[*],POSITION=[0.55,0.85],/NORMAL)
 
   IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
-     fitTitle          = ["Bulk energy (eV)","Plasma temp. (eV)","Kappa","Density (cm^-3)","Angle (deg)"]
+     fitTitle          = ["Bulk energy (eV)","Plasma temp. (eV)","Kappa","Density (cm^-3)"]
      fitInfoStr        = [STRING(FORMAT='(F-15.2)',kappaFit.A[0]), $
                           STRING(FORMAT='(F-15.2)',kappaFit.A[1]), $
                           STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
@@ -147,7 +168,13 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      IF KEYWORD_SET(add_angle_label) THEN BEGIN
         fitTitle = [fitTitle,"Angle (deg)"]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
-        fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',add_angle_label)]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.1)',add_angle_label)]
+     ENDIF
+
+     IF KEYWORD_SET(add_chi_value) THEN BEGIN
+        fitTitle = [fitTitle,'chi^2']
+        ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
      ENDIF
 
      fitParamsText     = TEXT(0.2,0.25, $
@@ -157,6 +184,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
+                              (KEYWORD_SET(add_chi_value) ? $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : '') + $
                               STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $
@@ -175,6 +204,12 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
            fitInfoStr  = [fitInfoStr,STRING(FORMAT='(F-8.4)',add_angle_label)]
         ENDIF
 
+        IF KEYWORD_SET(add_chi_value) THEN BEGIN
+           fitTitle = [fitTitle,'chi^2']
+           ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
+           fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
+        ENDIF
+
         fitParamsText  = TEXT(0.52,0.25, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
@@ -182,6 +217,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
+                              (KEYWORD_SET(add_chi_value) ? $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : '') + $
                               STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $

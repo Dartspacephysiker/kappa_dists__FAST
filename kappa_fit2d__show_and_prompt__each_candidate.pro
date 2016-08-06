@@ -1,21 +1,24 @@
-;2016/08/05
-PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
-                                 nTotFits, $
-                                 iTime, $
-                                 IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-                                 KSTRINGS=kStrings, $
-                                 KPLOT_OPT=kPlot_opt, $
-                                 KCURVEFIT_OPT=kCurvefit_opt, $
-                                 PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
-                                 PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-                                 FINISH_AND_SAVE_ALL=finish_and_save_all, $
-                                 KAPPA_FIT__SHOW__QUIT=show__quit
+;2016/08/06
+PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
+   nTot2DFits, $
+   iTime, $
+   IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
+   KSTRINGS=kStrings, $
+   KPLOT_OPT=kPlot_opt, $
+   KCURVEFIT_OPT=kCurvefit_opt, $
+   PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+   PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+   FINISH_AND_SAVE_ALL=finish_and_save_all, $
+   KAPPA_FIT__SHOW__QUIT=show__quit
 
   COMPILE_OPT idl2
 
   ;;Some stuff in case we decide to write a few of these chocolatiers
-  cont2DLims  = {zrange:[10^(6.6),10^9]}
-  spec2DLims = {yrange:[1e6,1e10]}
+  upLim       = MAX(curDataStr.data) > MAX(fit2DStruct.bestFitStr.data)
+  ;; cont2DLims  = {zrange:[10^(6.6),10^9]}
+  ;; spec2DLims = {yrange:[1e6,1e10]}
+  cont2DLims  = {zrange:[10^(6.6),upLim]}
+  spec2DLims = {yrange:[1e6,upLim]}
   spec2DDatLims = CREATE_STRUCT(spec2DLims,'PSYM',1)
 
   IF KEYWORD_SET(is_maxwellian_fit) THEN BEGIN
@@ -25,16 +28,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
   ENDELSE
 
   CASE 1 OF
-     ;; KEYWORD_SET(prompt__cont_to_next_fit): BEGIN
-     ;;    ;; IF nGoodFits_tempK GT 0 THEN BEGIN
-     ;;    ;;    cont = 0
-     ;;    ;;    prompt__cont_to_next_fit = 0
-     ;;    ;; ENDIF ELSE BEGIN
-     ;;    cont = 1
-     ;;    ;; ENDELSE
-     ;; END
      KEYWORD_SET(prompt__cont_until_fit_eq): BEGIN
-        IF nTotFits GE prompt__cont_until_fit_eq THEN BEGIN
+        IF nTot2DFits GE prompt__cont_until_fit_eq THEN BEGIN
            cont = 0
         ENDIF ELSE BEGIN
            cont = 1
@@ -55,34 +50,12 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
                      kStrings.timeFNStrs[iTime])
 
      POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-     PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,curDataStr, $
-                                   LIMITS=cont2DLims, $
-                                   ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
+     PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+        LIMITS=cont2DLims, $
+        ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+        FITSTRING=fitString
      PCLOSE
 
-     ;; kapFName = kPlot_opt.plotDir + STRING(FORMAT='("kappa_fit--orb_",A0,"--",A0)', $
-     ;;                                  kStrings.orbStr, $
-     ;;                                  kStrings.timeFNStrs[iTime])
-     ;; POPEN,kappaFName, $
-     ;;       /LAND, $
-     ;;       FONT=0
-     ;; PLOT_CONTOUR2D_MODEL_AND_DATA,fit2D_inf_list[-1],curDataStr, $
-     ;;                               LIMITS=cont2DLims, $
-     ;;                               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
-     ;; PCLOSE
-
-     ;; IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
-     ;;    maxFName   = kPlot_opt.plotDir + STRING(FORMAT='("Maxwell_fit--orb_",A0,"--",A0)', $
-     ;;                                            kStrings.orbStr, $
-     ;;                                            kStrings.timeFNStrs[iTime])
-     ;;    POPEN,maxFName, $
-     ;;          /LAND, $
-     ;;          FONT=0
-     ;;    PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DGauss_inf_list[-1],curDataStr, $
-     ;;                                  LIMITS=cont2DLims, $
-     ;;                                  ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
-     ;;    PCLOSE
-     ;; ENDIF
   ENDIF
 
   WHILE ~cont DO BEGIN
@@ -136,18 +109,20 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
         END
         "p": BEGIN
            cont = 0
-           PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,curDataStr, $
-                                         LIMITS=cont2DLims, $
-                                         ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
+           PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+              LIMITS=cont2DLims, $
+              ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+              FITSTRING=fitString
         END
         "s": BEGIN
            cont = 0
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-           PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,curDataStr, $
-                                         LIMITS=cont2DLims, $
-                                         ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
+           PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+              LIMITS=cont2DLims, $
+              ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+              FITSTRING=fitString
            PCLOSE
         END
         "f": BEGIN

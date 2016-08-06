@@ -1,6 +1,7 @@
-PRO PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,dataSDT, $
-                                  LIMITS=limits, $
-                                  ADD_FITPARAMS_TEXT=add_fitParams_text
+PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
+   LIMITS=limits, $
+   ADD_FITPARAMS_TEXT=add_fitParams_text, $
+   FITSTRING=fitString
 
   COMPILE_OPT idl2
 
@@ -35,6 +36,14 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA,fit2DStruct,dataSDT, $
                    STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
                    STRING(FORMAT='(A0,T27,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C'
      ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(fit2DStruct.bestFit1DParams.fitStatus EQ 0 ? 'Y' : 'N')), $
+
+     IF N_ELEMENTS(fitString) GT 0 THEN BEGIN
+        XYOUTS,0.13,0.26,fitString, $
+               CHARSIZE=1.0, $
+               FONT=0, $
+               /NORMAL, $
+               /NOCLIP
+     ENDIF
 
      XYOUTS,0.13,0.24,'!11' + theString + '!X', $ ;+ $
      ;; XYOUTS,0.12,0.28,theString, $ ;+ $

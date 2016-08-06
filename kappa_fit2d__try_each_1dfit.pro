@@ -1,14 +1,22 @@
 PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                 nEnergies,out_eRange_peak, $
-                                allAngles,nTotAngles, $
+                                allAngles,nTotAngles,useTheseAnglesIndex, $
                                 successes, $
                                 curFitStr,fits,curDataStr, $
                                 good_angleBin_i,good_fits_i,iWin, $
+                                ;; JUST_ERANGE_PEAK=just_eRange_peak, $
+                                ESTFACS=estFacs, $
                                 KCURVEFIT_OPT=kCurvefit_opt, $
+                                KPLOT_OPT=kPlot_opt, $
                                 KSDTDATA_OPT=kSDTData_opt, $
-                                FIT2D_INF_LIST=fit2D_inf_list
+                                KSTRINGS=kStrings, $
+                                FIT2D_INF_LIST=fit2D_inf_list, $
+                                FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
+                                FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit
 
   COMPILE_OPT idl2
+
+  ;; just_eRange_peak  = 1
 
   OKStatus          = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
@@ -30,15 +38,20 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
 
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                             nEnergies,out_eRange_peak, $
-                            allAngles,nTotAngles, $
+                            allAngles,nTotAngles,useTheseAnglesIndex, $
                             curFitStr,fits,curDataStr, $
                             iAngle,iFit,testFitStr,testFitParams,testArray, $
                             craptest, $
                             wts,X2D,Y2D,dataToFit, $
-                            fa,dens_param, $
+                            fa,dens_param,pre_densEst, $
+                            ITIME=iTime, $
+                            JUST_ERANGE_PEAK=just_eRange_peak, $
+                            ESTFACS=estFacs, $
                             KCURVEFIT_OPT=kCurvefit_opt, $
                             KSDTDATA_OPT=kSDTData_opt, $
-                            OUT_ANGLE_I=angle_i
+                            KSTRINGS=kStrings, $
+                            OUT_ANGLE_I=angle_i, $
+                            OUT_ERANGE_I=eRange_i
 
 
      FitDens        = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
@@ -65,8 +78,17 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                  ERRMSG=errMsg, $
                                  _EXTRA=extra)
 
-     ;; craptest.data  = testArray
-     craptest.data[*,angle_i]  = yFit
+
+     ;; IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
+     ;;    oldcraptest=craptest
+     ;;    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+     ;;       craptest.data[eRange_i[m],angle_i] = yFit[m,angle_i]
+     ;;    ENDFOR
+     ;;    STOP
+     ;; ENDIF ELSE BEGIN
+        ;; craptest.data  = testArray
+        craptest.data[*,angle_i]  = yFit
+     ;; ENDELSE
      densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,craptest, $
                                     ENERGY=kSDTData_opt.energy_electrons, $
                                     ANGLE=kSDTData_opt.fit2D_dens_aRange)
@@ -89,6 +111,27 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
      ENDIF ELSE BEGIN
         testArrays[*,*,iWin]              = 0.0
      ENDELSE
+
+     IF KEYWORD_SET(show_and_prompt) THEN BEGIN
+        tmp2DInfoStruct = {bestFitStr      :crapTest     , $
+                           bestFit1DParams :fits[iFit]   , $
+                           bestAngle_i     :iAngle       , $
+                           bestDens        :densEst      , $
+                           bestChi2        :bestNorm}
+
+        KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,tmp2DInfoStruct, $
+           iWin, $
+           iTime, $
+           IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
+           KSTRINGS=kStrings, $
+           KPLOT_OPT=kPlot_opt, $
+           KCURVEFIT_OPT=kCurvefit_opt, $
+           PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+           PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+           FINISH_AND_SAVE_ALL=finish_and_save_all, $
+           KAPPA_FIT__SHOW__QUIT=show__quit
+     ENDIF
+
   ENDFOR
   
   datDens             = CALL_FUNCTION(kSDTData_opt.densFunc,curDatastr, $

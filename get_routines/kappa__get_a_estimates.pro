@@ -76,7 +76,8 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            ESTFACS=estFacs, $
                            A_OUT=A, $
                            AGAUSS_OUT=AGauss, $
-                           DONT_PRINT_ESTIMATES=dont_print_estimates
+                           DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                           TEST_NOREV=test_noRev
 
 
   COMPILE_OPT idl2
@@ -95,8 +96,13 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                      B_EGauss:1.0}
   ENDIF
 
-  min_energy      =  Xorig[(minEInd - 2) > 0]
-  max_energy      =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+  IF KEYWORD_SET(test_noRev) THEN BEGIN
+     max_energy =  Xorig[(minEInd - 2) > 0]
+     min_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+  ENDIF ELSE BEGIN
+     min_energy =  Xorig[(minEInd - 2) > 0]
+     max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+  ENDELSE
 
   eRange_peak     = [min_energy,max_energy]
 

@@ -21,7 +21,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
   AMaxStep[1]     = 30.
 
   ;;And don't let kappa get out of hand
-  AMaxStep[2]     = 0.5
+  AMaxStep[2]     = 1.0
 
   ;;And don't let DENSITY get out of hand!
   AMaxStep[3]     = 0.5
@@ -43,6 +43,12 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
                      ;; [0,0], $
                      ;; [0,0], $
 
+  ;;Make 'em play nice
+  FOR k=0,N_ELEMENTS(A)-1 DO BEGIN
+     IF A[k] LT Alimits[0,k] THEN A[k] = Alimits[0,k]
+     IF A[k] GT Alimits[1,k] THEN A[k] = Alimits[1,k]
+  ENDFOR
+
   Alimited        = TRANSPOSE(Alimited)
   Alimits         = TRANSPOSE(Alimits)
 
@@ -50,7 +56,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
                        fixed:0         , $
                        parname:''      , $
                        ;; relstep:0.D     , $
-                       ;; mpmaxstep:0.D   , $
+                       mpmaxstep:0.D   , $
                        limited:[0,0]   , $
                        limits:[0.D,0]} , $
                       ;; 7)
@@ -67,7 +73,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
   parInfo[*].parName = ["E_b","T","kappa","N","bulkAngle"]
 
   ;;Got it. What about anything like, you know, a max step size?
-  ;; parInfo[*].mpmaxstep  = AMaxStep
+  parInfo[*].mpmaxstep  = AMaxStep
 
   ;;So certain values can't be exceeded?
   parInfo[*].limited[0] = Alimited[*,0]
