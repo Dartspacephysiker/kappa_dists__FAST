@@ -15,6 +15,11 @@ PRO UPDATE_KAPPA_FITPARAM_INFO,paramInfo,A,fixA,eRange_peak, $
 
   COMPILE_OPT idl2
 
+  ;;update this guy first
+  IF ~KEYWORD_SET(no_eRange_peak) THEN BEGIN
+     paramInfo[0].limits = eRange_peak
+  END
+
   ;;Make 'em play nice
   FOR k=0,N_ELEMENTS(A)-1 DO BEGIN
      IF A[k] LT paramInfo[k].limits[0] THEN A[k] = paramInfo[k].limits[0]
@@ -28,9 +33,5 @@ PRO UPDATE_KAPPA_FITPARAM_INFO,paramInfo,A,fixA,eRange_peak, $
   IF ~KEYWORD_SET(no_fixA) THEN BEGIN
      paramInfo[*].fixed = fixA
   ENDIF
-
-  IF ~KEYWORD_SET(no_eRange_peak) THEN BEGIN
-     paramInfo[0].limits = eRange_peak
-  END
 
 END
