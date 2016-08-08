@@ -1,28 +1,32 @@
-PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
+PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                            nEnergies,out_eRange_peak, $
                            allAngles,nTotAngles,useTheseAnglesIndex, $
-                           curKappaStr,kappaFits,curDataStr, $
-                           iAngle,iKappa,testKappa,testKappaFit,testArray, $
+                           curFitStr,fitInfoArr,curDataStr, $
+                           iAngle,iFit,testFitStr,testFit1DInfo,testArray, $
                            craptest, $
-                           wts,X2D,Y2D,dataToFit, $
-                           fa,dens_param,pre_densEst, $
+                           wtsForFit,X2D,Y2D,dataToFit, $
+                           fa, $
+                           ;; dens_param, $
+                           pre_densEst, $
                            ITIME=iTime, $
                            ESTFACS=estFacs, $
                            JUST_ERANGE_PEAK=just_eRange_peak, $
                            KCURVEFIT_OPT=kCurvefit_opt, $
+                           KFITPARAMSTRUCT=kFitParamStruct, $
                            KSDTDATA_OPT=kSDTData_opt, $
                            KSTRINGS=kStrings, $
-                           OUT_ANGLE_I=angle_i, $
+                           ;; OUT_ANGLE_I=angle_i, $
+                           OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                            OUT_ERANGE_I=eRange_i
   
   COMPILE_OPT idl2
 
   iAngle             = good_angleBin_i[iWin]
-  iKappa             = good_kappaFits_i[iWin]
+  iFit               = good_fits_i[iWin]
 
-  testKappa          = curKappaStr
-  testKappaFit       = kappaFits[iKappa]
-  eRange_peak        = out_eRange_peak[*,iKappa]
+  testFitStr         = curFitStr
+  testFit1DInfo      = fitInfoArr[iFit]
+  eRange_peak        = out_eRange_peak[*,iFit]
 
 
   testArray          = MAKE_ARRAY(nEnergies,nTotAngles)
@@ -30,47 +34,36 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
      KEYWORD_SET(kCurvefit_opt.fit1D_dens__each_angle): BEGIN
         
         ;;Let them express some individuality in this spot
-        KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,testKappa, $
+        KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,testFitStr, $
                                       allAngles, $
                                       eRange_peak, $
-                                      testKappaFit, $
+                                      testFit1DInfo, $
                                       ITIME=iTime, $
                                       ESTFACS=estFacs, $
-                                      CURVEFIT_OPT=kCurvefit_opt, $
-                                      SDTDATA_OPT=kSDTData_opt, $
-                                      STRINGS=kStrings, $
+                                      KCURVEFIT_OPT=kCurvefit_opt, $
+                                      KFITPARAMSTRUCT=kFitParamStruct, $
+                                      KSDTDATA_OPT=kSDTData_opt, $
+                                      KSTRINGS=kStrings, $
                                       FIT2D_INF_LIST=fit2D_inf_list, $
                                       OUT_1D_DENS_ESTS=out_1D_dens_ests
 
-        testArray    = testKappa.data
+        testArray    = testFitStr.data
      END
      ELSE: BEGIN
         ;;Just treat them as all having the same density
         FOR k=0,nTotAngles-1 DO BEGIN
-           testData        = testKappa.data[*,iAngle]
+           testData        = testFitStr.data[*,iAngle]
            testArray[*,k]  = testData
         ENDFOR
      END
   ENDCASE
 
-  pre_densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,testKappa, $
+  pre_densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,testFitStr, $
                                      ENERGY=kSDTData_opt.energy_electrons, $
                                      ANGLE=kSDTData_opt.fit2D_dens_aRange)
 
-  craptest           = testKappa
+  craptest           = testFitStr
   ;; craptest.data      = testArray
-
-  ;;Get some better weights
-  ;; testKappa          = CONV_UNITS(testKappa,'counts')
-  ;; testKappa.ddata    = (testKappa.data)^.5
-  ;; testKappa          = CONV_UNITS(testKappa,units)
-
-  ;;wts, calcked from fit
-  ;; wts                = 1.D/(testKappa.ddata)^2
-  ;; fixMe              = WHERE(~FINITE(wts),nFixMe)
-  ;; IF nFixMe GT 0 THEN BEGIN
-  ;;    wts[fixMe]      = 0.0
-  ;; ENDIF
 
   ;;Uhh, use data for fit weighting. Not fit data.
   wts                = curDataStr.ddata
@@ -80,28 +73,39 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
 
   ;; just_eRange_peak   = 1
   IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
-     eRange_i        = WHERE((testKappa.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
-                             (testKappa.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
+     eRange_i        = WHERE((testFitStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
+                             (testFitStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
      IF nEnKeep EQ 0 THEN STOP
   ENDIF ELSE BEGIN
-     nEnKeep         = N_ELEMENTS(testKappa.energy[*,nTotAngles/2])
+     nEnKeep         = N_ELEMENTS(testFitStr.energy[*,nTotAngles/2])
      eRange_i        = INDGEN(nEnKeep)
   ENDELSE
 
   ;;First drop some energies
-  X2D                = testKappa.energy[eRange_i,*]
-  Y2D                = testKappa.theta[eRange_i,*]
+  X2D                = testFitStr.energy[eRange_i,*]
+  Y2D                = testFitStr.theta[eRange_i,*]
   dataToFit          = curDataStr.data[eRange_i,*]
+  wtsForFit          = wts[eRange_i,*]
 
   CASE 1 OF
      kCurvefit_opt.fit2d_only_dens_angles: BEGIN
-        angles             = REFORM(testKappa.theta[useTheseAnglesIndex,*])
-        angle_i            = WHERE( (angles GE kSDTData_opt.fit2D_dens_aRange[0]) AND (angles LE kSDTData_opt.fit2D_dens_aRange[1]),nAKeep)
+        angles             = REFORM(testFitStr.theta[useTheseAnglesIndex,*])
+        angle_i            = WHERE( (angles GE kSDTData_opt.fit2D_dens_aRange[0]) AND $
+                                    (angles LE kSDTData_opt.fit2D_dens_aRange[1]), $
+                                    nAKeep, $
+                                    COMPLEMENT=remAngle_i, $
+                                    NCOMPLEMENT=nARem)
+        fit2D_dens_angleInfo = {angle_i:angle_i, $
+                               nAKeep:nAKeep, $
+                               remAngle_i:remAngle_i, $
+                               nARem:nARem}
         IF nAKeep GT 0 THEN BEGIN
+           ;;NOTE, we may have (intentionally) dropped some energies in {X,Y}2D by this point!
+           ;;See lines above dealing with {X,Y}2D, dataToFit
            X2D                = X2D[*,angle_i]
            Y2D                = Y2D[*,angle_i]
            dataToFit          = dataToFit[*,angle_i]
-
+           wtsForFit          = wtsForFit[*,angle_i]
         ENDIF ELSE BEGIN
            PRINT,"What? Did you provide a bogus fit2D_dens_aRange?"
            STOP
@@ -112,8 +116,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
      END
   ENDCASE
 
-  fa                 = {kappa_1d_fitparams:testKappaFit.A}
-  dens_param         = testKappaFit.A[3]
+  fa                 = {kappa_1d_fitparams:testFit1DInfo.A}
 
   IF KEYWORD_SET(kCurvefit_opt.fit1D_dens__each_angle) THEN BEGIN
      CASE 1 OF

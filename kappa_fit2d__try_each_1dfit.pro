@@ -7,12 +7,17 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                 ;; JUST_ERANGE_PEAK=just_eRange_peak, $
                                 ESTFACS=estFacs, $
                                 KCURVEFIT_OPT=kCurvefit_opt, $
+                                KFITPARAMSTRUCT=kFitParamStruct, $
+                                KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
                                 KPLOT_OPT=kPlot_opt, $
                                 KSDTDATA_OPT=kSDTData_opt, $
                                 KSTRINGS=kStrings, $
                                 FIT2D_INF_LIST=fit2D_inf_list, $
                                 FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
-                                FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit
+                                FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
+                                FIT2D__SHOW__FITSTRING=fitString, $
+                                PRINT_2DFITINFO=print_2DFitInfo, $
+                                PRINT_2DWININFO=print_2DWinInfo
 
   COMPILE_OPT idl2
 
@@ -35,58 +40,36 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
   errMsgArray       = !NULL
   statusArray       = !NULL
 
-
-  ;; For keeping MPFIT2DFUN physical
-  densInfo = {value:0.D       , $
-              fixed:0         , $
-              parname:''      , $
-              ;; relstep:0.D     , $
-              mpmaxstep:0.D   , $
-              limited:[0,0]   , $
-              limits:[0.D,0]}
-
-  densMaxStep    = 0.5
-  denslimited    = [1,1]
-  densLimits     = [1e-4,100]  
-
-  densInfo[*].mpmaxstep  = densMaxStep
-
-  densInfo.limited[0] = densLimited[0]
-  densInfo.limited[1] = densLimited[1]
-
-  ;;What are the limits, then?
-  densInfo.limits[0] = densLimits[0]
-  densInfo.limits[1] = densLimits[1]
-
   FOR iWin=0,nGoodFits-1 DO BEGIN
 
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                             nEnergies,out_eRange_peak, $
                             allAngles,nTotAngles,useTheseAnglesIndex, $
                             curFitStr,fits,curDataStr, $
-                            iAngle,iFit,testFitStr,testFitParams,testArray, $
+                            iAngle,iFit,testFitStr,testFit1DInfo,testArray, $
                             craptest, $
-                            wts,X2D,Y2D,dataToFit, $
-                            fa,dens_param,pre_densEst, $
+                            wtsForFit,X2D,Y2D,dataToFit, $
+                            fa, $
+                            ;; dens_param, $
+                            pre_densEst, $
                             ITIME=iTime, $
                             JUST_ERANGE_PEAK=just_eRange_peak, $
                             ESTFACS=estFacs, $
                             KCURVEFIT_OPT=kCurvefit_opt, $
+                            KFITPARAMSTRUCT=kFitParamStruct, $
                             KSDTDATA_OPT=kSDTData_opt, $
                             KSTRINGS=kStrings, $
-                            OUT_ANGLE_I=angle_i, $
+                           OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
+                            ;; OUT_ANGLE_I=angle_i, $
                             OUT_ERANGE_I=eRange_i
 
-     ;; densInfo.value    = dens_param
-     densInfo.value    = pre_densEst
+     ;; kFit2DParamStruct.value    = dens_param
+     UPDATE_KAPPA_FIT2D_PARAM_INFO,kFit2DParamStruct,pre_densEst
 
-     IF densInfo.value LT densLimits[0] THEN densInfo.value = densLimits[0]
-     IF densInfo.value GT densLimits[1] THEN densInfo.value = densLimits[1]
-
-     FitDens        = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
+     fitDens        = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
                                  err, $
                                  ;; dens_param, $
-                                 WEIGHTS=wts, $
+                                 WEIGHTS=wtsForFit, $
                                  FUNCTARGS=fa, $
                                  BESTNORM=bestNorm, $
                                  NFEV=nfev, $
@@ -98,7 +81,8 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                  PFREE_INDEX=ifree, $
                                  CALC_FJAC=calc_fjac, $
                                  BEST_FJAC=best_fjac, $
-                                 PARINFO=densInfo, QUERY=query, $
+                                 PARINFO=kFit2DParamStruct, $
+                                 QUERY=query, $
                                  NPEGGED=npegged, NFREE=nfree, DOF=dof, $
                                  COVAR=covar, PERROR=perror, $
                                  MAXITER=kCurvefit_opt.fit2d_max_iter, $
@@ -109,16 +93,15 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                  _EXTRA=extra)
 
 
-     ;; IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
-     ;;    oldcraptest=craptest
-     ;;    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
-     ;;       craptest.data[eRange_i[m],angle_i] = yFit[m,angle_i]
-     ;;    ENDFOR
-     ;;    STOP
-     ;; ENDIF ELSE BEGIN
-        ;; craptest.data  = testArray
-        craptest.data[*,angle_i]  = yFit
-     ;; ENDELSE
+     IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
+        oldcraptest = craptest
+        FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+           craptest.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
+        ENDFOR
+        ;; STOP
+     ENDIF ELSE BEGIN
+        craptest.data[*,fit2D_dens_angleInfo.angle_i]  = yFit
+     ENDELSE
      densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,craptest, $
                                     ENERGY=kSDTData_opt.energy_electrons, $
                                     ANGLE=kSDTData_opt.fit2D_dens_aRange)
@@ -129,9 +112,26 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
      dofArray       = [dofArray,dof]
      fitDensArray   = [fitDensArray,fitDens]
      IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
+
+        ;;Info?
+        IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+           testFit1DInfo.A[3] = densEst
+           PRINT_KAPPA_FLUX_FIT_PARAMS,testFit1DInfo.A,bestNorm
+        ENDIF
+
         CASE 1 OF
            kCurvefit_opt.fit2d_only_dens_angles: BEGIN
-              testArrays[*,angle_i,iWin]  = yFit              
+              CASE 1 OF
+                 KEYWORD_SET(just_eRange_peak): BEGIN
+                    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+                       testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
+                    ENDFOR
+                    
+                 END
+                 ELSE: BEGIN
+                    testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
+                 END
+              ENDCASE
            END
            ELSE: BEGIN
               testArrays[*,*,iWin]        = yFit
@@ -139,6 +139,10 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
         ENDCASE
 
      ENDIF ELSE BEGIN
+        IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+           PRINT,fitString + ' 2DFit failure ...'
+        ENDIF
+
         testArrays[*,*,iWin]              = 0.0
      ENDELSE
 
@@ -166,6 +170,10 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
 
   ENDFOR
   
+  ;; IF KEYWORD_SET(kCurvefit_opt.postfit_remaining_angles) THEN BEGIN
+
+  ;; ENDIF
+
   datDens             = CALL_FUNCTION(kSDTData_opt.densFunc,curDatastr, $
                                       ENERGY=kSDTData_opt.energy_electrons, $
                                       ANGLE=kSDTData_opt.fit2D_dens_aRange)
@@ -177,6 +185,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                               statusArray EQ 4, $
                               nSuccess)
   IF nSuccess GT 0 THEN BEGIN
+
      minTemp          = MIN(chiArray[success_i],minChi_ii)
      ;; win_i               = CGSETINTERSECTION(success_i,minChi_i,COUNT=haveWin)
      win_i            = success_i[minChi_ii]
@@ -208,6 +217,19 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                          statusArray     :statusArray}
 
      fit2D_inf_list.ADD,tmpKeeper                             
+
+     IF KEYWORD_SET(print_2DWinInfo) THEN BEGIN
+        tmpFit1D_A   = fitWin.A
+        tmpFit1D_A[3] = densWin
+
+        PRINT,''
+        PRINT,'******************************'
+        PRINT,FORMAT='("WINNER (",A0," #",I0,")")',fitString,iTime
+        PRINT,''
+        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpFit1D_A,chi2win
+        PRINT,'******************************'
+     ENDIF
+
   ENDIF ELSE BEGIN
      winStruct        = !NULL
   ENDELSE

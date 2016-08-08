@@ -97,11 +97,15 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   ENDIF
 
   IF KEYWORD_SET(test_noRev) THEN BEGIN
-     max_energy =  Xorig[(minEInd - 2) > 0]
-     min_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     ;; max_energy =  Xorig[(minEInd - 2) > 0]
+     ;; min_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     max_energy =  Xorig[minEInd > 0]
+     min_energy =  Xorig[maxEInd < (nEnergies - 1)]
   ENDIF ELSE BEGIN
-     min_energy =  Xorig[(minEInd - 2) > 0]
-     max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     ;; min_energy =  Xorig[(minEInd - 2) > 0]
+     ;; max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     min_energy = !NULL
+     max_energy = !NULL
   ENDELSE
 
   eRange_peak     = [min_energy,max_energy]

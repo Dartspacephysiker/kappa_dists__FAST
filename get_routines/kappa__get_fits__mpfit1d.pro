@@ -5,6 +5,8 @@
 PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              orig,kappaFit,gaussFit, $
                              KCURVEFIT_OPT=kCurvefit_opt, $
+                             KFITPARAMSTRUCT=kappaParamStruct, $
+                             GFITPARAMSTRUCT=gaussParamStruct, $
                              ENERGY_INDS=energy_inds, $
                              ERANGE_PEAK=eRange_peak, $
                              PEAK_IND=peak_ind, $
@@ -32,14 +34,6 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   COMPILE_OPT idl2
 
   OKStatus                    = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
-
-  IF N_ELEMENTS(kappa_fixA) EQ 0 THEN BEGIN
-     kappa_fixA               = [0,0,0,0,1] ;Vary bulk E [0], Temperature [1], kappa [2], and density [3] (but not angle)
-  ENDIF
-  
-  IF N_ELEMENTS(gauss_fixA) EQ 0 THEN BEGIN
-     gauss_fixA               = [0,0,1,0,1] ;Vary bulk E [0], Temperature [1], and density [3] (but not kappa or angle)
-  ENDIF
 
   orig                        = {x:Xorig, $
                                  y:Yorig, $
@@ -69,18 +63,13 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ENDIF
      ENDIF
 
-     ;; weights                     = 1./ABS(Y)^2
-     ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)
-     ;; IF nFixMe GT 0 THEN BEGIN
-     ;;    weights[fixMe]           = 0.0
-     ;; ENDIF
-
      ;;Alternate
      weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
      weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
-     kappaParams = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
-                                            ERANGE_PEAK=eRange_peak)
+     UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak
+     ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
+     ;;                                        ERANGE_PEAK=eRange_peak)
 
      A        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
                          X,Y, $
@@ -96,7 +85,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                          PFREE_INDEX=ifree, $
                          CALC_FJAC=calc_fjac, $
                          BEST_FJAC=best_fjac, $
-                         PARINFO=kappaParams, $
+                         PARINFO=kappaParamStruct, $
                          QUERY=query, $
                          NPEGGED=npegged, NFREE=nfree, DOF=dof, $
                          COVAR=covar, $
@@ -113,8 +102,11 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      ;; IF status EQ -16 THEN STOP
      IF status EQ 0 THEN STOP
 
-     IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
+     IF nPegged GT 0 THEN PRINT,"PEGGED!"
+     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) THEN BEGIN
+     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
         fitStatus = 0 
+        kappaParamStruct[*].value = AGauss
      ENDIF ELSE BEGIN
         fitStatus = 1
      ENDELSE
@@ -122,7 +114,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      IF KEYWORD_SET(fitStatus) THEN BEGIN
         IF ~KEYWORD_SET(dont_print_fitInfo) THEN PRINT,'kappaFit failure ...'
         chi2            = -1
-        pValGauss       = -1
+        pVal            = -1
      ENDIF ELSE BEGIN
 
         chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) )
@@ -139,7 +131,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;;Calculate chi and things if it checks out
 
         ;;need to adjust Y bounds?
-        yMax                        = MAX(yFit) 
+        ;; yMax                        = MAX(yFit) 
+
         IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
            PRINT,"Fitted spectral properties: "
            PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,A
@@ -208,8 +201,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
      weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
-     gaussParams = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
-                                            ERANGE_PEAK=eRange_peak)
+     UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_peak
+     ;; gaussParamStruct = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
+     ;;                                        ERANGE_PEAK=eRange_peak)
 
      AGauss        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
                               X,Y, $
@@ -225,9 +219,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               PFREE_INDEX=ifree, $
                               CALC_FJAC=calc_fjac, $
                               BEST_FJAC=best_fjac, $
-                              PARINFO=gaussParams, $
+                              PARINFO=gaussParamStruct, $
                               QUERY=query, $
-                              NPEGGED=npegged, NFREE=nfree, DOF=dof, $
+                              NPEGGED=nPegged, NFREE=nfree, DOF=dof, $
                               COVAR=covar, $
                               PERROR=perror, $
                               MAXITER=KEYWORD_SET(kCurvefit_opt.max_iter) ? $
@@ -245,8 +239,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      ENDIF
 
-     IF (WHERE(gaussStatus EQ OKStatus))[0] NE -1 THEN BEGIN
+     IF nPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
+
+     ;; IF (WHERE(gaussStatus EQ OKStatus))[0] NE -1 THEN BEGIN
+     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
         gaussFitStatus = 0 
+        gaussParamStruct[*].value = AGauss
      ENDIF ELSE BEGIN
         gaussFitStatus = 1
      ENDELSE
@@ -261,7 +259,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;;Calculate chi and things if it checks out
 
         ;;need to adjust Y bounds?
-        yMax               = MAX(yGaussFit) > yMax
+        ;; yMax               = MAX(yGaussFit) > yMax
 
         chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) )
 

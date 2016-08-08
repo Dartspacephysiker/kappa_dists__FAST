@@ -12,7 +12,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
    FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
    FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
-   FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
+   START_FROM_FA__VARY_BULK_E=start_from_fa__vary_bulk_e, $
    FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
    FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
@@ -33,6 +33,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    ESTIMATE_FACTORS=estFacs, $
    DONT_PRINT_ESTIMATES=dont_print_estimates, $
    DONT_PRINT_FITINFO=dont_print_fitInfo, $
+   PRINT_2DFITINFO=print_2DFitInfo, $
+   PRINT_2DWININFO=print_2DWinInfo, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
@@ -189,6 +191,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     ESTFACS=estFacs, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     DONT_PRINT_FITINFO=dont_print_fitInfo, $
+                    PRINT_2DFITINFO=print_2DFitInfo, $
+                    PRINT_2DWININFO=print_2DWinInfo, $
                     E_ANGLE=e_angle, $
                     DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                     TREAT_FIELDALIGNED_AS_BULK=treat_fieldaligned_as_bulk, $
@@ -197,7 +201,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT_EACH__SYNTH_SDT_STRUCT=synthPackage, $
                     FIT_EACH__SKIP_BAD_FITS=fit_each__skip_bad_fits, $
                     FIT_EACH__START_FROM_FIELDALIGNED=start_from_fieldaligned, $
-                    FIT_EACH__VARY_BULK_ENERGY=vary_bulk_energy, $
+                    START_FROM_FA__VARY_BULK_E=start_from_fa__vary_bulk_e, $
                     FIT_EACH__MIN_ANGLEFITS_FOR_KEEP=min_anglefits_for_keep, $
                     FIT_EACH__SHOW_AND_PROMPT=fit_each__show_and_prompt, $
                     FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
