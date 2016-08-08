@@ -34,6 +34,30 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
   densEstArray      = !NULL
   errMsgArray       = !NULL
   statusArray       = !NULL
+
+
+  ;; For keeping MPFIT2DFUN physical
+  densInfo = {value:0.D       , $
+              fixed:0         , $
+              parname:''      , $
+              ;; relstep:0.D     , $
+              mpmaxstep:0.D   , $
+              limited:[0,0]   , $
+              limits:[0.D,0]}
+
+  densMaxStep    = 0.5
+  denslimited    = [1,1]
+  densLimits     = [1e-4,100]  
+
+  densInfo[*].mpmaxstep  = densMaxStep
+
+  densInfo.limited[0] = densLimited[0]
+  densInfo.limited[1] = densLimited[1]
+
+  ;;What are the limits, then?
+  densInfo.limits[0] = densLimits[0]
+  densInfo.limits[1] = densLimits[1]
+
   FOR iWin=0,nGoodFits-1 DO BEGIN
 
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
@@ -53,22 +77,28 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                             OUT_ANGLE_I=angle_i, $
                             OUT_ERANGE_I=eRange_i
 
+     ;; densInfo.value    = dens_param
+     densInfo.value    = pre_densEst
+
+     IF densInfo.value LT densLimits[0] THEN densInfo.value = densLimits[0]
+     IF densInfo.value GT densLimits[1] THEN densInfo.value = densLimits[1]
 
      FitDens        = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
                                  err, $
-                                 dens_param, $
+                                 ;; dens_param, $
                                  WEIGHTS=wts, $
                                  FUNCTARGS=fa, $
                                  BESTNORM=bestNorm, $
                                  NFEV=nfev, $
-                                 FTOL=kCurvefit_opt.fit2d_tol, $
+                                 ;; FTOL=kCurvefit_opt.fit2d_tol, $
+                                 FTOL=1e-4, $
                                  GTOL=1e-13, $
                                  STATUS=status, $
                                  BEST_RESID=best_resid, $
                                  PFREE_INDEX=ifree, $
                                  CALC_FJAC=calc_fjac, $
                                  BEST_FJAC=best_fjac, $
-                                 PARINFO=parinfo, QUERY=query, $
+                                 PARINFO=densInfo, QUERY=query, $
                                  NPEGGED=npegged, NFREE=nfree, DOF=dof, $
                                  COVAR=covar, PERROR=perror, $
                                  MAXITER=kCurvefit_opt.fit2d_max_iter, $
@@ -123,13 +153,15 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
            iWin, $
            iTime, $
            IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
-           KSTRINGS=kStrings, $
-           KPLOT_OPT=kPlot_opt, $
            KCURVEFIT_OPT=kCurvefit_opt, $
+           KPLOT_OPT=kPlot_opt, $
+           KSDTDATA_OPT=kSDTData_opt, $
+           KSTRINGS=kStrings, $
            PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
            PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
            FINISH_AND_SAVE_ALL=finish_and_save_all, $
            KAPPA_FIT__SHOW__QUIT=show__quit
+
      ENDIF
 
   ENDFOR

@@ -3,9 +3,10 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
    nTot2DFits, $
    iTime, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-   KSTRINGS=kStrings, $
-   KPLOT_OPT=kPlot_opt, $
    KCURVEFIT_OPT=kCurvefit_opt, $
+   KPLOT_OPT=kPlot_opt, $
+   KSDTDATA_OPT=kSDTData_opt, $
+   KSTRINGS=kStrings, $
    PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
    PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
@@ -53,6 +54,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
         LIMITS=cont2DLims, $
         ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+        KSDTDATA_OPT=kSDTData_opt, $
         FITSTRING=fitString
      PCLOSE
 
@@ -87,24 +89,31 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "e": BEGIN
            cont = 0
-           SPEC2D,curDataStr,/LABEL,LIMITS=spec2DLims,/MSEC
+           SPEC2D,curDataStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  /LABEL,LIMITS=spec2DLims,/MSEC
         END
         "fe": BEGIN
            cont = 0
-           SPEC2D,fit2DStruct.bestFitStr,/LABEL,LIMITS=spec2DLims,/MS
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  /LABEL,LIMITS=spec2DLims,/MS
         END
         "be": BEGIN
            cont = 0
-           SPEC2D,fit2DStruct.bestFitStr,/LABEL,/MS,LIMITS=spec2DLims
-           SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  /LABEL,/MS,LIMITS=spec2DLims
+           SPEC2D,curDataStr,OVERPLOT=showFit,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  /LABEL,/MS,LIMITS=spec2DDatLims
         END
         "se": BEGIN
            cont = 0
            tempFN = STRING(FORMAT='("spec2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-           SPEC2D,fit2DStruct.bestFitStr,/LABEL,/MS,LIMITS=spec2DLims
-           SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  /LABEL,/MS,LIMITS=spec2DLims
+           SPEC2D,curDataStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                  OVERPLOT=showFit, $
+                  /LABEL,/MS,LIMITS=spec2DDatLims
            PCLOSE
         END
         "p": BEGIN
@@ -112,6 +121,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+              KSDTDATA_OPT=kSDTData_opt, $
               FITSTRING=fitString
         END
         "s": BEGIN
@@ -122,6 +132,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
+              KSDTDATA_OPT=kSDTData_opt, $
               FITSTRING=fitString
            PCLOSE
         END
@@ -131,8 +142,10 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,strings.orbStr,strings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-           CONTOUR2D,fit2DStruct.bestFitStr,/POLAR,/FILL,/LABEL,/MS,LIMITS=cont2DLims
-           CONTOUR2D,curDataStr,/POLAR,OVERPLOT=showFit,/LABEL,/MS,LIMITS=cont2DLims
+           CONTOUR2D,fit2DStruct.bestFitStr,/POLAR,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                     /FILL,/LABEL,/MS,LIMITS=cont2DLims
+           CONTOUR2D,curDataStr,/POLAR,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+                     OVERPLOT=showFit,/LABEL,/MS,LIMITS=cont2DLims
            PCLOSE
         END
         "q": BEGIN

@@ -61,9 +61,9 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
   ;; craptest.data      = testArray
 
   ;;Get some better weights
-  testKappa          = CONV_UNITS(testKappa,'counts')
-  testKappa.ddata    = (testKappa.data)^.5
-  testKappa          = CONV_UNITS(testKappa,units)
+  ;; testKappa          = CONV_UNITS(testKappa,'counts')
+  ;; testKappa.ddata    = (testKappa.data)^.5
+  ;; testKappa          = CONV_UNITS(testKappa,units)
 
   ;;wts, calcked from fit
   ;; wts                = 1.D/(testKappa.ddata)^2
@@ -72,10 +72,11 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
   ;;    wts[fixMe]      = 0.0
   ;; ENDIF
 
-  wts                = testKappa.ddata
+  ;;Uhh, use data for fit weighting. Not fit data.
+  wts                = curDataStr.ddata
   wts[*]             = 0.0D
-  nz_i               = WHERE(testKappa.ddata GT 0,/NULL)
-  wts[nz_i]          = 1.D/(testKappa.ddata[nz_i])^2
+  nz_i               = WHERE(curDataStr.ddata GT 0,/NULL)
+  wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])^2
 
   ;; just_eRange_peak   = 1
   IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
@@ -97,12 +98,6 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
         angles             = REFORM(testKappa.theta[useTheseAnglesIndex,*])
         angle_i            = WHERE( (angles GE kSDTData_opt.fit2D_dens_aRange[0]) AND (angles LE kSDTData_opt.fit2D_dens_aRange[1]),nAKeep)
         IF nAKeep GT 0 THEN BEGIN
-           ;; X2D                = testKappa.energy[*,angle_i]
-           ;; Y2D                = testKappa.theta[*,angle_i]
-           ;; dataToFit          = curDataStr.data[*,angle_i]
-           ;; X2D                = testKappa.energy[eRange_i,angle_i]
-           ;; Y2D                = testKappa.theta[eRange_i,angle_i]
-           ;; dataToFit          = curDataStr.data[eRange_i,angle_i]
            X2D                = X2D[*,angle_i]
            Y2D                = Y2D[*,angle_i]
            dataToFit          = dataToFit[*,angle_i]
@@ -114,12 +109,6 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_kappaFits_i,iWin, $
      END
      ELSE: BEGIN
         angle_i            = INDGEN(nTotAngles)
-        ;; X2D                = testKappa.energy
-        ;; Y2D                = testKappa.theta
-        ;; dataToFit          = curDataStr.data
-        ;; X2D                = testKappa.energy[eRange_i,*]
-        ;; Y2D                = testKappa.theta[eRange_i,*]
-        ;; dataToFit          = curDataStr.data[eRange_i,*]
      END
   ENDCASE
 

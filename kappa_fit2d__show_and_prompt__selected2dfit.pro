@@ -1,15 +1,15 @@
 ;2016/08/05
-PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
-                                 nTotFits, $
-                                 iTime, $
-                                 IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-                                 KSTRINGS=kStrings, $
-                                 KPLOT_OPT=kPlot_opt, $
-                                 KCURVEFIT_OPT=kCurvefit_opt, $
-                                 PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
-                                 PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-                                 FINISH_AND_SAVE_ALL=finish_and_save_all, $
-                                 KAPPA_FIT__SHOW__QUIT=show__quit
+PRO KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DStruct, $
+   nTotFits, $
+   iTime, $
+   IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
+   KSTRINGS=kStrings, $
+   KPLOT_OPT=kPlot_opt, $
+   KCURVEFIT_OPT=kCurvefit_opt, $
+   PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+   PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+   FINISH_AND_SAVE_ALL=finish_and_save_all, $
+   KAPPA_FIT__SHOW__QUIT=show__quit
 
   COMPILE_OPT idl2
 
@@ -138,6 +138,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
            cont = 0
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
+              KSDTDATA_OPT=kSDTData_opt, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
         END
         "s": BEGIN
@@ -147,6 +148,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT,curDataStr,fit2DStruct, $
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
+              KSDTDATA_OPT=kSDTData_opt, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text
            PCLOSE
         END

@@ -47,8 +47,10 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
      tempAngle          = allAngles[iAngle]
      tempAngleEstRange  = [tempAngle-1.0,tempAngle+1.0]
 
+     ;; tmpA_1D[3]         = N_2D_FS(curDataStr,ENERGY=eRange_peak, $
+     ;;                              ANGLE=tempAngleEstRange)*estFacs.N
      tmpA_1D[3]         = N_2D_FS(curDataStr,ENERGY=eRange_peak, $
-                                  ANGLE=tempAngleEstRange)*estFacs.N
+                                  ANGLE=tempAngleEstRange)
 
      IF KEYWORD_SET(curvefit_opt.trim_energies_below_peak) THEN BEGIN 
         ;; X               = Xorig[WHERE(Xorig GE eRange_peak[0] AND Xorig LE eRange_peak[1])]
@@ -92,6 +94,10 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
            ;;We can't budge anything but density
            fixA__each_1dfit    = [0,0,0,1,0,0,0]
 
+           ;;Was trying to figure something out 2016/08/06. Should be OK now
+           ;; testA_1D            = MAKE_ARRAY(7,VALUE=0.)
+           ;; testA_1D[0] = tmpA_1D[0] & testA_1D[1] = tmpA_1D[1] & testA_1D[2] = tmpA_1D[2] & testA_1D[3] = tmpA_1D[3] & tmpA_1D=testA_1D
+
            yFit               = CURVEFIT(X,Y,weights,tmpA_1D,sigma, $
                                          FUNCTION_NAME='KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F' , $
                                          /DOUBLE, $
@@ -116,45 +122,54 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
         END
         1: BEGIN
 
-           ;;We can't budge anything but density
-           fixA__each_1dfit    = [1,1,1,0,1]
+           IF N_ELEMENTS(X) LE 5 THEN BEGIN
+              PRINT,"Skipping! Too few elements to fit meaningfully ..."
+              skip   = 1
+              status = 0
+           ENDIF
 
-           tmpParams = INIT_KAPPA_FITPARAM_INFO(tmpA_1D,fixA__each_1dfit, $
-                                                ERANGE_PEAK=eRange_peak)
-           
-           ;; weights[*] = 1.0
-           A        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
-                               X,Y, $
-                               WEIGHTS=weights, $
-                               FUNCTARGS=fa, $
-                               BESTNORM=bestNorm, $
-                               AUTODERIVATIVE=0, $
-                               NFEV=nfev, $
-                               ;; FTOL=KEYWORD_SET(curvefit_opt.fit_tol) ? $
-                               ;; curvefit_opt.fit_tol : 1e-3, $
-                               FTOL=1e-9, $
-                               GTOL=1e-13, $
-                               STATUS=status, $
-                               BEST_RESID=best_resid, $
-                               PFREE_INDEX=ifree, $
-                               CALC_FJAC=calc_fjac, $
-                               BEST_FJAC=best_fjac, $
-                               PARINFO=tmpParams, $
-                               QUERY=query, $
-                               NPEGGED=npegged, NFREE=nfree, DOF=dof, $
-                               COVAR=covar, $
-                               PERROR=perror, $
-                               MAXITER=KEYWORD_SET(curvefit_opt.max_iter) ? $
-                               curvefit_opt.max_iter : 150, $
-                               NITER=itNum, $
-                               YFIT=yFit, $
-                               /QUIET, $
-                               ERRMSG=errMsg, $
-                               _EXTRA=extra)
+           IF ~KEYWORD_SET(skip) THEN BEGIN
+              ;;We can't budge anything but density
+              fixA__each_1dfit    = [1,1,1,0,1]
 
-           IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
-              IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
-              IF status EQ 0 THEN STOP
+              tmpParams = INIT_KAPPA_FITPARAM_INFO(tmpA_1D,fixA__each_1dfit, $
+                                                   ERANGE_PEAK=eRange_peak)
+              
+              ;; weights[*] = 1.0
+              tmpA_1D  = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
+                                  X,Y, $
+                                  WEIGHTS=weights, $
+                                  FUNCTARGS=fa, $
+                                  BESTNORM=bestNorm, $
+                                  AUTODERIVATIVE=0, $
+                                  NFEV=nfev, $
+                                  ;; FTOL=KEYWORD_SET(curvefit_opt.fit_tol) ? $
+                                  ;; curvefit_opt.fit_tol : 1e-3, $
+                                  FTOL=1e-9, $
+                                  GTOL=1e-13, $
+                                  STATUS=status, $
+                                  BEST_RESID=best_resid, $
+                                  PFREE_INDEX=ifree, $
+                                  CALC_FJAC=calc_fjac, $
+                                  BEST_FJAC=best_fjac, $
+                                  PARINFO=tmpParams, $
+                                  QUERY=query, $
+                                  NPEGGED=npegged, NFREE=nfree, DOF=dof, $
+                                  COVAR=covar, $
+                                  PERROR=perror, $
+                                  MAXITER=KEYWORD_SET(curvefit_opt.max_iter) ? $
+                                  curvefit_opt.max_iter : 150, $
+                                  NITER=itNum, $
+                                  YFIT=yFit, $
+                                  /QUIET, $
+                                  ERRMSG=errMsg, $
+                                  _EXTRA=extra)
+
+              IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+                 IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
+                 IF status EQ 0 THEN STOP
+              ENDIF
+
            ENDIF
 
            IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
@@ -177,7 +192,8 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
                                                              'Y',yFit, $
                                                              'NAME','1DFit', $
                                                              tmpFitStr)
-           tmpTmpFit.A                       = A
+           ;;Just for plots
+           tmpTmpFit.A                       = tmpA_1D
            tmpTmpFit.fitStatus               = fitStatus
            
 
@@ -201,7 +217,6 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
            ;; PRINT,'Status : ' + STRCOMPRESS(status,/REMOVE_ALL)
            ;; PRINT,'itNum  : ' + STRCOMPRESS(itNum,/REMOVE_ALL)
            ;; ;; STOP
-
 
            CASE fitStatus OF 
               0: BEGIN 

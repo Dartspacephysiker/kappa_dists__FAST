@@ -1,17 +1,26 @@
 PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
    LIMITS=limits, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
+   KSDTDATA_OPT=kSDTData_opt, $
    FITSTRING=fitString
 
   COMPILE_OPT idl2
 
+  ;; IF N_ELEMENTS(kSDTData_opt) GT 0 THEN BEGIN
+  ;;    angle = kSDTData_opt.fit2D_dens_aRange
+  ;; ENDIF ELSE BEGIN
+  ;;    angle = !NULL
+  ;; ENDELSE
+
   CONTOUR2D,fit2DStruct.bestFitStr, $
+            ;; ANGLE=angle, $
             /POLAR, $
             /FILL, $
             /MSEC, $
             LIMITS=limits, $
             /LABEL
   CONTOUR2D,dataSDT, $
+            ;; ANGLE=angle, $
             /POLAR, $
             /OVERPLOT, $
             /MSEC, $
