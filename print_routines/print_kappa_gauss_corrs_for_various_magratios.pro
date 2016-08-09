@@ -9,7 +9,8 @@ PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
 
   COMPILE_OPT idl2
 
-  RBVals = [1,2,3,4,5,6,7,8,9,10,30,50,70,100,300,500,700]
+  RBVals = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60, $
+            70,80,90,100,300,500,700,1000,3000,5000,7000,10000,30000,50000]
   nRBVals = N_ELEMENTS(RBVals)
   
   kCorrArr = MAKE_ARRAY(nRBVals,/FLOAT)
@@ -50,15 +51,16 @@ PRO PRINT_KAPPA_GAUSS_CORRS_FOR_VARIOUS_MAGRATIOS,AStruct,AStructGauss, $
      gc           = gauss_current[includeG_i]
 
      sortCK_i  = SORT(obsCK)
-     sortCG_i  = SORT(obsCG)
      sortObsCK = obsCK[sortCK_i]
-     sortObsCG = obsCG[sortCG_i]
      sortKapC  = kc[sortCK_i]
-     sortGauC  = gc[sortCG_i]
-
      kappaFit     = LINFIT(sortObsCK,sortKapC, $
                            PROB=kappaProb, $
                            CHISQR=kappaChi)
+
+     sortCG_i  = SORT(obsCG)
+     sortObsCG = obsCG[sortCG_i]
+     sortGauC  = gc[sortCG_i]
+
      gaussFit     = LINFIT(sortObsCG,sortGauC, $
                            PROB=gaussProb, $
                            CHISQR=gaussChi)

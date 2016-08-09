@@ -10,7 +10,8 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
                                 USE_BULKENERGY_POT=use_bulkEnergy_pot, $
                                 BOTH_USE_KAPPA_BULKENERGY=both_use_kappa_bulkenergy, $
                                 BOTH_USE_MAXWELL_BULKENERGY=both_use_maxwell_bulkenergy, $
-                                NO_CHARI_FOR_POT=no_charI_for_pot
+                                NO_CHARI_FOR_POT=no_charI_for_pot, $
+                                USE_CALCKED_JDIFF_EFLUX=use_calcked_Jdiff_eFlux
 
   COMPILE_OPT idl2
 
@@ -60,20 +61,28 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
   ENDIF
 
   ;;Get current, suffixes for plot name
-  IF KEYWORD_SET(use_je_current) THEN BEGIN
-     obs_current     = setup.Je
-     obsName         = 'e- ESA'
-     obsSuff         = 'e_ESA'
-  ENDIF ELSE BEGIN
-     IF KEYWORD_SET(use_jMag_current) THEN BEGIN
+  CASE 1 OF
+     KEYWORD_SET(use_je_current): BEGIN
+        obs_current     = setup.Je
+        obsName         = 'e- ESA'
+        obsSuff         = 'e_ESA'
+     END
+     KEYWORD_SET(use_jMag_current): BEGIN
         obs_current  = setup.jMag
         obsName      = 'Fluxgate Mag-derived'
         obsSuff      = 'fluxgate'
-     ENDIF ELSE BEGIN
+     END
+     KEYWORD_SET(use_calcked_Jdiff_eFlux): BEGIN
+        obs_current  = setup.Jdiff_eFlux
+        obsName      = 'e- ESA'
+        obsSuff      = 'JDiff_e_ESA'
+     END
+     ELSE: BEGIN
         obs_current  = setup.Jtot
         obsName      = 'e- and i+ ESA'
         obsSuff      = 'both_ESAs'
-     ENDELSE
-  ENDELSE
+     END
+  ENDCASE
+
 
 END

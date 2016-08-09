@@ -76,7 +76,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_AND_OBSERVED_CURRENT,kappa_current,gauss_current,obs
   gaussName    = modName + ' (Maxwellian)'
   
   kappaLName   = "K "
-  gaussLName   = "G "
+  gaussLName   = "M "
 
   ;;Bonus
   pSyms        = ['+','x']
