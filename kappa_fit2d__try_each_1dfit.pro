@@ -125,37 +125,42 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
            PRINT_KAPPA_FLUX_FIT_PARAMS,testFit1DInfo.A,bestNorm
         ENDIF
 
-        CASE 1 OF
-           kCurvefit_opt.fit2d_only_dens_angles: BEGIN
-              CASE 1 OF
-                 KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
-                    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
-                       testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
-                    ENDFOR
-                    
-                 END
-                 ELSE: BEGIN
-                    testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
-                 END
-              ENDCASE
-           END
-           kCurvefit_opt.fit2d_only_eAngles: BEGIN
-              CASE 1 OF
-                 KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
-                    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
-                       testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
-                    ENDFOR
-                    
-                 END
-                 ELSE: BEGIN
-                    testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
-                 END
-              ENDCASE
-           END
-           ELSE: BEGIN
-              testArrays[*,*,iWin]        = yFit
-           END
-        ENDCASE
+        IF KEYWORD_SET(kCurvefit_opt.fit2d_keep_wholeFit) THEN BEGIN
+           testArrays[*,*,iWin]           = craptest.data
+        ENDIF ELSE BEGIN
+
+           CASE 1 OF
+              kCurvefit_opt.fit2d_only_dens_angles: BEGIN
+                 CASE 1 OF
+                    KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+                       FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+                          testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
+                       ENDFOR
+                       
+                    END
+                    ELSE: BEGIN
+                       testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
+                    END
+                 ENDCASE
+              END
+              kCurvefit_opt.fit2d_only_eAngles: BEGIN
+                 CASE 1 OF
+                    KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+                       FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+                          testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
+                       ENDFOR
+                       
+                    END
+                    ELSE: BEGIN
+                       testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
+                    END
+                 ENDCASE
+              END
+              ELSE: BEGIN
+                 testArrays[*,*,iWin]        = yFit
+              END
+           ENDCASE
+        ENDELSE
 
      ENDIF ELSE BEGIN
         IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN

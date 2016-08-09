@@ -171,21 +171,22 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      WHILE nAngles LT nReqAngles DO BEGIN
         minAngle_i = MIN(angleBin_i)
         maxAngle_i = MAX(angleBin_i) 
-        IF (maxAngle_i EQ nTotAngles - 1) THEN BEGIN
+        IF (maxAngle_i EQ (nTotAngles - 1)) THEN BEGIN
            angleBin_i = [angleBin_i,minAngle_i-1]
+           angleBin_i = angleBin_i[SORT(angleBin_i)]
         ENDIF ELSE BEGIN
-           tAngles_i = [minAngle_i-1,maxAngle_i+1 < nTotAngles - 1]
+           tAngles_i = [minAngle_i-1,maxAngle_i+1 < (nTotAngles - 1)]
            ;; tAngles = [tempTheta[minAngle_i-1],tempTheta[maxAngle_i+1]]
            ;; tAngles = [tempTheta[tAngles_i[0]],tempTheta[tAngles_i[1]]]
            tAngles = [tempAllAngles[tAngles_i[0]],tempAllAngles[tAngles_i[1]]]
            tTest   = ABS([tAngles[0]-tempAllAngles[minAngle_i],tAngles[1]-tempAllAngles[maxAngle_i]])
            junk    = MIN(tTest,addMe_ii)
-           angleBin_i = SORT([angleBin_i,tAngles_i[addMe_ii]])
-
+           angleBin_i = [angleBin_i,tAngles_i[addMe_ii]]
+           angleBin_i = angleBin_i[SORT(angleBin_i)]
         ENDELSE
         nAngles++
      ENDWHILE
-
+     IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqAngles THEN STOP
 
      nLoopAngles                           = nAngles ;This needs to be distinguished from nAngles because of the change in sweep direction that occurs when using START_FROM_FIELDALIGNED keyword
 
