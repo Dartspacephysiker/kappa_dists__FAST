@@ -87,7 +87,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                          BEST_FJAC=best_fjac, $
                          PARINFO=kappaParamStruct, $
                          QUERY=query, $
-                         NPEGGED=npegged, NFREE=nfree, DOF=dof, $
+                         NPEGGED=npegged, $
+                         NFREE=nfree, $
+                         DOF=dof, $
                          COVAR=covar, $
                          PERROR=perror, $
                          MAXITER=KEYWORD_SET(kCurvefit_opt.max_iter) ? $
@@ -102,11 +104,29 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      ;; IF status EQ -16 THEN STOP
      IF status EQ 0 THEN STOP
 
-     IF nPegged GT 0 THEN PRINT,"PEGGED!"
+     IF nPegged GT 0 THEN BEGIN
+        temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
+        kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
+        IF kappaPegged AND temperaturePegged THEN BEGIN
+           PRINT,"PEGGED!"
+           iBePegged = 1
+        ENDIF ELSE BEGIN
+           iBePegged  = 0
+        ENDELSE
+        ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
+        ;;    iBePegged = 1
+        ;; ENDIF ELSE BEGIN
+        ;;    iBePegged = 0
+        ;; ENDELSE
+     ENDIF ELSE BEGIN
+        iBePegged    = 0
+     ENDELSE
+
      ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) THEN BEGIN
-     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
+     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
+     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND ~KEYWORD_SET(iBePegged) THEN BEGIN
         fitStatus = 0 
-        kappaParamStruct[*].value = AGauss
+        kappaParamStruct[*].value = A
      ENDIF ELSE BEGIN
         fitStatus = 1
      ENDELSE
@@ -142,7 +162,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      IF KEYWORD_SET(fit_fail__user_prompt) AND fitStatus GT 0 THEN BEGIN
         
-        KAPPA__FIT_FAIL_USER_PROMPT,A,kappa_fixA,energy_inds
+        tmpA             = [A[0],A[1],A[2],A[3],0,0,A[4]]
+        tmpfixA          = ~[kappa_fixA[0],kappa_fixA[1],kappa_fixA[2],kappa_fixA[3],1,1,kappa_fixA[4]]
+        KAPPA__FIT_FAIL_USER_PROMPT,tmpA,tmpfixA,energy_inds, $
+                                    Xorig,X,Yorig,Y, $
+                                    STRINGS=strings, $
+                                    BOUNDS_I=bounds_i
 
      ENDIF ELSE BEGIN
         contKappa                = 1
@@ -216,12 +241,14 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               GTOL=1e-13, $
                               STATUS=gaussStatus, $
                               BEST_RESID=best_resid, $
-                              PFREE_INDEX=ifree, $
+                              PFREE_INDEX=iGaussFree, $
                               CALC_FJAC=calc_fjac, $
                               BEST_FJAC=best_fjac, $
                               PARINFO=gaussParamStruct, $
                               QUERY=query, $
-                              NPEGGED=nPegged, NFREE=nfree, DOF=dof, $
+                              NPEGGED=nGaussPegged, $
+                              NFREE=nGaussFree, $
+                              DOF=gaussDOF, $
                               COVAR=covar, $
                               PERROR=perror, $
                               MAXITER=KEYWORD_SET(kCurvefit_opt.max_iter) ? $
@@ -236,13 +263,32 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
         IF (gaussStatus LE 0) OR (gaussStatus GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(gaussStatus)
         IF gaussStatus EQ 0 THEN STOP
-
      ENDIF
 
-     IF nPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
+     ;; IF nGaussPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
+     IF nGaussFree LT 3 THEN PRINT,"GAUSSPEGGED!"
+
+     ;; IF nPegged GT 0 THEN BEGIN
+     ;;    temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
+     ;;    kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
+     ;;    IF kappaPegged AND temperaturePegged THEN BEGIN
+     ;;       PRINT,"PEGGED!"
+     ;;       iBePegged = 1
+     ;;    ENDIF ELSE BEGIN
+     ;;       iBePegged  = 0
+     ;;    ENDELSE
+     ;;    ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
+     ;;    ;;    iBePegged = 1
+     ;;    ;; ENDIF ELSE BEGIN
+     ;;    ;;    iBePegged = 0
+     ;;    ;; ENDELSE
+     ;; ENDIF ELSE BEGIN
+     ;;    iBePegged    = 0
+     ;; ENDELSE
 
      ;; IF (WHERE(gaussStatus EQ OKStatus))[0] NE -1 THEN BEGIN
-     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
+     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nGaussPegged EQ 0 ) THEN BEGIN
+     IF ((WHERE(status EQ OKStatus))[0] NE -1) OR (nGaussFree LT 3) THEN BEGIN
         gaussFitStatus = 0 
         gaussParamStruct[*].value = AGauss
      ENDIF ELSE BEGIN

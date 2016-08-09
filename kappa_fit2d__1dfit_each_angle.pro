@@ -227,7 +227,7 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
 
            ;; PRINT,'Status : ' + STRCOMPRESS(status,/REMOVE_ALL)
            ;; PRINT,'itNum  : ' + STRCOMPRESS(itNum,/REMOVE_ALL)
-           ;; ;; STOP
+           ;; STOP
 
            CASE fitStatus OF 
               0: BEGIN 

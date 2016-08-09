@@ -42,6 +42,12 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
 
   FOR iWin=0,nGoodFits-1 DO BEGIN
 
+     ;; CASE 1 OF
+     ;;    KEYWORD_SET(kCurvefit_opt.fit2d_only_eAngles): BEGIN
+
+
+     ;;    END
+     ;;    ELSE: BEGIN
      SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                             nEnergies,out_eRange_peak, $
                             allAngles,nTotAngles,useTheseAnglesIndex, $
@@ -53,13 +59,13 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                             ;; dens_param, $
                             pre_densEst, $
                             ITIME=iTime, $
-                            JUST_ERANGE_PEAK=just_eRange_peak, $
+                            ;; JUST_ERANGE_PEAK=just_eRange_peak, $
                             ESTFACS=estFacs, $
                             KCURVEFIT_OPT=kCurvefit_opt, $
                             KFITPARAMSTRUCT=kFitParamStruct, $
                             KSDTDATA_OPT=kSDTData_opt, $
                             KSTRINGS=kStrings, $
-                           OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
+                            OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                             ;; OUT_ANGLE_I=angle_i, $
                             OUT_ERANGE_I=eRange_i
 
@@ -93,7 +99,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                  _EXTRA=extra)
 
 
-     IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
+     IF KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak) THEN BEGIN
         oldcraptest = craptest
         FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
            craptest.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
@@ -122,7 +128,20 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
         CASE 1 OF
            kCurvefit_opt.fit2d_only_dens_angles: BEGIN
               CASE 1 OF
-                 KEYWORD_SET(just_eRange_peak): BEGIN
+                 KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+                    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+                       testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
+                    ENDFOR
+                    
+                 END
+                 ELSE: BEGIN
+                    testArrays[*,fit2D_dens_angleInfo.angle_i,iWin]  = yFit
+                 END
+              ENDCASE
+           END
+           kCurvefit_opt.fit2d_only_eAngles: BEGIN
+              CASE 1 OF
+                 KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
                     FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
                        testArrays[eRange_i[m],fit2D_dens_angleInfo.angle_i,iWin] = yFit[m,*]
                     ENDFOR
@@ -145,6 +164,10 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
 
         testArrays[*,*,iWin]              = 0.0
      ENDELSE
+     ;;    END
+     ;; ENDCASE
+
+
 
      IF KEYWORD_SET(show_and_prompt) THEN BEGIN
         tmp2DInfoStruct = {bestFitStr      :crapTest     , $

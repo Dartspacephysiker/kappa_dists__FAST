@@ -34,10 +34,10 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                       ;; [0,0], $
                       [0,0]]
   
-  Alimits         = [[100.,1e4]    , $ ;E_b
+  Alimits         = [[100.,3.5e4]    , $ ;E_b
                      [10,3.5e4]     , $ ;Temp
                      [1.5001D,100]  , $ ;kappa 
-                     [1e-5,100]     , $ ;N
+                     [1e-6,100]     , $ ;N
                      [-180,180]]       ;Bulk Angle
                      ;; [1,0], $
                      ;; [0,0], $
@@ -56,7 +56,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                        fixed:0         , $
                        parname:''      , $
                        ;; relstep:0.D     , $
-                       mpmaxstep:0.D   , $
+                       ;; mpmaxstep:0.D   , $
                        limited:[0,0]   , $
                        limits:[0.D,0]} , $
                       ;; 7)
@@ -73,7 +73,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   paramInfo[*].parName = ["E_b","T","kappa","N","bulkAngle"]
 
   ;;Got it. What about anything like, you know, a max step size?
-  paramInfo[*].mpmaxstep  = AMaxStep
+  ;; paramInfo[*].mpmaxstep  = AMaxStep
 
   ;;So certain values can't be exceeded?
   paramInfo[*].limited[0] = Alimited[*,0]

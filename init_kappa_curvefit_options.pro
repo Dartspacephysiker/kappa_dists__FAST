@@ -13,6 +13,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
                                      MAX_ITERATIONS=max_iter, $
                                      FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                      FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
+                                     FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2d__only_fit_eAngles, $
+                                     FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
                                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
                                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
@@ -46,6 +48,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
   kCurvefit_opt                              = {fit_tol                  :defFit_tol, $
                                                 fit2d_tol                :defFit2D_tol, $
                                                 fit2d_only_dens_angles   : 0, $
+                                                fit2d_only_eAngles      : 0, $
+                                                fit2d_just_eRange_peak   : 0, $
                                                 max_iter                 :defMax_iter, $
                                                 fit2d_max_iter           :defFit2D_max_iter, $
                                                 fita                     :defKappaFitA, $
@@ -136,6 +140,14 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(fit2d__only_fit_densAngles) GT 0 THEN BEGIN
      kCurvefit_opt.fit2d_only_dens_angles    = fit2d__only_fit_densAngles
+  ENDIF
+
+  IF N_ELEMENTS(fit2d__only_fit_eAngles) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2d_only_eAngles    = fit2d__only_fit_eAngles
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__only_fit_peak_eRange) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_just_eRange_peak = fit2D__only_fit_peak_eRange
   ENDIF
 
   RETURN,kCurvefit_opt

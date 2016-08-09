@@ -22,6 +22,10 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   spec2DLims = {yrange:[1e6,upLim]}
   spec2DDatLims = CREATE_STRUCT(spec2DLims,'PSYM',1)
 
+  IF N_ELEMENTS(kSDTData_opt) GT 0 THEN BEGIN
+     angleRange = kSDTData_opt.fit2D_dens_aRange
+  ENDIF
+
   IF KEYWORD_SET(is_maxwellian_fit) THEN BEGIN
      fitString  = 'Maxwell'
   ENDIF ELSE BEGIN
@@ -63,6 +67,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   WHILE ~cont DO BEGIN
      PRINT,"(C)ontinue    / Cont. to (N)ext fit   / Cont. (U)ntil fitNum Eq  / S(T)op and inspect / "
      PRINT,"Sp(E)ctrum    / (FE) Fitted spectrum  / (BE) Both Spectra        / (SE) Save Spectrum / " 
+     PRINT,"(A)djust spec. angle range / "
      PRINT,"(P)itch angle / (S)ave Pitch angle    / "
      PRINT,"(F)inish and save all / (Q)uit ?"
      IF KEYWORD_SET(finish_and_save_all) THEN input = 's' ELSE READ,input
@@ -89,19 +94,19 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "e": BEGIN
            cont = 0
-           SPEC2D,curDataStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,curDataStr,ANGLE=angleRange, $
                   /LABEL,LIMITS=spec2DLims,/MSEC
         END
         "fe": BEGIN
            cont = 0
-           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,LIMITS=spec2DLims,/MS
         END
         "be": BEGIN
            cont = 0
-           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DLims
-           SPEC2D,curDataStr,OVERPLOT=showFit,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,curDataStr,OVERPLOT=showFit,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DDatLims
         END
         "se": BEGIN
@@ -109,12 +114,47 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("spec2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-           SPEC2D,fit2DStruct.bestFitStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DLims
-           SPEC2D,curDataStr,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           SPEC2D,curDataStr,ANGLE=angleRange, $
                   OVERPLOT=showFit, $
                   /LABEL,/MS,LIMITS=spec2DDatLims
            PCLOSE
+        END
+        "a": BEGIN
+           cont = 0
+
+           test_aRange = angleRange
+           input2 = ''
+           cont2  = 0
+
+           WHILE ~cont2 DO BEGIN
+              PRINT,FORMAT='("Current angle range : [",F0.1,",",F0.1,"]")',test_aRange
+              ;; PRINT,FORMAT='("Current energy inds: [",I0,I0,"]")',test_eInds
+              ;; PRINT,FORMAT='("Current energies   : [",G0.2," ,",G0.2,"]")',Xorig[test_eInds]
+              PRINT,'(E)dit angle range     / (P)rint current angle range info /'
+              PRINT,'(S)ave and finish editing / (F)inish editing, no save        '
+              READ,input2
+              CASE STRLOWCASE(input2) OF
+                 "e": BEGIN
+                    READ,newAngle,PROMPT="Enter new angle 0: "
+                    test_aRange[0] = newAngle
+                    READ,newAngle,PROMPT="Enter new angle 1: "
+                    test_aRange[1] = newAngle
+                 END
+                 "p": BEGIN
+                    PRINT,FORMAT='("Current angle range : [",F0.1,",",F0.1,"]")',test_aRange
+                    ;; PRINT,FORMAT='("Current energies   : [",G0.2," ,",G0.2,"]")',Xorig[test_eInds]
+                 END
+                 "s": BEGIN
+                    angleRange = test_aRange
+                    cont2       = 1
+                 END
+                 "f": BEGIN
+                    cont2       = 1
+                 END
+              ENDCASE
+           ENDWHILE
         END
         "p": BEGIN
            cont = 0
@@ -142,9 +182,9 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,strings.orbStr,strings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
-           CONTOUR2D,fit2DStruct.bestFitStr,/POLAR,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           CONTOUR2D,fit2DStruct.bestFitStr,/POLAR, $
                      /FILL,/LABEL,/MS,LIMITS=cont2DLims
-           CONTOUR2D,curDataStr,/POLAR,ANGLE=kSDTData_opt.fit2D_dens_aRange, $
+           CONTOUR2D,curDataStr,/POLAR, $
                      OVERPLOT=showFit,/LABEL,/MS,LIMITS=cont2DLims
            PCLOSE
         END

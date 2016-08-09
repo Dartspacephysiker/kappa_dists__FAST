@@ -1,5 +1,8 @@
 ;;2016/08/05 Use it to see what's happening
-PRO KAPPA__FIT_FAIL_USER_PROMPT,A,fixA,energy_inds
+PRO KAPPA__FIT_FAIL_USER_PROMPT,A,fixA,energy_inds, $
+                                Xorig,X,Yorig,Y, $
+                                STRINGS=strings, $
+                                BOUNDS_I=bounds_i
 
   COMPILE_OPT idl2
    
@@ -10,7 +13,7 @@ PRO KAPPA__FIT_FAIL_USER_PROMPT,A,fixA,energy_inds
   cont       = 0
 
   origA      = A
-  orig_fixA  = kappa_fixA
+  orig_fixA  = fixA
   orig_eInds = energy_inds
 
   WHILE ~cont DO BEGIN

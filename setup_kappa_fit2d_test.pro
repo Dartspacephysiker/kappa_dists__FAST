@@ -10,7 +10,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                            pre_densEst, $
                            ITIME=iTime, $
                            ESTFACS=estFacs, $
-                           JUST_ERANGE_PEAK=just_eRange_peak, $
+                           ;; JUST_ERANGE_PEAK=just_eRange_peak, $
                            KCURVEFIT_OPT=kCurvefit_opt, $
                            KFITPARAMSTRUCT=kFitParamStruct, $
                            KSDTDATA_OPT=kSDTData_opt, $
@@ -34,6 +34,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
      KEYWORD_SET(kCurvefit_opt.fit1D_dens__each_angle): BEGIN
         
         ;;Let them express some individuality in this spot
+        ;;NOTE, while we fit to each angle, we only fit to energies falling within eRange_peak
         KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,testFitStr, $
                                       allAngles, $
                                       eRange_peak, $
@@ -72,7 +73,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
   wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])^2
 
   ;; just_eRange_peak   = 1
-  IF KEYWORD_SET(just_eRange_peak) THEN BEGIN
+  IF KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak) THEN BEGIN
      eRange_i        = WHERE((testFitStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
                              (testFitStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
      IF nEnKeep EQ 0 THEN STOP
@@ -98,7 +99,8 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
         fit2D_dens_angleInfo = {angle_i:angle_i, $
                                nAKeep:nAKeep, $
                                remAngle_i:remAngle_i, $
-                               nARem:nARem}
+                               nARem:nARem, $
+                               type:'Only densAngles'}
         IF nAKeep GT 0 THEN BEGIN
            ;;NOTE, we may have (intentionally) dropped some energies in {X,Y}2D by this point!
            ;;See lines above dealing with {X,Y}2D, dataToFit
@@ -108,6 +110,30 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
            wtsForFit          = wtsForFit[*,angle_i]
         ENDIF ELSE BEGIN
            PRINT,"What? Did you provide a bogus fit2D_dens_aRange?"
+           STOP
+        ENDELSE
+     END
+     kCurvefit_opt.fit2d_only_eAngles: BEGIN
+        angles             = REFORM(testFitStr.theta[useTheseAnglesIndex,*])
+        angle_i            = WHERE( (angles GE kSDTData_opt.electron_angleRange[0]) AND $
+                                    (angles LE kSDTData_opt.electron_angleRange[1]), $
+                                    nAKeep, $
+                                    COMPLEMENT=remAngle_i, $
+                                    NCOMPLEMENT=nARem)
+        fit2D_dens_angleInfo = {angle_i:angle_i, $
+                               nAKeep:nAKeep, $
+                               remAngle_i:remAngle_i, $
+                               nARem:nARem, $
+                               type:'Only eAngles'}
+        IF nAKeep GT 0 THEN BEGIN
+           ;;NOTE, we may have (intentionally) dropped some energies in {X,Y}2D by this point!
+           ;;See lines above dealing with {X,Y}2D, dataToFit
+           X2D                = X2D[*,angle_i]
+           Y2D                = Y2D[*,angle_i]
+           dataToFit          = dataToFit[*,angle_i]
+           wtsForFit          = wtsForFit[*,angle_i]
+        ENDIF ELSE BEGIN
+           PRINT,"What? Did you provide a bogus electron_angleRange?"
            STOP
         ENDELSE
      END
@@ -121,6 +147,9 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
   IF KEYWORD_SET(kCurvefit_opt.fit1D_dens__each_angle) THEN BEGIN
      CASE 1 OF
         kCurvefit_opt.fit2d_only_dens_angles: BEGIN
+           fa              = CREATE_STRUCT(fa,"dens_1D_ests",out_1D_dens_ests[angle_i])
+        END
+        kCurvefit_opt.fit2d_only_eAngles: BEGIN
            fa              = CREATE_STRUCT(fa,"dens_1D_ests",out_1D_dens_ests[angle_i])
         END
         ELSE: BEGIN

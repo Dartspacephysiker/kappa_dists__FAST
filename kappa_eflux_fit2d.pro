@@ -19,6 +19,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1DFit_to_density_at_each_angle, $
    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
    FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
+   FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2d__only_fit_eAngles, $
+   FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
    MIN_PEAK_ENERGY=min_peak_energy, $
@@ -86,6 +88,9 @@ PRO KAPPA_EFLUX_FIT2D, $
                                               FIT2D_TOLERANCE=fit2d_tol, $
                                               FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
                                               FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
+                                              FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2d__only_fit_eAngles, $
+                                              FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+
                                               FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit_each__1DFit_to_density_at_each_angle, $
                                               N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                               N_ENERGIES_ABOVE_PEAK=n_above_peak, $
