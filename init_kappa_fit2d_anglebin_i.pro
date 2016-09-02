@@ -37,18 +37,6 @@ PRO INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
   junk                                  = MAX(nAnglesPerEnergy,useTheseAnglesIndex)
   tempAllAngles                         = AorigArr[*,useTheseAnglesIndex]
 
-     ;; CASE alleyOop OF
-     ;;    0: BEGIN
-     ;;       angleBins                       = tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1]
-     ;;    END
-     ;;    1: BEGIN
-     ;;       angleBins                       = tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1]
-     ;;    END
-        
-     ;; ENDCASE
-
-     ;; angleBin_i                            = WHERE(angleBins,nReqAngles)
-
      CASE alleyOop OF
         0: BEGIN
            nReqAngles                      = N_ELEMENTS(WHERE(tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1],/NULL))
@@ -58,8 +46,5 @@ PRO INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
         END
         
      ENDCASE
-
-     ;; angleBin_i                            = WHERE(angleBins,nReqAngles)
-
 
 END

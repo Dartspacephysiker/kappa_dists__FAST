@@ -1,12 +1,13 @@
-PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
-                                        BULK_OFFSET=bulk_offset, $
-                                        CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks, $
-                                        MIN_PEAK_ENERGY=min_peak_energy
+PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
+   Xorig,Yorig,peak_ind,peak_energy, $
+   BULK_OFFSET=bulk_offset, $
+   CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks, $
+   MIN_PEAK_ENERGY=min_peak_energy
 
   COMPILE_OPT idl2
 
 
-  b_offset                             = KEYWORD_SET(bulk_offset) ? bulk_offset : 0 ;bulk offset
+  b_offset              = KEYWORD_SET(bulk_offset) ? bulk_offset : 0 ;bulk offset
 
   IF KEYWORD_SET(check_for_higher_flux_peaks) THEN BEGIN
      ;;Figure out where most energetic maximum is
@@ -21,7 +22,8 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
         testMax         = max_ys[i]
         curMax_i        = maxima_i[i]
         PRINT,'testval:',STRCOMPRESS((ABS(testMax-peak_y)/peak_y),/REMOVE_ALL)
-        IF testMax_X GT Xorig[peak_ind] AND (ABS(testMax-peak_y)/peak_y) LT peak_tol_percent THEN BEGIN
+        IF testMax_X GT Xorig[peak_ind] AND $
+           (ABS(testMax-peak_y)/peak_y) LT peak_tol_percent THEN BEGIN
            peak_ind     = curMax_i
            peak_energy  = testMax_X
         ENDIF
@@ -32,7 +34,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
         KEYWORD_SET(min_peak_energy): BEGIN
            inds         = WHERE(Xorig GE min_peak_energy)
            IF inds[0] EQ -1 THEN BEGIN
-              PRINT,"Can't find any good energy inds! Consider lowering your energy requirement."
+              PRINT,"Can't find any good energy inds! Maybe lower your energy requirement."
               STOP
            ENDIF
            max_y        = MAX(Yorig[inds],peak_ind)
@@ -50,4 +52,3 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY,Xorig,Yorig,peak_ind,peak_energy, $
   ENDELSE
 
 END
-

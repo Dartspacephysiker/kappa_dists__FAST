@@ -8,13 +8,15 @@
 ; A[4]: inDT,      The "delta_t" for integration of electron counts (UNUSED)
 ; A[5]: m,         Particle mass (in this case electron mass), in eV/c^2
 ;2016/07/19
-FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
-                                     FIT2D_TOLERANCE=fit2d_tol, $
-                                     MAX_ITERATIONS=max_iter, $
-                                     FIT2D_MAX_ITERATIONS=fit2d_max_iter, $
-                                     FIT2D__ONLY_FIT_DENSANGLES=fit2d__only_fit_densAngles, $
-                                     FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2d__only_fit_eAngles, $
+FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
+                                     FIT1D__MAX_ITERATIONS=max_iter, $
+                                     FIT2D__TOLERANCE=fit2D_tol, $
+                                     FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+                                     FIT2D__ONLY_FIT_DENSANGLES=fit2D__only_fit_densAngles, $
+                                     FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
                                      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+                                     FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
+                                     FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
                                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
                                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
                                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
@@ -47,13 +49,15 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
   defKappaFitA                               = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
 
   kCurvefit_opt                              = {fit_tol                  :defFit_tol, $
-                                                fit2d_tol                :defFit2D_tol, $
-                                                fit2d_only_dens_angles   : 0, $
-                                                fit2d_only_eAngles       : 0, $
-                                                fit2d_just_eRange_peak   : 0, $
-                                                fit2d_keep_wholefit      : 0, $
+                                                fit2D_tol                :defFit2D_tol, $
+                                                fit2D_only_dens_angles   : 0, $
+                                                fit2D_only_eAngles       : 0, $
+                                                fit2D_just_eRange_peak   : 0, $
+                                                fit2D__bulk_e_anisotropy : 0, $
+                                                fit2D__bulk_e_anis_factor: 0., $
+                                                fit2D_keep_wholefit      : 0, $
                                                 max_iter                 :defMax_iter, $
-                                                fit2d_max_iter           :defFit2D_max_iter, $
+                                                fit2D_max_iter           :defFit2D_max_iter, $
                                                 fita                     :defKappaFitA, $
                                                 fit1D_dens__each_angle   : 0, $
                                                 n_below_peak             :defNEn_below_peak, $
@@ -69,39 +73,67 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(fit_tol) GT 0 THEN BEGIN
      kCurvefit_opt.fit_tol                   = fit_tol
+
+     PRINT,FORMAT='("kCurvefit_opt.fit_tol",T45,":",T48,F0.2)', $
+     kCurvefit_opt.fit_tol
   ENDIF
 
   IF N_ELEMENTS(max_iter) GT 0 THEN BEGIN
      kCurvefit_opt.max_iter                  = max_iter
+
+     PRINT,FORMAT='("kCurvefit_opt.max_iter",T45,":",T48,I0)', $
+     kCurvefit_opt.max_iter
   ENDIF
 
-  IF N_ELEMENTS(fit2d_max_iter) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2d_max_iter            = fit2d_max_iter
+  IF N_ELEMENTS(fit2D_max_iter) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_max_iter            = fit2D_max_iter
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_max_iter",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D_max_iter
   ENDIF
 
-  IF N_ELEMENTS(fit2d_tol) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2d_tol                 = fit2d_tol
+  IF N_ELEMENTS(fit2D_tol) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_tol                 = fit2D_tol
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_tol",T45,":",T48,F0.2)', $
+     kCurvefit_opt.fit2D_tol
   ENDIF
 
   IF N_ELEMENTS(n_below_peak) GT 0 THEN BEGIN
      kCurvefit_opt.n_below_peak              = n_below_peak
+
+     PRINT,FORMAT='("kCurvefit_opt.n_below_peak",T45,":",T48,I0)', $
+     kCurvefit_opt.n_below_peak
   ENDIF
 
   IF N_ELEMENTS(n_above_peak) GT 0 THEN BEGIN
      kCurvefit_opt.n_above_peak              = n_above_peak
+
+     PRINT,FORMAT='("kCurvefit_opt.n_above_peak",T45,":",T48,I0)', $
+     kCurvefit_opt.n_above_peak
   ENDIF
 
   IF N_ELEMENTS(trim_energies_below_peak) GT 0 THEN BEGIN
      kCurvefit_opt.trim_energies_below_peak  = trim_energies_below_peak
+
+     PRINT,FORMAT='("kCurvefit_opt.trim_energies_below_peak",T45,":",T48,I0)', $
+     kCurvefit_opt.trim_energies_below_peak
   ENDIF
 
   IF N_ELEMENTS(min_peak_energy) GT 0 THEN BEGIN
      kCurvefit_opt.min_peak_energy           = min_peak_energy
+
+     PRINT,FORMAT='("kCurvefit_opt.min_peak_energy",T45,":",T48,I0)', $
+     kCurvefit_opt.min_peak_energy
   ENDIF
 
   IF N_ELEMENTS(dont_fit_below_thresh_value) GT 0 THEN BEGIN
      ;; ADD_STR_ELEMENT,kCurvefit_opt,'thresh_eFlux',dont_fit_below_thresh_value
      kCurvefit_opt.thresh_eFlux              = dont_fit_below_thresh_value
+
+     PRINT,FORMAT='("kCurvefit_opt.thresh_eFlux",T45,":",T48,I0)', $
+     kCurvefit_opt.thresh_eFlux
+
   ENDIF
 
   IF N_ELEMENTS(estimate_A_from_data) GT 0 THEN BEGIN
@@ -110,6 +142,9 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(add_gaussian_estimate) GT 0 THEN BEGIN
      kCurvefit_opt.add_gaussian_estimate     = add_gaussian_estimate
+
+     PRINT,FORMAT='("kCurvefit_opt.add_gaussian_estimate",T45,":",T48,I0)', $
+     kCurvefit_opt.add_gaussian_estimate
   ENDIF
 
   IF N_ELEMENTS(use_SDT_Gaussian_fit) GT 0 THEN BEGIN
@@ -118,10 +153,16 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(use_mpFit1D) GT 0 THEN BEGIN
      kCurvefit_opt.use_mpFit1D               = use_mpFit1D
+
+     PRINT,FORMAT='("kCurvefit_opt.use_mpFit1D",T45,":",T48,I0)', $
+     kCurvefit_opt.use_mpFit1D
   ENDIF
 
   IF KEYWORD_SET(fit1D_to_density_at_each_angle) THEN BEGIN
      kCurvefit_opt.fit1D_dens__each_angle    = fit1D_to_density_at_each_angle
+
+     PRINT,FORMAT='("kCurvefit_opt.fit1D_to_density_at_each_angle",T45,":",T48,I0)', $
+     kCurvefit_opt.fit1D_to_density_at_each_angle
   ENDIF
 
   IF N_ELEMENTS(n_est) GT 0 THEN BEGIN
@@ -140,23 +181,49 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT_TOLERANCE=fit_tol, $
      kCurvefit_opt.bulk_offset               = bulk_offset
   ENDIF
 
-  IF N_ELEMENTS(fit2d__only_fit_densAngles) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2d_only_dens_angles    = fit2d__only_fit_densAngles
+  IF N_ELEMENTS(fit2D__only_fit_densAngles) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_only_dens_angles    = fit2D__only_fit_densAngles
+
+     PRINT,FORMAT='("kCurvefit_opt.only_dens_angles",T45,":",T48,I0)', $
+     kCurvefit_opt.only_dens_angles
   ENDIF
 
-  IF N_ELEMENTS(fit2d__only_fit_eAngles) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2d_only_eAngles    = fit2d__only_fit_eAngles
+  IF N_ELEMENTS(fit2D__only_fit_eAngles) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_only_eAngles    = fit2D__only_fit_eAngles
+
+     PRINT,FORMAT='("kCurvefit_opt.only_eAngles",T45,":",T48,I0)', $
+     kCurvefit_opt.only_eAngles
   ENDIF
 
   IF N_ELEMENTS(fit2D__only_fit_peak_eRange) GT 0 THEN BEGIN
      kCurvefit_opt.fit2D_just_eRange_peak = fit2D__only_fit_peak_eRange
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_just_eRange_peak",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D_just_eRange_peak
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__bulk_e_anisotropy) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D__bulk_e_anisotropy = fit2D__bulk_e_anisotropy
+
+     PRINT,"Assuming anisotropic bulk energy ..."
+  ENDIF
+
+  IF KEYWORD_SET(kCurvefit_opt.fit2D__bulk_e_anisotropy) THEN BEGIN
+     kCurvefit_opt.fit2D__bulk_e_anis_factor = (KEYWORD_SET(fit2D__bulk_e_anis_factor) ? $
+                                               fit2D__bulk_e_anis_factor : 0.3)
+
+     PRINT,FORMAT='("Bulk_E Anistropy Factor : ",F0.2)', $
+           kCurvefit_opt.fit2D__bulk_e_anis_factor
   ENDIF
 
   IF N_ELEMENTS(fit2D__keep_wholeFit) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2d_keep_wholefit = fit2D__keep_wholeFit
+     kCurvefit_opt.fit2D_keep_wholefit = fit2D__keep_wholeFit
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__keep_wholeFit",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D__keep_wholeFit
   ENDIF
 
-
+  PRINT,''
 
   RETURN,kCurvefit_opt
 

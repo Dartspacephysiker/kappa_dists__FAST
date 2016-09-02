@@ -84,7 +84,8 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
   COMMON FIT_MASS,mass
 
-  ;; dat.mass is a scaler with units of eV/(km/s)^2. Use 1.6e-12erg/eV * (km/1.e5cm)^2 to convert
+  ;; McFadden says: "dat.mass is a scaler [sic] with units of eV/(km/s)^2."
+  ;; Use 1.6e-12erg/eV * (km/1.e5cm)^2 to convert
   mass = dat.mass*1.6e-22
 
   IF SIZE(estFacs,/TYPE) NE 8 THEN BEGIN

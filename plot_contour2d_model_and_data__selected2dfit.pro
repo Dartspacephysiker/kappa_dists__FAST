@@ -1,4 +1,5 @@
 PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
+   FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    LIMITS=limits, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    KSDTDATA_OPT=kSDTData_opt, $
@@ -28,7 +29,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
             /LABEL
   IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
      
-     tmpA        = fit2DStruct.bestFit1DParams.A
+     tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.bestFit1DParams : $
+                   fit2DStruct.bestFit1DParams.A
      fitTitle    = ["Bulk energy  (eV)","Plasma temp. (eV)", $
                     "Kappa","Density (cm^-3)", $
                     CGGREEK('chi',/PS)+'!11^2']

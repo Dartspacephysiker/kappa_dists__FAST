@@ -2,6 +2,7 @@
 PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
    nTot2DFits, $
    iTime, $
+   FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    KCURVEFIT_OPT=kCurvefit_opt, $
    KPLOT_OPT=kPlot_opt, $
@@ -56,6 +57,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
      POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+        FOR_HORSESHOE_FIT=for_horseshoe_fit, $
         LIMITS=cont2DLims, $
         ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
         KSDTDATA_OPT=kSDTData_opt, $
@@ -159,6 +161,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         "p": BEGIN
            cont = 0
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+              FOR_HORSESHOE_FIT=for_horseshoe_fit, $
               LIMITS=cont2DLims, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
               KSDTDATA_OPT=kSDTData_opt, $
@@ -170,6 +173,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
                            fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+              FOR_HORSESHOE_FIT=for_horseshoe_fit, $
               LIMITS=cont2DLims, $
               ADD_FITPARAMS_TEXT=kPlot_opt.add_fitParams_text, $
               KSDTDATA_OPT=kSDTData_opt, $
