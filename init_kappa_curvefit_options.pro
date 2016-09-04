@@ -15,12 +15,15 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                      FIT2D__ONLY_FIT_DENSANGLES=fit2D__only_fit_densAngles, $
                                      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
                                      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+                                     FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
                                      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
                                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
                                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
                                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
                                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+                                     N_BELOW_PEAK2D=n_below_peak2D, $
+                                     N_ABOVE_PEAK2D=n_above_peak2D, $
                                      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
                                      MIN_PEAK_ENERGY=min_peak_energy, $
                                      DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
@@ -53,6 +56,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                                 fit2D_only_dens_angles   : 0, $
                                                 fit2D_only_eAngles       : 0, $
                                                 fit2D_just_eRange_peak   : 0, $
+                                                fit2D_fit_above_minE     : 0, $
                                                 fit2D__bulk_e_anisotropy : 0, $
                                                 fit2D__bulk_e_anis_factor: 0., $
                                                 fit2D_keep_wholefit      : 0, $
@@ -62,6 +66,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                                 fit1D_dens__each_angle   : 0, $
                                                 n_below_peak             :defNEn_below_peak, $
                                                 n_above_peak             :defNEn_above_peak, $
+                                                n_below_peak2D           :defNEn_below_peak, $
+                                                n_above_peak2D           :defNEn_above_peak, $
                                                 trim_energies_below_peak :1, $
                                                 min_peak_energy          :defMin_peak_energy, $
                                                 thresh_eFlux             :0.0D, $
@@ -111,6 +117,20 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
 
      PRINT,FORMAT='("kCurvefit_opt.n_above_peak",T45,":",T48,I0)', $
      kCurvefit_opt.n_above_peak
+  ENDIF
+
+  IF N_ELEMENTS(n_below_peak2d) GT 0 THEN BEGIN
+     kCurvefit_opt.n_below_peak2d              = n_below_peak2d
+
+     PRINT,FORMAT='("kCurvefit_opt.n_below_peak2d",T45,":",T48,I0)', $
+     kCurvefit_opt.n_below_peak2d
+  ENDIF
+
+  IF N_ELEMENTS(n_above_peak2d) GT 0 THEN BEGIN
+     kCurvefit_opt.n_above_peak2d              = n_above_peak2d
+
+     PRINT,FORMAT='("kCurvefit_opt.n_above_peak2d",T45,":",T48,I0)', $
+     kCurvefit_opt.n_above_peak2d
   ENDIF
 
   IF N_ELEMENTS(trim_energies_below_peak) GT 0 THEN BEGIN
@@ -200,6 +220,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
 
      PRINT,FORMAT='("kCurvefit_opt.fit2D_just_eRange_peak",T45,":",T48,I0)', $
      kCurvefit_opt.fit2D_just_eRange_peak
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__only_fit_aboveMin) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D_fit_above_minE = fit2D__only_fit_aboveMin
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_fit_above_minE",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D_fit_above_minE
   ENDIF
 
   IF N_ELEMENTS(fit2D__bulk_e_anisotropy) GT 0 THEN BEGIN

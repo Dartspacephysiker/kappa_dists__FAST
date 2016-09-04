@@ -22,14 +22,22 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   nz_i               = WHERE(curDataStr.ddata GT 0,/NULL)
   wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])^2
 
-  IF KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak) THEN BEGIN
-     eRange_i        = WHERE((curFitStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
-                             (curFitStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
-     IF nEnKeep EQ 0 THEN STOP
-  ENDIF ELSE BEGIN
-     nEnKeep         = N_ELEMENTS(curFitStr.energy[*,nTotAngles/2])
-     eRange_i        = INDGEN(nEnKeep)
-  ENDELSE
+  CASE 1 OF
+     KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+        eRange_i        = WHERE((curFitStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
+                                (curFitStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
+        IF nEnKeep EQ 0 THEN STOP
+     END
+     KEYWORD_SET(kCurvefit_opt.fit2D_fit_above_minE): BEGIN
+        eRange_i        = WHERE(curFitStr.energy[*,nTotAngles/2] GE $
+                                kCurvefit_opt.min_peak_energy,nEnKeep)
+        IF nEnKeep EQ 0 THEN STOP
+     END
+     ELSE: BEGIN
+        nEnKeep         = N_ELEMENTS(curFitStr.energy[*,nTotAngles/2])
+        eRange_i        = INDGEN(nEnKeep)
+     END
+  ENDCASE
 
   ;;First drop some energies
   X2D                = curFitStr.energy[eRange_i,*]

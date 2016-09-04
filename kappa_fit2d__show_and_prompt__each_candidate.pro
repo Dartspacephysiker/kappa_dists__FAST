@@ -64,6 +64,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         FITSTRING=fitString
      PCLOSE
 
+     RETURN
   ENDIF
 
   WHILE ~cont DO BEGIN

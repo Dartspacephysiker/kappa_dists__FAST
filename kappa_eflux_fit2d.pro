@@ -12,6 +12,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
    N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+   N_BELOW_PEAK2D=n_below_peak2D, $
+   N_ABOVE_PEAK2D=n_above_peak2D, $
    CHECK_FOR_HIGHER_FLUX_PEAKS__SET_CORRESPONDING_PEAK_ENERGY=check_higher_peaks_set_peakEn, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
@@ -30,6 +32,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
    FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
    FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+   FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
    FIT2D__PRINT_FITINFO=print_2DFitInfo, $
    FIT2D__TOLERANCE=fit2d_tol, $
@@ -74,10 +77,13 @@ PRO KAPPA_EFLUX_FIT2D, $
                   FIT2D__TOLERANCE=fit2d_tol, $
                   FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
                   FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+                  FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                   FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
                   FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
                   N_ENERGIES_BELOW_PEAK=n_below_peak, $
                   N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+                  N_BELOW_PEAK2D=n_below_peak2D, $
+                  N_ABOVE_PEAK2D=n_above_peak2D, $
                   TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
                   MIN_PEAK_ENERGY=min_peak_energy, $
                   DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $

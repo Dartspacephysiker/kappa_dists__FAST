@@ -8,10 +8,11 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
                                       PLOT_BULKE_MODEL=plot_bulke_model, $
                                       PLOT_BULKE_FACTOR=plot_bulke_factor, $
                                       POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
-                                      PLOT_BULKE_MODEL_V_DATA_COMPARISON=plot_comparison, $
+                                      PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
                                       PLOT_FLUX_PEAKS=plot_flux_peaks, $
                                       PLOTDIR=plotDir, $
                                       ORBIT=orbit, $
+                                      TIME=time, $
                                       SAVE_PLOTS=save_plots, $
                                       OUT_PEAK_ENERGIES=peak_en, $
                                       OUT_PEAK_FLUXES=peak_flux, $
@@ -21,12 +22,23 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
   COMPILE_OPT IDL2
 
   IF KEYWORD_SET(save_plots) THEN BEGIN
-     SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
+     IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
 
      pSuff              = '.png'
 
      orbStr             = KEYWORD_SET(orbit)  ? STRING(FORMAT='("--",I0)',orbit) : ''
-     timeStr            = KEYWORD_SET(time)   ? STRING(FORMAT='("--",A0)',TIME_TO_STR(time,/MS))  : ''
+     IF KEYWORD_SET(time) THEN BEGIN
+
+        CASE SIZE(time,/TYPE) OF
+           7: BEGIN
+              timeStr   = time
+           END
+           ELSE: BEGIN
+              timeStr   = STRING(FORMAT='("--",A0)',TIME_TO_STR(time,/MS))
+           END
+        ENDCASE
+     ENDIF
+
      minEnStr           = KEYWORD_SET(minEn)  ? STRING(FORMAT='("--minEn_",I0)',minEn)  : ''
 
      bFuncSPName        = 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+pSuff
@@ -54,9 +66,10 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
      prevAngle_i = (bestAngle_i + k - 1) MOD nAngles
 
      IF KEYWORD_SET(min_energy) THEN BEGIN
-        tmpEn    = X[WHERE(X[*,tmpAngle_i] GE min_energy),tmpAngle_i]
-        tmpAngle = Y[WHERE(X[*,tmpAngle_i] GE min_energy),tmpAngle_i]
-        tmpData  = Z[WHERE(X[*,tmpAngle_i] GE min_energy),tmpAngle_i]
+        good_i   = WHERE(X[*,tmpAngle_i] GE min_energy)
+        tmpEn    = X[good_i,tmpAngle_i]
+        tmpAngle = Y[good_i,tmpAngle_i]
+        tmpData  = Z[good_i,tmpAngle_i]
      ENDIF ELSE BEGIN
         tmpEn    = X[*,tmpAngle_i]
         tmpAngle = Y[*,tmpAngle_i]
@@ -92,10 +105,10 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
 
   CASE 1 OF
      KEYWORD_SET(logScale): BEGIN
-        minRatio           = ALOG10(MIN(peak_En/peak_En[0]))
+        minRatio           = ALOG10(MIN(peak_En/peak_En[bestAngle_i]))
      END
      ELSE: BEGIN
-        minRatio           = MIN(peak_En/peak_En[0])
+        minRatio           = MIN(peak_En/peak_En[bestAngle_i])
      END
   ENDCASE
 
@@ -173,7 +186,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
      xTickValues = [-180,-90,0,90,180]
      xTickName   = STRING(FORMAT='(I0)',xTickValues)
 
-     those = PLOT(peak_angle[sort_i],peak_en[sort_i]/peak_en[0], $
+     those = PLOT(peak_angle[sort_i],peak_en[sort_i]/peak_en[bestAngle_i], $
                   NAME='Model function', $
                   XTITLE='$\theta$ (deg)', $
                   YTITLE='b($\theta$)!C!C(E$_b$($\theta$)/E$_{b,||}$)', $
@@ -208,7 +221,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
                   SYMBOL='*', $
                   SYM_SIZE=2.0, $
                   FONT_SIZE=18, $
-                  LINESTYLE='', $
+                  LINESTYLE='-', $
                   COLOR='black', $
                   ;; /OVERPLOT, $
                   CURRENT=window)
@@ -229,8 +242,9 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
      IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
 
      sort_i = SORT(peak_angle)
+     yRange       = [MIN(peak_en[sort_i]/peak_en[bestAngle_i]),MAX(peak_en[sort_i]/peak_en[bestAngle_i])]
 
-     that = PLOT(peak_angle,peak_en/peak_en[0], $
+     that = PLOT(peak_angle,peak_en/peak_en[bestAngle_i], $
                  NAME='Data', $
                  ;; TITLE='Variation in E$_{bulk}$ with pitch angle', $
                  YRANGE=[0.19,1.02], $
@@ -269,14 +283,15 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
      IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
 
      sort_i       = SORT(peak_angle)
-     yLog         = ALOG10(MIN(peak_flux)/MAX(peak_flux)) LT 2 ? 1 : 0
+     yLog         = ALOG10(MIN(peak_flux)/MAX(peak_flux)) LT -1 ? 1 : 0
+     yRange       = [MIN(peak_flux[sort_i]/peak_flux[bestAngle_i]),MAX(peak_flux[sort_i]/peak_flux[bestAngle_i])]
      ;; pkFlux_title = STRING(FORMAT='(A0,A0)', $
      ;;                          "Variation in peak diff. eFlux with pitch angle", $
      ;;                          (KEYWORD_SET(min_energy) ? $
      ;;                           STRING(FORMAT='("!C(Min energy: ",G0.2," eV)")',min_energy) : $
      ;;                           ''))
 
-     ;; that = PLOT(peak_angle[sort_i],peak_flux[sort_i]/peak_flux[0], $
+     ;; that = PLOT(peak_angle[sort_i],peak_flux[sort_i]/peak_flux[bestAngle_i], $
      ;;             NAME='peak_flux', $
      ;;             TITLE=pkFlux_title, $
      ;;             XTITLE='$\theta$ (deg)', $
@@ -291,7 +306,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
      xTickValues = [-180,-90,0,90,180]
      xTickName   = STRING(FORMAT='(I0)',xTickValues)
 
-     that = PLOT(peak_angle[sort_i],peak_flux[sort_i]/peak_flux[0], $
+     that = PLOT(peak_angle[sort_i],peak_flux[sort_i]/peak_flux[bestAngle_i], $
                  NAME='peak_flux', $
                  TITLE=pkFlux_title, $
                  XTITLE='$\theta$ (deg)', $
@@ -319,7 +334,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
 
   ;; print = 1
   IF KEYWORD_SET(print) THEN BEGIN
-     diff = (peak_en/peak_en[0])-factor
+     diff = (peak_en/peak_en[bestAngle_i])-factor
 
      PRINT,FORMAT='(A0,T12,A0,T24,A0,T36,A0)', $
            "Angle", $
@@ -328,7 +343,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST,X,Y,Z, $
            "(Act-Mod)" 
      FOR k=0,nAngles-1 DO PRINT,FORMAT='(F0.2,T12,F0.2,T24,F0.2,T36,F0.2)', $
                                 peak_angle[k], $
-                                peak_en[k]/peak_en[0], $
+                                peak_en[k]/peak_en[bestAngle_i], $
                                 factor[k], $
                                 diff[k]
   ENDIF

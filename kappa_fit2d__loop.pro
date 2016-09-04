@@ -52,6 +52,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   
   COMPILE_OPT idl2
 
+  ;;For updating K_EA__gFunc,K_EA__bFunc
+  @common__kappa_flux2d__horseshoe__eanisotropy.pro
+
   ;; RESOLVE_ROUTINE,'mpfit2dfun',/IS_FUNCTION
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
@@ -190,6 +193,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ENDFOR
      ENDIF
 
+     ;;Make angles start from field aligned, go back and forth
+     angleBin_i = angleBin_i[SORT(ABS(tempAllAngles[angleBin_i]))]
+
      ;;Order of dat.data is [energy,angle] when coming from SDT
      dat                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
@@ -199,6 +205,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      good_angleBinG_i      = !NULL
      good_kappaFits_i      = !NULL
      good_gaussFits_i      = !NULL
+
+     gotKappa              = 0
+     gotGauss              = 0
 
      shoutOut              = 1
      FOR iiAngle=0,nAngles-1 DO BEGIN
@@ -350,36 +359,82 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            ;;Determine whether we're keeping this guy or not, for plotting purposes and for building synthetic SDT structs
            skipKappa                                = (kappaFit.fitStatus GT 0)
 
-           IF ~skipKappa THEN BEGIN
+           IF ~skipKappa AND ~gotKappa THEN BEGIN
               synthKappa.data[*,iAngle,iTime]       = kappaFit.yFull
               synthKappa.energy[*,iAngle,iTime]     = kappaFit.xFull
               nGoodFits_tempK++
               good_angleBinK_i                      = [good_angleBinK_i,iAngle]
               good_kappaFits_i                      = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
+
+              gotKappa                              = 1
+              PRINT,"Got our 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
            ENDIF
 
            IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
               skipGauss                             = (gaussFit.fitStatus GT 0)
 
-              IF ~skipGauss THEN BEGIN
+              IF ~skipGauss AND ~gotGauss THEN BEGIN
                  synthGauss.data[*,iAngle,iTime]    = gaussFit.yFull
                  synthGauss.energy[*,iAngle,iTime]  = gaussFit.xFull
                  nGoodFits_tempG++
                  good_angleBinG_i                   = [good_angleBinG_i,iAngle]
                  good_gaussFits_i                   = [good_gaussFits_i,N_ELEMENTS(gaussFits)-1]
+
+                 gotGauss                           = 1
+              
               ENDIF
            ENDIF
         ENDIF
 
+        IF gotKappa THEN BEGIN
+           ;; PRINT,"Got our 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
+           IF ~gotGauss THEN PRINT,'Sorry, Gauss is missing out.'
+           BREAK
+        ENDIF
+
      ENDFOR
 
+     stopMe1      = '97-02-01/09:26:13.22'
+     stopMe2      = '97-02-01/09:26:18.91'
+     sm1          = STR_TO_TIME(stopMe1)
+     sm2          = STR_TO_TIME(stopMe2)
+
+     IF (ABS(t-sm1) LT 0.1) OR (ABS(t-sm2) LT 0.1) THEN BEGIN
+
      ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
-     curKappaStr                                    = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
-     curGaussStr                                    = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
-     curDataStr                                     = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+     curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
+     curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
+     curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
      ;;Units for later
      INIT_KAPPA_UNITCONV,curDataStr
+
+     UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
+        ;; bestAngle_i, $
+        good_angleBinK_i[0], $
+        PEAK_ENERGY=peak_energy, $
+        ;; KAPPAPARAMSTRUCT=kappaParamStruct, $
+        ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
+        KCURVEFITOPT=kCurvefit_opt, $
+        KSTRINGS=kStrings, $
+        ITIME=iTime, $
+        LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
+        PLOT_BULKE_MODEL=plot_bulke_model, $
+        ;; PLOT_BULKE_FACTOR=plot_bulke_factor, $
+        ;; /PLOT_BULKE_FACTOR, $
+        ;; POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
+        ;; /POLARPLOT_BULKE_FACTOR, $
+        PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
+        ;; PLOT_FLUX_PEAKS=plot_flux_peaks, $
+        /PLOT_FLUX_PEAKS, $
+        PLOTDIR=kPlot_opt.plotDir, $
+        ORBIT=orbit, $
+        ;; SAVE_PLOTS=save_plots
+        /SAVE_PLOTS
+
+  ENDIF
+
+     CONTINUE
 
      CASE 1 OF
         KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
@@ -399,6 +454,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            nTotAngles, $
            successesK, $
            curKappaStr,kappaFits,curDataStr, $
+           good_angleBinK_i, $
            KCURVEFIT_OPT=kCurvefit_opt, $
            KFITPARAMSTRUCT=kappaParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
