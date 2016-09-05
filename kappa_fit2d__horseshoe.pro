@@ -5,6 +5,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            successes, $
                            curFitStr,fits,curDataStr, $
                            fitAngle_i, $
+                           ;; IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
                            KCURVEFIT_OPT=kCurvefit_opt, $
                            KFITPARAMSTRUCT=kFitParamStruct, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
@@ -30,6 +31,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      curFitStr,curDataStr, $
      wtsForFit,X2D,Y2D,dataToFit, $
      fa, $
+     IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
      ITIME=iTime, $
      KCURVEFIT_OPT=kCurvefit_opt, $
      KFITPARAMSTRUCT=kFitParamStruct, $
@@ -136,15 +138,19 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   ENDCASE
 
 
+  fit2Ddens         = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
+                                 ENERGY=kSDTData_opt.energy_electrons, $
+                                 ANGLE=kSDTData_opt.fit2D_dens_aRange)
+
   IF KEYWORD_SET(show_and_prompt) THEN BEGIN
-     densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
-                                    ENERGY=kSDTData_opt.energy_electrons, $
-                                    ANGLE=kSDTData_opt.fit2D_dens_aRange)
+     ;; densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
+     ;;                                ENERGY=kSDTData_opt.energy_electrons, $
+     ;;                                ANGLE=kSDTData_opt.fit2D_dens_aRange)
 
      tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
                         bestFit1DParams :fit2DParams  , $
                         fitAngle_i      :0.0          , $
-                        bestDens        :densEst      , $
+                        bestDens        :fit2Ddens    , $
                         bestChi2        :bestNorm}
 
      KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,tmp2DInfoStruct, $
@@ -158,8 +164,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         KSTRINGS=kStrings, $
         PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
         PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-        FINISH_AND_SAVE_ALL=finish_and_save_all, $
-        ;; /FINISH_AND_SAVE_ALL, $
+        ;; FINISH_AND_SAVE_ALL=finish_and_save_all, $
+        /FINISH_AND_SAVE_ALL, $
         KAPPA_FIT__SHOW__QUIT=show__quit
 
   ENDIF
@@ -179,8 +185,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
      keep_iTime      = [keep_iTime,iTime]
 
-     tmpKeeper       = {fitStr       : fit2DStr   , $
+     tmpKeeper       = {SDT          : fit2DStr   , $
                         fitParams    : fit2DParams, $
+                        fitDens      : fit2Ddens  , $
                         chi2         : bestNorm   , $
                         errMsg       : errMsg     , $
                         status       : status     , $

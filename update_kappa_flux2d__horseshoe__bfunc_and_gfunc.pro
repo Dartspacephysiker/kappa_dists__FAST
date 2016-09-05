@@ -4,6 +4,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
    ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
    ;; FITPARAMSTRUCT=fitParamStruct, $
    PEAK_ENERGY=peak_energy, $
+   NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
    KCURVEFITOPT=kCurvefit_opt, $
    KSTRINGS=kStrings, $
    ITIME=iTime, $
@@ -26,6 +27,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
           curDataStr.theta, $
           curDataStr.data, $
           fitAngle_i, $
+          NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
           ;; BULK_ENERGY=kappaParamStruct[0].value, $
           ;; BULK_ENERGY=kappaParamStruct[0].value, $
           BULK_ENERGY=peak_energy, $

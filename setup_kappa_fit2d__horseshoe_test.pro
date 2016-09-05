@@ -4,6 +4,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    curFitStr,curDataStr, $
    wtsForFit,X2D,Y2D,dataToFit, $
    fa, $
+   IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    ITIME=iTime, $
    KCURVEFIT_OPT=kCurvefit_opt, $
    KFITPARAMSTRUCT=kFitParamStruct, $
@@ -54,7 +55,8 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
                           type:'a good type'}
 
 
-  fa                 = {mu_0          : COS(kSDTData_opt.electron_lca/180.*!PI), $
-                        Bingham_style : 1}
+  fa                 = {mu_0              : COS(kSDTData_opt.electron_lca/180.*!PI), $
+                        Bingham_style     : 1, $
+                        is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit)}
 
 END

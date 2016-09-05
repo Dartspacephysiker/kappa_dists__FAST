@@ -62,10 +62,12 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   
   IF N_ELEMENTS(electron_lca) GT 0 THEN BEGIN
      kSDTData_opt.electron_lca              = electron_lca
-
+     kSDTData_opt.fit2D_dens_aRange         = [-ABS(electron_lca),ABS(electron_lca)]
      ;; PRINT,FORMAT='("Loss-cone angle (not fitting angles outside this range): ",F0.2)', $
      PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
            kSDTData_opt.electron_lca
+     PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
+           kSDTData_opt.fit2D_dens_aRange
   ENDIF
   
   IF N_ELEMENTS(fit2D_density_angleRange) GT 0 THEN BEGIN

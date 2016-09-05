@@ -50,7 +50,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   showFit       = 1
 
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
-     tempFN = STRING(FORMAT='(A0,"_fit--orb_",A0,"--",A0)', $
+     tempFN = STRING(FORMAT='("orb_",A0,"--",A0,"_fit--",A0)', $
                      fitString, $
                      kStrings.orbStr, $
                      kStrings.timeFNStrs[iTime])
@@ -114,8 +114,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "se": BEGIN
            cont = 0
-           tempFN = STRING(FORMAT='("spec2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
-                           fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
+           tempFN = STRING(FORMAT='("spec2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
+                           kStrings.orbStr,fitString,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DLims
@@ -170,8 +170,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "s": BEGIN
            cont = 0
-           tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
-                           fitString,kStrings.orbStr,kStrings.timeFNStrs[iTime])
+           tempFN = STRING(FORMAT='("contour2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
+                           kStrings.orbStr,fitString,kStrings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               FOR_HORSESHOE_FIT=for_horseshoe_fit, $
@@ -184,8 +184,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         "f": BEGIN
            cont = 1
            finish_and_save_all = 1
-           tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
-                           fitString,strings.orbStr,strings.timeFNStrs[iTime])
+           tempFN = STRING(FORMAT='("contour2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
+                           strings.orbStr,fitString,strings.timeFNStrs[iTime])
            POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN
            CONTOUR2D,fit2DStruct.bestFitStr,/POLAR, $
                      /FILL,/LABEL,/MS,LIMITS=cont2DLims
