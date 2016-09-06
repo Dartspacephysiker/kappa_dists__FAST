@@ -35,6 +35,7 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
    SAVEPLOT=savePlot, $
    SPNAME=sPName, $
    PLOTDIR=plotDir, $
+   ORBIT=orbit, $
    CLOSE_WINDOW_AFTER_SAVE=close_window_after_save
 
 
@@ -45,6 +46,8 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
   IF ~ISA(window) THEN BEGIN
      window              = WINDOW(DIMENSIONS=[900,600])
   ENDIF
+
+  orbStr                 = N_ELEMENTS(orbit) GT 0 ? 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) : ''
 
   xTickFont_size         = 16
   xTickFont_style        =  1      
@@ -201,12 +204,12 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
      pNamePref    = ''
-     FOR i=0,N_ELEMENTS(pIndex)-1 DO BEGIN
-        pNamePref += (KEYWORD_SET(pIndex[i]) ? nameAbbrev[i] + '--' : '' )
+     FOR i=0,N_ELEMENTS(plots)-1 DO BEGIN
+        pNamePref += (KEYWORD_SET(plots[i]) ? nameAbbrev[i] + '--' : '' )
      ENDFOR
 
      IF KEYWORD_SET(spName) THEN outName = spName ELSE BEGIN
-        outName = GET_TODAY_STRING() + pNamePref + 'time_series.png'
+        outName = GET_TODAY_STRING() + '--' + orbStr + pNamePref + 'time_series.png'
      ENDELSE
      IF N_ELEMENTS(plotDir) GT 0 THEN BEGIN
         pDir = plotDir
@@ -214,8 +217,8 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
         SET_PLOT_DIR,pDir,/ADD_TODAY,/FOR_KAPPA_DB
      ENDELSE
 
-     PRINT,'Saving to ' + spName + '...'
-     window.save,pDir+spName
+     PRINT,'Saving to ' + outName + '...'
+     window.save,pDir+outName
 
      IF KEYWORD_SET(close_window_after_save) THEN BEGIN
         window.close

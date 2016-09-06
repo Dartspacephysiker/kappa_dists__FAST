@@ -81,7 +81,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                             BESTNORM=bestNorm, $
                             NFEV=nfev, $
                             ;; FTOL=kCurvefit_opt.fit2d_tol, $
-                            FTOL=1e-4, $
+                            FTOL=kCurvefit_opt.fit2D_tol, $
                             GTOL=1e-13, $
                             STATUS=status, $
                             BEST_RESID=best_resid, $
@@ -105,9 +105,6 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
 
      ;;Info?
-     IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
-        PRINT_KAPPA_FLUX_FIT_PARAMS,fit2DParams,bestNorm
-     ENDIF
      nSuccess     = 1
 
   ENDIF ELSE BEGIN
@@ -212,6 +209,12 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         PRINT,''
         PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,bestNorm
         PRINT,'******************************'
+     ENDIF
+
+     IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+        tmpParams = tmpKeeper.fitParams
+        tmpParams[3] = tmpKeeper.fitDens
+        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm
      ENDIF
 
   ENDIF ELSE BEGIN

@@ -51,8 +51,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
      tempFN = STRING(FORMAT='("orb_",A0,"--",A0,"_fit--",A0)', $
-                     fitString, $
                      kStrings.orbStr, $
+                     fitString, $
                      kStrings.timeFNStrs[iTime])
 
      POPEN,(KEYWORD_SET(kPlot_opt.plotDir) ? kPlot_opt.plotDir : './') + tempFN

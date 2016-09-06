@@ -194,6 +194,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ENDIF
 
      ;;Make angles start from field aligned, go back and forth
+     ;;Doesn't change which angles we use, but it does change the order
      angleBin_i = angleBin_i[SORT(ABS(tempAllAngles[angleBin_i]))]
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
@@ -400,48 +401,48 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;; sm2          = STR_TO_TIME(stopMe2)
 
      ;;orb 1789
-     stopMe1      = '97-02-02/21:02:20.41'
-     stopMe2      = '97-02-02/21:02:21.84'
-     sm1          = STR_TO_TIME(stopMe1)
-     sm2          = STR_TO_TIME(stopMe2)
+     ;; stopMe1      = '97-02-02/21:02:20.41'
+     ;; stopMe2      = '97-02-02/21:02:21.84'
+     ;; sm1          = STR_TO_TIME(stopMe1)
+     ;; sm2          = STR_TO_TIME(stopMe2)
 
-     IF (ABS(t-sm1) LT 0.1) OR (ABS(t-sm2) LT 0.1) THEN BEGIN
+     ;; IF (ABS(t-sm1) LT 0.1) OR (ABS(t-sm2) LT 0.1) THEN BEGIN
 
-        ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
-        curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
-        curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
-        curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+     ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
+     curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
+     curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
+     curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
-        ;;Units for later
-        INIT_KAPPA_UNITCONV,curDataStr
+     ;;Units for later
+     INIT_KAPPA_UNITCONV,curDataStr
 
-        UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
-           ;; bestAngle_i, $
-           good_angleBinK_i[0], $
-           /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
-           PEAK_ENERGY=peak_energy, $
-           ;; KAPPAPARAMSTRUCT=kappaParamStruct, $
-           ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
-           KCURVEFITOPT=kCurvefit_opt, $
-           KSTRINGS=kStrings, $
-           ITIME=iTime, $
-           LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
-           PLOT_BULKE_MODEL=plot_bulke_model, $
-           ;; PLOT_BULKE_FACTOR=plot_bulke_factor, $
-           ;; /PLOT_BULKE_FACTOR, $
-           ;; POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
-           /POLARPLOT_BULKE_FACTOR, $
-           PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
-           ;; PLOT_FLUX_PEAKS=plot_flux_peaks, $
-           /PLOT_FLUX_PEAKS, $
-           PLOTDIR=kPlot_opt.plotDir, $
-           ORBIT=orbit, $
-           ;; SAVE_PLOTS=save_plots
-           /SAVE_PLOTS
+     UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
+        ;; bestAngle_i, $
+        good_angleBinK_i[0], $
+        /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
+        PEAK_ENERGY=peak_energy, $
+        ;; KAPPAPARAMSTRUCT=kappaParamStruct, $
+        ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
+        KCURVEFITOPT=kCurvefit_opt, $
+        KSTRINGS=kStrings, $
+        ITIME=iTime, $
+        LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
+        PLOT_BULKE_MODEL=plot_bulke_model, $
+        ;; PLOT_BULKE_FACTOR=plot_bulke_factor, $
+        ;; /PLOT_BULKE_FACTOR, $
+        ;; POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
+        ;; /POLARPLOT_BULKE_FACTOR, $
+        PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
+        ;; PLOT_FLUX_PEAKS=plot_flux_peaks, $
+        ;; /PLOT_FLUX_PEAKS, $
+        PLOTDIR=kPlot_opt.plotDir, $
+        ORBIT=orbit, $
+        SAVE_PLOTS=save_plots
+     ;; /SAVE_PLOTS
 
-     ENDIF
+     ;; ENDIF
 
-     CONTINUE
+     ;; IF ~(ABS(t-sm1) LT 0.1) AND ~(ABS(t-sm2) LT 0.1) THEN CONTINUE
 
      CASE 1 OF
         KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
