@@ -5,9 +5,6 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
    ;; FITPARAMSTRUCT=fitParamStruct, $
    PEAK_ENERGY=peak_energy, $
    NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
-   KCURVEFIT_OPT=kCurvefit_opt, $
-   KSDTDATA_OPT=kSDTData_opt, $
-   KSTRINGS=kStrings, $
    ITIME=iTime, $
    LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
    PLOT_BULKE_MODEL=plot_bulke_model, $
@@ -22,6 +19,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
   COMPILE_OPT IDL2
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
+  @common__kappa_fit2d_structs.pro
 
   junk =  KAPPA_EFLUX__ANISOTROPY_DIST( $
           curDataStr.energy, $
@@ -32,8 +30,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
           ;; BULK_ENERGY=kappaParamStruct[0].value, $
           ;; BULK_ENERGY=kappaParamStruct[0].value, $
           BULK_ENERGY=peak_energy, $
-          MIN_ENERGY=kCurvefit_opt.min_peak_energy, $
-          REDUCENEGFAC=kCurvefit_opt.fit2D__bulk_e_anis_factor, $
+          MIN_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
+          REDUCENEGFAC=KF2D__Curvefit_opt.fit2D__bulk_e_anis_factor, $
           LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
           PLOT_BULKE_MODEL=plot_bulke_model, $
           PLOT_BULKE_FACTOR=plot_bulke_factor, $
@@ -42,7 +40,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
           PLOT_FLUX_PEAKS=plot_flux_peaks, $
           PLOTDIR=plotDir, $
           ORBIT=orbit, $
-          TIME=kStrings.timeFNStrs[iTime], $
+          TIME=KF2D__strings.timeFNStrs[iTime], $
           SAVE_PLOTS=save_plots, $
           ;; OUT_PEAK_ENERGIES=peak_en_kappa, $
           ;; OUT_PEAK_FLUXES=peak_flux_kappa, $
@@ -56,8 +54,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
   ;; K_EA__bFunc_kappa = peak_en_kappa / peak_en_kappa[fitAngle_i]
   ;; K_EA__gFunc_kappa = peak_flux_kappa / peak_flux_kappa[fitAngle_i]
 
-  keepAngles_i  = WHERE(peak_angle GE kSDTData_opt.electron_lca[0] AND $
-                        peak_angle LE kSDTData_opt.electron_lca[1])
+  keepAngles_i  = WHERE(peak_angle GE KF2D__SDTData_opt.electron_lca[0] AND $
+                        peak_angle LE KF2D__SDTData_opt.electron_lca[1])
   
   IF (WHERE(fitAngle_i EQ keepAngles_i))[0] EQ -1 THEN STOP
 
@@ -67,11 +65,11 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
   K_EA__angles  = peak_angle  [keepAngles_i]
   K_EA__angle_i = peak_angle_i[keepAngles_i]
 
-  IF KEYWORD_SET(kCurvefit_opt.fit2D__disable_bFunc) THEN BEGIN
-     K_EA__bFunc[*] = 0.0
+  IF KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc) THEN BEGIN
+     K_EA__bFunc[*] = 1.0
   ENDIF
 
-  ;; IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+  ;; IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
   ;;    junk =  KAPPA_EFLUX__ANISOTROPY_DIST( $
   ;;            curDataStr.energy, $
   ;;            curDataStr.theta, $
@@ -79,8 +77,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr,fitAngle_i, $
   ;;            fitAngle_i, $
   ;;            ;; BULK_ENERGY=gaussParamStruct[0].value, $
   ;;            BULK_ENERGY=, $
-  ;;            MIN_ENERGY=kCurvefit_opt.min_peak_energy, $
-  ;;            REDUCENEGFAC=kCurvefit_opt.fit2D__bulk_e_anis_factor, $
+  ;;            MIN_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
+  ;;            REDUCENEGFAC=KF2D__Curvefit_opt.fit2D__bulk_e_anis_factor, $
   ;;            LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
   ;;            PLOT_BULKE_MODEL=plot_bulke_model, $
   ;;            PLOT_BULKE_FACTOR=plot_bulke_factor, $

@@ -7,14 +7,12 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    fa, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    ITIME=iTime, $
-   KCURVEFIT_OPT=kCurvefit_opt, $
-   KFITPARAMSTRUCT=kFitParamStruct, $
-   KSDTDATA_OPT=kSDTData_opt, $
-   KSTRINGS=kStrings, $
    OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
    OUT_ERANGE_I=eRange_i
   
   COMPILE_OPT idl2
+
+  @common__kappa_fit2d_structs.pro
 
   eRange_peak        = out_eRange_peak[*,-1]
 
@@ -25,14 +23,14 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])^2
 
   CASE 1 OF
-     KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+     KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
         eRange_i        = WHERE((curFitStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
                                 (curFitStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
-     KEYWORD_SET(kCurvefit_opt.fit2D_fit_above_minE): BEGIN
+     KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
         eRange_i        = WHERE(curFitStr.energy[*,nTotAngles/2] GE $
-                                kCurvefit_opt.min_peak_energy,nEnKeep)
+                                KF2D__curveFit_opt.min_peak_energy,nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      ELSE: BEGIN
@@ -42,14 +40,14 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   ENDCASE
 
   CASE 1 OF
-     KEYWORD_SET(kCurvefit_opt.fit2d__exclude_lca_from_fit): BEGIN
-        aRange_i        = WHERE((curFitStr.theta[nEnergies/2,*] GE kSDTData_opt.electron_lca[0]) AND $
-                                (curFitStr.theta[nEnergies/2,*] LE kSDTData_opt.electron_lca[1]),nAnKeep)
+     KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_fit): BEGIN
+        aRange_i        = WHERE((curFitStr.theta[nEnergies/2,*] GE KF2D__SDTData_opt.electron_lca[0]) AND $
+                                (curFitStr.theta[nEnergies/2,*] LE KF2D__SDTData_opt.electron_lca[1]),nAnKeep)
         IF nAnKeep EQ 0 THEN STOP
      END
-     ;; KEYWORD_SET(kCurvefit_opt.fit2D_fit_above_minE): BEGIN
+     ;; KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
      ;;    aRange_i        = WHERE(curFitStr.energy[*,nTotAngles/2] GE $
-     ;;                            kCurvefit_opt.min_peak_energy,nEnKeep)
+     ;;                            KF2D__curveFit_opt.min_peak_energy,nEnKeep)
      ;;    IF nEnKeep EQ 0 THEN STOP
      ;; END
      ELSE: BEGIN
@@ -79,7 +77,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
                           type:'a good type'}
 
 
-  fa                 = {mu_0              : COS(kSDTData_opt.electron_lca/180.*!PI), $
+  fa                 = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
                         Bingham_style     : 1, $
                         is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit)}
 

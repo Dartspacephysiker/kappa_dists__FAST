@@ -5,7 +5,7 @@
 PRO PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,A,chi2
   
   ;; PRINT,FORMAT='("Bulk energy (eV)",T20,"Plasma temp. (eV)",T40,"Kappa",T50,"Density (cm^-3)",T65,"Angle offset (deg)",A0)',''
-  PRINT,FORMAT='(A0,T20,A0,T40,A0,T50,A0' + (KEYWORD_SET(chi2) ? ',T65,"Chi^2"' : '') + ')', $
+  PRINT,FORMAT='(A0,T20,A0,T40,A0,T50,A0' + (KEYWORD_SET(chi2) ? ',T65,"Chi^2 (norm)"' : '') + ')', $
         "Bulk energy (eV)", $
         "Plasma temp. (eV)", $
         "Kappa", $

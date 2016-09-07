@@ -1,18 +1,21 @@
 PRO INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
                                 AORIGARR=AorigArr, $
-                                KSDTDATA_OPT=kSDTData_opt, $
                                 OUT_NREQ_ANGLES=nReqAngles, $
                                 OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
-  CASE N_ELEMENTS(kSDTData_opt.electron_angleRange) OF
+  COMPILE_OPT idl2
+
+  @common__kappa_fit2d_structs.pro
+
+  CASE N_ELEMENTS(KF2D__SDTData_opt.electron_angleRange) OF
      0: BEGIN
         tempRange    = [-180,180]
      END
      1: BEGIN
-        tempRange    = [(-1.)*ABS(kSDTData_opt.electron_angleRange),ABS(kSDTData_opt.electron_angleRange)]
+        tempRange    = [(-1.)*ABS(KF2D__SDTData_opt.electron_angleRange),ABS(KF2D__SDTData_opt.electron_angleRange)]
      END
      2: BEGIN
-        tempRange    = kSDTData_opt.electron_angleRange
+        tempRange    = KF2D__SDTData_opt.electron_angleRange
 
         CASE 1 OF
            tempRange[0] LT tempRange[1]: BEGIN
@@ -30,19 +33,22 @@ PRO INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
   ENDCASE
 
 
-  nAnglesPerEnergy = MAKE_ARRAY(nEnergies,/INTEGER)
+  nAnglesPerEnergy        = MAKE_ARRAY(nEnergies,/INTEGER)
   FOR k=0,nEnergies-1 DO BEGIN
-     nAnglesPerEnergy[k]                = N_ELEMENTS(WHERE((AorigArr[*,k] GE tempRange[0]) AND (AorigArr[*,k] GE tempRange[1])))
+     nAnglesPerEnergy[k]  = N_ELEMENTS(WHERE((AorigArr[*,k] GE tempRange[0]) AND $
+                                             (AorigArr[*,k] GE tempRange[1])))
   ENDFOR
-  junk                                  = MAX(nAnglesPerEnergy,useTheseAnglesIndex)
-  tempAllAngles                         = AorigArr[*,useTheseAnglesIndex]
+  junk                    = MAX(nAnglesPerEnergy,useTheseAnglesIndex)
+  tempAllAngles           = AorigArr[*,useTheseAnglesIndex]
 
      CASE alleyOop OF
         0: BEGIN
-           nReqAngles                      = N_ELEMENTS(WHERE(tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1],/NULL))
+           nReqAngles     = N_ELEMENTS(WHERE((tempAllAngles GE tempRange[0]) AND $
+                                             (tempAllAngles LE tempRange[1]),/NULL))
         END
         1: BEGIN
-           nReqAngles                      = N_ELEMENTS(WHERE(tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1],/NULL))
+           nReqAngles     = N_ELEMENTS(WHERE((tempAllAngles GE tempRange[0]) OR $
+                                             (tempAllAngles LE tempRange[1]),/NULL))
         END
         
      ENDCASE

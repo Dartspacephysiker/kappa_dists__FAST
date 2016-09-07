@@ -7,12 +7,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            curFitStr,fits,curDataStr, $
                            fitAngle_i, $
                            ;; IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-                           KCURVEFIT_OPT=kCurvefit_opt, $
                            KFITPARAMSTRUCT=kFitParamStruct, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-                           KPLOT_OPT=kPlot_opt, $
-                           KSDTDATA_OPT=kSDTData_opt, $
-                           KSTRINGS=kStrings, $
                            FIT2D_INF_LIST=fit2D_inf_list, $
                            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
                            FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
@@ -23,6 +19,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   COMPILE_OPT idl2
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
+  @common__kappa_fit2d_structs.pro
 
   OKStatus     = [1,2,3,4]      ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
@@ -35,15 +32,11 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      fa, $
      IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
      ITIME=iTime, $
-     KCURVEFIT_OPT=kCurvefit_opt, $
-     KFITPARAMSTRUCT=kFitParamStruct, $
-     KSDTDATA_OPT=kSDTData_opt, $
-     KSTRINGS=kStrings, $
      OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
      OUT_ERANGE_I=eRange_i
   
   CASE 1 OF
-     KEYWORD_SET(kCurvefit_opt.fit2D__bulk_e_anisotropy): BEGIN
+     KEYWORD_SET(KF2D__curveFit_opt.fit2D__bulk_e_anisotropy): BEGIN
         func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON'
 
         ;; fitAngle_i = 0.0       ;As we learn later
@@ -56,8 +49,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         ;;            curDataStr.data, $
         ;;            fitAngle_i, $
         ;;            BULK_ENERGY=kFitParamStruct[0].value, $
-        ;;            MIN_ENERGY=kCurvefit_opt.min_peak_energy, $
-        ;;            REDUCENEGFAC=kCurvefit_opt.fit2D__bulk_e_anis_factor, $
+        ;;            MIN_ENERGY=KF2D__curveFit_opt.min_peak_energy, $
+        ;;            REDUCENEGFAC=KF2D__curveFit_opt.fit2D__bulk_e_anis_factor, $
         ;;            LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
         ;;            PLOT_FACTOR=plot_factor, $
         ;;            PLOT_COMPARISON=plot_comparison, $
@@ -82,8 +75,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                             FUNCTARGS=fa, $
                             BESTNORM=bestNorm, $
                             NFEV=nfev, $
-                            ;; FTOL=kCurvefit_opt.fit2d_tol, $
-                            FTOL=kCurvefit_opt.fit2D_tol, $
+                            ;; FTOL=KF2D__curveFit_opt.fit2d_tol, $
+                            FTOL=KF2D__curveFit_opt.fit2D_tol, $
                             GTOL=1e-13, $
                             STATUS=status, $
                             BEST_RESID=best_resid, $
@@ -96,8 +89,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                             NPEGGED=nPegged, $
                             NFREE=nFree, $
                             DOF=dof, $
-                            COVAR=covar, PERROR=pError, $
-                            MAXITER=kCurvefit_opt.fit2d_max_iter, $
+                            COVAR=covar, $
+                            PERROR=pError, $
+                            MAXITER=KF2D__curveFit_opt.fit2d_max_iter, $
                             NITER=nIter, $
                             YFIT=yFit, $
                             /QUIET, $
@@ -121,13 +115,13 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   fit2DStr        = curFitStr
 
   CASE 1 OF
-     KEYWORD_SET(kCurvefit_opt.fit2d_just_eRange_peak): BEGIN
+     KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
         oldfit2DStr = fit2DStr
         FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
            fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
         ENDFOR
      END
-     KEYWORD_SET(kCurvefit_opt.fit2D_fit_above_minE): BEGIN
+     KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
         ;; oldfit2DStr = fit2DStr
         FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
            fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
@@ -139,44 +133,33 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   ENDCASE
 
 
-  fit2Ddens         = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
-                                 ENERGY=kSDTData_opt.energy_electrons, $
-                                 ANGLE=kSDTData_opt.fit2D_dens_aRange)
+  fit2Ddens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
+                                 ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                                 ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
 
   ;; IF iTime GE 14 THEN BEGIN
 
-  ;;    CONTOUR2D,curDataStr,/POLAR
-  ;;    junk        = MAX(curFitStr.data[*,fitAngle_i],edgery_i)
-  ;;    peak_energy = (curFitStr.energy[edgery_i,fitAngle_i])[0]
-  ;;    plotme      = MAKE_ARRAY(2,N_ELEMENTS(k_ea__angle_i))
-  ;;    plotme[0,*] = COS(k_ea__angles*!PI/180.)*ALOG10(peak_energy*k_ea__bFunc)
-  ;;    plotme[1,*] = SIN(k_ea__angles*!PI/180.)*ALOG10(peak_energy*k_ea__bFunc)
-  ;;    PLOTS,plotme,/DATA
-
-  ;;    STOP
 
   ;; ENDIF
 
   IF KEYWORD_SET(show_and_prompt) THEN BEGIN
-     ;; densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
-     ;;                                ENERGY=kSDTData_opt.energy_electrons, $
-     ;;                                ANGLE=kSDTData_opt.fit2D_dens_aRange)
+     ;; densEst        = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
+     ;;                                ENERGY=KF2D__SDTData_opt.energy_electrons, $
+     ;;                                ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
 
      tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
                         bestFit1DParams :fit2DParams  , $
-                        fitAngle_i      :0.0          , $
+                        fitAngle_i      :fitAngle_i   , $
                         bestDens        :fit2Ddens    , $
-                        bestChi2        :bestNorm}
+                        bestChi2        :bestNorm/(dof-nPegged), $
+                        eRange_peak     :out_eRange_peak[*,-1]}
 
-     KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,tmp2DInfoStruct, $
+     KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
+        tmp2DInfoStruct, $
         iWin, $
         iTime, $
         /FOR_HORSESHOE_FIT, $
         IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
-        KCURVEFIT_OPT=kCurvefit_opt, $
-        KPLOT_OPT=kPlot_opt, $
-        KSDTDATA_OPT=kSDTData_opt, $
-        KSTRINGS=kStrings, $
         PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
         PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
         ;; FINISH_AND_SAVE_ALL=finish_and_save_all, $
@@ -225,7 +208,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         PRINT,'******************************'
         PRINT,FORMAT='("WINNER (",A0," #",I0,")")',fitString,iTime
         PRINT,''
-        PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,bestNorm
+        PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,bestNorm/(dof-nPegged)
         PRINT,'******************************'
      ENDIF
 

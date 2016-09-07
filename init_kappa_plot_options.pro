@@ -4,20 +4,22 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
                                  PLOTDIR=plotDir, $
                                  ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                                  ADD_FITPARAMS_TEXT=add_fitParams_text, $
-                                 ADD_ANGLE_LABEL=add_angle_label
+                                 ADD_ANGLE_LABEL=add_angle_label, $
+                                 FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries
+
   
   COMPILE_OPT idl2
 
-
   defAdd_oneCount_curve            = 1
 
-  kPlot_opt                        = {no_plots:0, $
-                                      save_fitplots:0, $
-                                      plot_full_fit:0, $
-                                      plotDir:'', $
-                                      add_angle_label:0, $
-                                      add_fitParams_text:0, $
-                                      add_oneCount_curve:defAdd_oneCount_curve}
+  kPlot_opt                        = {no_plots              : 0, $
+                                      save_fitplots         : 0, $
+                                      plot_full_fit         : 0, $
+                                      plotDir               : '', $
+                                      add_angle_label       : 0, $
+                                      add_fitParams_text    : 0, $
+                                      fit2D__add_boundaries : 0, $
+                                      add_oneCount_curve    : defAdd_oneCount_curve}
 
   IF N_ELEMENTS(no_plots) GT 0 THEN BEGIN
      kPlot_opt.no_plots            = no_plots
@@ -40,15 +42,19 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
 
 
   IF N_ELEMENTS(add_oneCount_curve) GT 0 THEN BEGIN
-     kPlot_opt.add_oneCount_curve  = add_oneCount_curve
+     kPlot_opt.add_oneCount_curve     = add_oneCount_curve
   ENDIF
 
   IF N_ELEMENTS(add_fitParams_text) GT 0 THEN BEGIN
-     kPlot_opt.add_fitParams_text  = add_fitParams_text
+     kPlot_opt.add_fitParams_text     = add_fitParams_text
   ENDIF
 
   IF N_ELEMENTS(add_angle_label) GT 0 THEN BEGIN
-     kPlot_opt.add_angle_label     = add_angle_label
+     kPlot_opt.add_angle_label        = add_angle_label
+  ENDIF
+  
+  IF N_ELEMENTS(fit2D__add_boundaries) GT 0 THEN BEGIN
+     kPlot_opt.fit2D__add_boundaries  = fit2D__add_boundaries
   ENDIF
   
 

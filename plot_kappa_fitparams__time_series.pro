@@ -3,6 +3,7 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
    BULK_ENERGY=bulk_energy, $
    TEMPERATURE=temperature, $
    DENSITY=density, $
+   DENS_2D=dens_2d, $
    KAPPA=kappa, $
    SUPPRESS_LINEPLOT=suppress_line, $
    SUPPRESS_SCATTERPLOT=suppress_scatter, $

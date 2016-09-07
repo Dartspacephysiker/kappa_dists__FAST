@@ -23,10 +23,6 @@
 ;
 ;-
 PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
-                      KSDTDATA_OPT=kSDTData_opt, $
-                      KCURVEFIT_OPT=kCurvefit_opt, $
-                      KPLOT_OPT=kPlot_opt, $
-                      STRINGS=kStrings, $
                       BOUNDS=bounds, $
                       ESTFACS=estFacs, $
                       FIT1D__AVERAGE_OVER_ANGLERANGE=fit1D__average_over_angleRange, $
@@ -55,12 +51,15 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   ;;For updating K_EA__gFunc,K_EA__bFunc
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
 
+  ;;Get yourself KF2D__SDTData_opt,KF2D__Curvefit_opt, etc.
+  @common__kappa_fit2d_structs.pro
+
   ;; RESOLVE_ROUTINE,'mpfit2dfun',/IS_FUNCTION
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
   energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])
   data                              = TRANSPOSE(diff_eFlux.data,[1,0,2])
-  oneCount_data                     = KEYWORD_SET(kPlot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
+  oneCount_data                     = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
   angles                            = TRANSPOSE(diff_eFlux.theta,[1,0,2])
 
   nEnergies                         = N_ELEMENTS(energies[0,*,0])
@@ -70,13 +69,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   IF KEYWORD_SET(synthPackage) THEN BEGIN
      synthKappa                     = diff_eFlux
      synthKappa.data[*]             = 0.0
-     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+     IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
         synthGauss                  = diff_eFlux
         synthGauss.data[*]          = 0.0
      ENDIF
   ENDIF
 
-  IF KEYWORD_SET(kPlot_opt.add_oneCount_curve) THEN BEGIN
+  IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
      yMin                      = MIN(oneCount_data[WHERE(oneCount_data GT 0)])
      yMin                      = 10.^(FLOOR(ALOG10(yMin)))
   ENDIF ELSE BEGIN
@@ -85,13 +84,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   
   INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
                               AORIGARR=angles[*,*,0], $
-                              KSDTDATA_OPT=kSDTData_opt, $
                               OUT_NREQ_ANGLES=nReqAngles, $
                               OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
   ;;Init fitParams structs
   CASE 1 OF
-     KEYWORD_SET(kCurvefit_opt.use_mpFit1D): BEGIN
+     KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
         ;;Vary bulk E [0], Temperature [1], kappa [2], and density [3] (but not angle)
         kappa_fixA        = [0,0,0,0,1] 
         
@@ -128,14 +126,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;;And now the order becomes [angle,energy] for each of these arrays
      XorigArr                              = energies[*,*,iTime]
      YorigArr                              = data[*,*,iTime]
-     IF KEYWORD_SET(kPlot_opt.add_oneCount_curve) THEN BEGIN
+     IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
         oneCountArr                        = oneCount_data[*,*,iTime]
      END
      AorigArr                              = angles[*,*,iTime]
 
-     IF KEYWORD_SET(kCurvefit_opt.min_peak_energy) THEN BEGIN
+     IF KEYWORD_SET(KF2D__Curvefit_opt.min_peak_energy) THEN BEGIN
         ;;Try taking it from the top
-        min_peak_ind                       = MAX(WHERE(REFORM(XorigArr[0,*]) GE kCurvefit_opt.min_peak_energy)) 
+        min_peak_ind                       = MAX(WHERE(REFORM(XorigArr[0,*]) GE KF2D__Curvefit_opt.min_peak_energy)) 
         IF min_peak_ind EQ -1 THEN BEGIN
            STOP
         ENDIF
@@ -224,7 +222,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         tempAngle          = tempAllAngles[iAngle]
         tempAngleEstRange  = [tempAngle-1.0,tempAngle+1.0]
 
-        IF KEYWORD_SET(kPlot_opt.add_oneCount_curve) THEN BEGIN
+        IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
            oneCurve        = {x:Xorig, $
                               y:REFORM(oneCountArr[iAngle,*]), $
                               NAME:"One Count"}
@@ -233,20 +231,20 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            Xorig,Yorig, $
            peak_ind,peak_energy, $
-           BULK_OFFSET=kCurvefit_opt.bulk_offset, $
+           BULK_OFFSET=KF2D__Curvefit_opt.bulk_offset, $
            CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
-           MIN_PEAK_ENERGY=kCurvefit_opt.min_peak_energy
+           MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy
         
-        ;; minEInd        = (peak_ind - kCurvefit_opt.n_below_peak) > 0
-        ;; maxEInd        = (peak_ind + kCurvefit_opt.n_above_peak) < nEnergies-1
+        ;; minEInd        = (peak_ind - KF2D__Curvefit_opt.n_below_peak) > 0
+        ;; maxEInd        = (peak_ind + KF2D__Curvefit_opt.n_above_peak) < nEnergies-1
 
         ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
         ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
         ;;  for fitting—namely, n_below_peak and n_above_peak
-        maxEInd           = (peak_ind + kCurvefit_opt.n_below_peak) < nEnergies-1
-        minEInd           = (peak_ind - kCurvefit_opt.n_above_peak) > 0
+        maxEInd           = (peak_ind + KF2D__Curvefit_opt.n_below_peak) < nEnergies-1
+        minEInd           = (peak_ind - KF2D__Curvefit_opt.n_above_peak) > 0
 
-        ;; IF KEYWORD_SET(kCurvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
+        ;; IF KEYWORD_SET(KF2D__Curvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
            
         ;;    nAbove      = nEnergies-1-maxEInd
         ;;    killIt      = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
@@ -256,20 +254,20 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ;; ENDIF
 
         ;;estimate from the data!
-        IF KEYWORD_SET(kCurvefit_opt.estimate_A_from_data) THEN BEGIN 
+        IF KEYWORD_SET(KF2D__Curvefit_opt.estimate_A_from_data) THEN BEGIN 
 
            KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                                   minEInd,maxEInd,nEnergies, $
                                   peak_ind,peak_energy,eRange_peak, $
-                                  KAPPA_EST=kCurvefit_opt.fitA[2], $
+                                  KAPPA_EST=KF2D__Curvefit_opt.fitA[2], $
                                   ;; MASS=mass, $
-                                  E_ANGLE=kSDTData_opt.electron_angleRange, $
+                                  E_ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                                   ANGLES=tempAngleEstRange, $
                                   N_ANGLES_IN_RANGE=nAngles, $
                                   ;; BULKANGLE_STRUCT=angleStr, $
                                   DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
-                                  ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
-                                  USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
+                                  ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $
+                                  USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                                   ESTFACS=estFacs, $
                                   A_OUT=A, $
                                   AGAUSS_OUT=AGauss, $
@@ -285,13 +283,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         yRange                                      = [yMin,MAX(data)]
         energy_inds                                 = [minEInd,maxEInd]
         CASE 1 OF
-           KEYWORD_SET(kCurvefit_opt.use_mpFit1D): BEGIN
+           KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
 
               IF shoutOut THEN BEGIN
                  PRINT,FORMAT='("Time  (",I0,"/",I0,") : ",A0)', $
                        iTime+1, $
                        N_ELEMENTS(bounds), $
-                       kStrings.timeStrs[iTime]
+                       KF2D__strings.timeStrs[iTime]
 
                  shoutOut = 0
 
@@ -301,7 +299,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                        orig,kappaFit,gaussFit, $
-                                       KCURVEFIT_OPT=kCurvefit_opt, $
+                                       KCURVEFIT_OPT=KF2D__Curvefit_opt, $
                                        KFITPARAMSTRUCT=kappaParamStruct, $
                                        GFITPARAMSTRUCT=gaussParamStruct, $
                                        ENERGY_INDS=energy_inds, $
@@ -313,7 +311,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                        KAPPA_FIXA=kappa_fixA, $
                                        GAUSS_FIXA=gauss_fixA, $
                                        YMAX=yMax, $
-                                       STRINGS=kStrings, $
+                                       STRINGS=KF2D__strings, $
                                        OUT_FITTED_PARAMS=out_kappaParams, $
                                        OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                                        OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -329,8 +327,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            ELSE: BEGIN
               KAPPA__GET_FITS,Xorig,Yorig, $
                               orig,kappaFit,gaussFit, $
-                              ADD_GAUSSIAN_ESTIMATE=kCurvefit_opt.add_gaussian_estimate, $
-                              USE_SDT_GAUSSIAN_FIT=kCurvefit_opt.use_SDT_Gaussian_fit, $
+                              ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $
+                              USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                               BOUNDS_I=iTime, $
                               ENERGY_INDS=energy_inds, $
                               ERANGE_PEAK=eRange_peak, $
@@ -340,10 +338,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                               KAPPA_FIXA=kappa_fixA, $
                               GAUSS_FIXA=gauss_fixA, $
                               YMAX=yMax, $
-                              MAX_ITER=kCurvefit_opt.max_iter, $
-                              FIT_TOL=kCurvefit_opt.fit_tol, $
-                              STRINGS=kStrings, $
-                              TRIM_ENERGIES_BELOW_PEAK=kCurvefit_opt.trim_energies_below_peak, $
+                              MAX_ITER=KF2D__Curvefit_opt.max_iter, $
+                              FIT_TOL=KF2D__Curvefit_opt.fit_tol, $
+                              STRINGS=KF2D__strings, $
+                              TRIM_ENERGIES_BELOW_PEAK=KF2D__Curvefit_opt.trim_energies_below_peak, $
                               OUT_FITTED_PARAMS=out_kappaParams, $
                               OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                               OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -376,7 +374,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               PRINT,"Got kappa 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
            ENDIF
 
-           IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+           IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
               skipGauss                             = (gaussFit.fitStatus GT 0)
 
               IF ~skipGauss AND ~gotGauss THEN BEGIN
@@ -400,7 +398,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ;; ENDIF
 
         CASE 1 OF
-           KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
+           KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate): BEGIN
               IF gotKappa AND gotGauss THEN BEGIN
                  gotEm                              = 1
                  BREAK
@@ -449,11 +447,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         good_angleBinK_i[0], $
         /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
         PEAK_ENERGY=peak_energy, $
-        ;; KAPPAPARAMSTRUCT=kappaParamStruct, $
-        ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
-        KCURVEFIT_OPT=kCurvefit_opt, $
-        KSDTDATA_OPT=kSDTData_opt, $
-        KSTRINGS=kStrings, $
         ITIME=iTime, $
         LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
         PLOT_BULKE_MODEL=plot_bulke_model, $
@@ -464,7 +457,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
         ;; PLOT_FLUX_PEAKS=plot_flux_peaks, $
         ;; /PLOT_FLUX_PEAKS, $
-        PLOTDIR=kPlot_opt.plotDir, $
+        PLOTDIR=KF2D__Plot_opt.plotDir, $
         ORBIT=orbit, $
         SAVE_PLOTS=save_plots
      ;; /SAVE_PLOTS
@@ -474,7 +467,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;; IF ~(ABS(t-sm1) LT 0.1) AND ~(ABS(t-sm2) LT 0.1) THEN CONTINUE
 
      CASE 1 OF
-        KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
+        KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate): BEGIN
            proceed                                  = ((nGoodFits_tempK GT 0) AND $
                                                        (nGoodFits_tempG GT 0))
         END
@@ -493,12 +486,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            successesK, $
            curKappaStr,kappaFits,curDataStr, $
            good_angleBinK_i, $
-           KCURVEFIT_OPT=kCurvefit_opt, $
            KFITPARAMSTRUCT=kappaParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-           KPLOT_OPT=kPlot_opt, $
-           KSDTDATA_OPT=kSDTData_opt, $
-           KSTRINGS=kStrings, $
            FIT2D_INF_LIST=fit2DKappa_inf_list, $
            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
            FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
@@ -518,7 +507,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         kBest       = 999
      ENDELSE
 
-     IF proceed AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+     IF proceed AND KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
 
         KAPPA_FIT2D__HORSESHOE, $
            keepG_iTime,iTime, $
@@ -527,12 +516,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            nTotAngles, $
            successesG, $
            curGaussStr,gaussFits,curDataStr, $
-           KCURVEFIT_OPT=kCurvefit_opt, $
+           good_angleBinG_i, $
            KFITPARAMSTRUCT=gaussParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-           KPLOT_OPT=kPlot_opt, $
-           KSDTDATA_OPT=kSDTData_opt, $
-           KSTRINGS=kStrings, $
            FIT2D_INF_LIST=fit2DGauss_inf_list, $
            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
            /FIT2D__SHOW__IS_MAXWELLIAN_FIT, $
@@ -556,9 +542,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            totSuccessesK, $
            iTime, $
            IS_MAXWELLIAN_FIT=0, $
-           KSTRINGS=kStrings, $
-           KPLOT_OPT=kPlot_opt, $
-           KCURVEFIT_OPT=kCurvefit_opt, $
            PROMPT__CONT_TO_NEXT_FIT=Kprompt__cont_to_next_fit, $
            PROMPT__CONT_UNTIL_FIT_EQ=Kprompt__cont_until_fit_eq, $
            FINISH_AND_SAVE_ALL=Kfinish_and_save_all, $
@@ -569,9 +552,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               totSuccessesG, $
               iTime, $
               IS_MAXWELLIAN_FIT=1, $
-              KSTRINGS=kStrings, $
-              KPLOT_OPT=kPlot_opt, $
-              KCURVEFIT_OPT=kCurvefit_opt, $
               PROMPT__CONT_TO_NEXT_FIT=Gprompt__cont_to_next_fit, $
               PROMPT__CONT_UNTIL_FIT_EQ=Gprompt__cont_until_fit_eq, $
               FINISH_AND_SAVE_ALL=Gfinish_and_save_all, $
@@ -609,7 +589,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                           /RECALCULATE_DDATA, $
                           APPEND_DATA_NAME=' (Kappa fits)'))
 
-     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+     IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
         synthPackage.Add,MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX( $
                           synthGauss, $
                           TIME_INDS=tmpTime_i, $
