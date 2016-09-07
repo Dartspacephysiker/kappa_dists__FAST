@@ -34,6 +34,7 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
    OVERPLOT=overplot, $
    SAVEPLOT=savePlot, $
    SPNAME=sPName, $
+   PLOTNAMEPREF=plotNamePref, $
    PLOTDIR=plotDir, $
    ORBIT=orbit, $
    CLOSE_WINDOW_AFTER_SAVE=close_window_after_save
@@ -86,8 +87,6 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
 
   yLog            = [1,1,1,1]
 
-  xTitle          = 'Time since ' + TIME_TO_STR(fit2D.SDT[0].time,/MSEC)
-
   nPlots          = (~KEYWORD_SET(suppress_line) + (~KEYWORD_SET(suppress_scatter))) * nKWPlot
   plotArr         = MAKE_ARRAY(nPlots,/OBJ)
 
@@ -111,6 +110,8 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
         xRange          = [x_values[1]-(1/20864.),x_values[-1]+(1/20864.)]
      END
   ENDCASE
+
+  xTitle          = 'Time since ' + TIME_TO_STR(fit2D.SDT[1].time-1,/MSEC)
 
   iParam                = 0
   FOR iPlot=(0-KEYWORD_SET(suppress_line)),nPlots-1 DO BEGIN
@@ -203,13 +204,17 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
-     pNamePref    = ''
+     pNameSuff    = ''
      FOR i=0,N_ELEMENTS(plots)-1 DO BEGIN
-        pNamePref += (KEYWORD_SET(plots[i]) ? nameAbbrev[i] + '--' : '' )
+        pNameSuff += (KEYWORD_SET(plots[i]) ? nameAbbrev[i] + '--' : '' )
      ENDFOR
 
+     IF KEYWORD_SET(plotNamePref) THEN BEGIN
+        pNameSuff = plotNamePref + pNameSuff
+     ENDIF
+
      IF KEYWORD_SET(spName) THEN outName = spName ELSE BEGIN
-        outName = GET_TODAY_STRING() + '--' + orbStr + pNamePref + 'time_series.png'
+        outName = GET_TODAY_STRING() + '--' + orbStr + pNameSuff + 'time_series.png'
      ENDELSE
      IF N_ELEMENTS(plotDir) GT 0 THEN BEGIN
         pDir = plotDir

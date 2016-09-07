@@ -19,6 +19,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    OUT_PEAK_ENERGIES=peak_en, $
    OUT_PEAK_FLUXES=peak_flux, $
    OUT_ANGLES=peak_angle, $
+   OUT_ANGLE_I=peak_angle_i, $
    PRINT=print
 
   COMPILE_OPT IDL2
@@ -53,9 +54,10 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   angles                = Y[0,*]
   nAngles               = N_ELEMENTS(angles)
 
-  peak_en               = MAKE_ARRAY(nAngles,/DOUBLE)
-  peak_flux             = MAKE_ARRAY(nAngles,/DOUBLE)
-  peak_angle            = MAKE_ARRAY(nAngles,/DOUBLE)
+  peak_en               = MAKE_ARRAY(nAngles,/DOUBLE )
+  peak_flux             = MAKE_ARRAY(nAngles,/DOUBLE )
+  peak_angle            = MAKE_ARRAY(nAngles,/FLOAT  )
+  peak_angle_i          = MAKE_ARRAY(nAngles,/INTEGER)
 
   allEn_i               = INDGEN(N_ELEMENTS(X[*,0]))
   energyMin             = MIN(ABS(X[*,fitAngle_i]-bulk_energy),energy_i)
@@ -94,6 +96,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
      peak_en[tmpAngle_i]      = tmpEn[tmpMax_ii]
      peak_flux[tmpAngle_i]    = tmpMax
      peak_angle[tmpAngle_i]   = tmpAngle[tmpMax_ii]
+     peak_angle_i[k]          = tmpAngle_i
 
   ENDFOR
 

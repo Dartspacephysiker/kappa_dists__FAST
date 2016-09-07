@@ -37,9 +37,9 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/FLOAT   )
   status              = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
   nfEv                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
-  best_resid          = MAKE_ARRAY(nFitPoints,nFits,             VALUE=0.0D,/FLOAT   )
+  ;; best_resid          = MAKE_ARRAY(nFitPoints,nFits,             VALUE=0.0D,/FLOAT   )
   pFree_index         = MAKE_ARRAY(nPFree_index,nFits,           VALUE=0.0D,/INTEGER )
-  best_fJac           = MAKE_ARRAY(nFitPoints,nPFree_index,nFits,VALUE=0.0D,/FLOAT   )
+  ;; best_fJac           = MAKE_ARRAY(nFitPoints,nPFree_index,nFits,VALUE=0.0D,/FLOAT   )
   nPegged             = MAKE_ARRAY(nFits,                        VALUE=0.0D,/BYTE    )
   nFree               = MAKE_ARRAY(nFits,                        VALUE=0.0D,/BYTE    )
   dof                 = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
@@ -89,9 +89,9 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   chi2[k]           = fit2D_inf_list[k].chi2
   status[k]         = fit2D_inf_list[k].status
   nfEv[k]           = fit2D_inf_list[k].nfEv
-  best_resid[*,k]   = fit2D_inf_list[k].best_resid
+  ;; best_resid[*,k]   = fit2D_inf_list[k].best_resid
   pFree_index[*,k]  = fit2D_inf_list[k].pFree_index
-  best_fJac[*,*,k]  = fit2D_inf_list[k].best_fJac
+  ;; best_fJac[*,*,k]  = fit2D_inf_list[k].best_fJac
   nPegged[k]        = fit2D_inf_list[k].nPegged
   nFree[k]          = fit2D_inf_list[k].nFree
   dof[k]            = fit2D_inf_list[k].dof
@@ -143,9 +143,9 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                        errMsg       : errMsg     , $
                        status       : status     , $
                        nfEv         : nfEv       , $
-                       best_resid   : best_resid , $
+                       ;; best_resid   : best_resid , $
                        pFree_index  : pFree_index, $
-                       best_fJac    : best_fJac  , $
+                       ;; best_fJac    : best_fJac  , $
                        nPegged      : nPegged    , $
                        nFree        : nFree      , $
                        dof          : dof        , $

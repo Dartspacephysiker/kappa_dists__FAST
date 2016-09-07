@@ -1,6 +1,7 @@
 ;2016/09/02
 PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            out_eRange_peak, $
+                           nEnergies, $
                            nTotAngles, $
                            successes, $
                            curFitStr,fits,curDataStr, $
@@ -27,6 +28,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
      out_eRange_peak, $
+     nEnergies, $
      nTotAngles, $
      curFitStr,curDataStr, $
      wtsForFit,X2D,Y2D,dataToFit, $
@@ -44,7 +46,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      KEYWORD_SET(kCurvefit_opt.fit2D__bulk_e_anisotropy): BEGIN
         func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON'
 
-        fitAngle_i = 0.0       ;As we learn later
+        ;; fitAngle_i = 0.0       ;As we learn later
         
         ;; func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY'
 
@@ -102,6 +104,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                             ERRMSG=errMsg, $
                             _EXTRA=extra)
 
+  nFit            = N_ELEMENTS(yFit)
+
   IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
 
      ;;Info?
@@ -138,6 +142,20 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   fit2Ddens         = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $
                                  ENERGY=kSDTData_opt.energy_electrons, $
                                  ANGLE=kSDTData_opt.fit2D_dens_aRange)
+
+  ;; IF iTime GE 14 THEN BEGIN
+
+  ;;    CONTOUR2D,curDataStr,/POLAR
+  ;;    junk        = MAX(curFitStr.data[*,fitAngle_i],edgery_i)
+  ;;    peak_energy = (curFitStr.energy[edgery_i,fitAngle_i])[0]
+  ;;    plotme      = MAKE_ARRAY(2,N_ELEMENTS(k_ea__angle_i))
+  ;;    plotme[0,*] = COS(k_ea__angles*!PI/180.)*ALOG10(peak_energy*k_ea__bFunc)
+  ;;    plotme[1,*] = SIN(k_ea__angles*!PI/180.)*ALOG10(peak_energy*k_ea__bFunc)
+  ;;    PLOTS,plotme,/DATA
+
+  ;;    STOP
+
+  ;; ENDIF
 
   IF KEYWORD_SET(show_and_prompt) THEN BEGIN
      ;; densEst        = CALL_FUNCTION(kSDTData_opt.densFunc,fit2DStr, $

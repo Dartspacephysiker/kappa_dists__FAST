@@ -20,7 +20,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                                energy_electrons    :[4,3.5e4], $
                                                routine             :'get_fa_' + defEEB_or_EES, $
                                                electron_anglerange :defElectron_angleRange, $
-                                               electron_lca        :180., $
+                                               electron_lca        :[-180.,180.], $
                                                fit2D_dens_aRange   :defFit2D_dens_angleRange, $
                                                densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
@@ -61,11 +61,25 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
   
   IF N_ELEMENTS(electron_lca) GT 0 THEN BEGIN
-     kSDTData_opt.electron_lca              = electron_lca
-     kSDTData_opt.fit2D_dens_aRange         = [-ABS(electron_lca),ABS(electron_lca)]
-     ;; PRINT,FORMAT='("Loss-cone angle (not fitting angles outside this range): ",F0.2)', $
-     PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
+     CASE N_ELEMENTS(electron_lca) OF
+        1: BEGIN
+           kSDTData_opt.electron_lca         = [-ABS(electron_lca),ABS(electron_lca)]
+           kSDTData_opt.fit2D_dens_aRange    = [-ABS(electron_lca),ABS(electron_lca)]
+        END
+        2: BEGIN
+           kSDTData_opt.electron_lca         = electron_lca
+           kSDTData_opt.fit2D_dens_aRange    = electron_lca
+        END
+        ELSE: BEGIN
+           PRINT,'Bogus lca provided! Has to be one or two elements.'
+           STOP
+        END
+     ENDCASE
+     PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,2(F0.2,:,", "))', $
            kSDTData_opt.electron_lca
+     PRINT,"     (i.e., not fitting angles outside the above range)"
+     ;; PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
+     ;;       kSDTData_opt.electron_lca
      PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
            kSDTData_opt.fit2D_dens_aRange
   ENDIF

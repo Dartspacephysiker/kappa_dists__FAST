@@ -160,25 +160,25 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      ;;2016/09/02 What on earth am I doing here?
      ;;Oh yeah, making sure that we have enough angles to do stuff
      WHILE nAngles LT nReqAngles DO BEGIN
+        ;;Sort the angles, get indices for unsorting them, find out which angle to include next
+        sort_i   = SORT(tempAllAngles)
+        tAngles  = tempAllAngles[sort_i]
+        unsort_i = VALUE_LOCATE(tAngles,tempAllAngles)
+        minAngle = MIN(tempAllAngles[angleBin_i])
+        maxAngle = MAX(tempAllAngles[angleBin_i])
+        IF ~ARRAY_EQUAL(tAngles[unsort_i],tempAllAngles) THEN STOP
 
-        minAngle_i     = MIN(angleBin_i)
-        maxAngle_i     = MAX(angleBin_i) 
+        ;;Get the next angles on either side
+        curMinMax_i = VALUE_LOCATE(tAngles, $
+                                   [minAngle, $
+                                    maxAngle])
+        curMinMax_i[0] -= 1
+        curMinMax_i[1] += 1
+        this = MIN(ABS([tAngles[curMinMax_i[0]]-minAngle,$
+                        tAngles[curMinMax_i[1]]-maxAngle]),bin_i)
 
-        IF (maxAngle_i EQ (nTotAngles - 1)) THEN BEGIN
+        angleBin_i = [unsort_i[curMinMax_i[bin_i]],angleBin_i]
 
-           angleBin_i  = [angleBin_i,minAngle_i-1]
-           angleBin_i  = angleBin_i[SORT(angleBin_i)]
-
-        ENDIF ELSE BEGIN
-
-           tAngles_i   = [minAngle_i-1,maxAngle_i+1 < (nTotAngles - 1)]
-           tAngles     = [tempAllAngles[tAngles_i[0]],tempAllAngles[tAngles_i[1]]]
-           tTest       = ABS([tAngles[0]-tempAllAngles[minAngle_i],tAngles[1]-tempAllAngles[maxAngle_i]])
-           junk        = MIN(tTest,addMe_ii)
-           angleBin_i  = [angleBin_i,tAngles_i[addMe_ii]]
-           angleBin_i  = angleBin_i[SORT(angleBin_i)]
-
-        ENDELSE
 
         nAngles++
 
@@ -209,6 +209,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      gotKappa              = 0
      gotGauss              = 0
+     gotEm                 = 0
 
      shoutOut              = 1
      FOR iiAngle=0,nAngles-1 DO BEGIN
@@ -287,7 +288,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            KEYWORD_SET(kCurvefit_opt.use_mpFit1D): BEGIN
 
               IF shoutOut THEN BEGIN
-                 PRINT,"Time: " + kStrings.timeStrs[iTime]
+                 PRINT,FORMAT='("Time  (",I0,"/",I0,") : ",A0)', $
+                       iTime+1, $
+                       N_ELEMENTS(bounds), $
+                       kStrings.timeStrs[iTime]
+
                  shoutOut = 0
 
               ENDIF
@@ -368,7 +373,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               good_kappaFits_i                      = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
 
               gotKappa                              = 1
-              PRINT,"Got our 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
+              PRINT,"Got kappa 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
            ENDIF
 
            IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
@@ -383,17 +388,40 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
                  gotGauss                           = 1
               
+                 PRINT,"Got Gauss 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
               ENDIF
            ENDIF
         ENDIF
 
-        IF gotKappa THEN BEGIN
-           ;; PRINT,"Got our 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
-           IF ~gotGauss THEN PRINT,'Sorry, Gauss is missing out.'
-           BREAK
-        ENDIF
+        ;; IF gotKappa THEN BEGIN
+        ;;    ;; PRINT,"Got our 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
+        ;;    IF ~gotGauss THEN PRINT,'Sorry, Gauss is missing out.'
+        ;;    BREAK
+        ;; ENDIF
+
+        CASE 1 OF
+           KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate): BEGIN
+              IF gotKappa AND gotGauss THEN BEGIN
+                 gotEm                              = 1
+                 BREAK
+              ENDIF
+           END
+           ELSE: BEGIN
+              IF gotKappa THEN BEGIN
+                 gotEm                              = 1
+                 BREAK
+              ENDIF
+           END
+        ENDCASE
 
      ENDFOR
+
+     IF ~gotEm THEN BEGIN
+        PRINT,"Couldn't muster good fits for iTime = " + STRCOMPRESS(iTime,/REMOVE_ALL) + '!!!'
+        PRINT,'SKIPPING'
+        CONTINUE
+     ENDIF
+        
 
      ;; stopMe1      = '97-02-01/09:26:13.22'
      ;; stopMe2      = '97-02-01/09:26:18.91'
@@ -423,7 +451,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         PEAK_ENERGY=peak_energy, $
         ;; KAPPAPARAMSTRUCT=kappaParamStruct, $
         ;; GAUSSPARAMSTRUCT=gaussParamStruct, $
-        KCURVEFITOPT=kCurvefit_opt, $
+        KCURVEFIT_OPT=kCurvefit_opt, $
+        KSDTDATA_OPT=kSDTData_opt, $
         KSTRINGS=kStrings, $
         ITIME=iTime, $
         LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
@@ -459,6 +488,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         KAPPA_FIT2D__HORSESHOE, $
            keepK_iTime,iTime, $
            out_eRange_peak, $
+           nEnergies, $
            nTotAngles, $
            successesK, $
            curKappaStr,kappaFits,curDataStr, $
@@ -493,6 +523,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         KAPPA_FIT2D__HORSESHOE, $
            keepG_iTime,iTime, $
            out_eRange_peak, $
+           nEnergies, $
            nTotAngles, $
            successesG, $
            curGaussStr,gaussFits,curDataStr, $
