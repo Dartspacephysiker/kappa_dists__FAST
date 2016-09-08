@@ -401,16 +401,16 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate): BEGIN
               IF gotKappa AND gotGauss THEN BEGIN
                  gotEm                              = 1
-                 BREAK
               ENDIF
            END
            ELSE: BEGIN
               IF gotKappa THEN BEGIN
                  gotEm                              = 1
-                 BREAK
               ENDIF
            END
         ENDCASE
+
+        IF gotEm THEN BREAK
 
      ENDFOR
 
@@ -444,6 +444,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
         ;; bestAngle_i, $
+        angleBin_i, $
         good_angleBinK_i[0], $
         /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
         PEAK_ENERGY=peak_energy, $

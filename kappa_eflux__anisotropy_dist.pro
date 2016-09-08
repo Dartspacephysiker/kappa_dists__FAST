@@ -1,6 +1,7 @@
 ;;09/02/16
 FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    X,Y,Z, $
+   angleBin_i, $
    fitAngle_i, $
    NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
    BULK_ENERGY=bulk_energy, $
@@ -20,9 +21,22 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    OUT_PEAK_FLUXES=peak_flux, $
    OUT_ANGLES=peak_angle, $
    OUT_ANGLE_I=peak_angle_i, $
+   OUT_FITANGLE_II=fitAngle_ii, $
    PRINT=print
 
   COMPILE_OPT IDL2
+
+  CASE N_ELEMENTS(angleBin_i) OF
+     0: BEGIN
+        aBin_i          = INDGEN(N_ELEMENTS(Y[0,*]))
+     END
+     ELSE: BEGIN
+        aBin_i          = angleBin_i
+     END
+  ENDCASE
+
+  fitAngle_ii           = (WHERE(fitAngle_i EQ aBin_i,haveFitAngle))[0]
+  IF haveFitAngle LT 1 THEN STOP
 
   IF KEYWORD_SET(save_plots) THEN BEGIN
      IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
@@ -51,7 +65,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   ENDIF
 
   ;;Initialize
-  angles                = Y[0,*]
+  angles                = Y[0,aBin_i]
   nAngles               = N_ELEMENTS(angles)
 
   peak_en               = MAKE_ARRAY(nAngles,/DOUBLE )
@@ -62,41 +76,42 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   allEn_i               = INDGEN(N_ELEMENTS(X[*,0]))
   energyMin             = MIN(ABS(X[*,fitAngle_i]-bulk_energy),energy_i)
 
-  peak_en[fitAngle_i]  = X[energy_i,fitAngle_i]
+  peak_en[fitAngle_ii]  = X[energy_i,fitAngle_i]
 
   ;;Now loop
   FOR k=0,nAngles-1 DO BEGIN
-     tmpAngle_i  = (fitAngle_i + k    ) MOD nAngles
-     prevAngle_i = (fitAngle_i + k - 1) MOD nAngles
+     tmpAngle_ii   = (fitAngle_ii + k    ) MOD nAngles
+     prevAngle_ii  = (fitAngle_ii + k - 1) MOD nAngles
 
+     tmpAngle_i    = (aBin_i[tmpAngle_ii])[0]
      IF KEYWORD_SET(min_energy) THEN BEGIN
-        good_i   = WHERE(X[*,tmpAngle_i] GE min_energy)
-        tmpEn    = X[good_i,tmpAngle_i]
-        tmpAngle = Y[good_i,tmpAngle_i]
-        tmpData  = Z[good_i,tmpAngle_i]
+        good_i     = WHERE(X[*,tmpAngle_i] GE min_energy)
+        tmpEn      = X[good_i,tmpAngle_i]
+        tmpAngle   = Y[good_i,tmpAngle_i]
+        tmpData    = Z[good_i,tmpAngle_i]
      ENDIF ELSE BEGIN
-        tmpEn    = X[*,tmpAngle_i]
-        tmpAngle = Y[*,tmpAngle_i]
-        tmpData  = Z[*,tmpAngle_i]
+        tmpEn      = X[*,tmpAngle_i]
+        tmpAngle   = Y[*,tmpAngle_i]
+        tmpData    = Z[*,tmpAngle_i]
      ENDELSE
 
      ;; tmpMax    = GET_N_MAXIMA_IN_ARRAY(tmpData, $
      ;;                                N=3, $
      ;;                                OUT_I=tmpMax_ii)
 
-     ;; energyMin     = MIN(ABS(tmpEn[tmpMax_ii]-peak_en[prevAngle_i]), $
+     ;; energyMin     = MIN(ABS(tmpEn[tmpMax_ii]-peak_en[aBin_i[prevAngle_ii]]), $
      ;;                     energy_iii)
      ;; peak_en[tmpAngle_i] = tmpEn[tmpMax_ii[energy_iii]]
      ;; peak_angle[tmpAngle_i] = tmpAngle[tmpMax_ii[energy_iii]]
 
      tmpMax                   = MAX(tmpData,tmpMax_ii)
 
-     ;; energyMin     = MIN(ABS(tmpEn[tmpMax_ii]-peak_en[prevAngle_i]), $
+     ;; energyMin     = MIN(ABS(tmpEn[tmpMax_ii]-peak_en[aBin_i[prevAngle_ii]]), $
      ;;                     energy_iii)
-     peak_en[tmpAngle_i]      = tmpEn[tmpMax_ii]
-     peak_flux[tmpAngle_i]    = tmpMax
-     peak_angle[tmpAngle_i]   = tmpAngle[tmpMax_ii]
-     peak_angle_i[k]          = tmpAngle_i
+     peak_en[tmpAngle_ii]      = tmpEn[tmpMax_ii]
+     peak_flux[tmpAngle_ii]    = tmpMax
+     peak_angle[tmpAngle_ii]   = tmpAngle[tmpMax_ii]
+     peak_angle_i[k]           = tmpAngle_i
 
   ENDFOR
 
@@ -110,10 +125,10 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   CASE 1 OF
      KEYWORD_SET(logScale): BEGIN
-        minRatio           = ALOG10(MIN(peak_En/peak_En[fitAngle_i]))
+        minRatio           = ALOG10(MIN(peak_En/peak_En[fitAngle_ii]))
      END
      ELSE: BEGIN
-        minRatio           = MIN(peak_En/peak_En[fitAngle_i])
+        minRatio           = MIN(peak_En/peak_En[fitAngle_ii])
      END
   ENDCASE
 

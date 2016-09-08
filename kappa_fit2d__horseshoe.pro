@@ -142,7 +142,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   ;; ENDIF
 
-  IF KEYWORD_SET(show_and_prompt) THEN BEGIN
+  IF KEYWORD_SET(show_and_prompt) AND nSuccess GT 0 THEN BEGIN
      ;; densEst        = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
      ;;                                ENERGY=KF2D__SDTData_opt.energy_electrons, $
      ;;                                ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
