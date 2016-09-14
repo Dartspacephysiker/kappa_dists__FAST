@@ -29,7 +29,7 @@ FUNCTION KAPPA__SELECT_2DFIT_DENS,fit2D, $
         ENDFOR
      END
      ELSE: BEGIN
-        fitDens = fit2D.dens
+        fitDens = fit2D.fitDens
      END
   ENDCASE
 

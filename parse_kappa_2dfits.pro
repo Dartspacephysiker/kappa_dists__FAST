@@ -14,6 +14,9 @@ PRO PARSE_KAPPA_2DFITS,fitParams, $
              'Kappa', $
              'N']
 
-  Astruct = CREATE_STRUCT([A_names[0:3], $
-                          REFORM(A[0,*]),REFORM(A[1,*]),REFORM(A[2,*]),REFORM(A[3,*]))
+  Astruct = CREATE_STRUCT([A_names[0:3]], $
+                           REFORM(fitParams[0,*]), $
+                           REFORM(fitParams[1,*]), $
+                           REFORM(fitParams[2,*]), $
+                           REFORM(fitParams[3,*]))
 END
