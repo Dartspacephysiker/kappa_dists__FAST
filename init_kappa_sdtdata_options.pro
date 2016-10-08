@@ -8,21 +8,21 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
 
   COMPILE_OPT idl2
 
-  defEEB_or_EES                             = 'eeb'
-  defSpectra_average_interval               = 0
-  defEnergy_electrons                       = [4,3.5e4]
-  defElectron_angleRange                    = [-20,20]
-  defFit2D_dens_angleRange                  = [-20,20]
+  defEEB_or_EES                = 'eeb'
+  defSpectra_average_interval  = 0
+  defEnergy_electrons          = [4,3.5e4]
+  defElectron_angleRange       = [-20,20]
+  defFit2D_dens_angleRange     = [-20,20]
 
-  kSDTData_opt                              = {eeb_or_ees          :defEEB_or_EES, $
-                                               spec_avg_intvl      :defSpectra_average_interval, $
-                                               do_all_times        :0, $
-                                               energy_electrons    :[4,3.5e4], $
-                                               routine             :'get_fa_' + defEEB_or_EES, $
-                                               electron_anglerange :defElectron_angleRange, $
-                                               electron_lca        :[-180.,180.], $
-                                               fit2D_dens_aRange   :defFit2D_dens_angleRange, $
-                                               densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
+  kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
+                   spec_avg_intvl      :defSpectra_average_interval, $
+                   do_all_times        :0, $
+                   energy_electrons    :[4,3.5e4], $
+                   routine             :'get_fa_' + defEEB_or_EES, $
+                   electron_anglerange :defElectron_angleRange, $
+                   electron_lca        :[-180.,180.], $
+                   fit2D_dens_aRange   :defFit2D_dens_angleRange, $
+                   densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
 
   IF N_ELEMENTS(eeb_or_ees) GT 0 THEN BEGIN
@@ -54,22 +54,21 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
 
   IF N_ELEMENTS(electron_angleRange) GT 0 THEN BEGIN
-     kSDTData_opt.electron_angleRange       = electron_angleRange
+     kSDTData_opt.electron_angleRange      = electron_angleRange
      ;; PRINT,FORMAT='("SDT electron angle range",T45,":",T48,2(F0.2))', $
      PRINT,FORMAT='("kSDTData_opt.electron_angleRange",T45,":",T48,2(F0.2,:,", "))', $
            kSDTData_opt.electron_angleRange
   ENDIF
+  kSDTData_opt.fit2D_dens_aRange           = kSDTData_opt.electron_angleRange
   
   IF N_ELEMENTS(electron_lca) GT 0 THEN BEGIN
      CASE N_ELEMENTS(electron_lca) OF
         1: BEGIN
-           kSDTData_opt.electron_lca         = [-ABS(electron_lca),ABS(electron_lca)]
-           kSDTData_opt.fit2D_dens_aRange    = [-ABS(electron_lca),ABS(electron_lca)]
+           kSDTData_opt.electron_lca       = [ABS(electron_lca),-ABS(electron_lca)]
         END
         2: BEGIN
-           kSDTData_opt.electron_lca         = electron_lca
-           kSDTData_opt.fit2D_dens_aRange    = electron_lca
-        END
+           kSDTData_opt.electron_lca       = electron_lca
+          END
         ELSE: BEGIN
            PRINT,'Bogus lca provided! Has to be one or two elements.'
            STOP
@@ -85,7 +84,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
   
   IF N_ELEMENTS(fit2D_density_angleRange) GT 0 THEN BEGIN
-     kSDTData_opt.fit2D_dens_aRange         = fit2D_density_angleRange
+     kSDTData_opt.fit2D_dens_aRange        = fit2D_density_angleRange
 
      ;; PRINT,FORMAT='("SDT density angle range",T45,":",T48,2(F0.2))', $
      PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $

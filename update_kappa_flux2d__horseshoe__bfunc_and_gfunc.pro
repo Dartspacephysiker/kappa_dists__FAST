@@ -53,6 +53,11 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   K_EA__angles  = peak_angle  
   K_EA__angle_i = peak_angle_i
 
+  ;; PRINT,"Kappa anisotropy angles: "
+  ;; FOR k=0,N_ELEMENTS(K_EA__angles)-1 DO BEGIN
+  ;;    PRINT,FORMAT='(I0,T10,F0.2)',K_EA__angle_i[k],K_EA__angles[k]
+  ;; ENDFOR
+
   IF KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc) THEN BEGIN
      K_EA__bFunc[*] = 1.0
   ENDIF

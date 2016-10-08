@@ -1,21 +1,22 @@
-PRO INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
-                                AORIGARR=AorigArr, $
-                                OUT_NREQ_ANGLES=nReqAngles, $
-                                OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
+PRO INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
+                                       ANGLERANGE=angleRange, $
+                                       AORIGARR=AorigArr, $
+                                       OUT_NREQ_ANGLES=nReqAngles, $
+                                       OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
   COMPILE_OPT idl2
 
   @common__kappa_fit2d_structs.pro
 
-  CASE N_ELEMENTS(KF2D__SDTData_opt.electron_angleRange) OF
+  CASE N_ELEMENTS(angleRange) OF
      0: BEGIN
         tempRange    = [-180,180]
      END
      1: BEGIN
-        tempRange    = [(-1.)*ABS(KF2D__SDTData_opt.electron_angleRange),ABS(KF2D__SDTData_opt.electron_angleRange)]
+        tempRange    = [(-1.)*ABS(angleRange),ABS(angleRange)]
      END
      2: BEGIN
-        tempRange    = KF2D__SDTData_opt.electron_angleRange
+        tempRange    = angleRange
 
         CASE 1 OF
            tempRange[0] LT tempRange[1]: BEGIN

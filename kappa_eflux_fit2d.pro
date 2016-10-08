@@ -6,6 +6,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    DO_ALL_TIMES=do_all_times, $
    ENERGY_ELECTRONS=energy_electrons, $
    LOAD_DAT_FROM_FILE=loadFile, $
+   SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
    LOAD_DIR=loadDir, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -154,10 +155,15 @@ PRO KAPPA_EFLUX_FIT2D, $
                               ELECTRON_ENERGY_LIMS=KF2D__SDTData_opt.energy_electrons, $
                               SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file
 
-     orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
+  orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
   ;; ENDIF ELSE BEGIN
   ;;    orbStr                            = '???'
   ;; ENDELSE
+
+  IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
+     PRINT,"Couldn't get diff_eFlux! Quitting ..."
+     RETURN
+  ENDIF
 
   IF KEYWORD_SET(do_all_times) THEN BEGIN
      PRINT,"Doing all times ..."
@@ -202,7 +208,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     DONT_PRINT_FITINFO=dont_print_fitInfo, $
-                    E_ANGLE=e_angle, $
+                    ;; E_ANGLE=e_angle, $
                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
                     OUT_FITTED_PARAMS=out_kappaParams, $
                     OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $

@@ -33,7 +33,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                       DONT_PRINT_ESTIMATES=dont_print_estimates, $
                       DONT_PRINT_FITINFO=dont_print_fitInfo, $
-                      E_ANGLE=e_angle, $
+                      ;; E_ANGLE=e_angle, $
                       CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
                       OUT_FITTED_PARAMS=out_kappaParams, $
                       OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
@@ -82,10 +82,19 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      yMin                      = MIN(data[WHERE(data GT 0)])
   ENDELSE
   
-  INIT_KAPPA_FIT2D_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
-                              AORIGARR=angles[*,*,0], $
-                              OUT_NREQ_ANGLES=nReqAngles, $
-                              OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
+  ;;Init source-cone angles
+  INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempSCRange,alleyOop,nEnergies, $
+                                     ANGLERANGE=KF2D__SDTData_opt.electron_angleRange, $
+                                     AORIGARR=angles[*,*,0], $
+                                     OUT_NREQ_ANGLES=nReqSCAngles, $
+                                     OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
+
+  ;;Init loss-cone angles
+  ;; INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempLCRange,alleyOop,nEnergies, $
+  ;;                                    ANGLERANGE=KF2D__SDTData_opt.electron_lca, $
+  ;;                                    AORIGARR=angles[*,*,0], $
+  ;;                                    OUT_NREQ_ANGLES=nReqSCAngles, $
+  ;;                                    OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
   ;;Init fitParams structs
   CASE 1 OF
@@ -107,57 +116,59 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   ;;We won't want to use this anymore. We're outrightly fitting 2D, you know
   ;; INIT_KAPPA_FIT2DPARAMS_INFO,kFit2DParamStruct
 
-  keepK_iTime                              = !NULL ;Keep track of which fits get to come home with us
-  keepG_iTime                              = !NULL ;Keep track of which fits get to come home with us
-  successesK                               = 0
-  successesG                               = 0
-  totSuccessesK                            = 0
-  totSuccessesG                            = 0
-  fit2DKappa_inf_list                      = LIST()
-  fit2DGauss_inf_list                      = LIST()
+  keepK_iTime          = !NULL ;Keep track of which fits get to come home with us
+  keepG_iTime          = !NULL ;Keep track of which fits get to come home with us
+  successesK           = 0
+  successesG           = 0
+  totSuccessesK        = 0
+  totSuccessesG        = 0
+  fit2DKappa_inf_list  = LIST()
+  fit2DGauss_inf_list  = LIST()
   FOR i=0,N_ELEMENTS(bounds)-1 DO BEGIN
 
-     successesK                            = 0
-     successesG                            = 0
+     successesK       = 0
+     successesG       = 0
 
-     iTime                                 = bounds[i]
-     t                                     = times[iTime]
+     iTime            = bounds[i]
+     t                = times[iTime]
 
      ;;And now the order becomes [angle,energy] for each of these arrays
-     XorigArr                              = energies[*,*,iTime]
-     YorigArr                              = data[*,*,iTime]
+     XorigArr         = energies[*,*,iTime]
+     YorigArr         = data[*,*,iTime]
      IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
-        oneCountArr                        = oneCount_data[*,*,iTime]
+        oneCountArr   = oneCount_data[*,*,iTime]
      END
-     AorigArr                              = angles[*,*,iTime]
+     AorigArr         = angles[*,*,iTime]
 
      IF KEYWORD_SET(KF2D__Curvefit_opt.min_peak_energy) THEN BEGIN
         ;;Try taking it from the top
-        min_peak_ind                       = MAX(WHERE(REFORM(XorigArr[0,*]) GE KF2D__Curvefit_opt.min_peak_energy)) 
+        min_peak_ind  = MAX(WHERE(REFORM(XorigArr[0,*]) GE KF2D__Curvefit_opt.min_peak_energy)) 
         IF min_peak_ind EQ -1 THEN BEGIN
            STOP
         ENDIF
      ENDIF ELSE BEGIN
-        min_peak_ind                       = nEnergies-1
+        min_peak_ind  = nEnergies-1
      ENDELSE
 
-     tempAllAngles                         = AorigArr[*,useTheseAnglesIndex]
+     tempAllAngles    = AorigArr[*,useTheseAnglesIndex]
 
      CASE alleyOop OF
         0: BEGIN
-           angleBins                       = tempAllAngles GE tempRange[0] AND tempAllAngles LE tempRange[1]
+           angleBins  = tempAllAngles GE tempSCRange[0] AND tempAllAngles LE tempSCRange[1]
         END
         1: BEGIN
-           angleBins                       = tempAllAngles GE tempRange[0] OR tempAllAngles LE tempRange[1]
+           angleBins  = tempAllAngles GE tempSCRange[0] OR tempAllAngles LE tempSCRange[1]
         END
         
      ENDCASE
 
-     angleBin_i                            = WHERE(angleBins,nAngles)
+     ;;NOTE: AOrigArr[angleBin_i,usetheseanglesindex]-tempallangles[angleBin_i] = 0 EVERYWHERE
+     ;;This is good; you can use angleBin_i with AOrigArr
+     angleBin_i       = WHERE(angleBins,nAngles)
 
      ;;2016/09/02 What on earth am I doing here?
      ;;Oh yeah, making sure that we have enough angles to do stuff
-     WHILE nAngles LT nReqAngles DO BEGIN
+     WHILE nAngles LT nReqSCAngles DO BEGIN
         ;;Sort the angles, get indices for unsorting them, find out which angle to include next
         sort_i   = SORT(tempAllAngles)
         tAngles  = tempAllAngles[sort_i]
@@ -182,7 +193,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      ENDWHILE
 
-     IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqAngles THEN STOP
+     IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN STOP
 
      IF KEYWORD_SET(fit1D__average_over_angleRange) THEN BEGIN
         tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
@@ -444,7 +455,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
         ;; bestAngle_i, $
-        angleBin_i, $
+        ;; angleBin_i, $
+        !NULL, $
         good_angleBinK_i[0], $
         /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
         PEAK_ENERGY=peak_energy, $

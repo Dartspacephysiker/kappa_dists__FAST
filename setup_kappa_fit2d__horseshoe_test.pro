@@ -41,8 +41,15 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_fit): BEGIN
-        aRange_i        = WHERE((curFitStr.theta[nEnergies/2,*] GE KF2D__SDTData_opt.electron_lca[0]) AND $
-                                (curFitStr.theta[nEnergies/2,*] LE KF2D__SDTData_opt.electron_lca[1]),nAnKeep)
+        bro         = KF2D__SDTData_opt.electron_lca
+        IF bro[0] LT bro[1] THEN BEGIN
+           aRange_i = WHERE((curFitStr.theta[nEnergies/2,*] LE bro[0]) OR $
+                            (curFitStr.theta[nEnergies/2,*] GE bro[1]),nAnKeep)
+        ENDIF ELSE BEGIN
+           aRange_i = WHERE((curFitStr.theta[nEnergies/2,*] LE bro[0]) AND $
+                            (curFitStr.theta[nEnergies/2,*] GE bro[1]),nAnKeep)
+        ENDELSE
+        ;; PRINT,"Angles for 2D fit: ",curFitStr.theta[nEnergies/2,aRange_i]
         IF nAnKeep EQ 0 THEN STOP
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
@@ -53,6 +60,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
      ELSE: BEGIN
         nAnKeep         = N_ELEMENTS(curFitStr.theta[nEnergies/2,*])
         aRange_i        = INDGEN(nAnKeep)
+        ;; PRINT,'Angles for 2D fit: ALL'
      END
   ENDCASE
 
@@ -77,8 +85,8 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
                           type:'a good type'}
 
 
-  fa                 = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
-                        Bingham_style     : 1, $
-                        is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit)}
+  fa  = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
+         Bingham_style     : 1, $
+         is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit)}
 
 END

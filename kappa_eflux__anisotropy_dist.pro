@@ -206,7 +206,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
      xTickValues = [-180,-90,0,90,180]
      xTickName   = STRING(FORMAT='(I0)',xTickValues)
 
-     yVals = KEYWORD_SET(normalize_to_fitAngle_vals) ? peak_en[sort_i]/peak_en[fitAngle_i] : $
+     yVals = KEYWORD_SET(normalize_to_fitAngle_vals) ? peak_en[sort_i]/peak_en[fitAngle_ii] : $
              peak_en[sort_i]
 
      those = PLOT(peak_angle[sort_i],yVals, $
@@ -239,7 +239,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
      IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
 
-     yVals = KEYWORD_SET(normalize_to_fitAngle_vals) ? ALOG10(peak_en[sort_i])/ALOG10(peak_en[fitAngle_i]) : $
+     yVals = KEYWORD_SET(normalize_to_fitAngle_vals) ? ALOG10(peak_en[sort_i])/ALOG10(peak_en[fitAngle_ii]) : $
              ALOG10(peak_en[sort_i])
 
      ;; yRange = KEYWORD_SET(normalize_to_fitAngle_vals) ? [0.001,2.0] : !NULL
@@ -272,7 +272,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
      IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
 
      yVals        = KEYWORD_SET(normalize_to_fitAngle_vals) ? $
-                    peak_en[sort_i]/peak_en[fitAngle_i] : $
+                    peak_en[sort_i]/peak_en[fitAngle_ii] : $
                     peak_en[sort_i]
 
 
