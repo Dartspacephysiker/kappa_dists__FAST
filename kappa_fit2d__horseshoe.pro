@@ -163,7 +163,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
         PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
         ;; FINISH_AND_SAVE_ALL=finish_and_save_all, $
-        /FINISH_AND_SAVE_ALL, $
+        ;; /FINISH_AND_SAVE_ALL, $
         KAPPA_FIT__SHOW__QUIT=show__quit
 
   ENDIF
@@ -215,7 +215,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
         tmpParams = tmpKeeper.fitParams
         tmpParams[3] = tmpKeeper.fitDens
-        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm
+        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged)
      ENDIF
 
   ENDIF ELSE BEGIN

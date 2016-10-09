@@ -100,9 +100,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                          ERRMSG=errMsg, $
                          _EXTRA=extra)
 
-     IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
+     ;; IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
      ;; IF status EQ -16 THEN STOP
-     IF status EQ 0 THEN STOP
+     ;; IF status EQ 0 THEN STOP
 
      IF nPegged GT 0 THEN BEGIN
         temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
@@ -175,6 +175,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   ENDWHILE
 
+  ;; IF fitStatus GT 0 THEN BEGIN
+
+  ;; ENDIF ELSE BEGIN
      out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
                                  [[out_kappaParams],[A]] : A
      out_eRange_peak             = N_ELEMENTS(out_eRange_peak) GT 0 ? $
@@ -213,125 +216,125 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         kappaFits.Add,kappaFit
      ENDELSE
 
-  ;; ENDIF
-
-  IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
-     ;; weights                  = 1./ABS(Y)^2
-     ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)
-     ;; IF nFixMe GT 0 THEN BEGIN
-     ;;    weights[fixMe]           = 0.0
      ;; ENDIF
 
-     ;;Alternate
-     weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
-     weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
+     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+        ;; weights                  = 1./ABS(Y)^2
+        ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)
+        ;; IF nFixMe GT 0 THEN BEGIN
+        ;;    weights[fixMe]           = 0.0
+        ;; ENDIF
 
-     UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_peak
-     ;; gaussParamStruct = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
-     ;;                                        ERANGE_PEAK=eRange_peak)
+        ;;Alternate
+        weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+        weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
-     AGauss        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
-                              X,Y, $
-                              WEIGHTS=weights, $
-                              FUNCTARGS=fa, $
-                              BESTNORM=bestNorm, $
-                              NFEV=nfev, $
-                              FTOL=KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
-                              kCurvefit_opt.fit_tol : 1e-3, $
-                              GTOL=1e-13, $
-                              STATUS=gaussStatus, $
-                              BEST_RESID=best_resid, $
-                              PFREE_INDEX=iGaussFree, $
-                              CALC_FJAC=calc_fjac, $
-                              BEST_FJAC=best_fjac, $
-                              PARINFO=gaussParamStruct, $
-                              QUERY=query, $
-                              NPEGGED=nGaussPegged, $
-                              NFREE=nGaussFree, $
-                              DOF=gaussDOF, $
-                              COVAR=covar, $
-                              PERROR=perror, $
-                              MAXITER=KEYWORD_SET(kCurvefit_opt.max_iter) ? $
-                              kCurvefit_opt.max_iter : 150, $
-                              NITER=itNum, $
-                              YFIT=yGaussFit, $
-                              /QUIET, $
-                              ERRMSG=errMsg, $
-                              _EXTRA=extra)
+        UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_peak
+        ;; gaussParamStruct = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
+        ;;                                        ERANGE_PEAK=eRange_peak)
 
-     ;;Little update
-     IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
-        IF (gaussStatus LE 0) OR (gaussStatus GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(gaussStatus)
-        IF gaussStatus EQ 0 THEN STOP
-     ENDIF
+        AGauss        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
+                                 X,Y, $
+                                 WEIGHTS=weights, $
+                                 FUNCTARGS=fa, $
+                                 BESTNORM=bestNorm, $
+                                 NFEV=nfev, $
+                                 FTOL=KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
+                                 kCurvefit_opt.fit_tol : 1e-3, $
+                                 GTOL=1e-13, $
+                                 STATUS=gaussStatus, $
+                                 BEST_RESID=best_resid, $
+                                 PFREE_INDEX=iGaussFree, $
+                                 CALC_FJAC=calc_fjac, $
+                                 BEST_FJAC=best_fjac, $
+                                 PARINFO=gaussParamStruct, $
+                                 QUERY=query, $
+                                 NPEGGED=nGaussPegged, $
+                                 NFREE=nGaussFree, $
+                                 DOF=gaussDOF, $
+                                 COVAR=covar, $
+                                 PERROR=perror, $
+                                 MAXITER=KEYWORD_SET(kCurvefit_opt.max_iter) ? $
+                                 kCurvefit_opt.max_iter : 150, $
+                                 NITER=itNum, $
+                                 YFIT=yGaussFit, $
+                                 /QUIET, $
+                                 ERRMSG=errMsg, $
+                                 _EXTRA=extra)
 
-     ;; IF nGaussPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
-     IF nGaussFree LT 3 THEN PRINT,"GAUSSPEGGED!"
+        ;;Little update
+        IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
+           IF (gaussStatus LE 0) OR (gaussStatus GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(gaussStatus)
+           IF gaussStatus EQ 0 THEN STOP
+        ENDIF
 
-     ;; IF nPegged GT 0 THEN BEGIN
-     ;;    temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
-     ;;    kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
-     ;;    IF kappaPegged AND temperaturePegged THEN BEGIN
-     ;;       PRINT,"PEGGED!"
-     ;;       iBePegged = 1
-     ;;    ENDIF ELSE BEGIN
-     ;;       iBePegged  = 0
-     ;;    ENDELSE
-     ;;    ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
-     ;;    ;;    iBePegged = 1
-     ;;    ;; ENDIF ELSE BEGIN
-     ;;    ;;    iBePegged = 0
-     ;;    ;; ENDELSE
-     ;; ENDIF ELSE BEGIN
-     ;;    iBePegged    = 0
-     ;; ENDELSE
+        ;; IF nGaussPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
+        IF nGaussFree LT 3 THEN PRINT,"GAUSSPEGGED!"
 
-     ;; IF (WHERE(gaussStatus EQ OKStatus))[0] NE -1 THEN BEGIN
-     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nGaussPegged EQ 0 ) THEN BEGIN
-     IF ((WHERE(status EQ OKStatus))[0] NE -1) OR (nGaussFree LT 3) THEN BEGIN
-        gaussFitStatus = 0 
-        gaussParamStruct[*].value = AGauss
-     ENDIF ELSE BEGIN
-        gaussFitStatus = 1
-     ENDELSE
+        ;; IF nPegged GT 0 THEN BEGIN
+        ;;    temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
+        ;;    kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
+        ;;    IF kappaPegged AND temperaturePegged THEN BEGIN
+        ;;       PRINT,"PEGGED!"
+        ;;       iBePegged = 1
+        ;;    ENDIF ELSE BEGIN
+        ;;       iBePegged  = 0
+        ;;    ENDELSE
+        ;;    ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
+        ;;    ;;    iBePegged = 1
+        ;;    ;; ENDIF ELSE BEGIN
+        ;;    ;;    iBePegged = 0
+        ;;    ;; ENDELSE
+        ;; ENDIF ELSE BEGIN
+        ;;    iBePegged    = 0
+        ;; ENDELSE
 
-     IF KEYWORD_SET(gaussFitStatus) THEN BEGIN
-        IF ~KEYWORD_SET(dont_print_fitInfo) THEN PRINT,'gaussFit failure ...'
-        chi2            = -1
-        pValGauss       = -1
-     ENDIF ELSE BEGIN
-
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        ;;Calculate chi and things if it checks out
-
-        ;;need to adjust Y bounds?
-        ;; yMax               = MAX(yGaussFit) > yMax
-
-        chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) )
-
-        IF FINITE(chi2) THEN BEGIN
-           pValGauss       = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-3) ;3 for the 3 params that were allowed to participate in this fit
+        ;; IF (WHERE(gaussStatus EQ OKStatus))[0] NE -1 THEN BEGIN
+        ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nGaussPegged EQ 0 ) THEN BEGIN
+        IF ((WHERE(gaussStatus EQ OKStatus))[0] NE -1) OR (nGaussFree LT 3) THEN BEGIN
+           gaussFitStatus = 0 
+           gaussParamStruct[*].value = AGauss
         ENDIF ELSE BEGIN
-           pValGauss       = -1
+           gaussFitStatus = 1
         ENDELSE
 
-        IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
-           PRINT,"Gaussian fitted spectral properties: "
-           PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,AGauss
-        ENDIF
-     ENDELSE
+        IF KEYWORD_SET(gaussFitStatus) THEN BEGIN
+           IF ~KEYWORD_SET(dont_print_fitInfo) THEN PRINT,'gaussFit failure ...'
+           chi2            = -1
+           pValGauss       = -1
+        ENDIF ELSE BEGIN
+
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+           ;;Calculate chi and things if it checks out
+
+           ;;need to adjust Y bounds?
+           ;; yMax               = MAX(yGaussFit) > yMax
+
+           chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) )
+
+           IF FINITE(chi2) THEN BEGIN
+              pValGauss       = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-3) ;3 for the 3 params that were allowed to participate in this fit
+           ENDIF ELSE BEGIN
+              pValGauss       = -1
+           ENDELSE
+
+           IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
+              PRINT,"Gaussian fitted spectral properties: "
+              PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,AGauss
+           ENDIF
+        ENDELSE
 
 
-     gaussFit              = {x:KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
-                              y:yGaussFit, $
-                              name:"Gaussian Fitted spectrum" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
-                              A:AGauss, $
-                              time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
-                              time_index:bounds_i, $
-                              fitStatus:gaussFitStatus, $
-                              chi2:chi2, $
-                              pVal:pValGauss, $
-                              is_sdt_fit:KEYWORD_SET(use_SDT_Gaussian_fit)}
+        gaussFit              = {x:KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
+                                 y:yGaussFit, $
+                                 name:"Gaussian Fitted spectrum" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
+                                 A:AGauss, $
+                                 time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
+                                 time_index:bounds_i, $
+                                 fitStatus:gaussFitStatus, $
+                                 chi2:chi2, $
+                                 pVal:pValGauss, $
+                                 is_sdt_fit:KEYWORD_SET(use_SDT_Gaussian_fit)}
 
         IF KEYWORD_SET(add_full_fits) THEN BEGIN
            CASE 1 OF
@@ -359,8 +362,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $
                            [[out_gaussParams],[AGauss]] : $
                            AGauss
-     ;; ENDIF
+        ;; ENDIF
 
-  ENDIF
-
+     ENDIF
+  ;; ENDELSE
 END

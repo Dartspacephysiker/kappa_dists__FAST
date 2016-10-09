@@ -160,11 +160,13 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
      ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
   ENDIF
 
-  IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
-     kappaFits    = LIST(kappaFit)
-  ENDIF ELSE BEGIN
-     kappaFits.Add,kappaFit
-  ENDELSE
+  ;; IF fitStatus EQ 0 THEN BEGIN
+     IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+        kappaFits    = LIST(kappaFit)
+     ENDIF ELSE BEGIN
+        kappaFits.Add,kappaFit
+     ENDELSE
+  ;; ENDIF
 
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
      ;; weights               = SQRT(ABS(Y))
@@ -295,11 +297,13 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
 
      ;; gaussFits    = N_ELEMENTS(gaussFits) EQ 0 ? gaussFit : [gaussFits,gaussFit]
-     IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
-        gaussFits    = LIST(gaussFit)
-     ENDIF ELSE BEGIN
-        gaussFits.Add,gaussFit
-     ENDELSE
+     ;; IF gaussFitStatus EQ 0 AND fitStatus EQ 0 THEN BEGIN
+        IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
+           gaussFits    = LIST(gaussFit)
+        ENDIF ELSE BEGIN
+           gaussFits.Add,gaussFit
+        ENDELSE
+     ;; ENDIF
 
      out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $
                                 [[out_gaussParams],[AGauss]] : $

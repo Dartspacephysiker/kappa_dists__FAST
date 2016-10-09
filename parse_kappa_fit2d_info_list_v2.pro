@@ -2,8 +2,11 @@
 FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         ;; FITS1D_LIST=fits1D_list, $
                                         HIGHDENSITY_THRESHOLD=highDens_thresh, $
+                                        LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                         KAPPA_LOWTHRESHOLD=lKappa_thresh, $
                                         KAPPA_HIGHTHRESHOLD=hKappa_thresh, $
+                                        CHI2_THRESHOLD=chi2_thresh, $
+                                        CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                         DESTROY_INFO_LIST=destroy, $
                                         OUT_GOOD_I=include_i, $
                                         OUT_GOOD_T=include_t, $
@@ -48,8 +51,10 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   nIter               = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
 
   nExcluded_highDens  = 0
+  nExcluded_lowDens  = 0
   nExcluded_lKappa    = 0
   nExcluded_hKappa    = 0
+  nExcluded_chi2    = 0
   exclude_i           = !NULL
   FOR k=0,nFits-1 DO BEGIN
      excluded         = 0
@@ -73,9 +78,36 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         ENDIF
      ENDIF
 
+     IF KEYWORD_SET(chi2_thresh) AND ~excluded THEN BEGIN
+        IF fit2D_inf_list[k].chi2 GT chi2_thresh THEN BEGIN
+           nExcluded_chi2++
+           exclude_i  = [exclude_i,k]
+           excluded   = 1
+           ;; CONTINUE
+        ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(chi2_over_dof_thresh) AND ~excluded THEN BEGIN
+        IF (fit2D_inf_list[k].chi2/fit2D_inf_list[k].dof) GT chi2_over_dof_thresh THEN BEGIN
+           nExcluded_chi2++
+           exclude_i  = [exclude_i,k]
+           excluded   = 1
+           ;; CONTINUE
+        ENDIF
+     ENDIF
+
      IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
         IF fit2D_inf_list[k].fitDens GT highDens_thresh THEN BEGIN
            nExcluded_highDens++
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
+        ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
+        IF fit2D_inf_list[k].fitDens GT lowDens_thresh THEN BEGIN
+           nExcluded_lowDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
            ;; CONTINUE
@@ -116,8 +148,14 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   IF KEYWORD_SET(highDens_thresh) THEN BEGIN
      PRINT,'Excluded ' + STRCOMPRESS(nExcluded_highDens,/REMOVE_ALL) + $
-           " fits on the basis of density threshold (dens LE " + $
+           " fits on the basis of density threshold (dens must be LE " + $
            STRCOMPRESS(highDens_thresh,/REMOVE_ALL) + ")"
+  ENDIF
+
+  IF KEYWORD_SET(lowDens_thresh) THEN BEGIN
+     PRINT,'Excluded ' + STRCOMPRESS(nExcluded_lowDens,/REMOVE_ALL) + $
+           " fits on the basis of low density threshold (dens must be GE " + $
+           STRCOMPRESS(lowDens_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(lKappa_thresh) THEN BEGIN
@@ -131,27 +169,37 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
            " fits on the basis of high kappa threshold (kappa LE " + STRCOMPRESS(hKappa_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
+  IF KEYWORD_SET(chi2_thresh) THEN BEGIN
+     PRINT,'Excluded ' + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
+           " fits on the basis of chi^2 threshold ( chi^2 GT " + STRCOMPRESS(chi2_thresh,/REMOVE_ALL) + ")"
+  ENDIF
+
+  IF KEYWORD_SET(chi2_over_dof_thresh) THEN BEGIN
+     PRINT,'Excluded ' + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
+           " fits on the basis of chi^2/dof threshold ( chi^2/dof GT " + STRCOMPRESS(chi2_over_dof_thresh,/REMOVE_ALL) + ")"
+  ENDIF
+
   PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)
 
   ;; best2DFit            = {SDT: SDTStr, $
   ;;                         params1D:fitParams}
 
-  fit2D             = {SDT          : SDTStr     , $
-                       fitParams    : fitParams  , $
-                       fitDens      : fitDens    , $
-                       chi2         : chi2       , $
-                       errMsg       : errMsg     , $
-                       status       : status     , $
-                       nfEv         : nfEv       , $
-                       ;; best_resid   : best_resid , $
-                       pFree_index  : pFree_index, $
-                       ;; best_fJac    : best_fJac  , $
-                       nPegged      : nPegged    , $
-                       nFree        : nFree      , $
-                       dof          : dof        , $
-                       covar        : covar      , $
-                       pError       : pError     , $
-                       nIter        : nIter      }
+  fit2D             = {SDT          : SDTStr     [include_i], $
+                       fitParams    : fitParams[*,include_i], $
+                       fitDens      : fitDens    [include_i], $
+                       chi2         : chi2       [include_i], $
+                       errMsg       : errMsg     [include_i], $
+                       status       : status     [include_i], $
+                       nfEv         : nfEv       [include_i], $
+                       ;; best_resid   : best_resid [include_i], $
+                       pFree_index  : pFree_index[*,include_i], $
+                       ;; best_fJac    : best_fJac  [include_i], $
+                       nPegged      : nPegged    [include_i], $
+                       nFree        : nFree      [include_i], $
+                       dof          : dof        [include_i], $
+                       covar        : covar  [*,*,include_i], $
+                       pError       : pError   [*,include_i], $
+                       nIter        : nIter      [include_i]}
 
 
   IF KEYWORD_SET(fit_type) THEN BEGIN
