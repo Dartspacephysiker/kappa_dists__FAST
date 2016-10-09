@@ -175,9 +175,6 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   ENDWHILE
 
-  ;; IF fitStatus GT 0 THEN BEGIN
-
-  ;; ENDIF ELSE BEGIN
      out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
                                  [[out_kappaParams],[A]] : A
      out_eRange_peak             = N_ELEMENTS(out_eRange_peak) GT 0 ? $
@@ -209,12 +206,6 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
      ENDIF
 
-
-     IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
-        kappaFits    = LIST(kappaFit)
-     ENDIF ELSE BEGIN
-        kappaFits.Add,kappaFit
-     ENDELSE
 
      ;; ENDIF
 
@@ -353,17 +344,40 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
            ADD_STR_ELEMENT,gaussFit,'bulkAngleInf',add_angleStr
         ENDIF
 
-        IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
-           gaussFits    = LIST(gaussFit)
-        ENDIF ELSE BEGIN
-           gaussFits.Add,gaussFit
-        ENDELSE
-
         out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $
                            [[out_gaussParams],[AGauss]] : $
                            AGauss
         ;; ENDIF
 
      ENDIF
+
+     ;;Now handle the adding of stuff
+     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+
+        IF ~fitStatus AND ~gaussFitStatus THEN BEGIN
+
+           IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+              kappaFits    = LIST(kappaFit)
+           ENDIF ELSE BEGIN
+              kappaFits.Add,kappaFit
+           ENDELSE
+
+           IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
+              gaussFits    = LIST(gaussFit)
+           ENDIF ELSE BEGIN
+              gaussFits.Add,gaussFit
+           ENDELSE
+
+        ENDIF
+     ENDIF ELSE BEGIN
+
+        IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+           kappaFits    = LIST(kappaFit)
+        ENDIF ELSE BEGIN
+           kappaFits.Add,kappaFit
+        ENDELSE
+
+     ENDELSE
+
   ;; ENDELSE
 END

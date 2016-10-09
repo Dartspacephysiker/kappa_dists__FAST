@@ -6,6 +6,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            successes, $
                            curFitStr,fits,curDataStr, $
                            fitAngle_i, $
+                           hadSuccess, $
                            ;; IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
                            KFITPARAMSTRUCT=kFitParamStruct, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
@@ -218,8 +219,11 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged)
      ENDIF
 
+     hadSuccess = 1
+
   ENDIF ELSE BEGIN
-     winStruct        = !NULL
+     winStruct  = !NULL
+     hadSuccess = 0
   ENDELSE
 
 END

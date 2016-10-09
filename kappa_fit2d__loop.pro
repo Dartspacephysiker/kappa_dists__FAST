@@ -372,21 +372,23 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         IF KEYWORD_SET(synthPackage) THEN BEGIN
 
            ;;Determine whether we're keeping this guy or not, for plotting purposes and for building synthetic SDT structs
-           skipKappa                                = (kappaFit.fitStatus GT 0)
+           gaussDecision                         = KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
+                                                   (gaussFit.fitStatus GT 0) : 0
+           skipKappa                             = (kappaFit.fitStatus GT 0) OR gaussDecision
 
            IF ~skipKappa AND ~gotKappa THEN BEGIN
-              synthKappa.data[*,iAngle,iTime]       = kappaFit.yFull
-              synthKappa.energy[*,iAngle,iTime]     = kappaFit.xFull
+              synthKappa.data[*,iAngle,iTime]    = kappaFit.yFull
+              synthKappa.energy[*,iAngle,iTime]  = kappaFit.xFull
               nGoodFits_tempK++
-              good_angleBinK_i                      = [good_angleBinK_i,iAngle]
-              good_kappaFits_i                      = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
+              good_angleBinK_i                   = [good_angleBinK_i,iAngle]
+              good_kappaFits_i                   = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
 
-              gotKappa                              = 1
+              gotKappa                           = 1
               PRINT,"Got kappa 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
            ENDIF
 
            IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
-              skipGauss                             = (gaussFit.fitStatus GT 0)
+              skipGauss                             = (gaussFit.fitStatus GT 0) OR (kappaFit.fitStatus GT 0)
 
               IF ~skipGauss AND ~gotGauss THEN BEGIN
                  synthGauss.data[*,iAngle,iTime]    = gaussFit.yFull
@@ -430,7 +432,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         PRINT,'SKIPPING'
         CONTINUE
      ENDIF
-        
 
      ;; stopMe1      = '97-02-01/09:26:13.22'
      ;; stopMe2      = '97-02-01/09:26:18.91'
@@ -499,6 +500,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            successesK, $
            curKappaStr,kappaFits,curDataStr, $
            good_angleBinK_i, $
+           hadSuccess, $
            KFITPARAMSTRUCT=kappaParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DKappa_inf_list, $
@@ -520,6 +522,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         kBest       = 999
      ENDELSE
 
+     proceed = proceed AND hadSuccess
+
      IF proceed AND KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
 
         KAPPA_FIT2D__HORSESHOE, $
@@ -530,6 +534,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            successesG, $
            curGaussStr,gaussFits,curDataStr, $
            good_angleBinG_i, $
+           hadSuccess, $
            KFITPARAMSTRUCT=gaussParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DGauss_inf_list, $

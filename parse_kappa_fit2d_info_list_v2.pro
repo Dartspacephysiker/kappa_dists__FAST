@@ -106,7 +106,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      ENDIF
 
      IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].fitDens GT lowDens_thresh THEN BEGIN
+        IF fit2D_inf_list[k].fitDens LT lowDens_thresh THEN BEGIN
            nExcluded_lowDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
