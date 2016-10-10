@@ -8,6 +8,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         CHI2_THRESHOLD=chi2_thresh, $
                                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                         DESTROY_INFO_LIST=destroy, $
+                                        IN_GOOD_I=in_good_i, $
                                         OUT_GOOD_I=include_i, $
                                         OUT_GOOD_T=include_t, $
                                         OUT_BAD_I=exclude_i, $
@@ -177,6 +178,24 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   IF KEYWORD_SET(chi2_over_dof_thresh) THEN BEGIN
      PRINT,'Excluded ' + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
            " fits on the basis of chi^2/dof threshold ( chi^2/dof GT " + STRCOMPRESS(chi2_over_dof_thresh,/REMOVE_ALL) + ")"
+  ENDIF
+
+  IF KEYWORD_SET(in_good_i) THEN BEGIN
+     nBef = N_ELEMENTS(include_i)
+     include2_i = CGSETINTERSECTION(include_i,in_good_i,COUNT=nAft,INDICES_B=include_ii)
+     exclude2_i = CGSETDIFFERENCE(include_i,in_good_i,COUNT=nExclude2,POSITIONS=exclude_ii,NORESULT=-1)
+
+     include_t = include_t[include_ii]
+
+     IF exclude2_i[0] NE -1 THEN BEGIN
+
+        exclude_i = [exclude_i,exclude2_i]
+        exclude_i = exclude_i[SORT(exclude_i)]
+        exclude_t = (SDTStr.time)[exclude_i]
+
+        PRINT,"Lost" + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
+     ENDIF
+
   ENDIF
 
   PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)

@@ -12,6 +12,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
                            FIT2D_INF_LIST=fit2D_inf_list, $
                            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
+                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                            FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
                            FIT2D__SHOW__FITSTRING=fitString, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
@@ -21,6 +22,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro
+
+  IF KEYWORD_SET(fit2D__save_all_candidate_plots) THEN finish_and_save_all = 1
 
   OKStatus     = [1,2,3,4]      ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
@@ -163,8 +166,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
         PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
         PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-        ;; FINISH_AND_SAVE_ALL=finish_and_save_all, $
-        ;; /FINISH_AND_SAVE_ALL, $
+        FINISH_AND_SAVE_ALL=finish_and_save_all, $
         KAPPA_FIT__SHOW__QUIT=show__quit
 
   ENDIF

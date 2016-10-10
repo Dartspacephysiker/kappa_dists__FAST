@@ -14,6 +14,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           T2STR=t2Str, $
                           SHOW_POST_PLOTS=show_post_plots, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
+                          FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
                           OUT_FIT2DK=fit2DK, $
@@ -197,6 +198,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
+        FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
         FIT2D__PRINT_FITINFO=print_2DFitInfo, $
         FIT2D__TOLERANCE=fit2D_tol, $
         FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
@@ -332,14 +334,66 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
-                                          CHI2_THRESHOLD=chi2_thresh) 
+                                          CHI2_THRESHOLD=chi2_thresh, $
+                                          OUT_GOOD_I=includeK_i)
 
   fit2DG = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DGauss_inf_list, $
                                           FIT_TYPE='Maxwellian', $
                                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
-                                          CHI2_THRESHOLD=chi2_thresh) 
+                                          CHI2_THRESHOLD=chi2_thresh, $
+                                          IN_GOOD_I=includeK_i, $
+                                          OUT_GOOD_I=includeG_i) 
+
+  ;;Now shrink everyone
+  IF ~ARRAY_EQUAL(includeK_i,includeG_i) THEN BEGIN
+
+     IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(gaussFits) THEN STOP
+     IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN STOP
+     IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(fit2DKappa_inf_list) THEN STOP
+
+     include_i = CGSETINTERSECTION(includeK_i,includeG_i)
+
+  fit2DK            = {SDT          : fit2dK.SDT [include_i], $
+                       fitParams    : fit2DK.fitParams[*,include_i], $
+                       fitDens      : fit2DK.fitDens  [include_i], $
+                       chi2         : fit2DK.chi2     [include_i], $
+                       errMsg       : fit2DK.errMsg   [include_i], $
+                       status       : fit2DK.status   [include_i], $
+                       nfEv         : fit2DK.nfEv     [include_i], $
+                       ;; best_resid   : best_resid [include_i], $
+                       pFree_index  : fit2DK.pFree_index[*,include_i], $
+                       ;; best_fJac    : best_fJac  [include_i], $
+                       nPegged      : fit2DK.nPegged    [include_i], $
+                       nFree        : fit2DK.nFree      [include_i], $
+                       dof          : fit2DK.dof        [include_i], $
+                       covar        : fit2DK.covar  [*,*,include_i], $
+                       pError       : fit2DK.pError   [*,include_i], $
+                       nIter        : fit2DK.nIter      [include_i]}
+     
+  fit2DG            = {SDT          : fit2DG.SDT [include_i], $
+                       fitParams    : fit2DG.fitParams[*,include_i], $
+                       fitDens      : fit2DG.fitDens  [include_i], $
+                       chi2         : fit2DG.chi2     [include_i], $
+                       errMsg       : fit2DG.errMsg   [include_i], $
+                       status       : fit2DG.status   [include_i], $
+                       nfEv         : fit2DG.nfEv     [include_i], $
+                       ;; best_resid   : best_resid [include_i], $
+                       pFree_index  : fit2DG.pFree_index[*,include_i], $
+                       ;; best_fJac    : best_fJac  [include_i], $
+                       nPegged      : fit2DG.nPegged    [include_i], $
+                       nFree        : fit2DG.nFree      [include_i], $
+                       dof          : fit2DG.dof        [include_i], $
+                       covar        : fit2DG.covar  [*,*,include_i], $
+                       pError       : fit2DG.pError   [*,include_i], $
+                       nIter        : fit2DG.nIter      [include_i]}
+
+
+  kappaFits = kappaFits[include_i]
+  gaussFits = gaussFits[include_i]
+
+  ENDIF
 
   IF KEYWORD_SET(show_post_plots) THEN BEGIN
 
