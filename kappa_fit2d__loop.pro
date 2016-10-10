@@ -326,8 +326,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                        STRINGS=KF2D__strings, $
                                        OUT_FITTED_PARAMS=out_kappaParams, $
                                        OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                                       OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                                       OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                                       ;; OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                                       ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                                        /ADD_FULL_FITS, $
                                        ADD_ANGLESTR=angleStr, $
                                        OUT_ERANGE_PEAK=out_eRange_peak, $
@@ -368,6 +368,34 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
            END
         ENDCASE
+
+        ;;Now handle the adding of stuff
+        IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
+
+           IF ~kappaFit.fitStatus AND ~gaussFit.fitStatus THEN BEGIN
+
+              IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+                 kappaFits    = LIST(kappaFit)
+              ENDIF ELSE BEGIN
+                 kappaFits.Add,kappaFit
+              ENDELSE
+
+              IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
+                 gaussFits    = LIST(gaussFit)
+              ENDIF ELSE BEGIN
+                 gaussFits.Add,gaussFit
+              ENDELSE
+
+           ENDIF
+        ENDIF ELSE BEGIN
+
+           IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+              kappaFits    = LIST(kappaFit)
+           ENDIF ELSE BEGIN
+              kappaFits.Add,kappaFit
+           ENDELSE
+
+        ENDELSE
 
         ;;Now that we've finished with all these angles, let's see about recovering them
         IF KEYWORD_SET(synthPackage) THEN BEGIN
@@ -501,7 +529,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            successesK, $
            curKappaStr,kappaFits,curDataStr, $
            good_angleBinK_i, $
-           hadSuccess, $
+           hadSuccessK, $
            KFITPARAMSTRUCT=kappaParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DKappa_inf_list, $
@@ -524,7 +552,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         kBest       = 999
      ENDELSE
 
-     proceed = proceed AND hadSuccess
+     proceed = proceed AND hadSuccessK
 
      IF proceed AND KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
 
@@ -536,7 +564,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            successesG, $
            curGaussStr,gaussFits,curDataStr, $
            good_angleBinG_i, $
-           hadSuccess, $
+           hadSuccessG, $
            KFITPARAMSTRUCT=gaussParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DGauss_inf_list, $
@@ -549,12 +577,30 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         
         totSuccessesG += successesG
 
+
+
         ;; PRINT,FORMAT='("GAUSS_FIT2D__TRY_EACH SUCCESSES (TOT) : ",I0," (",I0,")")', $
         ;;       successesG, $
         ;;       totSuccessesG
 
      ENDIF
 
+     IF ~(hadSuccessK AND hadSuccessG) THEN BEGIN
+        CASE (N_ELEMENTS(kappaFits) - N_ELEMENTS(fit2DKappa_inf_list)) OF
+           0:                             ;excellent
+           1: kappaFits = kappaFits[0:-2] ;Well... I guess we'll trim one
+           ELSE: STOP
+        ENDCASE
+
+        IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
+           CASE (N_ELEMENTS(gaussFits) - N_ELEMENTS(fit2DGauss_inf_list)) OF
+              0:                             ;excellent
+              1: gaussFits = gaussFits[0:-2] ;Well... I guess we'll trim one
+              ELSE: STOP
+           ENDCASE
+        ENDIF
+
+     ENDIF
      ;; IF proceed AND KEYWORD_SET(fit1D__show_and_prompt) AND kBest LT 3.0 THEN BEGIN
      ;; IF proceed AND KEYWORD_SET(fit1D__show_and_prompt) THEN BEGIN
      IF 0 THEN BEGIN

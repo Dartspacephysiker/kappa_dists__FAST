@@ -7,6 +7,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         KAPPA_HIGHTHRESHOLD=hKappa_thresh, $
                                         CHI2_THRESHOLD=chi2_thresh, $
                                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+                                        DONT_SHRINK_PARSED_STRUCT=dont_shrink, $
                                         DESTROY_INFO_LIST=destroy, $
                                         IN_GOOD_I=in_good_i, $
                                         OUT_GOOD_I=include_i, $
@@ -181,7 +182,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   ENDIF
 
   IF KEYWORD_SET(in_good_i) THEN BEGIN
-     nBef = N_ELEMENTS(include_i)
+     nBef       = N_ELEMENTS(include_i)
      include2_i = CGSETINTERSECTION(include_i,in_good_i,COUNT=nAft,INDICES_B=include_ii)
      exclude2_i = CGSETDIFFERENCE(include_i,in_good_i,COUNT=nExclude2,POSITIONS=exclude_ii,NORESULT=-1)
 
@@ -193,32 +194,40 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         exclude_i = exclude_i[SORT(exclude_i)]
         exclude_t = (SDTStr.time)[exclude_i]
 
-        PRINT,"Lost" + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
+        PRINT,"Lost an additional" + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
      ENDIF
+
+     nKept = nAft
 
   ENDIF
 
+  IF KEYWORD_SET(dont_shrink) THEN BEGIN
+     keep_i = INDGEN(nFits)
+     nKept  = nFits
+  ENDIF ELSE BEGIN
+     keep_i = include_i
+  ENDELSE
   PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)
 
   ;; best2DFit            = {SDT: SDTStr, $
   ;;                         params1D:fitParams}
 
-  fit2D             = {SDT          : SDTStr     [include_i], $
-                       fitParams    : fitParams[*,include_i], $
-                       fitDens      : fitDens    [include_i], $
-                       chi2         : chi2       [include_i], $
-                       errMsg       : errMsg     [include_i], $
-                       status       : status     [include_i], $
-                       nfEv         : nfEv       [include_i], $
-                       ;; best_resid   : best_resid [include_i], $
-                       pFree_index  : pFree_index[*,include_i], $
-                       ;; best_fJac    : best_fJac  [include_i], $
-                       nPegged      : nPegged    [include_i], $
-                       nFree        : nFree      [include_i], $
-                       dof          : dof        [include_i], $
-                       covar        : covar  [*,*,include_i], $
-                       pError       : pError   [*,include_i], $
-                       nIter        : nIter      [include_i]}
+  fit2D             = {SDT          : SDTStr     [keep_i], $
+                       fitParams    : fitParams[*,keep_i], $
+                       fitDens      : fitDens    [keep_i], $
+                       chi2         : chi2       [keep_i], $
+                       errMsg       : errMsg     [keep_i], $
+                       status       : status     [keep_i], $
+                       nfEv         : nfEv       [keep_i], $
+                       ;; best_resid   : best_resid [keep_i], $
+                       pFree_index  : pFree_index[*,keep_i], $
+                       ;; best_fJac    : best_fJac  [keep_i], $
+                       nPegged      : nPegged    [keep_i], $
+                       nFree        : nFree      [keep_i], $
+                       dof          : dof        [keep_i], $
+                       covar        : covar  [*,*,keep_i], $
+                       pError       : pError   [*,keep_i], $
+                       nIter        : nIter      [keep_i]}
 
 
   IF KEYWORD_SET(fit_type) THEN BEGIN

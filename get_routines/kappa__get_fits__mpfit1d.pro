@@ -19,8 +19,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              STRINGS=strings, $
                              OUT_FITTED_PARAMS=out_kappaParams, $
                              OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                             OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                             OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                             ;; OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                             ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                              ADD_FULL_FITS=add_full_fits, $
                              ADD_ANGLESTR=add_angleStr, $
                              OUT_ERANGE_PEAK=out_eRange_peak, $
@@ -350,34 +350,4 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;; ENDIF
 
      ENDIF
-
-     ;;Now handle the adding of stuff
-     IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
-
-        IF ~fitStatus AND ~gaussFitStatus THEN BEGIN
-
-           IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
-              kappaFits    = LIST(kappaFit)
-           ENDIF ELSE BEGIN
-              kappaFits.Add,kappaFit
-           ENDELSE
-
-           IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
-              gaussFits    = LIST(gaussFit)
-           ENDIF ELSE BEGIN
-              gaussFits.Add,gaussFit
-           ENDELSE
-
-        ENDIF
-     ENDIF ELSE BEGIN
-
-        IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
-           kappaFits    = LIST(kappaFit)
-        ENDIF ELSE BEGIN
-           kappaFits.Add,kappaFit
-        ENDELSE
-
-     ENDELSE
-
-  ;; ENDELSE
 END

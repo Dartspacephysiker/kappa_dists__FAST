@@ -46,7 +46,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   ENDIF
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
-     IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 6
+     IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4
   ENDIF
 
   ;; bounds                    = [160:210:50]/spectra_avg_interval & bounds  = bounds[uniq(bounds)]
@@ -335,7 +335,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                           CHI2_THRESHOLD=chi2_thresh, $
-                                          OUT_GOOD_I=includeK_i)
+                                          OUT_GOOD_I=includeK_i, $
+                                          /DONT_SHRINK_PARSED_STRUCT)
 
   fit2DG = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DGauss_inf_list, $
                                           FIT_TYPE='Maxwellian', $
@@ -344,10 +345,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                           CHI2_THRESHOLD=chi2_thresh, $
                                           IN_GOOD_I=includeK_i, $
-                                          OUT_GOOD_I=includeG_i) 
+                                          OUT_GOOD_I=includeG_i, $
+                                          /DONT_SHRINK_PARSED_STRUCT) 
 
   ;;Now shrink everyone
-  IF ~ARRAY_EQUAL(includeK_i,includeG_i) THEN BEGIN
+  IF ~(ARRAY_EQUAL(includeK_i,includeG_i) AND (N_ELEMENTS(kappaFits) EQ N_ELEMENTS(gaussFits)) AND $
+       (N_ELEMENTS(kappaFits) EQ N_ELEMENTS(fit2DKappa_inf_list))) THEN BEGIN
 
      IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(gaussFits) THEN STOP
      IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN STOP
@@ -389,6 +392,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                        pError       : fit2DG.pError   [*,include_i], $
                        nIter        : fit2DG.nIter      [include_i]}
 
+  fit2DKappa_inf_list = fit2DKappa_inf_list[include_i]
+  fit2DGauss_inf_list = fit2DKappa_inf_list[include_i]
 
   kappaFits = kappaFits[include_i]
   gaussFits = gaussFits[include_i]
