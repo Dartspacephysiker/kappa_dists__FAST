@@ -57,6 +57,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    NO_PLOTS=no_plots, $
    SAVE_FITPLOTS=save_fitplots, $
    PLOT_FULL_FIT=plot_full_fit, $
+   PLOTNAMEPREF=plotNamePref, $
    PLOTDIR=plotDir, $
    OUT_FITTED_PARAMS=out_kappaParams, $
    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
@@ -125,6 +126,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                        SAVE_FITPLOTS=save_fitplots, $
                        PLOT_FULL_FIT=plot_full_fit, $
                        PLOTDIR=plotDir, $
+                       PLOTNAMEPREF=plotNamePref, $
                        ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                        ADD_FITPARAMS_TEXT=add_fitParams_text, $
                        ADD_ANGLE_LABEL=add_angle_label, $

@@ -7,6 +7,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         KAPPA_HIGHTHRESHOLD=hKappa_thresh, $
                                         CHI2_THRESHOLD=chi2_thresh, $
                                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+                                        DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                                        N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                         DONT_SHRINK_PARSED_STRUCT=dont_shrink, $
                                         DESTROY_INFO_LIST=destroy, $
                                         IN_GOOD_I=in_good_i, $
@@ -53,16 +55,35 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   nIter               = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
 
   nExcluded_highDens  = 0
-  nExcluded_lowDens  = 0
+  nExcluded_lowDens   = 0
   nExcluded_lKappa    = 0
   nExcluded_hKappa    = 0
-  nExcluded_chi2    = 0
+  nExcluded_chi2      = 0
+  nExcluded_dEf       = 0
   exclude_i           = !NULL
   FOR k=0,nFits-1 DO BEGIN
      excluded         = 0
      tmpKappa         = fit2D_inf_list[k].fitParams[2]
 
-     IF KEYWORD_SET(lKappa_thresh) THEN BEGIN
+     IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
+        IF fit2D_inf_list[k].fitDens GT highDens_thresh THEN BEGIN
+           nExcluded_highDens++
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
+        ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
+        IF fit2D_inf_list[k].fitDens LT lowDens_thresh THEN BEGIN
+           nExcluded_lowDens++
+           exclude_i   = [exclude_i,k]
+           excluded    = 1
+           ;; CONTINUE
+        ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(lKappa_thresh) AND ~excluded THEN BEGIN
         IF tmpKappa LT lKappa_thresh THEN BEGIN
            nExcluded_lKappa++
            exclude_i  = [exclude_i,k]
@@ -98,18 +119,11 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         ENDIF
      ENDIF
 
-     IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].fitDens GT highDens_thresh THEN BEGIN
-           nExcluded_highDens++
-           exclude_i   = [exclude_i,k]
-           excluded    = 1
-           ;; CONTINUE
-        ENDIF
-     ENDIF
-
-     IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].fitDens LT lowDens_thresh THEN BEGIN
-           nExcluded_lowDens++
+     IF KEYWORD_SET(nPkAbove_dEF_thresh) AND ~excluded THEN BEGIN
+        ;;First get all the bins nearest to bulk energy
+        junk = MIN(ABS(fit2D_inf_list[k].SDT.energy[*,0]-fit2D_inf_list[k].fitParams[0]),bulk_e__ind)
+        IF N_ELEMENTS(WHERE(fit2D_inf_list[k].SDT.data[bulk_e__ind,*] GE diffEflux_thresh,/NULL)) LT nPkAbove_dEF_thresh THEN BEGIN
+           nExcluded_dEf++
            exclude_i   = [exclude_i,k]
            excluded    = 1
            ;; CONTINUE
@@ -179,6 +193,13 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   IF KEYWORD_SET(chi2_over_dof_thresh) THEN BEGIN
      PRINT,'Excluded ' + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
            " fits on the basis of chi^2/dof threshold ( chi^2/dof GT " + STRCOMPRESS(chi2_over_dof_thresh,/REMOVE_ALL) + ")"
+  ENDIF
+
+  IF KEYWORD_SET(nPkAbove_dEF_thresh) THEN BEGIN
+     PRINT,'Excluded ' + STRCOMPRESS(nExcluded_dEf,/REMOVE_ALL) + $
+           " fits on the basis of low differential energy flux threshold at peak (peak must be GE " + $
+           STRCOMPRESS(diffEFlux_thresh,/REMOVE_ALL) + ' for at least ' + $
+           STRCOMPRESS(nPkAbove_dEF_thresh,/REMOVE_ALL) + " angles)"
   ENDIF
 
   IF KEYWORD_SET(in_good_i) THEN BEGIN

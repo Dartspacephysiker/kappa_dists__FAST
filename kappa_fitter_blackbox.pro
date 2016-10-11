@@ -9,6 +9,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
+                          DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                          N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                           RESTORE_FITFILE=restore_fitFile, $
                           T1STR=t1Str, $
                           T2STR=t2Str, $
@@ -17,6 +19,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
+                          CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $
                           PLOTDIR=plotDir, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
@@ -225,6 +228,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         NO_PLOTS=no_plots, $
         SAVE_FITPLOTS=save_fitplots, $
         PLOT_FULL_FIT=plot_full_fit, $
+        PLOTNAMEPREF=plotNamePref, $
         PLOTDIR=plotDir, $
         OUT_FITTED_PARAMS=out_kappaParams, $
         OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
@@ -341,6 +345,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                           CHI2_THRESHOLD=chi2_thresh, $
+                                          DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                                          N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                           OUT_GOOD_I=includeK_i, $
                                           /DONT_SHRINK_PARSED_STRUCT)
 
@@ -350,6 +356,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                           CHI2_THRESHOLD=chi2_thresh, $
+                                          DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                                          N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                           IN_GOOD_I=includeK_i, $
                                           OUT_GOOD_I=includeG_i, $
                                           /DONT_SHRINK_PARSED_STRUCT) 
@@ -408,7 +416,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   IF KEYWORD_SET(show_post_plots) THEN BEGIN
 
-     POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir,save_kappa_plot
+     POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir,save_kappa_plot, $
+                            CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save                            
 
   ENDIF
 

@@ -54,13 +54,30 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   input         = ''
   showFit       = 1
 
+  ;;Set up PA plot dir
+  PAPlotDir = (KEYWORD_SET(KF2D__Plot_opt.plotDir) ? KF2D__Plot_opt.plotDir : './') + 'PA_plots/'
+  plotDir_exists = FILE_TEST(PAPlotdir,/DIRECTORY)
+  IF ~plotDir_exists THEN BEGIN
+     IF KEYWORD_SET(verbose) THEN PRINTF,lun,"SET_PLOT_DIR: Making directory " + PAPlotdir
+     SPAWN,'mkdir -p ' + PAPlotDir
+  ENDIF
+  plotDir_exists = FILE_TEST(PAPlotDir,/DIRECTORY)
+  IF ~plotDir_exists THEN BEGIN
+     PRINTF,lun,'Failed to make directory: ' + PAPlotDir
+     PRINTF,lun,"Setting PAPlot dir to ./"
+     PAPlotDir = './'
+  ENDIF
+
+
+
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
-     tempFN = STRING(FORMAT='("orb_",A0,"--",A0,"_fit--",A0)', $
+     tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"_fit--",A0)', $
                      KF2D__strings.orbStr, $
+                     KF2D__Plot_opt.plotNamePref, $
                      fitString, $
                      KF2D__strings.timeFNStrs[iTime])
 
-     POPEN,(KEYWORD_SET(GET_PA_PLOT_DIR()) ? GET_PA_PLOT_DIR() : './') + tempFN, $
+     POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
            XSIZE=xSize, $
            YSIZE=ySize, $
            LAND=land
@@ -125,9 +142,11 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "se": BEGIN
            cont   = 0
-           tempFN = STRING(FORMAT='("spec2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
-                           KF2D__strings.orbStr,fitString,KF2D__strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(GET_PA_PLOT_DIR()) ? GET_PA_PLOT_DIR() : './') + tempFN, $
+           tempFN = STRING(FORMAT='("spec2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
+                           KF2D__strings.orbStr, $
+                           KF2D__Plot_opt.plotNamePref, $
+                           fitString,KF2D__strings.timeFNStrs[iTime])
+           POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
                  LAND=land
@@ -184,9 +203,11 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         END
         "s": BEGIN
            cont = 0
-           tempFN = STRING(FORMAT='("contour2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
-                           KF2D__strings.orbStr,fitString,KF2D__strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(GET_PA_PLOT_DIR()) ? GET_PA_PLOT_DIR() : './') + tempFN, $
+           tempFN = STRING(FORMAT='("contour2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
+                           KF2D__strings.orbStr, $
+                           KF2D__Plot_opt.plotNamePref, $
+                           fitString,KF2D__strings.timeFNStrs[iTime])
+           POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
                  LAND=land
@@ -200,9 +221,11 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         "f": BEGIN
            cont = 1
            finish_and_save_all = 1
-           tempFN = STRING(FORMAT='("contour2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
-                           strings.orbStr,fitString,strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(GET_PA_PLOT_DIR()) ? GET_PA_PLOT_DIR() : './') + tempFN, $
+           tempFN = STRING(FORMAT='("contour2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
+                           strings.orbStr, $
+                           KF2D__Plot_opt.plotNamePref, $
+                           fitString,strings.timeFNStrs[iTime])
+           POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
                  LAND=land
@@ -226,22 +249,11 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
 END
 
-FUNCTION GET_PA_PLOT_DIR
+;; FUNCTION GET_PA_PLOT_DIR
 
-  @common__kappa_fit2d_structs.pro
+;;   @common__kappa_fit2d_structs.pro
 
-  PAPlotDir = (KEYWORD_SET(KF2D__Plot_opt.plotDir) ? KF2D__Plot_opt.plotDir : './') + 'PA_plots/'
-  plotDir_exists = FILE_TEST(PAPlotdir,/DIRECTORY)
-  IF ~plotDir_exists THEN BEGIN
-     IF KEYWORD_SET(verbose) THEN PRINTF,lun,"SET_PLOT_DIR: Making directory " + PAPlotdir
-     SPAWN,'mkdir -p ' + PAPlotDir
-  ENDIF
-  plotDir_exists = FILE_TEST(PAPlotDir,/DIRECTORY)
-  IF ~plotDir_exists THEN BEGIN
-     PRINTF,lun,'Failed to make directory: ' + PAPlotDir
-     RETURN,''
-  ENDIF
 
-  RETURN,PAPlotDir
+;;   RETURN,PAPlotDir
 
-END
+;; END

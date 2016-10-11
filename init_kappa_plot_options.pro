@@ -2,6 +2,7 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
                                  SAVE_FITPLOTS=save_fitplots, $
                                  PLOT_FULL_FIT=plot_full_fit, $
                                  PLOTDIR=plotDir, $
+                                 PLOTNAMEPREF=plotNamePref, $
                                  ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                                  ADD_FITPARAMS_TEXT=add_fitParams_text, $
                                  ADD_ANGLE_LABEL=add_angle_label, $
@@ -16,6 +17,7 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
                                       save_fitplots         : 0, $
                                       plot_full_fit         : 0, $
                                       plotDir               : '', $
+                                      plotNamePref          : '', $
                                       add_angle_label       : 0, $
                                       add_fitParams_text    : 0, $
                                       fit2D__add_boundaries : 0, $
@@ -40,6 +42,9 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
      kPlot_opt.plotDir             = plotDir
   ENDELSE
 
+  IF N_ELEMENTS(plotNamePref) GT 0 THEN BEGIN
+     kPlot_opt.plotNamePref             = plotNamePref
+  ENDIF
 
   IF N_ELEMENTS(add_oneCount_curve) GT 0 THEN BEGIN
      kPlot_opt.add_oneCount_curve     = add_oneCount_curve

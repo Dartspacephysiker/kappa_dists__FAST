@@ -804,7 +804,7 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
 
         IF KEYWORD_SET(close_window_after_save) THEN BEGIN
            windowArr[iParam].close
-           windowArr[iParam]      = !NULL
+           ;; windowArr[iParam]      = !NULL
         ENDIF
 
      ENDIF
