@@ -17,6 +17,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
+                          PLOTDIR=plotDir, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -28,22 +29,14 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   
   COMPILE_OPT IDL2
 
-  SET_PLOT_DIR,plotDir, $
-               /FOR_SDT, $
-               /ADD_TODAY, $
-               ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
+  IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
+     SET_PLOT_DIR,plotDir, $
+                  /FOR_SDT, $
+                  /ADD_TODAY, $
+                  ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
+  ENDIF
 
   outDir               = '~/software/sdt/batch_jobs/saves_output_etc/'
-
-  fitFile              = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
-                         '--Kappa_fits_and_Gauss_fits--' + eeb_or_ees + '--horseshoe2d'
-
-  IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
-     save_diff_eFlux_to_file = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + '--output_from_get_losscone_and_eflux_data.sav'
-  ENDIF
-  IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
-     diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + '--output_from_get_losscone_and_eflux_data.sav'
-  ENDIF
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
      IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4
@@ -153,6 +146,18 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      plotNamePref    += '--exc_LCA'
   ENDIF
 
+  fitFile              = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
+                         '--Kappa_fits_and_Gauss_fits--' + eeb_or_ees + '--horseshoe2d'
+
+  IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
+     save_diff_eFlux_to_file = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
+                               plotNamePref + '.sav'
+  ENDIF
+  IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
+     diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
+                         plotNamePref + '.sav'
+  ENDIF
+
   fitFile                       = fitFile + plotNamePref + '.sav'
 
   IF KEYWORD_SET(restore_fitFile) THEN BEGIN
@@ -195,6 +200,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
         FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
         FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
+        FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
@@ -393,7 +399,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                        nIter        : fit2DG.nIter      [include_i]}
 
   fit2DKappa_inf_list = fit2DKappa_inf_list[include_i]
-  fit2DGauss_inf_list = fit2DKappa_inf_list[include_i]
+  fit2DGauss_inf_list = fit2DGauss_inf_list[include_i]
 
   kappaFits = kappaFits[include_i]
   gaussFits = gaussFits[include_i]

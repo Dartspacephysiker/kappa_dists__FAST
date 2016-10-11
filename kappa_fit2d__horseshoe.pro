@@ -119,6 +119,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   fit2DStr        = curFitStr
 
   CASE 1 OF
+     KEYWORD_SET(kF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
+        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,curFitStr.theta,fit2DParams)
+     END
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
         oldfit2DStr = fit2DStr
         FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN

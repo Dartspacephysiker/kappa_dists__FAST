@@ -630,7 +630,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
      
-
      IF KEYWORD_SET(fit1D__skip_bad_fits) THEN BEGIN
         tmpTimeK_i = keepK_iTime
         tmpTimeG_i = keepG_iTime
