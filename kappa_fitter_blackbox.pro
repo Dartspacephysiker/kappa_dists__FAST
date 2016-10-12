@@ -351,6 +351,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           CHI2_THRESHOLD=chi2_thresh, $
                                           DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                                           N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                                          DENS_ANGLERANGE=fit2D__density_angleRange, $
                                           OUT_GOOD_I=includeK_i, $
                                           /DONT_SHRINK_PARSED_STRUCT)
 
@@ -362,6 +363,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           CHI2_THRESHOLD=chi2_thresh, $
                                           DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                                           N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                                          DENS_ANGLERANGE=fit2D__density_angleRange, $
                                           IN_GOOD_I=includeK_i, $
                                           OUT_GOOD_I=includeG_i, $
                                           /DONT_SHRINK_PARSED_STRUCT) 

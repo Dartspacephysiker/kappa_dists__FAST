@@ -9,6 +9,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                         DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                                         N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                                        DENS_ANGLERANGE=dens_angleRange, $
                                         DONT_SHRINK_PARSED_STRUCT=dont_shrink, $
                                         DESTROY_INFO_LIST=destroy, $
                                         IN_GOOD_I=in_good_i, $
@@ -122,7 +123,14 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      IF KEYWORD_SET(nPkAbove_dEF_thresh) AND ~excluded THEN BEGIN
         ;;First get all the bins nearest to bulk energy
         junk = MIN(ABS(fit2D_inf_list[k].SDT.energy[*,0]-fit2D_inf_list[k].fitParams[0]),bulk_e__ind)
-        IF N_ELEMENTS(WHERE(fit2D_inf_list[k].SDT.data[bulk_e__ind,*] GE diffEflux_thresh,/NULL)) LT nPkAbove_dEF_thresh THEN BEGIN
+        tmpDat = fit2D_inf_list[k].SDT.data[bulk_e__ind,*]
+        IF KEYWORD_SET(dens_angleRange) THEN BEGIN
+           angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) AND $
+                           (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+           IF nAnKeep LT 2 THEN STOP
+           tmpDat  = tmpDat[*,angle_i]
+        ENDIF
+        IF N_ELEMENTS(WHERE(tmpDat GE diffEflux_thresh,/NULL)) LT nPkAbove_dEF_thresh THEN BEGIN
            nExcluded_dEf++
            exclude_i   = [exclude_i,k]
            excluded    = 1
