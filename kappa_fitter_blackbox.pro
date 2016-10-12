@@ -62,11 +62,13 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   add_full_fits                 = 1
   fit2D__only_fit_peak_eRange   = 0
   fit2D__only_fit_aboveMin      = 1
+  fit2D__only_fit_eAngles       = 1
   fit2D__keep_wholeFit          = 1  
   fit2D__bulk_e_anisotropy      = 1
-  fit2D__exclude_lca_from_fit   = 1
+  fit2D__exclude_lca_from_densCalc = 1
   fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
+  fit2D__density_angleRange     = [-150,150]
 
   use_mpFit1D                   = 1
 
@@ -145,7 +147,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      plotNamePref    += '--No_bFunc'
   ENDIF
 
-  IF KEYWORD_SET(fit2D__exclude_lca_from_fit) THEN BEGIN
+  IF KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
      plotNamePref    += '--exc_LCA'
   ENDIF
 
@@ -211,10 +213,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__PRINT_FITINFO=print_2DFitInfo, $
         FIT2D__TOLERANCE=fit2D_tol, $
         FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+        FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
         FIT2D__LOSSCONE_ANGLE=fit2D__lossCone_angle, $
         FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
         FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-        FIT2D__EXCLUDE_LCA_FROM_FIT=fit2D__exclude_lca_from_fit, $
+        FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+        FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
         FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
         USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $

@@ -18,7 +18,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
                                      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-                                     FIT2D__EXCLUDE_LCA_FROM_FIT=fit2D__exclude_lca_from_fit, $
+                                     FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
                                      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
                                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
                                      FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
@@ -61,7 +61,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                                 fit2D_fit_above_minE        :  0, $
                                                 fit2D__bulk_e_anisotropy    :  0, $
                                                 fit2D__bulk_e_anis_factor   :  0., $
-                                                fit2D__exclude_lca_from_fit :  0, $
+                                                fit2D__exclude_lca_from_densCalc :  0, $
                                                 fit2D__disable_bFunc        :  0, $
                                                 fit2D__keep_wholeFit        :  0, $
                                                 max_iter                    : defMax_iter, $
@@ -215,8 +215,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
   IF N_ELEMENTS(fit2D__only_fit_eAngles) GT 0 THEN BEGIN
      kCurvefit_opt.fit2D_only_eAngles    = fit2D__only_fit_eAngles
 
-     PRINT,FORMAT='("kCurvefit_opt.only_eAngles",T45,":",T48,I0)', $
-     kCurvefit_opt.only_eAngles
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_only_eAngles",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D_only_eAngles
   ENDIF
 
   IF N_ELEMENTS(fit2D__only_fit_peak_eRange) GT 0 THEN BEGIN
@@ -247,11 +247,11 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
            kCurvefit_opt.fit2D__bulk_e_anis_factor
   ENDIF
 
-  IF N_ELEMENTS(fit2D__exclude_lca_from_fit) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2D__exclude_lca_from_fit = fit2D__exclude_lca_from_fit
+  IF N_ELEMENTS(fit2D__exclude_lca_from_densCalc) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D__exclude_lca_from_densCalc = fit2D__exclude_lca_from_densCalc
 
-     PRINT,FORMAT='("kCurvefit_opt.fit2D__exclude_lca_from_fit",T45,":",T48,I0)', $
-     kCurvefit_opt.fit2D__exclude_lca_from_fit
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__exclude_lca_from_densCalc",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D__exclude_lca_from_densCalc
   ENDIF
 
   IF N_ELEMENTS(fit2D__disable_bFunc) GT 0 THEN BEGIN

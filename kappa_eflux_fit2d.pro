@@ -39,10 +39,12 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__TOLERANCE=fit2d_tol, $
    FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+   FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
    FIT2D__LOSSCONE_ANGLE=fit2D__lossCone_angle, $
    FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
    FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-   FIT2D__EXCLUDE_LCA_FROM_FIT=fit2D__exclude_lca_from_fit, $
+   FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+   FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
    FIT2D__PRINT_FITINFO=print_2DFitInfo, $
    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
@@ -85,12 +87,13 @@ PRO KAPPA_EFLUX_FIT2D, $
                        FIT1D__MAX_ITERATIONS=max_iter, $
                        FIT2D__TOLERANCE=fit2d_tol, $
                        FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+                       FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
                        FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
                        FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
                        FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                        FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
                        FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-                       FIT2D__EXCLUDE_LCA_FROM_FIT=fit2D__exclude_lca_from_fit, $
+                       FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
                        FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
                        N_ENERGIES_BELOW_PEAK=n_below_peak, $
                        N_ENERGIES_ABOVE_PEAK=n_above_peak, $
@@ -118,7 +121,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                        ENERGY_ELECTRONS=energy_electrons, $
                        ELECTRON_ANGLERANGE=electron_angleRange, $
                        ELECTRON_LOSSCONE_ANGLE=electron_lca, $
-                       FIT2D_DENSITY_ANGLERANGE=fit2D_density_angleRange)
+                       FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange)
 
   ;;Plot options
   KF2D__Plot_opt     = INIT_KAPPA_PLOT_OPTIONS( $
