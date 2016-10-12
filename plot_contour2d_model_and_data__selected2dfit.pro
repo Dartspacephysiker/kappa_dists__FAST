@@ -80,7 +80,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                    fit2DStruct.bestFit1DParams.A
      fitTitle    = ["Bulk energy  (eV)","Plasma temp. (eV)", $
                     "Kappa","Density (cm^-3)", $
-                    CGGREEK('chi',/PS)+'!11^2 (norm)']
+                    CGGREEK('chi',/PS)+'!11!U2!N!Dred!N      ']
                     ;; "Angle (deg)"]
      fitInfoStr  = [STRING(FORMAT='(F-15.2)',tmpA[0]), $
                     STRING(FORMAT='(F-15.2)',tmpA[1]), $
