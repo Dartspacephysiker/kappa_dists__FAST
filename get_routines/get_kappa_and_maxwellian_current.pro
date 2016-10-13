@@ -39,9 +39,9 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,AStruct,AStructGauss, $
   ENDCASE
 
   ;;Get currents based on R value
-  kappa_current                  = DOUBLE(1.0e6) * KNIGHT_RELATION__DORS_KLETZING_11(AStruct.kappa,AStruct.temp,densK, $
+  kappa_current                  = DOUBLE(1.0e6) * KNIGHT_RELATION__DORS_KLETZING_11(AStruct.kappa,AStruct.temperature,densK, $
                                                                                      kappaPot/DOUBLE(1.6e-19),magRatio) ;, $
-  gauss_current                  = DOUBLE(1.0e6) * KNIGHT_RELATION__DORS_KLETZING_4(AStructGauss.temp,densG, $
+  gauss_current                  = DOUBLE(1.0e6) * KNIGHT_RELATION__DORS_KLETZING_4(AStructGauss.temperature,densG, $
                                                                                     gaussPot/DOUBLE(1.6e-19),magRatio)
 
   IF KEYWORD_SET(make_currents_positive) THEN BEGIN

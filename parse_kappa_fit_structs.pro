@@ -29,7 +29,7 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
   A = REFORM(A,N_ELEMENTS(A)/NStructs,NStructs)
 
   A_names = ['bulk_energy', $
-             'Temp', $
+             'temperature', $
              'Kappa', $
              'N', $
              'delta_t', $       ;bogus

@@ -585,7 +585,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      ENDIF
 
-     IF ~(hadSuccessK AND hadSuccessG) THEN BEGIN
+     IF ~(KEYWORD_SET(hadSuccessK) AND KEYWORD_SET(hadSuccessG)) THEN BEGIN
         CASE (N_ELEMENTS(kappaFits) - N_ELEMENTS(fit2DKappa_inf_list)) OF
            0:                             ;excellent
            1: kappaFits = kappaFits[0:-2] ;Well... I guess we'll trim one

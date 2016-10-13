@@ -21,6 +21,16 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
                           CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $
                           PLOTDIR=plotDir, $
+                          SHOW_STRANGEWAY_SUMMARY=show_Strangeway_summary, $
+                          SWAY__SAVE_PS=sway__save_ps, $
+                          SWAY__SAVE_PNG=sway__save_png, $
+                          SWAY__ADD_KAPPA_PANEL=sway__add_kappa_panel, $
+                          SWAY__ADD_CHARE_PANEL=sway__add_chare_panel, $
+                          SWAY__ADD_NEWELL_PANEL=sway__add_Newell_panel, $
+                          SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
+                          SHOW_KAPPA_SUMMARY=show_kappa_summary, $
+                          KSUM__SAVE_PS=kSum__save_ps, $
+                          KSUM__SAVE_PNG=kSum__save_png, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -68,7 +78,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   fit2D__exclude_lca_from_densCalc = 1
   fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
-  fit2D__density_angleRange     = [-150,150]
+  fit2D__density_angleRange     = [-32,32]
 
   use_mpFit1D                   = 1
 
@@ -91,8 +101,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   n_below_peak                  = 3
   n_above_peak                  = 7
-  n_below_peak2D                = 3
-  n_above_peak2D                = 7
+  n_below_peak2D                = 4
+  n_above_peak2D                = 8
   dont_fit_below_thresh_value   = 0
   bulk_offset                   = 0
 
@@ -110,7 +120,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   fit2D_max_iter                = 4000
 
   fit_tol                       = 1e-3
-  fit2D_tol                     = 1e-4
+  fit2D_tol                     = 1e-5
 
   kappa_est                     = 2.7
 
@@ -369,8 +379,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           /DONT_SHRINK_PARSED_STRUCT) 
 
   ;;Now shrink everyone
-  IF ~(ARRAY_EQUAL(includeK_i,includeG_i) AND (N_ELEMENTS(kappaFits) EQ N_ELEMENTS(gaussFits)) AND $
-       (N_ELEMENTS(kappaFits) EQ N_ELEMENTS(fit2DKappa_inf_list))) THEN BEGIN
+  IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
+       (N_ELEMENTS(kappaFits)  EQ N_ELEMENTS(gaussFits)           ) AND $
+       (N_ELEMENTS(kappaFits)  EQ N_ELEMENTS(fit2DKappa_inf_list) ) AND $
+       (N_ELEMENTS(includeK_i) EQ N_ELEMENTS(fit2DKappa_inf_list) ) ) THEN BEGIN
 
      IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(gaussFits) THEN STOP
      IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN STOP
@@ -378,45 +390,45 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      include_i = CGSETINTERSECTION(includeK_i,includeG_i)
 
-  fit2DK            = {SDT          : fit2dK.SDT [include_i], $
-                       fitParams    : fit2DK.fitParams[*,include_i], $
-                       fitDens      : fit2DK.fitDens  [include_i], $
-                       chi2         : fit2DK.chi2     [include_i], $
-                       errMsg       : fit2DK.errMsg   [include_i], $
-                       status       : fit2DK.status   [include_i], $
-                       nfEv         : fit2DK.nfEv     [include_i], $
-                       ;; best_resid   : best_resid [include_i], $
-                       pFree_index  : fit2DK.pFree_index[*,include_i], $
-                       ;; best_fJac    : best_fJac  [include_i], $
-                       nPegged      : fit2DK.nPegged    [include_i], $
-                       nFree        : fit2DK.nFree      [include_i], $
-                       dof          : fit2DK.dof        [include_i], $
-                       covar        : fit2DK.covar  [*,*,include_i], $
-                       pError       : fit2DK.pError   [*,include_i], $
-                       nIter        : fit2DK.nIter      [include_i]}
+     fit2DK            = {SDT          : fit2dK.SDT [include_i], $
+                          fitParams    : fit2DK.fitParams[*,include_i], $
+                          fitDens      : fit2DK.fitDens  [include_i], $
+                          chi2         : fit2DK.chi2     [include_i], $
+                          errMsg       : fit2DK.errMsg   [include_i], $
+                          status       : fit2DK.status   [include_i], $
+                          nfEv         : fit2DK.nfEv     [include_i], $
+                          ;; best_resid   : best_resid [include_i], $
+                          pFree_index  : fit2DK.pFree_index[*,include_i], $
+                          ;; best_fJac    : best_fJac  [include_i], $
+                          nPegged      : fit2DK.nPegged    [include_i], $
+                          nFree        : fit2DK.nFree      [include_i], $
+                          dof          : fit2DK.dof        [include_i], $
+                          covar        : fit2DK.covar  [*,*,include_i], $
+                          pError       : fit2DK.pError   [*,include_i], $
+                          nIter        : fit2DK.nIter      [include_i]}
      
-  fit2DG            = {SDT          : fit2DG.SDT [include_i], $
-                       fitParams    : fit2DG.fitParams[*,include_i], $
-                       fitDens      : fit2DG.fitDens  [include_i], $
-                       chi2         : fit2DG.chi2     [include_i], $
-                       errMsg       : fit2DG.errMsg   [include_i], $
-                       status       : fit2DG.status   [include_i], $
-                       nfEv         : fit2DG.nfEv     [include_i], $
-                       ;; best_resid   : best_resid [include_i], $
-                       pFree_index  : fit2DG.pFree_index[*,include_i], $
-                       ;; best_fJac    : best_fJac  [include_i], $
-                       nPegged      : fit2DG.nPegged    [include_i], $
-                       nFree        : fit2DG.nFree      [include_i], $
-                       dof          : fit2DG.dof        [include_i], $
-                       covar        : fit2DG.covar  [*,*,include_i], $
-                       pError       : fit2DG.pError   [*,include_i], $
-                       nIter        : fit2DG.nIter      [include_i]}
+     fit2DG            = {SDT          : fit2DG.SDT [include_i], $
+                          fitParams    : fit2DG.fitParams[*,include_i], $
+                          fitDens      : fit2DG.fitDens  [include_i], $
+                          chi2         : fit2DG.chi2     [include_i], $
+                          errMsg       : fit2DG.errMsg   [include_i], $
+                          status       : fit2DG.status   [include_i], $
+                          nfEv         : fit2DG.nfEv     [include_i], $
+                          ;; best_resid   : best_resid [include_i], $
+                          pFree_index  : fit2DG.pFree_index[*,include_i], $
+                          ;; best_fJac    : best_fJac  [include_i], $
+                          nPegged      : fit2DG.nPegged    [include_i], $
+                          nFree        : fit2DG.nFree      [include_i], $
+                          dof          : fit2DG.dof        [include_i], $
+                          covar        : fit2DG.covar  [*,*,include_i], $
+                          pError       : fit2DG.pError   [*,include_i], $
+                          nIter        : fit2DG.nIter      [include_i]}
 
-  fit2DKappa_inf_list = fit2DKappa_inf_list[include_i]
-  fit2DGauss_inf_list = fit2DGauss_inf_list[include_i]
+     fit2DKappa_inf_list = fit2DKappa_inf_list[include_i]
+     fit2DGauss_inf_list = fit2DGauss_inf_list[include_i]
 
-  kappaFits = kappaFits[include_i]
-  gaussFits = gaussFits[include_i]
+     kappaFits = kappaFits[include_i]
+     gaussFits = gaussFits[include_i]
 
   ENDIF
 
@@ -431,5 +443,70 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   PRINT,FORMAT='("(N w/ k ≤ 2.5)/nTot : ",I0,"/",I0)', $
         N_ELEMENTS(WHERE(fit2DK.fitParams[2,*] LE 2.5)), $
         N_ELEMENTS(fit2DK.nIter)
+
+  IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
+     SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
+                    tplot_vars=tplot_vars, $
+                    EEB_OR_EES=eeb_OR_ees, $
+                    ENERGY_ELECTRONS=energy_electrons, $
+                    TLIMIT_NORTH=tlimit_north, $
+                    TLIMIT_SOUTH=tlimit_south, $
+                    TLIMIT_ALL=tlimit_all, $
+                    /SCREEN_PLOT, $
+                    ADD_KAPPA_PANEL=sway__add_kappa_panel, $
+                    ADD_CHARE_PANEL=sway__add_chare_panel, $
+                    ADD_NEWELL_PANEL=sway__add_Newell_panel, $
+                    LOG_KAPPAPLOT=sway__log_kappaPlot, $
+                    USE_FAC_V=use_fac_v, $
+                    USE_FAC_NOT_V=use_fac, $
+                    NO_BLANK_PANELS=no_blank_panels, $
+                    FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
+                    FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+                    KAPPAFITS=kappaFits, $
+                    GAUSSFITS=gaussFits, $
+                    CHI2_THRESHOLD=chi2_thresh, $
+                    CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+                    HIGHDENSITY_THRESHOLD=highDens_thresh, $
+                    LOWDENSITY_THRESHOLD=lowDens_thresh, $
+                    DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                    N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                    SAVE_PS=sway__save_ps, $
+                    SAVE_PNG=sway__save_png, $
+                    SAVEKAPPA_BONUSPREF=bonusPref, $
+                    PLOTDIR=plotDir
+
+  ENDIF
+
+  IF KEYWORD_SET(show_kappa_summary) THEN BEGIN
+     
+     IF KEYWORD_SET(show_Strangeway_summary) THEN tplot_vars = !NULL ;Clear 'em out
+
+     SINGLE_KAPPA_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
+                    tplot_vars=tplot_vars, $
+                    EEB_OR_EES=eeb_or_ees, $
+                    ENERGY_ELECTRONS=energy_electrons, $
+                    TLIMIT_NORTH=tlimit_north, $
+                    TLIMIT_SOUTH=tlimit_south, $
+                    TLIMIT_ALL=tlimit_all, $
+                    /SCREEN_PLOT, $
+                    USE_FAC_V=use_fac_v, $
+                    USE_FAC_NOT_V=use_fac, $
+                    NO_BLANK_PANELS=no_blank_panels, $
+                    FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
+                    FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+                    KAPPAFITS=kappaFits, $
+                    GAUSSFITS=gaussFits, $
+                    CHI2_THRESHOLD=chi2_thresh, $
+                    CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+                    HIGHDENSITY_THRESHOLD=highDens_thresh, $
+                    LOWDENSITY_THRESHOLD=lowDens_thresh, $
+                    DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                    N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                    SAVE_PS=kSum__save_ps, $
+                    SAVE_PNG=kSum__save_png, $
+                    SAVEKAPPA_BONUSPREF=bonusPref, $
+                    PLOTDIR=plotDir
+
+  ENDIF
 
 END

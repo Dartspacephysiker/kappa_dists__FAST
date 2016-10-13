@@ -79,8 +79,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
      tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.bestFit1DParams : $
                    fit2DStruct.bestFit1DParams.A
      fitTitle    = ["Bulk energy  (eV)","Plasma temp. (eV)", $
-                    "Kappa","Density (cm^-3)", $
-                    CGGREEK('chi',/PS)+'!11!U2!N!Dred!N      ']
+                    "Kappa","Density (cm!U-3!N)", $
+                    CGGREEK('chi',/PS)+'!11!U2!N!Dred!N']
                     ;; "Angle (deg)"]
      fitInfoStr  = [STRING(FORMAT='(F-15.2)',tmpA[0]), $
                     STRING(FORMAT='(F-15.2)',tmpA[1]), $
@@ -91,8 +91,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
      theString   = STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                    STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
                    STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
-                   STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
-                   STRING(FORMAT='(A0,T27,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C'
+                   STRING(FORMAT='(A0,T24,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
+                   STRING(FORMAT='(A0,T36,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C'
      ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(fit2DStruct.bestFit1DParams.fitStatus EQ 0 ? 'Y' : 'N')), $
 
      IF N_ELEMENTS(fitString) GT 0 THEN BEGIN

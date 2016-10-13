@@ -9,6 +9,7 @@ PRO INIT_KAPPA_FIT2DPARAMS_INFO,dens2D_params
                                  parname:''      , $
                                  ;; relstep:0.D     , $
                                  mpmaxstep:0.D   , $
+                                 mpside:2S   , $
                                  limited:[0,0]   , $
                                  limits:[0.D,0]}
   
