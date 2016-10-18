@@ -182,8 +182,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         curMinMax_i = VALUE_LOCATE(tAngles, $
                                    [minAngle, $
                                     maxAngle])
-        curMinMax_i[0] -= 1
-        curMinMax_i[1] += 1
+        IF curMinMax_i[0] EQ 0                       THEN curMinMax_i[0] += 1 ELSE curMinMax_i[0] -= 1
+        IF curMinMax_i[1] GE (N_ELEMENTS(tAngles)-1) THEN curMinMax_i[1] -= 1 ELSE curMinMax_i[1] += 1
         this = MIN(ABS([tAngles[curMinMax_i[0]]-minAngle,$
                         tAngles[curMinMax_i[1]]-maxAngle]),bin_i)
 
@@ -194,7 +194,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      ENDWHILE
 
-     IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN STOP
+     ;; IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN STOP
+     IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN PRINT,'WHOA!'
 
      IF KEYWORD_SET(fit1D__average_over_angleRange) THEN BEGIN
         tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)

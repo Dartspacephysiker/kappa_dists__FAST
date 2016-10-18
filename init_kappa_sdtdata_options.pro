@@ -11,7 +11,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   defEEB_or_EES                = 'eeb'
   defSpectra_average_interval  = 0
   defEnergy_electrons          = [4,3.5e4]
-  defElectron_angleRange       = [-32,32]
+  ;; defElectron_angleRange       = [-32,32]
+  defElectron_angleRange       = [150,-150]
   defFit2D_dens_angleRange     = [-150,150]
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $

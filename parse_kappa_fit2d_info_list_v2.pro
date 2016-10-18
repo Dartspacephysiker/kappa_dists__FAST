@@ -1,6 +1,7 @@
 ;2016/07/22
 FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         ;; FITS1D_LIST=fits1D_list, $
+                                        SOUTH=south, $
                                         HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                         LOWDENSITY_THRESHOLD=lowDens_thresh, $
                                         KAPPA_LOWTHRESHOLD=lKappa_thresh, $
@@ -129,8 +130,16 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         junk = MIN(ABS(fit2D_inf_list[k].SDT.energy[*,0]-fit2D_inf_list[k].fitParams[0]),bulk_e__ind)
         tmpDat = fit2D_inf_list[k].SDT.data[bulk_e__ind,*]
         IF KEYWORD_SET(dens_angleRange) THEN BEGIN
-           angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) AND $
-                           (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+           CASE 1 OF
+              KEYWORD_SET(south): BEGIN
+                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) OR $
+                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+              END
+              ELSE: BEGIN
+                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) AND $
+                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+              END
+           ENDCASE
            IF nAnKeep LT 2 THEN STOP
            tmpDat  = tmpDat[*,angle_i]
         ENDIF

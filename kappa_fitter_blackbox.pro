@@ -5,6 +5,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           MIN_PEAK_ENERGY=min_peak_energy, $
                           EEB_OR_EES=eeb_or_ees, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                          SOUTH=south, $
                           CHI2_THRESHOLD=chi2_thresh, $
                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
@@ -17,6 +18,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SHOW_POST_PLOTS=show_post_plots, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+                          FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
                           CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $
@@ -78,7 +80,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   fit2D__exclude_lca_from_densCalc = 1
   fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
-  fit2D__density_angleRange     = [-32,32]
+  IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN fit2D__density_angleRange     = [-32,32]
 
   use_mpFit1D                   = 1
 
@@ -354,6 +356,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   ENDELSE
 
   fit2DK = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DKappa_inf_list, $
+                                          SOUTH=south, $
                                           FIT_TYPE='Kappa', $
                                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
@@ -366,6 +369,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                           /DONT_SHRINK_PARSED_STRUCT)
 
   fit2DG = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DGauss_inf_list, $
+                                          SOUTH=south, $
                                           FIT_TYPE='Maxwellian', $
                                           HIGHDENSITY_THRESHOLD=highDens_thresh, $
                                           LOWDENSITY_THRESHOLD=lowDens_thresh, $
