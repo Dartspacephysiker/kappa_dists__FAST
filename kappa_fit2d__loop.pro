@@ -588,14 +588,26 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      IF ~(KEYWORD_SET(hadSuccessK) AND KEYWORD_SET(hadSuccessG)) THEN BEGIN
         CASE (N_ELEMENTS(kappaFits) - N_ELEMENTS(fit2DKappa_inf_list)) OF
            0:                             ;excellent
-           1: kappaFits = kappaFits[0:-2] ;Well... I guess we'll trim one
+           1: BEGIN
+              IF N_ELEMENTS(kappaFits) GT 1 THEN BEGIN
+                 kappaFits = kappaFits[0:-2] ;Well... I guess we'll trim one
+              ENDIF ELSE BEGIN
+                 kappaFits = !NULL
+              ENDELSE
+           END
            ELSE: STOP
         ENDCASE
 
         IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
            CASE (N_ELEMENTS(gaussFits) - N_ELEMENTS(fit2DGauss_inf_list)) OF
               0:                             ;excellent
-              1: gaussFits = gaussFits[0:-2] ;Well... I guess we'll trim one
+              1: BEGIN
+                 IF N_ELEMENTS(gaussFits) GT 1 THEN BEGIN
+                    gaussFits = gaussFits[0:-2] ;Well... I guess we'll trim one
+                 ENDIF ELSE BEGIN
+                    gaussFits = !NULL
+                 ENDELSE
+              END
               ELSE: STOP
            ENDCASE
         ENDIF

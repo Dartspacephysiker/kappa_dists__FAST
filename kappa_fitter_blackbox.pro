@@ -446,7 +446,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
      SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
-                    tplot_vars=tplot_vars, $
+                    TPLT_VARS=tPlt_vars, $
                     EEB_OR_EES=eeb_OR_ees, $
                     ENERGY_ELECTRONS=energy_electrons, $
                     TLIMIT_NORTH=tlimit_north, $
@@ -479,10 +479,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   IF KEYWORD_SET(show_kappa_summary) THEN BEGIN
      
-     IF KEYWORD_SET(show_Strangeway_summary) THEN tplot_vars = !NULL ;Clear 'em out
+     IF KEYWORD_SET(show_Strangeway_summary) THEN tPlt_vars = !NULL ;Clear 'em out
 
      SINGLE_KAPPA_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
-                    tplot_vars=tplot_vars, $
+                    TPLT_VARS=tPlt_vars, $
                     EEB_OR_EES=eeb_or_ees, $
                     ENERGY_ELECTRONS=energy_electrons, $
                     TLIMIT_NORTH=tlimit_north, $
