@@ -1,5 +1,5 @@
 ;;10/29/16
-PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
+PRO L80__SOLVE_MAXWELL__SIGMA_P,V1,V2,kmWid,nSteps, $
                        T_m,dens_m,R_B, $
                        SET_DK_DEFAULTS=set_DK_defaults, $
                        SHOW=show, $
@@ -8,7 +8,6 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
   COMPILE_OPT IDL2
 
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
-
   @common__l80_model.pro
 
   ;;The Dors and Kletzing values
@@ -30,7 +29,7 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
 
      mWidm = (maxXi - minXi) * SQRT(R_B)
 
-     nSteps = 40000
+     nSteps = 4000
   ENDIF
 
   L80__INIT_MODEL_PARAMS__MAXWELL,T_m,dens_m,R_B
@@ -62,13 +61,13 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
                                           POT_IN_JOULES=pot_in_joules)
 
   PRINT,"Starting eField: ",prem_diPot/l80dxi
-  iPotD         = [l80iPot[0],prem_diPot / l80dxi]
+  iPotD         = [l80iPot[0],prem_diPot / l80dxi,jEe]
 
   nRestarts     = 0
   startK        = 1
 
   ;;Solution vector
-  l80soln       = MAKE_ARRAY(2,l80nSteps,/DOUBLE)
+  l80soln       = MAKE_ARRAY(3,l80nSteps,/DOUBLE)
 
   ;;Others
   l80dPot       = l80iPot[0]-l80mPot[0]
@@ -76,9 +75,13 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
   l80je         = MAKE_ARRAY(l80nSteps  ,/DOUBLE)
   l80Sigma_P    = MAKE_ARRAY(l80nSteps  ,/DOUBLE)
   l80soln[*,0]  = iPotD
+
+  ;;junk for plots
+  l802deriv     = MAKE_ARRAY(l80nSteps,/DOUBLE)
+
   FOR l80k=startK,l80nSteps - 1 DO BEGIN
 
-     l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell', $
+     l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell__sigma_p', $
                              l80status, $
                              RTOL=rTol, $
                              ATOL=aTol)
@@ -96,6 +99,7 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
 
         IF nRestarts EQ 1000 THEN STOP
 
+        L80__CALC_2DERIV
         L80__PLOT_VARS
         STOP
      ENDIF ELSE BEGIN
@@ -109,29 +113,39 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
                                                 OUT_POTBAR=potBar, $
                                                 POT_IN_JOULES=pot_in_joules)
 
-        l80jEe[l80k]  = JEe
+        l80jEe[l80k]     = JEe
+        l80Sigma_P[l80k] = l80lastGoodSigma_P
 
-        l80je[l80k]   = KNIGHT_RELATION__DORS_KLETZING_4(DK18__T_m__m,DK18__dens_m__m, $
-                                                         l80dPot,DK18__R_B__m, $
-                                                         OUT_POTBAR=potBar, $
-                                                         /NO_MULT_BY_CHARGE)
+        l80je[l80k]       = KNIGHT_RELATION__DORS_KLETZING_4(DK18__T_m__m,DK18__dens_m__m, $
+                                                             l80dPot,DK18__R_B__m, $
+                                                             OUT_POTBAR=potBar, $
+                                                             /NO_MULT_BY_CHARGE)
 
-        ;; IF ~KEYWORD_SET(l80use_volts) THEN BEGIN
-        ;;    l80dPot *= 1000.D
-        ;; ENDIF
-        
+        dSigma_P_dJEe = PEDERSEN_HAREL1981(JEe,dPot, $
+                                           ;; /MAXWELL, $
+                                           /DERIVATIVE, $
+                                           OUT_POTBAR=potBar, $
+                                           POT_IN_JOULES=pot_in_joules)
+
      ENDELSE
   ENDFOR
 
+  L80__CALC_2DERIV
   L80__PLOT_VARS
   STOP
 
   ;;Twice
   PRINT,'Soln 2 ...'
+
+  l80lastGoodSigma_P = PEDERSEN_HAREL1981(JEe,l80dPot, $
+                                          /MAXWELL, $
+                                          OUT_POTBAR=potBar, $
+                                          POT_IN_JOULES=pot_in_joules)
+
   ;; startEField   = (l80ipot[1]-l80ipot[0])/l80dxi
   startEField   = INTERPOL(REFORM(l80soln[1,*]),1,/LSQUADRATIC)
   PRINT,"Starting eField: ",startEField
-  iPotD         = [l80iPot[0],startEField]
+  iPotD         = [l80iPot[0],startEField,JEe]
 
   ;;Solution vector
   l80dPot       = l80iPot[0]-l80mPot[0]
@@ -140,70 +154,58 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
   l80soln[*,0]  = iPotD
   FOR l80k=startK,l80nSteps - 1 DO BEGIN
 
-     l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell', $
+     l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell__sigma_p', $
                              l80status, $
                              RTOL=rTol, $
                              ATOL=aTol)
 
-     l80iPot[l80k] = l80soln[0,l80k]
-     iPotD   = l80soln[*,l80k]
-     l80dPot = l80iPot[l80k] - l80mPot[l80k]
-  ENDFOR
+     IF KEYWORD_SET(l80RESTART) THEN BEGIN
+        startEField   = (INTERPOL(REFORM(l80soln[1,*]),l80nsteps))[10]
+        ;; startEField   = INTERPOL(REFORM(l80soln[1,*]),1,/LSQUADRATIC)
+        PRINT,"REStarting eField: ",startEField
+        iPotD         = [l80iPot[0],startEField]
+        l80k          = startK
 
-  that2 = plot(l80xi,l80ipot,/oVERPLOT,color='blue')
+        l80dPot       = l80iPot[l80k] - l80mPot[l80k]
+        l80RESTART    = 0
+        nRestarts++
 
-  ;;Thrice
-  PRINT,'Soln 3 ...'
-  startEField   = INTERPOL(REFORM(l80soln[1,*]),1,/LSQUADRATIC)
-  PRINT,"Starting eField: ",startEField
-  iPotD         = [l80iPot[0],startEField]
+        IF nRestarts EQ 1000 THEN STOP
 
-  ;;Solution vector
-  l80dPot       = l80iPot[0]-l80mPot[0]
-  l80soln       = FLTARR(2,l80nSteps)
-  l80soln[*,0]  = iPotD
-  FOR l80k=startK,l80nSteps - 1 DO BEGIN
-
-     l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell', $
-                             l80status, $
-                             RTOL=rTol, $
-                             ATOL=aTol)
-
-     l80iPot[l80k] = l80soln[0,l80k]
-     iPotD   = l80soln[*,l80k]
-     l80dPot = l80iPot[l80k] - l80mPot[l80k]
-  ENDFOR
-
-  that3 = plot(l80xi,l80ipot,/oVERPLOT,color='green')
-
-
-  FOR jj=0,1000 DO BEGIN
-     PRINT,'Soln ' + STRCOMPRESS(jj+4,/REMOVE_ALL) + ' ...'
-     startEField   = INTERPOL(REFORM(l80soln[1,*]),1,/LSQUADRATIC)
-     PRINT,"Starting eField: ",startEField
-     iPotD         = [l80iPot[0],startEField]
-
-
-     ;;Solution vector
-     l80dPot       = l80iPot[0]-l80mPot[0]
-     l80soln       = FLTARR(2,l80nSteps)
-     l80soln[*,0]  = iPotD
-     FOR l80k=startK,l80nSteps - 1 DO BEGIN
-
-        l80soln[*,l80k] = LSODE(iPotD,l80xi[l80k],l80dxi,'l80__derivs__maxwell', $
-                                l80status, $
-                                RTOL=rTol, $
-                                ATOL=aTol)
+        L80__CALC_2DERIV
+        L80__PLOT_VARS
+        STOP
+     ENDIF ELSE BEGIN
 
         l80iPot[l80k] = l80soln[0,l80k]
         iPotD   = l80soln[*,l80k]
         l80dPot = l80iPot[l80k] - l80mPot[l80k]
-     ENDFOR
 
+        l80lastGoodSigma_P = PEDERSEN_HAREL1981(JEe,l80dPot, $
+                                                /MAXWELL, $
+                                                OUT_POTBAR=potBar, $
+                                                POT_IN_JOULES=pot_in_joules)
+
+        l80jEe[l80k]     = JEe
+        l80Sigma_P[l80k] = l80lastGoodSigma_P
+
+        l80je[l80k]       = KNIGHT_RELATION__DORS_KLETZING_4(DK18__T_m__m,DK18__dens_m__m, $
+                                                             l80dPot,DK18__R_B__m, $
+                                                             OUT_POTBAR=potBar, $
+                                                             /NO_MULT_BY_CHARGE)
+
+        dSigma_P_dJEe = PEDERSEN_HAREL1981(JEe,dPot, $
+                                           ;; /MAXWELL, $
+                                           /DERIVATIVE, $
+                                           OUT_POTBAR=potBar, $
+                                           POT_IN_JOULES=pot_in_joules)
+
+     ENDELSE
   ENDFOR
 
-  that4 = plot(l80xi,l80ipot,/oVERPLOT,color='green')
-
+  L80__CALC_2DERIV
+  L80__PLOT_VARS
+  STOP
 
   STOP
 

@@ -3,7 +3,7 @@
 ;;V1    : Magnetospheric potential in kV at LH boundary                           ( kilovolts  )
 ;;V2    : Magnetospheric potential in kV at RH boundary                           ( kilovolts  )
 ;;x     : Transverse points along arc at which to calculate ionospheric potential ( kilometers )
-PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,kmWidm,R_B, $
+PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,mWidm,R_B, $
                                 NSTEPS=nSteps, $
                                 USE_METERS=use_meters, $
                                 USE_VOLTS=use_volts, $
@@ -22,13 +22,13 @@ PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,kmWidm,R_B, $
      nSteps++
   ENDIF
 
-  kmWidi                  = kmWidm / SQRT(R_B)
+  l80mWidi                = mWidm / SQRT(R_B)
 
   nPerSide                = ( nSteps - 1 ) / 2
 
   l80xi                   = LINDGEN(nPerSide)+1
 
-  l80xi                   = DOUBLE([ (-1)*REVERSE(l80xi), 0, l80xi ] ) * kmWidi / nPerSide / 2
+  l80xi                   = DOUBLE([ (-1)*REVERSE(l80xi), 0, l80xi ] ) * l80mWidi / nPerSide / 2
   l80dxi                  = l80xi[1] - l80xi[0]
   l80dxi__meter           = l80dxi * 1000.D
   
@@ -64,7 +64,7 @@ PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,kmWidm,R_B, $
   ;;Now set up COMMON vars
   l80V1     = TEMPORARY(V1)
   l80V2     = TEMPORARY(V2)
-  l80kmWidm = TEMPORARY(kmWidm)
+  l80mWidm = TEMPORARY(mWidm)
   l80nSteps = TEMPORARY(nSteps)
 
   ;;Wanna see?
