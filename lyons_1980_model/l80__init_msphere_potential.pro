@@ -62,10 +62,12 @@ PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,mWidm,R_B, $
   l80mPot[nPerSide+1:-1]  = l80dV2dx * l80xm[nPerSide+1:-1]
 
   ;;Now set up COMMON vars
-  l80V1     = TEMPORARY(V1)
-  l80V2     = TEMPORARY(V2)
-  l80mWidm = TEMPORARY(mWidm)
-  l80nSteps = TEMPORARY(nSteps)
+  ;; l80V1   = TEMPORARY(V1)
+  ;; l80V2   = TEMPORARY(V2)
+  l80eps1    = TEMPORARY(V1) / l80mWidi * 2.
+  l80eps2    = TEMPORARY(V2) / l80mWidi * 2.
+  l80mWidm   = TEMPORARY(mWidm)
+  l80nSteps  = TEMPORARY(nSteps)
 
   ;;Wanna see?
   IF KEYWORD_SET(show) THEN BEGIN

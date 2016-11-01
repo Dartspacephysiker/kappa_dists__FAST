@@ -6,17 +6,22 @@ PRO L80__PLOT_VARS
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
   @common__l80_model.pro
 
-  nCol = 2
-  nRow = 3
+  ;; nCol = 3
+  ;; nRow = 2
+  ;; dims = [600,900]
 
-  xRange = [l80xi[0],l80xi[-1]]/1.e3
+  nCol = 3
+  nRow = 2
+  dims = [1000,600]
 
   IF N_ELEMENTS(l80Window) EQ 0 OR ~ISA(l80Window) THEN BEGIN
-     l80Window = WINDOW(DIMENSIONS=[600,900])
+     l80Window = WINDOW(DIMENSIONS=dims)
   ENDIF ELSE BEGIN
      l80Window.Erase
      l80Window.setCurrent
   ENDELSE
+
+  xRange = [l80xi[0],l80xi[-1]]/1.e3
 
   nPlots =7
   plotArr = MAKE_ARRAY(nPlots,/OBJ)
