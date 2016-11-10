@@ -191,18 +191,30 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
 
   IF N_ELEMENTS(n_est) GT 0 THEN BEGIN
      kCurvefit_opt.fitA[3]                   = n_est
+
+     PRINT,FORMAT='("kCurvefit_opt.fitA[3] (N)",T45,":",T48,I0)', $
+     kCurvefit_opt.fitA[3]
   ENDIF
 
   IF N_ELEMENTS(T) GT 0 THEN BEGIN
      kcurvefit_opt.fitA[1]                   = T
+
+     PRINT,FORMAT='("kCurvefit_opt.fitA[1] (T)",T45,":",T48,I0)', $
+     kCurvefit_opt.fitA[1]
   ENDIF
 
   IF N_ELEMENTS(kappa) GT 0 THEN BEGIN
      kCurvefit_opt.fitA[2]                   = kappa
+
+     PRINT,FORMAT='("kCurvefit_opt.fitA[2] (kappa)",T45,":",T48,I0)', $
+     kCurvefit_opt.fitA[2]
   ENDIF
 
   IF N_ELEMENTS(bulk_offset) GT 0 THEN BEGIN
      kCurvefit_opt.bulk_offset               = bulk_offset
+
+     PRINT,FORMAT='("kCurvefit_opt.bulk_offset",T45,":",T48,I0)', $
+     kCurvefit_opt.bulk_offset
   ENDIF
 
   IF N_ELEMENTS(fit2D__only_fit_densAngles) GT 0 THEN BEGIN

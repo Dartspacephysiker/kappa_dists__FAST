@@ -33,6 +33,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__SAVE_PS=kSum__save_ps, $
                           KSUM__SAVE_PNG=kSum__save_png, $
+                          KSUM__CONV_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
+                          KSUM__ADD_CHI2_LINE=kSum__add_chi2_line, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -124,7 +126,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   fit_tol                       = 1e-3
   fit2D_tol                     = 1e-5
 
-  kappa_est                     = 2.7
+  kappa_est                     = 10
 
   T_est_fac                     = 1.3
   N_est_fac                     = 7.0
@@ -486,30 +488,32 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      IF KEYWORD_SET(show_Strangeway_summary) THEN tPlt_vars = !NULL ;Clear 'em out
 
      SINGLE_KAPPA_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
-                    TPLT_VARS=tPlt_vars, $
-                    EEB_OR_EES=eeb_or_ees, $
-                    ENERGY_ELECTRONS=energy_electrons, $
-                    TLIMIT_NORTH=tlimit_north, $
-                    TLIMIT_SOUTH=tlimit_south, $
-                    TLIMIT_ALL=tlimit_all, $
-                    /SCREEN_PLOT, $
-                    USE_FAC_V=use_fac_v, $
-                    USE_FAC_NOT_V=use_fac, $
-                    NO_BLANK_PANELS=no_blank_panels, $
-                    FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
-                    FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
-                    KAPPAFITS=kappaFits, $
-                    GAUSSFITS=gaussFits, $
-                    CHI2_THRESHOLD=chi2_thresh, $
-                    CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
-                    HIGHDENSITY_THRESHOLD=highDens_thresh, $
-                    LOWDENSITY_THRESHOLD=lowDens_thresh, $
-                    DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
-                    N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
-                    SAVE_PS=kSum__save_ps, $
-                    SAVE_PNG=kSum__save_png, $
-                    SAVEKAPPA_BONUSPREF=bonusPref, $
-                    PLOTDIR=plotDir
+                          TPLT_VARS=tPlt_vars, $
+                          EEB_OR_EES=eeb_or_ees, $
+                          ENERGY_ELECTRONS=energy_electrons, $
+                          TLIMIT_NORTH=tlimit_north, $
+                          TLIMIT_SOUTH=tlimit_south, $
+                          TLIMIT_ALL=tlimit_all, $
+                          /SCREEN_PLOT, $
+                          USE_FAC_V=use_fac_v, $
+                          USE_FAC_NOT_V=use_fac, $
+                          NO_BLANK_PANELS=no_blank_panels, $
+                          ADD_CHI2_LINE=kSum__add_chi2_line, $
+                          FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
+                          FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+                          KAPPAFITS=kappaFits, $
+                          GAUSSFITS=gaussFits, $
+                          CHI2_THRESHOLD=chi2_thresh, $
+                          CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+                          HIGHDENSITY_THRESHOLD=highDens_thresh, $
+                          LOWDENSITY_THRESHOLD=lowDens_thresh, $
+                          DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+                          N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                          CONVERT_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
+                          SAVE_PS=kSum__save_ps, $
+                          SAVE_PNG=kSum__save_png, $
+                          SAVEKAPPA_BONUSPREF=bonusPref, $
+                          PLOTDIR=plotDir
 
   ENDIF
 

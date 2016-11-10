@@ -144,6 +144,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                                  ENERGY=KF2D__SDTData_opt.energy_electrons, $
                                  ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
 
+  obsTemp           = (T_2D(curDataStr, $
+                            ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                            ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange))[3]
   ;; IF iTime GE 14 THEN BEGIN
 
 
@@ -192,6 +195,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      tmpKeeper       = {SDT          : fit2DStr   , $
                         fitParams    : fit2DParams, $
                         fitDens      : fit2Ddens  , $
+                        obsTemp      : obsTemp    , $
                         chi2         : bestNorm   , $
                         errMsg       : errMsg     , $
                         status       : status     , $
