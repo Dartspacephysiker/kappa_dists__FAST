@@ -1,6 +1,8 @@
 ;;11/10/16
 PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
-                         LOAD_FROM_THIS_FILE=loadFile
+                         LOAD_FROM_THIS_FILE=loadFile, $
+                         SAVE_PLOT=save_plot, $
+                         BUFFER=buffer
 
   COMPILE_OPT IDL2
 
@@ -9,16 +11,22 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
   kappaColor   = 'Blue'
   kappaSym     = '*'
   kappaLSty    = '--'
-  maxWColor    = 'Red'
-  maxWSym      = '+'
-  maxWLSty     = '-'
+  gaussColor    = 'Red'
+  gaussSym      = '+'
+  gaussLSty     = '-'
 
   firstSym     = 'tu'
   secondSym    = 'd'
 
+  secondColor  = 'Purple'
+  firstColor   = 'Gray'
+
   sym_size     = 1.3
   sym_thick    = 1.5
   sym_transp   = 50
+
+  axisFontSize = 16
+  legFontSize  = 14
 
   loadFile     = '/home/spencerh/software/sdt/batch_jobs/saves_output_etc/20161110--orbit_1773--potential_drop__kappa_interp.sav'
 
@@ -58,10 +66,10 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
   ;;                 YLOG=1)
 
   ;; kappa_potBar = setup.charTot[statI]/REFORM(kappa2d.fitparams[1,statI])
-  ;; maxW_potBar  = setup.charTot[statI]/REFORM(gauss2d.fitparams[1,statI])
+  ;; gauss_potBar  = setup.charTot[statI]/REFORM(gauss2d.fitparams[1,statI])
 
   kappa_potBar = kappa2d.fitparams[0,statI]/REFORM(kappa2d.fitparams[1,statI])
-  maxW_potBar  = gauss2d.fitparams[0,statI]/REFORM(gauss2d.fitparams[1,statI])
+  gauss_potBar  = gauss2d.fitparams[0,statI]/REFORM(gauss2d.fitparams[1,statI])
 
   obs_potBar   = (kappa2d.fitparams[0,statI]+gauss2d.fitparams[0,statI]) / 2. / kappa2d.obsTemp
 
@@ -74,9 +82,10 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
   statIISecondH = WHERE(kappa2d.sdt[stati].time GE secondHalfStart)
 
   xRange       = [0.1,200]
-  yRange       = [4e-3,4e0]
+  yRange       = [4e-3,1e1]
 
-  window       = WINDOW(DIMENSIONS=[900,600])
+  window       = WINDOW(DIMENSIONS=[1000,600], $
+                        BUFFER=buffer)
 
   CVname1      = STRMID(TIME_TO_STR(kappa2d.sdt[stati[statIIFirstH]].time),14,5)
   CVname2      = STRMID(TIME_TO_STR(kappa2d.sdt[stati[statIISecondH]].time),14,5)
@@ -97,8 +106,8 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                        SYM_SIZE=sym_size, $
                        SYM_THICK=sym_thick, $
                        SYM_TRANSPARENCY=sym_transp, $
-                       COLOR='Brown', $
-                       FONT_SIZE=16, $
+                       COLOR=secondColor, $
+                       FONT_SIZE=axisFontSize, $
                        XLOG=1, $
                        YLOG=1, $
                        CURRENT=window)
@@ -110,14 +119,14 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                       XRANGE=xRange, $
                       YRANGE=yRange, $
                       XTITLE='$\Delta \phi$/k!DB!NT', $
-                      YTITLE='Field-aligned current ($\mu$A/m!U2!N)', $
+                      YTITLE='Field-aligned current ( $\mu$A/m!U2!N)', $
                       LINESTYLE=' ', $
                       SYMBOL=firstSym, $
                       SYM_SIZE=sym_size, $
                       SYM_THICK=sym_thick, $
                       SYM_TRANSPARENCY=sym_transp, $
-                      COLOR='Orange', $
-                      FONT_SIZE=16, $
+                      COLOR=firstColor, $
+                      FONT_SIZE=axisFontSize, $
                       ;; COLOR=kappaColor, $
                       XLOG=1, $
                       YLOG=1, $
@@ -125,7 +134,7 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                       CURRENT=window)
 
   kappa_potBar = kappa_potBar[SORT(kappa_potBar)]
-  maxW_potBar  = maxW_potBar[SORT(maxW_potBar)]
+  gauss_potBar  = gauss_potBar[SORT(gauss_potBar)]
 
 
   ;; pot       = setup.charTot[statI]
@@ -145,20 +154,34 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                                                   OUT_POTBAR=potBar, $
                                                   /NO_MULT_BY_CHARGE)
 
-     maxWCur  = KNIGHT_RELATION__DORS_KLETZING_4(tempM,densM,pot,tempR_B, $
+     gaussCur  = KNIGHT_RELATION__DORS_KLETZING_4(tempM,densM,pot,tempR_B, $
                                                  IN_POTBAR=in_potBar, $
-                                                 ;; IN_POTBAR=maxW_potBar, $
+                                                 ;; IN_POTBAR=gauss_potBar, $
                                                  OUT_POTBAR=potBar, $
                                                  /NO_MULT_BY_CHARGE)
 
 
-     ;; CVkappa  = PLOT(kappa_potBar, $
+     ;; kappaName  = STRING(FORMAT='("K (T = ",F0.1,' + $
+     ;; kappaName  = STRING(FORMAT='("K (T = 2.8e4",' + $
+     ;;                     ;; '" eV, N = ",G5.1," cm!U-3!N, $\kappa$ = ",F0.2,")")', $
+     ;;                     '", n = ",G5.2,", $\kappa$ = ",F0.2,")")', $
+     ;;                     ;; tempK, $
+     ;;                     densK, $
+     ;;                     kappa)
+     ;; gaussName  = STRING(FORMAT='("M (T = ",F0.1,' + $
+     ;;                     ;; '" eV, N = ",G0.1," cm!U-3!N")', $
+     ;;                     '", n = ",G5.2,")")', $
+     ;;                     tempM, $
+     ;;                     densM)
+     kappaName  = 'Kappa'
+     gaussName  = 'Maxwellian'
+
      CVkappa  = PLOT(in_potBar, $
                      kappaCur*1.e6, $
                      ;; XTITLE='Wolts', $
                      ;; YTITLE='FAC ($\mu$A/m!U2!N)', $
                      XRANGE=xRange, $
-                     NAME=STRING(FORMAT='("Kappa = ",F0.2)',kappa), $
+                     NAME=kappaName, $
                      LINESTYLE=lStyle[k], $
                      ;; LINESTYLE=kappaLSty, $
                      COLOR=kappaColor, $
@@ -167,16 +190,16 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                      /OVERPLOT, $
                      CURRENT=window)
 
-     ;; CVmaxW  = PLOT(maxW_potBar, $
-     CVmaxW  = PLOT(in_potBar, $
-                    maxWCur*1.e6, $
+     ;; CVgauss  = PLOT(gauss_potBar, $
+     CVgauss  = PLOT(in_potBar, $
+                    gaussCur*1.e6, $
                     ;; XTITLE='Wolts', $
                     ;; YTITLE='FAC ($\mu$A/m!U2!N)', $
                     XRANGE=xRange, $
-                    NAME='Maxwell', $
-                    ;; LINESTYLE=maxWLSty, $
+                    NAME=gaussName, $
+                    ;; LINESTYLE=gaussLSty, $
                     LINESTYLE=lStyle[k], $
-                    COLOR=maxWColor, $
+                    COLOR=gaussColor, $
                     XLOG=1, $
                     YLOG=1, $
                     /OVERPLOT, $
@@ -184,12 +207,11 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
 
   ENDFOR
 
-  legend = LEGEND(TARGET=[CVplot1,CVplot2,CVkappa,CVmaxW], $
-                  FONT_SIZE=16, $
-                  POSITION=[0.35,0.8], $
+  legend = LEGEND(TARGET=[CVplot1,CVplot2,CVkappa,CVgauss], $
+                  FONT_SIZE=legFontSize, $
+                  POSITION=[0.35,0.83], $
                   /NORMAL)
 
-  save_plot = 1
   IF KEYWORD_SET(save_plot) THEN BEGIN
      plotName = "~/Desktop/Current-voltage__orbit_1773.ps"
      PRINT,"Saving plot to " + plotName
