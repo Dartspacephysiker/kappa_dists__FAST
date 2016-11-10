@@ -141,12 +141,27 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
 
   fit2Ddens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
-                                 ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                                 ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                                 ENERGY=out_eRange_peak, $
                                  ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
 
   obsTemp           = (T_2D(curDataStr, $
-                            ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                            ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                            ENERGY=out_eRange_peak, $
                             ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange))[3]
+
+  ;;field-aligned conductances
+  fFAConduct        = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
+                      fit2DStr, $
+                      ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                      ENERGY=out_eRange_peak, $
+                      ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
+
+  oFAConduct        = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
+                      curDataStr, $
+                      ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                      ENERGY=out_eRange_peak, $
+                      ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
   ;; IF iTime GE 14 THEN BEGIN
 
 
@@ -196,6 +211,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                         fitParams    : fit2DParams, $
                         fitDens      : fit2Ddens  , $
                         obsTemp      : obsTemp    , $
+                        obsFAConduct : oFAConduct , $
+                        fitFAConduct : fFAConduct , $
                         chi2         : bestNorm   , $
                         errMsg       : errMsg     , $
                         status       : status     , $

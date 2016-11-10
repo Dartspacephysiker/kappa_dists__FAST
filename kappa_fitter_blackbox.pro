@@ -2,6 +2,7 @@
 PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ELECTRON_SOURCECONEANGLE=electron_angleRange, $
                           ELECTRON_LOSSCONEANGLE=electron_lca, $
+                          ENERGY_ELECTRONS=energy_electrons, $
                           MIN_PEAK_ENERGY=min_peak_energy, $
                           EEB_OR_EES=eeb_or_ees, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $

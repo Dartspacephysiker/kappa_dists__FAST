@@ -2,6 +2,7 @@
 PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                          LOAD_FROM_THIS_FILE=loadFile, $
                          SAVE_PLOT=save_plot, $
+                         FA_CONDUCTANCE_PLOT=fa_conductance_plot, $
                          BUFFER=buffer
 
   COMPILE_OPT IDL2
@@ -220,4 +221,12 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
 
   STOP
 
+  IF KEYWORD_SET(fa_conductance_plot) THEN BEGIN
+     this = PLOT(REFORM(kappa2d.fitParams[2,*]), $
+                 kappa2d.fitfaconduct/gauss2d.fitfaconduct, $
+                 LINESTYLE=' ', $
+                 SYMBOL='*', $
+                 XLOG=0, $
+                 XRANGE=[1.4,10])
+  ENDIF
 END

@@ -47,6 +47,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   fitParams           = MAKE_ARRAY(nFitParams,nFits,             VALUE=0.0,/FLOAT    )
   fitDens             = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
   obsTemp             = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  obsFAConduct        = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  fitFAConduct        = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
   errMsg              = MAKE_ARRAY(nFits,                                  /STRING   )
   chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/FLOAT   )
   status              = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
@@ -156,6 +158,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   fitParams[*,k]    = fit2D_inf_list[k].fitParams
   fitDens[k]        = fit2D_inf_list[k].fitDens
   obsTemp[k]        = fit2D_inf_list[k].obsTemp
+  obsFAConduct[k]   = fit2D_inf_list[k].obsFAConduct
+  fitFAConduct[k]   = fit2D_inf_list[k].fitFAConduct
   errMsg[k]         = fit2D_inf_list[k].errMsg
   chi2[k]           = fit2D_inf_list[k].chi2
   status[k]         = fit2D_inf_list[k].status
@@ -261,6 +265,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                        fitParams    : fitParams[*,keep_i], $
                        fitDens      : fitDens    [keep_i], $
                        obsTemp      : obsTemp    [keep_i], $
+                       obsFAConduct : obsFAConduct[keep_i], $
+                       fitFAConduct : fitFAConduct[keep_i], $
                        chi2         : chi2       [keep_i], $
                        errMsg       : errMsg     [keep_i], $
                        status       : status     [keep_i], $
