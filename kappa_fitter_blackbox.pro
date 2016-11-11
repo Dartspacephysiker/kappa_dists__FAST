@@ -43,7 +43,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D_KAPPA_INF_LIST=fit2DKappa_inf_list, $
                           FIT2D_GAUSS_INF_LIST=fit2DGauss_inf_list, $
                           SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
-                          LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file
+                          LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
+                          KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
+                          KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops
   
   COMPILE_OPT IDL2
 
@@ -514,7 +516,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SAVE_PS=kSum__save_ps, $
                           SAVE_PNG=kSum__save_png, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
-                          PLOTDIR=plotDir
+                          PLOTDIR=plotDir, $
+                          SAVE_FOR_OFFLINE=save_for_offline, $
+                          LOAD_FROM_OFFLINE=load_from_offline, $
+                          KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
+                          KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops
 
   ENDIF
 
