@@ -5,11 +5,14 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                          FA_CONDUCTANCE_PLOT=fa_conductance_plot, $
                          USE_TOTAL_J_AND_V=use_total_J_and_V, $
                          COMBINE_STATS_FROM_EACH_TIME=combine_stats_from_each_time, $
+                         CHITHRESH=chiThresh, $
                          BUFFER=buffer
 
   COMPILE_OPT IDL2
 
   defChiThresh = 5.0
+
+  IF N_ELEMENTS(chiThresh) EQ 0 THEN chiThresh = defChiThresh
 
   kappaColor   = 'Blue'
   kappaSym     = '*'
@@ -47,7 +50,7 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
 
   chi2Red = kappa2D.chi2/(kappa2D.dof+kappa2D.nFree)
 
-  statI   = WHERE(chi2Red LE defChiThresh,nStat)
+  statI   = WHERE(chi2Red LE chiThresh,nStat)
 
   IF nStat LT 3 THEN STOP
 
@@ -67,17 +70,24 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
      nCVDatPlots   = N_ELEMENTS(CVnameList)
 
      xRange        = [0.1,200]
-     yRange        = [4e-3,1e1]
 
   ENDIF ELSE BEGIN
 
      IF N_ELEMENTS(startStop_t) GT 0 THEN BEGIN
 
         dims = SIZE(startStop_t,/DIMENSIONS)
-        t    = REFORM(STR_TO_TIME(TEMPORARY(startStop_t)), $
-                   dims[0], $
-                   dims[1])
-        nCVDatPlots = N_ELEMENTS(t[*,0])
+        CASE N_ELEMENTS(dims) OF
+           2: BEGIN
+              t    = REFORM(STR_TO_TIME(TEMPORARY(startStop_t)), $
+                            dims[0], $
+                            dims[1])
+              nCVDatPlots = N_ELEMENTS(t[*,0])              
+           END
+           1: BEGIN
+              t    = STR_TO_TIME(TEMPORARY(startStop_t))
+              nCVDatPlots = 1
+           END
+        ENDCASE
 
         FOR k=0,nCVDatPlots-1 DO BEGIN
            candidato = WHERE(kappa2d.sdt[stati].time GE t[0,k] AND $
@@ -88,6 +98,7 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
               CVnameList[k] = (CVnameList[k])[0] + ' - ' + (CVnameList[k])[-1]
            ENDIF ELSE BEGIN
               PRINT,'Sorry, nothing doing with the event you requested.'
+              nCVDatPlots--
            ENDELSE
         ENDFOR
 
@@ -96,7 +107,25 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
      ENDELSE
         
      xRange        = [0.1,200]
-     yRange        = [4e-4,5e-1]
+
+     CASE orbString OF
+        '5805': BEGIN
+           yRange  = [1e-3,1e1]
+        END
+        '5825': BEGIN
+           yRange  = [1e-3,1e1]
+        END
+        '1770': BEGIN
+           yRange  = [4e-4,5e-1]
+        END
+        '1773': BEGIN
+           yRange  = [4e-3,1e1]
+        END
+        ELSE: BEGIN
+           yRange  = [4e-4,5e-1]
+        END
+     ENDCASE
+     
 
   ENDELSE
 

@@ -17,6 +17,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           T1STR=t1Str, $
                           T2STR=t2Str, $
                           SHOW_POST_PLOTS=show_post_plots, $
+                          FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                           FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
@@ -45,7 +46,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
                           LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
                           KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
-                          KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops
+                          KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops,$
+                          DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
   COMPILE_OPT IDL2
 
@@ -108,8 +110,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   n_below_peak                  = 3
   n_above_peak                  = 7
-  n_below_peak2D                = 4
-  n_above_peak2D                = 8
+  n_below_peak2D                = 3
+  n_above_peak2D                = 7
   dont_fit_below_thresh_value   = 0
   bulk_offset                   = 0
 
@@ -126,7 +128,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   max_iter                      = 4000
   fit2D_max_iter                = 4000
 
-  fit_tol                       = 1e-3
+  fit_tol                       = 1e-6
   fit2D_tol                     = 1e-5
 
   kappa_est                     = 10
@@ -222,6 +224,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
         FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
         FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
+        FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
         FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
@@ -262,7 +265,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_ERANGE_PEAK=out_eRange_peak, $
         OUT_PARAMSTR=out_paramStr, $
         OUT_STRINGS=strings, $
-        TXTOUTPUTDIR=txtOutputDir
+        TXTOUTPUTDIR=txtOutputDir,$
+        DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
      CASE eeb_or_ees OF
         'eeb': BEGIN
@@ -326,13 +330,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         IF N_ELEMENTS(gaussFits) GT 0 THEN BEGIN
            saveStr += 'gaussFits,'
         ENDIF
-
-        ;; IF N_ELEMENTS(synthStr_SDT_kappa) GT 0 THEN BEGIN
-        ;;    saveStr += 'synthStr_SDT_kappa,'
-        ;; ENDIF
-        ;; IF N_ELEMENTS(synthStr_SDT_gauss) GT 0 THEN BEGIN
-        ;;    saveStr += 'synthStr_SDT_gauss,'
-        ;; ENDIF
 
         IF N_ELEMENTS(synthPackage) GT 0 THEN BEGIN
            saveStr += 'synthPackage,'

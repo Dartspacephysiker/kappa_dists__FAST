@@ -29,6 +29,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
                       FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
                       FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
+                      FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                       FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                       FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                       FIT2D__PRINT_FITINFO=print_2DFitInfo, $
@@ -45,7 +46,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       OUT_SYNTH_SDT_STRUCTS=synthPackage, $
                       OUT_ERANGE_PEAK=out_eRange_peak, $
                       OUT_PARAMSTR=out_paramStr, $
-                      TXTOUTPUTDIR=txtOutputDir
+                      TXTOUTPUTDIR=txtOutputDir,$
+                      DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
   COMPILE_OPT idl2
 
@@ -66,6 +68,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   nEnergies                         = N_ELEMENTS(energies[0,*,0])
   nTotAngles                        = N_ELEMENTS(angles[*,0,0])
 
+  IF KEYWORD_SET(debug__break_on_this_time) THEN BEGIN
+     CASE SIZE(debug__BREAK_on_this_time,/TYPE) OF
+        7: breakTime = STR_TO_TIME(debug__BREAK_on_this_time)
+        5: breakTime = debug__BREAK_on_this_time
+        ELSE: STOP
+     ENDCASE
+  ENDIF
   ;;In order to get back to how things were, just 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
      synthKappa                     = diff_eFlux
@@ -132,6 +141,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      iTime            = bounds[i]
      t                = times[iTime]
+
+     IF N_ELEMENTS(breakTime) GT 0 THEN BEGIN
+        FOR jjBeak=0,N_ELEMENTS(breakTime)-1 DO BEGIN
+           IF ABS(t-breakTime[jjBeak]) LT 0.5 THEN STOP
+        ENDFOR
+     ENDIF
 
      ;;And now the order becomes [angle,energy] for each of these arrays
      XorigArr         = energies[*,*,iTime]
@@ -463,19 +478,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         CONTINUE
      ENDIF
 
-     ;; stopMe1      = '97-02-01/09:26:13.22'
-     ;; stopMe2      = '97-02-01/09:26:18.91'
-     ;; sm1          = STR_TO_TIME(stopMe1)
-     ;; sm2          = STR_TO_TIME(stopMe2)
-
-     ;;orb 1789
-     ;; stopMe1      = '97-02-02/21:02:20.41'
-     ;; stopMe2      = '97-02-02/21:02:21.84'
-     ;; sm1          = STR_TO_TIME(stopMe1)
-     ;; sm2          = STR_TO_TIME(stopMe2)
-
-     ;; IF (ABS(t-sm1) LT 0.1) OR (ABS(t-sm2) LT 0.1) THEN BEGIN
-
      ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
      curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
      curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
@@ -614,8 +616,38 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ENDIF
 
      ENDIF
-     ;; IF proceed AND KEYWORD_SET(fit1D__show_and_prompt) AND kBest LT 3.0 THEN BEGIN
-     ;; IF proceed AND KEYWORD_SET(fit1D__show_and_prompt) THEN BEGIN
+
+     IF KEYWORD_SET(fit1D__save_plotSlices) AND $
+        N_ELEMENTS(kappaFits) GT 0 AND $
+        hadSuccessK THEN BEGIN
+        PLOT_KAPPA_FITS,orig,kappaFits[-1], $
+                        KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
+                        gaussFits[-1] : $
+                        !NULL, $
+                        oneCurve, $
+                        ;; TITLE=title, $
+                        BOUNDS_I=iTime, $
+                        XRANGE=xRange, $
+                        YRANGE=yRange, $
+                        XLOG=xLog, $
+                        YLOG=yLog, $
+                        STRINGS=KF2D__strings, $
+                        ADD_GAUSSIAN_ESTIMATE=KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate), $
+                        /ADD_FITPARAMS_TEXT, $
+                        /ADD_ANGLE_LABEL, $
+                        /ADD_CHI_VALUE, $
+                        ADD_WINTITLE=add_winTitle, $
+                        /SAVE_FITPLOTS, $
+                        /PLOT_FULL_FIT, $
+                        ;; SKIP_BAD_FITS=skip_bad_fits, $
+                        USING_SDT_DATA=using_SDT_data, $
+                        ;; PLOT_SAVENAME=plotSN, $
+                        /USE_PSYM_FOR_DATA, $
+                        PLOTDIR=plotDir, $
+                        ;; OUT_WINDOWARR=windowArr, $
+                        /BUFFER
+     ENDIF
+
      IF 0 THEN BEGIN
 
         KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DKappa_inf_list[-1], $

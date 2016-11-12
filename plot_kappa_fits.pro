@@ -18,7 +18,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ;; PLOT_SAVENAME=plotSN, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
-                    OUT_WINDOWARR=windowArr
+                    OUT_WINDOWARR=windowArr, $
+                    BUFFER=buffer
 
   COMPILE_OPT idl2
 
@@ -42,56 +43,61 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ENDIF
   plotSN              += '.png'
 
-  title                = STRING(FORMAT='("Loss-cone e!U-!N # flux, (Orbit ",I0,", ",A0,")")', $
-                                strings.orbStr, $
-                                strings.orbDate[bounds_i])
+  title           = STRING(FORMAT='("Loss-cone e!U-!N # flux, (Orbit ",I0,", ",A0,")")', $
+                           strings.orbStr, $
+                           strings.orbDate[bounds_i])
 
   ;;plot things
-  nPlots               = KEYWORD_SET(orig)+KEYWORD_SET(kappaFit)+KEYWORD_SET(gaussFit)+KEYWORD_SET(oneCurve)
+  nPlots          = KEYWORD_SET(orig)+KEYWORD_SET(kappaFit)+KEYWORD_SET(gaussFit)+KEYWORD_SET(oneCurve)
 
   IF KEYWORD_SET(add_winTitle) THEN BEGIN
-     winTitle          = STRING(FORMAT='(A0)', $
-                                   strings.orbDate[bounds_i])
+     winTitle     = STRING(FORMAT='(A0)', $
+                           strings.orbDate[bounds_i])
      IF KEYWORD_SET(add_angle_label) THEN BEGIN
-        winTitle       = winTitle + ', Angle ' + STRING(FORMAT='(F-8.1)',add_angle_label)
+        winTitle  = winTitle + ', Angle ' + STRING(FORMAT='(F-8.1)',add_angle_label)
      ENDIF
 
      IF KEYWORD_SET(add_chi_value) THEN BEGIN
-        winTitle       = winTitle + ', chi^2 ' + STRING(FORMAT='(G-9.4)',add_chi_value)
+        winTitle  = winTitle + ', chi^2 ' + STRING(FORMAT='(G-9.4)',add_chi_value)
      ENDIF
   ENDIF
-  window               = WINDOW(DIMENSION=[800,600],TITLE=winTitle)
-  windowArr            = N_ELEMENTS(windowArr) GT 0 ? [windowArr,window] : window
+  window          = WINDOW(DIMENSION=[800,600],TITLE=winTitle,BUFFER=buffer)
+  windowArr       = N_ELEMENTS(windowArr) GT 0 ? [windowArr,window] : window
 
-  plotArr              = MAKE_ARRAY(nPlots,/OBJ) 
+  plotArr         = MAKE_ARRAY(nPlots,/OBJ) 
 
-  colorList            = LIST('RED','BLACK','BLUE','GRAY')
+  colorList       = LIST('RED','BLACK','BLUE','GRAY')
 
   ;;Silly string stuff
-  xTitle               = "Energy (eV)"
-  yTitle               = "Differential Energy Flux!C(eV/cm!U2!N-sr-s)"
+  xTitle          = "Energy (eV)"
+  yTitle          = "Differential Energy Flux!C(eV/cm!U2!N-sr-s)"
 
-  lineStyle            = ['','--','-.','-:']
+  lineStyle       = ['','--','-.','-:']
 
-  iPlot                = 0
+  yRange          = [(MIN(orig.y[WHERE(orig.y GT 0)]) < $
+                     MIN(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) > 1.0e5, $
+                     (MAX(orig.y[WHERE(orig.y GT 0)]) > $
+                     MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < 1.0e10]
+
+  iPlot           = 0
   ;;Data
-  plotArr[iPlot]       = PLOT(orig.x, $ ;x, $
-                              orig.y, $
-                              TITLE=title, $
-                              NAME=orig.name, $
-                              XTITLE=xTitle, $
-                              YTITLE=yTitle, $
-                              XRANGE=xRange, $
-                              YRANGE=yRange, $
-                              YLOG=1, $
-                              XLOG=1, $
-                              THICK=2.2, $
-                              LINESTYLE=KEYWORD_SET(psymData) ? 6 : !NULL, $
-                              SYMBOL=KEYWORD_SET(psymData) ? 1 : !NULL, $
-                              SYM_COLOR=KEYWORD_SET(psymData) ? colorList[0] : !NULL, $
-                              COLOR=colorList[0], $
-                              ;; OVERPLOT=i GT 0, $
-                              CURRENT=window) 
+  plotArr[iPlot]  = PLOT(orig.x, $ ;x, $
+                         orig.y, $
+                         TITLE=title, $
+                         NAME=orig.name, $
+                         XTITLE=xTitle, $
+                         YTITLE=yTitle, $
+                         XRANGE=xRange, $
+                         YRANGE=yRange, $
+                         YLOG=1, $
+                         XLOG=1, $
+                         THICK=2.2, $
+                         LINESTYLE=KEYWORD_SET(psymData) ? 6 : !NULL, $
+                         SYMBOL=KEYWORD_SET(psymData) ? 1 : !NULL, $
+                         SYM_COLOR=KEYWORD_SET(psymData) ? colorList[0] : !NULL, $
+                         COLOR=colorList[0], $
+                         ;; OVERPLOT=i GT 0, $
+                         CURRENT=window) 
   
   iPlot++
 
