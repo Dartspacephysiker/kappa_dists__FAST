@@ -74,6 +74,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    OUT_PARAMSTR=out_paramStr, $
    OUT_STRINGS=strings, $
    TXTOUTPUTDIR=txtOutputDir,$
+   DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
    DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
   COMPILE_OPT idl2
@@ -230,6 +231,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
                     OUT_PARAMSTR=out_paramStr, $
                     TXTOUTPUTDIR=txtOutputDir,$
+                    DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
                     DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
   PRINT,'DONE!'

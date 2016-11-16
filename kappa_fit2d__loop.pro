@@ -46,7 +46,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       OUT_SYNTH_SDT_STRUCTS=synthPackage, $
                       OUT_ERANGE_PEAK=out_eRange_peak, $
                       OUT_PARAMSTR=out_paramStr, $
-                      TXTOUTPUTDIR=txtOutputDir,$
+                      TXTOUTPUTDIR=txtOutputDir, $
+                      DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
                       DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
   COMPILE_OPT idl2
@@ -68,6 +69,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   nEnergies                         = N_ELEMENTS(energies[0,*,0])
   nTotAngles                        = N_ELEMENTS(angles[*,0,0])
 
+  IF KEYWORD_SET(debug__skip_to_this_time) THEN BEGIN
+     CASE SIZE(debug__skip_to_this_time,/TYPE) OF
+        7: skipTime  = STR_TO_TIME(debug__skip_to_this_time)
+        5: skipTime  = debug__skip_to_this_time
+        ELSE: STOP
+     ENDCASE
+  ENDIF
+
   IF KEYWORD_SET(debug__break_on_this_time) THEN BEGIN
      CASE SIZE(debug__BREAK_on_this_time,/TYPE) OF
         7: breakTime = STR_TO_TIME(debug__BREAK_on_this_time)
@@ -75,6 +84,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ELSE: STOP
      ENDCASE
   ENDIF
+
   ;;In order to get back to how things were, just 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
      synthKappa                     = diff_eFlux
@@ -141,6 +151,16 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      iTime            = bounds[i]
      t                = times[iTime]
+
+     IF N_ELEMENTS(skipTime) GT 0 THEN BEGIN
+        IF t LT skipTime THEN BEGIN
+           PRINT,FORMAT='("Skipping Time  ",I0,"/",I0," : ",A0)', $
+                 iTime+1, $
+                 N_ELEMENTS(bounds), $
+                 KF2D__strings.timeStrs[iTime]
+           CONTINUE
+        ENDIF
+     ENDIF
 
      IF N_ELEMENTS(breakTime) GT 0 THEN BEGIN
         FOR jjBeak=0,N_ELEMENTS(breakTime)-1 DO BEGIN
@@ -644,6 +664,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                         ;; PLOT_SAVENAME=plotSN, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
+                        /POSTSCRIPT, $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER
      ENDIF

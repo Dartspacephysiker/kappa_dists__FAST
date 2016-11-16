@@ -120,7 +120,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   CASE 1 OF
      KEYWORD_SET(kF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
-        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,curFitStr.theta,fit2DParams)
+        ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,curFitStr.theta,fit2DParams)
+        ;;Not currently clear why the shift is necessary, but it makes things come out right
+        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,SHIFT(curFitStr.theta,0,-1),fit2DParams)
      END
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
         oldfit2DStr = fit2DStr

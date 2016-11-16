@@ -18,6 +18,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ;; PLOT_SAVENAME=plotSN, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
+                    POSTSCRIPT=postscript, $
                     OUT_WINDOWARR=windowArr, $
                     BUFFER=buffer
 
@@ -41,7 +42,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      ;; plotSN           += STRING(FORMAT='("--angle_",F0.1)',kappaFit.A[6])
      plotSN           += STRING(FORMAT='("--angle_",F0.1)',add_angle_label)
   ENDIF
-  plotSN              += '.png'
+  plotSN              += ( KEYWORD_SET(postscript) ? '.ps' : '.png' )
 
   title           = STRING(FORMAT='("Loss-cone e!U-!N # flux, (Orbit ",I0,", ",A0,")")', $
                            strings.orbStr, $

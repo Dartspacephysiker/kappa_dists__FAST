@@ -47,6 +47,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
                           KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
                           KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops,$
+                          DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
                           DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
   COMPILE_OPT IDL2
@@ -109,9 +110,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   print_2DFitInfo               = 1
 
   n_below_peak                  = 3
-  n_above_peak                  = 7
+  n_above_peak                  = 15
   n_below_peak2D                = 3
-  n_above_peak2D                = 7
+  n_above_peak2D                = 15
   dont_fit_below_thresh_value   = 0
   bulk_offset                   = 0
 
@@ -125,19 +126,27 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   add_fitParams_text            = 1
   add_angle_label               = 1
 
-  max_iter                      = 4000
-  fit2D_max_iter                = 4000
+  max_iter                      = 10000
+  fit2D_max_iter                = 10000
 
-  fit_tol                       = 1e-6
+  fit_tol                       = 1e-3
   fit2D_tol                     = 1e-5
 
   kappa_est                     = 10
 
-  T_est_fac                     = 1.3
-  N_est_fac                     = 7.0
+  ;; T_est_fac                     = 1.3
+  ;; N_est_fac                     = 7.0
+  ;; bulkE_est_fac                 = 1.0
+
+  ;; TGauss_est_fac                = 0.3
+  ;; NGauss_est_fac                = 1.0
+  ;; bulkEGauss_est_fac            = 1.0
+
+  T_est_fac                     = 1.0
+  N_est_fac                     = 1.0
   bulkE_est_fac                 = 1.0
 
-  TGauss_est_fac                = 0.3
+  TGauss_est_fac                = 1.0
   NGauss_est_fac                = 1.0
   bulkEGauss_est_fac            = 1.0
 
@@ -266,6 +275,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_PARAMSTR=out_paramStr, $
         OUT_STRINGS=strings, $
         TXTOUTPUTDIR=txtOutputDir,$
+        DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
      CASE eeb_or_ees OF

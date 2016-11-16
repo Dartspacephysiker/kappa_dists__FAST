@@ -17,6 +17,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    ORBIT=orbit, $
    TIME=time, $
    SAVE_PLOTS=save_plots, $
+   DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=dont_allow_shift_in_peak_energy, $
    OUT_PEAK_ENERGIES=peak_en, $
    OUT_PEAK_FLUXES=peak_flux, $
    OUT_ANGLES=peak_angle, $
@@ -104,7 +105,15 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
      ;; peak_en[tmpAngle_i] = tmpEn[tmpMax_ii[energy_iii]]
      ;; peak_angle[tmpAngle_i] = tmpAngle[tmpMax_ii[energy_iii]]
 
-     tmpMax                   = MAX(tmpData,tmpMax_ii)
+     CASE 1 OF
+        KEYWORD_SET(dont_allow_shift_in_peak_energy): BEGIN
+           energyTemp          = MIN(ABS(tmpEn-bulk_energy),tmpMax_ii)
+           tmpMax              = tmpData[tmpMax_ii]
+        END
+        ELSE: BEGIN
+           tmpMax              = MAX(tmpData,tmpMax_ii)
+        END
+     ENDCASE
 
      ;; energyMin     = MIN(ABS(tmpEn[tmpMax_ii]-peak_en[aBin_i[prevAngle_ii]]), $
      ;;                     energy_iii)
@@ -132,22 +141,6 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
      END
   ENDCASE
 
-  ;; ;;Original
-  ;; factor[posAngle_i] = 1. - (      ABS(angles[posAngle_i]) / 90. * (1 - minRatio) )
-  ;; factor[negAngle_i] = 1. -        ABS(angles[negAngle_i]))/180. * (1 - minRatio) 
-
-  ;; ;;Another try
-  ;; factor[posAngle_i] = 1. - (      ABS(angles[posAngle_i]) / 90. * (1 - minRatio) )
-  ;; factor[negAngle_i] = 1. - ( (180-ABS(angles[negAngle_i]))/ 90. * (1 - minRatio) ) * 0.5
-
-  ;;And another try
-  ;; factor[posAngle_i] = minRatio + (1-minRatio) * ( (  90 - ABS(angles[posAngle_i]) ) / 90.)
-  ;; factor[negAngle_i] = minRatio + (1-minRatio) * ( ABS( 90 - ABS(angles[negAngle_i])) / 90.) $
-  ;;                      * 0.5
-  ;;And with COS
-  ;; factor[posAngle_i] = minRatio + (1-minRatio) * COS(angles[posAngle_i]/180*!PI)
-  ;; factor[negAngle_i] = minRatio + (1-minRatio) * COS(180-ABS(angles[negAngle_i]))/180*!PI)
-  
   reduceNegFac        = KEYWORD_SET(reduceNegFac) ? reduceNegFac : 0.3
 
   CASE 1 OF
@@ -163,13 +156,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   posAngle_i          = WHERE(factor GE 0 AND posAngle,nPos, $
                              COMPLEMENT=negAngle_i,NCOMPLEMENT=nNeg)
 
-  ;; posFactor_i         = WHERE(factor GE 0,nPos, $
-  ;;                            COMPLEMENT=negFactor_i,NCOMPLEMENT=nNeg)
-
   factor[negAngle_i] *= reduceNegFac
   factor              = factor + (minRatio - MIN(factor))
-  ;; factor[negAngle_i] *= 0.5
-  ;; factor[negAngle_i] = minRatio + (1-minRatio) * COS(180-ABS(angles[negAngle_i]))/180*!PI)
 
   sort_i              = SORT(peak_angle)
 

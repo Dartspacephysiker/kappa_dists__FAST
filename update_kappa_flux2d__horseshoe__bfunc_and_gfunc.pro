@@ -40,6 +40,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           ORBIT=orbit, $
           TIME=KF2D__strings.timeFNStrs[iTime], $
           SAVE_PLOTS=save_plots, $
+          DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc), $
           OUT_PEAK_ENERGIES=peak_en, $
           OUT_PEAK_FLUXES=peak_flux, $
           OUT_ANGLES=peak_angle, $
