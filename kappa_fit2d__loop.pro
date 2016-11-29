@@ -31,6 +31,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
                       FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                       FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
+                      FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+                      FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                       FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                       FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                       DONT_PRINT_ESTIMATES=dont_print_estimates, $
@@ -557,6 +559,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DKappa_inf_list, $
            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
+           FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
            FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
            FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
            FIT2D__SHOW__FITSTRING='Kappa', $
@@ -591,7 +595,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            KFITPARAMSTRUCT=gaussParamStruct, $
            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
            FIT2D_INF_LIST=fit2DGauss_inf_list, $
-           FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
+           FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=KEYWORD_SET(fit2d__show_each_candidate) AND ~KEYWORD_SET(fit2D__show_only_data), $
+           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
            FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
            /FIT2D__SHOW__IS_MAXWELLIAN_FIT, $
            FIT2D__SHOW__FITSTRING='Maxwell', $

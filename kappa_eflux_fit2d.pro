@@ -36,6 +36,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
    FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
+   FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+   FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
    FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__TOLERANCE=fit2d_tol, $
@@ -215,6 +217,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
                     FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                     FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
+                    FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+                    FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                     FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                     FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $

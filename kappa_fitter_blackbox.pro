@@ -19,6 +19,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SHOW_POST_PLOTS=show_post_plots, $
                           FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
+                          FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+                          FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                           FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                           FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
@@ -31,6 +33,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__ADD_KAPPA_PANEL=sway__add_kappa_panel, $
                           SWAY__ADD_CHARE_PANEL=sway__add_chare_panel, $
                           SWAY__ADD_NEWELL_PANEL=sway__add_Newell_panel, $
+                          SWAY__NEWELL_INTERP=sway__Newell_interp, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__SAVE_PS=kSum__save_ps, $
@@ -238,6 +241,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
+        FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+        FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
         FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
         FIT2D__PRINT_FITINFO=print_2DFitInfo, $
         FIT2D__TOLERANCE=fit2D_tol, $
@@ -472,6 +477,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                     ADD_KAPPA_PANEL=sway__add_kappa_panel, $
                     ADD_CHARE_PANEL=sway__add_chare_panel, $
                     ADD_NEWELL_PANEL=sway__add_Newell_panel, $
+                    NEWELL_2009_INTERP=sway__Newell_interp, $
                     LOG_KAPPAPLOT=sway__log_kappaPlot, $
                     USE_FAC_V=use_fac_v, $
                     USE_FAC_NOT_V=use_fac, $

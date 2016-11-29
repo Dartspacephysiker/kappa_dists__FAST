@@ -2,12 +2,14 @@
 PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
    nTot2DFits, $
    iTime, $
+   ONLY_DATA=only_data, $ 
    FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
    PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
-   KAPPA_FIT__SHOW__QUIT=show__quit
+   KAPPA_FIT__SHOW__QUIT=show__quit, $
+   FIT2D__PA_ZRANGE=fit2D__PA_zRange
 
   COMPILE_OPT idl2
 
@@ -21,11 +23,16 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   yWinSize    = 700
 
   ;;Some stuff in case we decide to write a few of these chocolatiers
-  upLim       = MAX(curDataStr.data) > MAX(fit2DStruct.bestFitStr.data)
+  upLim       = MAX(curDataStr.data) > (KEYWORD_SET(only_data) ? MAX(curDataStr.data) : MAX(fit2DStruct.bestFitStr.data))
   ;; cont2DLims  = {zrange:[10^(6.6),10^9]}
   ;; spec2DLims = {yrange:[1e6,1e10]}
   cont2DLims  = {zrange:[10^(6.6),upLim]}
   spec2DLims = {yrange:[1e6,upLim]}
+  IF KEYWORD_SET(fit2D__PA_zRange) THEN BEGIN
+     cont2DLims.zRange = fit2D__PA_zRange
+     spec2DLims.yRange = fit2D__PA_zRange
+  ENDIF
+
   spec2DDatLims = CREATE_STRUCT(spec2DLims,'PSYM',1)
 
   IF N_ELEMENTS(KF2D__SDTData_opt) GT 0 THEN BEGIN
@@ -71,17 +78,29 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
 
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
-     tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"_fit--",A0)', $
-                     KF2D__strings.orbStr, $
-                     KF2D__Plot_opt.plotNamePref, $
-                     fitString, $
-                     KF2D__strings.timeFNStrs[iTime])
+     CASE 1 OF
+        KEYWORD_SET(only_data): BEGIN
+           tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"--",A0)', $
+                           KF2D__strings.orbStr, $
+                           KF2D__Plot_opt.plotNamePref, $
+                           'Data', $
+                           KF2D__strings.timeFNStrs[iTime])
+        END
+        ELSE: BEGIN
+           tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"_fit--",A0)', $
+                           KF2D__strings.orbStr, $
+                           KF2D__Plot_opt.plotNamePref, $
+                           fitString, $
+                           KF2D__strings.timeFNStrs[iTime])
+        END
+     ENDCASE
 
      POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
            XSIZE=xSize, $
            YSIZE=ySize, $
            LAND=land
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+        ONLY_DATA=only_data, $ 
         FOR_HORSESHOE_FIT=for_horseshoe_fit, $
         LIMITS=cont2DLims, $
         ADD_FITPARAMS_TEXT=KF2D__Plot_opt.add_fitParams_text, $

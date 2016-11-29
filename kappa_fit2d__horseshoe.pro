@@ -12,6 +12,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
                            FIT2D_INF_LIST=fit2D_inf_list, $
                            FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
+                           FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+                           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                            FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
                            FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
                            FIT2D__SHOW__FITSTRING=fitString, $
@@ -169,28 +171,59 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   ;; ENDIF
 
-  IF KEYWORD_SET(show_and_prompt) AND nSuccess GT 0 THEN BEGIN
+  IF KEYWORD_SET(show_and_prompt) THEN BEGIN
      ;; densEst        = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
      ;;                                ENERGY=KF2D__SDTData_opt.energy_electrons, $
      ;;                                ANGLE=KF2D__SDTData_opt.fit2D_dens_aRange)
 
-     tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
-                        bestFit1DParams :fit2DParams  , $
-                        fitAngle_i      :fitAngle_i   , $
-                        bestDens        :fit2Ddens    , $
-                        bestChi2        :bestNorm/(dof-nPegged), $
-                        eRange_peak     :out_eRange_peak[*,-1]}
+     CASE 1 OF
+        KEYWORD_SET(fit2D__show_only_data): BEGIN
+              ;; tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
+              ;;                    bestFit1DParams :fit2DParams  , $
+              ;;                    fitAngle_i      :fitAngle_i   , $
+              ;;                    bestDens        :fit2Ddens    , $
+              ;;                    bestChi2        :bestNorm/(dof-nPegged), $
+              ;;                    eRange_peak     :out_eRange_peak[*,-1]}
 
-     KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
-        tmp2DInfoStruct, $
-        iWin, $
-        iTime, $
-        /FOR_HORSESHOE_FIT, $
-        IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
-        PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
-        PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-        FINISH_AND_SAVE_ALL=finish_and_save_all, $
-        KAPPA_FIT__SHOW__QUIT=show__quit
+              KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
+                 tmp2DInfoStruct, $
+                 iWin, $
+                 iTime, $
+                 /FOR_HORSESHOE_FIT, $
+                 /ONLY_DATA, $
+                 IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
+                 PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+                 PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+                 FINISH_AND_SAVE_ALL=finish_and_save_all, $
+                 KAPPA_FIT__SHOW__QUIT=show__quit, $
+                 FIT2D__PA_ZRANGE=fit2D__PA_zRange
+
+
+        END
+        ELSE: BEGIN
+           IF nSuccess GT 0 THEN BEGIN
+              tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
+                                 bestFit1DParams :fit2DParams  , $
+                                 fitAngle_i      :fitAngle_i   , $
+                                 bestDens        :fit2Ddens    , $
+                                 bestChi2        :bestNorm/(dof-nPegged), $
+                                 eRange_peak     :out_eRange_peak[*,-1]}
+
+              KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
+                 tmp2DInfoStruct, $
+                 iWin, $
+                 iTime, $
+                 /FOR_HORSESHOE_FIT, $
+                 IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
+                 PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+                 PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+                 FINISH_AND_SAVE_ALL=finish_and_save_all, $
+                 KAPPA_FIT__SHOW__QUIT=show__quit, $
+                 FIT2D__PA_ZRANGE=fit2D__PA_zRange
+
+           ENDIF
+        END
+     ENDCASE
 
   ENDIF
 
