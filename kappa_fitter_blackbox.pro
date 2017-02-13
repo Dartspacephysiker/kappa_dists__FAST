@@ -62,7 +62,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                   ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  outDir               = '~/software/sdt/batch_jobs/saves_output_etc/'
+  IF SIZE(load_diff_eFlux_file,/TYPE) NE 7 THEN BEGIN
+     outDir               = '~/software/sdt/batch_jobs/saves_output_etc/'
+  ENDIF
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
      IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4
@@ -190,8 +192,20 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                plotNamePref + '.sav'
   ENDIF
   IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
-     diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
-                         plotNamePref + '.sav'
+     CASE SIZE(load_diff_eFlux_file,/TYPE) OF
+        7: BEGIN
+           IF FILE_TEST(load_diff_eFlux_file) THEN BEGIN
+              diff_eFlux_file = load_diff_eFlux_file
+           ENDIF ELSE BEGIN
+              PRINT,"Couldn't find file: " + load_diff_eFlux_file
+              STOP
+           ENDELSE
+        END
+        ELSE: BEGIN
+           diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
+                               plotNamePref + '.sav'
+        END
+     ENDCASE
   ENDIF
 
   fitFile                       = fitFile + plotNamePref + '.sav'

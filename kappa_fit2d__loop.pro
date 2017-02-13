@@ -263,7 +263,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      FOR iiAngle=0,nAngles-1 DO BEGIN
 
         iAngle             = angleBin_i[iiAngle]
-
+        ;;these = get_en_spec__from_diff_eflux(diff_eFlux,ANGLE=[330,30]) & aorig[*] = 0. & yorig = REFORM(these.y[iTime,*]) & Xorig = REFORM(these.v[iTime,*])
         ;;Here's the data we're working with for this loop iteration
         Xorig              = REFORM(XorigArr[iAngle,*])
         Yorig              = REFORM(YorigArr[iAngle,*])
