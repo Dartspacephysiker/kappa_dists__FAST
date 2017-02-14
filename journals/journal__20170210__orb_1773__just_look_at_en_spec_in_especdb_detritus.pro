@@ -22,6 +22,8 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
 
   angle       = [-30,30]
   tmpespec_lc = GET_EN_SPEC__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle, $
+                                             /RETRACE)
+  tmpspec_lc  = GET_EN_SPEC__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle, $
                                              /RETRACE, $
                                              UNITS='flux')
   tmpJe_lc    = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle)
@@ -118,6 +120,14 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
   Yorig       = REFORM(tmpeSpec_lc.y[tInd,*])
   junk        = MAX(Yorig,peak_ind)
   peak_energy = Xorig[peak_ind]
+
+  estFacs      = {T:1.0, $
+                  N:1.0, $
+                  B_E:1.0, $
+                  TGauss:1.0, $
+                  NGauss:1.0, $
+                  B_EGauss:1.0}
+
   KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                          minEInd,maxEInd,nEnergies, $
                          peak_ind,peak_energy,eRange_peak, $

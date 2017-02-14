@@ -4,7 +4,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     ENERGY_ELECTRONS=energy_electrons, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     ELECTRON_LOSSCONE_ANGLE=electron_lca, $
-                                    FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange
+                                    FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+                                    _EXTRA=e
 
   COMPILE_OPT idl2
 

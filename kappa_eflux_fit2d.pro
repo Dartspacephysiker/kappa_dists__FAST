@@ -83,130 +83,186 @@ PRO KAPPA_EFLUX_FIT2D, $
 
   @common__kappa_fit2d_structs.pro
 
+  INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
+     T1=t1, $
+     T2=t2, $
+     LOAD_DAT_FROM_FILE=loadFile, $
+     LOAD_DIR=loadDir, $
+     SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
+     KF__CURVEFIT_OPT=KF2D__curveFit_opt, $
+     KF__SDTDATA_OPT=KF2D__SDTData_opt, $
+     KF__PLOT_OPT=KF2D__Plot_opt, $
+     KF__STRINGS=KF2D__strings, $
+     DIFF_EFLUX=diff_eFlux, $
+     DEF_ONECOUNT=dEF_oneCount, $
+     TIMES=times, $
+     SDT_TIME_INDS=bounds, $
+     FIT1D__TOLERANCE=fit_tol, $
+     FIT1D__MAX_ITERATIONS=max_iter, $
+     FIT2D__TOLERANCE=fit2d_tol, $
+     FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+     FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
+     FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
+     FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+     FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+     FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
+     FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
+     FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
+     FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
+     N_ENERGIES_BELOW_PEAK=n_below_peak, $
+     N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+     N_BELOW_PEAK2D=n_below_peak2D, $
+     N_ABOVE_PEAK2D=n_above_peak2D, $
+     TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
+     MIN_PEAK_ENERGY=min_peak_energy, $
+     DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
+     ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+     ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+     USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+     USE_MPFIT1D=use_mpFit1D, $
+     DENSITY_EST=n_est, $
+     TEMPERATURE_EST=T, $
+     KAPPA_EST=kappa, $
+     EEB_OR_EES=eeb_or_ees, $
+     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     DO_ALL_TIMES=do_all_times, $
+     ENERGY_ELECTRONS=energy_electrons, $
+     ELECTRON_ANGLERANGE=electron_angleRange, $
+     ELECTRON_LOSSCONE_ANGLE=electron_lca, $
+     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+     NO_PLOTS=no_plots, $
+     SAVE_FITPLOTS=save_fitplots, $
+     PLOT_FULL_FIT=plot_full_fit, $
+     PLOTDIR=plotDir, $
+     PLOTNAMEPREF=plotNamePref, $
+     ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+     ADD_FITPARAMS_TEXT=add_fitParams_text, $
+     ADD_ANGLE_LABEL=add_angle_label, $
+     FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
+     _REF_EXTRA=e
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Defaults
 
   ;;Curve fitting options
-  KF2D__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
-                       FIT1D__TOLERANCE=fit_tol, $
-                       FIT1D__MAX_ITERATIONS=max_iter, $
-                       FIT2D__TOLERANCE=fit2d_tol, $
-                       FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
-                       FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
-                       FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
-                       FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
-                       FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
-                       FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
-                       FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-                       FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
-                       FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
-                       N_ENERGIES_BELOW_PEAK=n_below_peak, $
-                       N_ENERGIES_ABOVE_PEAK=n_above_peak, $
-                       N_BELOW_PEAK2D=n_below_peak2D, $
-                       N_ABOVE_PEAK2D=n_above_peak2D, $
-                       TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
-                       MIN_PEAK_ENERGY=min_peak_energy, $
-                       DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
-                       ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
-                       ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
-                       USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
-                       USE_MPFIT1D=use_mpFit1D, $
-                       DENSITY_EST=n_est, $
-                       TEMPERATURE_EST=T, $
-                       KAPPA_EST=kappa) ;, $
-  ;; BULK_OFFSET=bulk_offset)
+  ;; KF2D__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
+  ;;                      FIT1D__TOLERANCE=fit_tol, $
+  ;;                      FIT1D__MAX_ITERATIONS=max_iter, $
+  ;;                      FIT2D__TOLERANCE=fit2d_tol, $
+  ;;                      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
+  ;;                      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
+  ;;                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
+  ;;                      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
+  ;;                      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+  ;;                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
+  ;;                      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
+  ;;                      FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
+  ;;                      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
+  ;;                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
+  ;;                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+  ;;                      N_BELOW_PEAK2D=n_below_peak2D, $
+  ;;                      N_ABOVE_PEAK2D=n_above_peak2D, $
+  ;;                      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
+  ;;                      MIN_PEAK_ENERGY=min_peak_energy, $
+  ;;                      DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
+  ;;                      ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
+  ;;                      ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+  ;;                      USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
+  ;;                      USE_MPFIT1D=use_mpFit1D, $
+  ;;                      DENSITY_EST=n_est, $
+  ;;                      TEMPERATURE_EST=T, $
+  ;;                      KAPPA_EST=kappa) ;, $
+  ;; ;; BULK_OFFSET=bulk_offset)
   
   
 
-  ;;SDT data options
-  KF2D__SDTData_opt  = INIT_KAPPA_SDTDATA_OPTIONS( $
-                       EEB_OR_EES=eeb_or_ees, $
-                       SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                       DO_ALL_TIMES=do_all_times, $
-                       ENERGY_ELECTRONS=energy_electrons, $
-                       ELECTRON_ANGLERANGE=electron_angleRange, $
-                       ELECTRON_LOSSCONE_ANGLE=electron_lca, $
-                       FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange)
+  ;; ;;SDT data options
+  ;; KF2D__SDTData_opt  = INIT_KAPPA_SDTDATA_OPTIONS( $
+  ;;                      EEB_OR_EES=eeb_or_ees, $
+  ;;                      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+  ;;                      DO_ALL_TIMES=do_all_times, $
+  ;;                      ENERGY_ELECTRONS=energy_electrons, $
+  ;;                      ELECTRON_ANGLERANGE=electron_angleRange, $
+  ;;                      ELECTRON_LOSSCONE_ANGLE=electron_lca, $
+  ;;                      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange)
 
-  ;;Plot options
-  KF2D__Plot_opt     = INIT_KAPPA_PLOT_OPTIONS( $
-                       NO_PLOTS=no_plots, $
-                       SAVE_FITPLOTS=save_fitplots, $
-                       PLOT_FULL_FIT=plot_full_fit, $
-                       PLOTDIR=plotDir, $
-                       PLOTNAMEPREF=plotNamePref, $
-                       ADD_ONECOUNT_CURVE=add_oneCount_curve, $
-                       ADD_FITPARAMS_TEXT=add_fitParams_text, $
-                       ADD_ANGLE_LABEL=add_angle_label, $
-                       FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries)
+  ;; ;;Plot options
+  ;; KF2D__Plot_opt     = INIT_KAPPA_PLOT_OPTIONS( $
+  ;;                      NO_PLOTS=no_plots, $
+  ;;                      SAVE_FITPLOTS=save_fitplots, $
+  ;;                      PLOT_FULL_FIT=plot_full_fit, $
+  ;;                      PLOTDIR=plotDir, $
+  ;;                      PLOTNAMEPREF=plotNamePref, $
+  ;;                      ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+  ;;                      ADD_FITPARAMS_TEXT=add_fitParams_text, $
+  ;;                      ADD_ANGLE_LABEL=add_angle_label, $
+  ;;                      FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries)
 
 
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;Defaults
-  KAPPA_FIT2D_DEFAULTS, $
-     BOUNDS=bounds              ;, $
+  ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; ;;Defaults
+  ;; KAPPA_FIT2D_DEFAULTS, $
+  ;;    BOUNDS=bounds              ;, $
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;Get data
-  ;; IF N_ELEMENTS(eSpec) EQ 0 OR N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
-  ;; IF N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
-  GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
-                              LOAD_DAT_FROM_FILE=loadFile, $
-                              LOAD_DIR=loadDir, $
-                              EEB_OR_EES=KF2D__SDTData_opt.eeb_or_ees, $
-                              DIFF_EFLUX=diff_eFlux, $
-                              SPECTRA_AVERAGE_INTERVAL=KF2D__SDTData_opt.spec_avg_intvl, $
-                              OUT_ORB=orb, $
-                              OUT_ANGLERANGE=e_angle, $
-                              /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
-                              CUSTOM_E_ANGLERANGE=KF2D__SDTData_opt.electron_angleRange, $
-                              ANGLESTR=angleStr, $
-                              ESPECUNITS=eSpecUnits, $
-                              ELECTRON_ENERGY_LIMS=KF2D__SDTData_opt.energy_electrons, $
-                              SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file
+  ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; ;;Get data
+  ;; ;; IF N_ELEMENTS(eSpec) EQ 0 OR N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
+  ;; ;; IF N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
+  ;; GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
+  ;;                             LOAD_DAT_FROM_FILE=loadFile, $
+  ;;                             LOAD_DIR=loadDir, $
+  ;;                             EEB_OR_EES=KF2D__SDTData_opt.eeb_or_ees, $
+  ;;                             DIFF_EFLUX=diff_eFlux, $
+  ;;                             SPECTRA_AVERAGE_INTERVAL=KF2D__SDTData_opt.spec_avg_intvl, $
+  ;;                             OUT_ORB=orb, $
+  ;;                             OUT_ANGLERANGE=e_angle, $
+  ;;                             /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
+  ;;                             CUSTOM_E_ANGLERANGE=KF2D__SDTData_opt.electron_angleRange, $
+  ;;                             ANGLESTR=angleStr, $
+  ;;                             ESPECUNITS=eSpecUnits, $
+  ;;                             ELECTRON_ENERGY_LIMS=KF2D__SDTData_opt.energy_electrons, $
+  ;;                             SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file
 
-  orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
-  ;; ENDIF ELSE BEGIN
-  ;;    orbStr                            = '???'
-  ;; ENDELSE
+  ;; orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
+  ;; ;; ENDIF ELSE BEGIN
+  ;; ;;    orbStr                            = '???'
+  ;; ;; ENDELSE
 
-  IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
-     PRINT,"Couldn't get diff_eFlux! Quitting ..."
-     RETURN
-  ENDIF
+  ;; IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
+  ;;    PRINT,"Couldn't get diff_eFlux! Quitting ..."
+  ;;    RETURN
+  ;; ENDIF
 
-  IF KEYWORD_SET(do_all_times) THEN BEGIN
-     PRINT,"Doing all times ..."
-     nBounds                           = N_ELEMENTS(diff_eFlux.time)
-     bounds                            = INDGEN(nBounds)
-  END
+  ;; IF KEYWORD_SET(do_all_times) THEN BEGIN
+  ;;    PRINT,"Doing all times ..."
+  ;;    nBounds                           = N_ELEMENTS(diff_eFlux.time)
+  ;;    bounds                            = INDGEN(nBounds)
+  ;; END
 
-  ;;Onecount curve?
-  IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
-     GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
-                                   ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
-                                   EEB_OR_EES=KF2D__SDTData_opt.EEB_or_EES, $
-                                   SPECTRA_AVERAGE_INTERVAL=KF2D__SDTData_opt.spec_avg_intvl, $
-                                   IN_PROTOSTRUCT=diff_eFlux, $
-                                   SDT_NAME=dEF_oneCount_name, $
-                                   ANGLE=e_angle, $
-                                   ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                                   /FIT_EACH_ANGLE, $  ;Perma-set because we do all angles for 2D fitting
-                                   OUT_ONEDAT=out_oneDat, $
-                                   QUIET=quiet
+  ;; ;;Onecount curve?
+  ;; IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN
+  ;;    GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
+  ;;                                  ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
+  ;;                                  EEB_OR_EES=KF2D__SDTData_opt.EEB_or_EES, $
+  ;;                                  SPECTRA_AVERAGE_INTERVAL=KF2D__SDTData_opt.spec_avg_intvl, $
+  ;;                                  IN_PROTOSTRUCT=diff_eFlux, $
+  ;;                                  SDT_NAME=dEF_oneCount_name, $
+  ;;                                  ANGLE=e_angle, $
+  ;;                                  ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+  ;;                                  /FIT_EACH_ANGLE, $  ;Perma-set because we do all angles for 2D fitting
+  ;;                                  OUT_ONEDAT=out_oneDat, $
+  ;;                                  QUIET=quiet
 
-     GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
-  ENDIF
+  ;;    GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
+  ;; ENDIF
 
-  ;;Times and strings
-  times                                = diff_eFlux.time
-  KF2D__strings                        = INIT_KAPPA_STRING_STRUCT(diff_eFlux, $
-                                                                  times, $
-                                                                  orbStr, $
-                                                                  angleStr, $
-                                                                  KF2D__SDTData_opt)
-
+  ;; ;;Times and strings
+  ;; times                                = diff_eFlux.time
+  ;; KF2D__strings                        = INIT_KAPPA_STRING_STRUCT(diff_eFlux, $
+  ;;                                                                 times, $
+  ;;                                                                 orbStr, $
+  ;;                                                                 angleStr, $
+  ;;                                                                 KF2D__SDTData_opt)
 
   KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                     BOUNDS=bounds, $

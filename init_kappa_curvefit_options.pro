@@ -36,7 +36,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS,FIT1D__TOLERANCE=fit_tol, $
                                      DENSITY_EST=n_est, $
                                      TEMPERATURE_EST=T, $
                                      KAPPA_EST=kappa, $
-                                     BULK_OFFSET=bulk_offset
+                                     BULK_OFFSET=bulk_offset, $
+                                     _EXTRA=e
 
 
   COMPILE_OPT idl2

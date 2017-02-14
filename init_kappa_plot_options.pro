@@ -6,7 +6,8 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
                                  ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                                  ADD_FITPARAMS_TEXT=add_fitParams_text, $
                                  ADD_ANGLE_LABEL=add_angle_label, $
-                                 FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries
+                                 FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
+                                 _EXTRA=e
 
   
   COMPILE_OPT idl2
