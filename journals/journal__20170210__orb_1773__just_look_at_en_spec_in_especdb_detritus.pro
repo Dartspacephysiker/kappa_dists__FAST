@@ -3,16 +3,14 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
 
   COMPILE_OPT IDL2
 
-  detritDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/Newell_batch_output/ions_included/'
-  detritus  = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_1773_0.sav'
+  ;; detritDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/Newell_batch_output/ions_included/'
+  ;; detritus  = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_1773_0.sav'
 
   diffEFDir = '~/software/sdt/batch_jobs/saves_output_etc/'
   diffEFFil = 'orb_1773--diff_eflux--ees--output_from_get_losscone_and_eflux_data.sav'
 
   RESTORE,diffEFDir+diffEFFil
 
-  STOP
-  
   ;; strtStr = '1997-02-01/09:25:30'
   ;; stopStr = '1997-02-01/09:28:01'
   strtStr = '1997-02-01/09:26:00'
@@ -20,17 +18,27 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
 
   no_strict_types = 1
 
-  RESTORE,detritDir+detritus
+  ;; RESTORE,detritDir+detritus
 
-  nHjar     = N_ELEMENTS(tmpeSpec_lc.x)
-  nUniq     = N_ELEMENTS(UNIQ(tmpeSpec_lc.x,SORT(tmpeSpec_lc.x)))
-  nJe       = N_ELEMENTS(tmpJe_lc.x)
-  nJee      = N_ELEMENTS(tmpJee_lc.x)
+  angle       = [-30,30]
+  tmpespec_lc = GET_EN_SPEC__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle, $
+                                             /RETRACE, $
+                                             UNITS='flux')
+  tmpJe_lc    = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle)
+  tmpJee_lc   = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle)
+  charE       = CHAR_ENERGY(tmpJe_lc,tmpJee_lc)
+
+  nHjar       = N_ELEMENTS(tmpeSpec_lc.x)
+  nUniq       = N_ELEMENTS(UNIQ(tmpeSpec_lc.x,SORT(tmpeSpec_lc.x)))
+  nJe         = N_ELEMENTS(tmpJe_lc.x)
+  nJee        = N_ELEMENTS(tmpJee_lc.x)
 
   IF ~((nHjar EQ nUniq) AND (nHjar EQ nJe) AND (nHjar EQ nJee)) THEN STOP
 
-  IF ~(ARRAY_EQUAL(tmpeSpec_lc.x,tmpJe_lc.x) AND ARRAY_EQUAL(tmpJee_lc.x,tmpJe_lc.x)) THEN STOP
-
+  IF ~(ARRAY_EQUAL(tmpeSpec_lc.x,tmpJe_lc.x) AND ARRAY_EQUAL(tmpJee_lc.x,tmpJe_lc.x)) THEN BEGIN
+     PRINT,"BRO"
+     STOP
+  ENDIF
 
   tInds   = VALUE_CLOSEST2(tmpeSpec_lc.x,STR_TO_TIME([strtStr,stopStr]))
   t1      = tmpeSpec_lc.x[tInds[0]]
@@ -101,6 +109,7 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
         TITLE='FAST ORBIT '+orbit_num, $
         TRANGE=[t1,t2]
 
+  STOP
 
   getTime = '1997-02-01/09:26:20'
   tInd    = VALUE_CLOSEST2(tmpeSpec_lc.x,STR_TO_TIME(getTime))
@@ -126,6 +135,5 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
                          DONT_PRINT_ESTIMATES=dont_print_estimates, $
                          TEST_NOREV=test_noRev
 
-  STOP
 
 END
