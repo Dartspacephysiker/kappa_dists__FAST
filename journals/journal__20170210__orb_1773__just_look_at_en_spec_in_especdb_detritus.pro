@@ -101,6 +101,27 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
   OPTIONS,'eSpec','ytickv',[10,100,1000,10000]                          ; set y-axis labels
   OPTIONS,'eSpec','panel_size',2                                        ; set panel size 
 
+  ;;Now … spec itself
+  tPlot_name = 'spec'
+  tPlt_vars  = [tPlot_name,tPlt_vars]
+  tmp        = tmpSpec_lc
+  STORE_DATA,tPlot_name,DATA=tmp
+
+  tmp.y = tmp.y>1.e1 ; Remove zeros
+  tmp.y = ALOG10(tmp.y)                                                 ; Pre-log
+  STORE_DATA,'spec',DATA=tmp                                           ; store data structure
+  OPTIONS,'spec','spec',1                                              ; set for spectrogram
+  ZLIM,'spec',4,7,0                                                    ; set z limits
+  YLIM,'spec',4,40000,1                                                ; set y limits
+  OPTIONS,'spec','ytitle','e- downgoing !C!CEnergy (eV)'               ; y title
+  OPTIONS,'spec','ztitle','Log nFlux!C!C#/cm!U2!N-s-sr-eV'             ; z title
+  OPTIONS,'spec','x_no_interp',1                                       ; don't interpolate
+  OPTIONS,'spec','y_no_interp',1                                       ; don't interpolate
+  OPTIONS,'spec','yticks',3                                            ; set y-axis labels
+  OPTIONS,'spec','ytickname',['10!A1!N','10!A2!N','10!A3!N','10!A4!N'] ; set y-axis labels
+  OPTIONS,'spec','ytickv',[10,100,1000,10000]                          ; set y-axis labels
+  OPTIONS,'spec','panel_size',2                                        ; set panel size 
+
 ; Plot the data
 
   ;;Get a fresh take on the Newell interp
