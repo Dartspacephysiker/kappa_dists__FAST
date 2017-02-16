@@ -29,6 +29,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT1D__MAX_ITERATIONS=max_iter, $
    FIT1D__TOLERANCE=fit_tol, $
    FIT1D__AVERAGE_OVER_ANGLERANGE=fit1d__average_over_angleRange, $
+   FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1d__sourceCone_energy_spectrum, $
+   FIT1D__NFLUX=fit1D__nFlux, $
    FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
    FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
    FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
@@ -99,6 +101,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      SDT_TIME_INDS=bounds, $
      FIT1D__TOLERANCE=fit_tol, $
      FIT1D__MAX_ITERATIONS=max_iter, $
+     FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
+     FIT1D__NFLUX=fit1D__nFlux, $
      FIT2D__TOLERANCE=fit2d_tol, $
      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $

@@ -77,12 +77,17 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            A_OUT=A, $
                            AGAUSS_OUT=AGauss, $
                            DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                           TEST_NOREV=test_noRev
+                           TEST_NOREV=test_noRev, $
+                           UNITS=units
 
 
   COMPILE_OPT idl2
 
   COMMON FIT_MASS,mass
+
+  IF N_ELEMENTS(units) EQ 0 THEN BEGIN
+     units = 'eFlux'
+  ENDIF
 
   ;; McFadden says: "dat.mass is a scaler [sic] with units of eV/(km/s)^2."
   ;; Use 1.6e-12erg/eV * (km/1.e5cm)^2 to convert
@@ -155,7 +160,7 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
 
      IF KEYWORD_SET(use_SDT_Gaussian_fit) THEN BEGIN
-        MAXWELLIAN_1,Xorig,AGauss,Yorig,pder,INDEX=[peak_ind,maxEInd],UNITS='eFlux'
+        MAXWELLIAN_1,Xorig,AGauss,Yorig,pder,INDEX=[peak_ind,maxEInd],UNITS=units
 
         T  = -1./Agauss[1]
         f0 = AGauss[0]

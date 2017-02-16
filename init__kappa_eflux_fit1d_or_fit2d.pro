@@ -18,6 +18,8 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   KF__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
                      FIT1D__TOLERANCE=fit_tol, $
                      FIT1D__MAX_ITERATIONS=max_iter, $
+                     FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
+                     FIT1D__NFLUX=fit1D__nFlux, $
                      FIT2D__TOLERANCE=fit2d_tol, $
                      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
                      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
