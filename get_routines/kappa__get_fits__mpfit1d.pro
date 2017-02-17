@@ -4,6 +4,7 @@
 ;
 PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              orig,kappaFit,gaussFit, $
+                             YORIG_ERROR=Yorig_error, $
                              KCURVEFIT_OPT=kCurvefit_opt, $
                              KFITPARAMSTRUCT=kappaParamStruct, $
                              GFITPARAMSTRUCT=gaussParamStruct, $
@@ -27,50 +28,116 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              OUT_PARAMSTR=out_paramStr, $
                              ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                              DONT_PRINT_FITINFO=dont_print_fitinfo, $
-                             FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+                             FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
+                             UNITS=units
 
   COMMON FIT_MASS,mass
 
   COMPILE_OPT idl2
 
-  OKStatus                    = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+  OKStatus   = [1,2,3,4]        ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+  IF ~KEYWORD_SET(units) THEN BEGIN
+     units   = 'eFlux'
+  ENDIF
+  fa         = {units : units}
 
-  orig                        = {x:Xorig, $
-                                 y:Yorig, $
-                                 name:strings.plotTimes[bounds_i]}
+  orig       = {x:Xorig, $
+                y:Yorig, $
+                name:strings.plotTimes[bounds_i]}
 
-  contKappa             = 0
+  IF KEYWORD_SET(Yorig_error) THEN BEGIN
+     STR_ELEMENT,orig,'yError',Yorig_error,/ADD_REPLACE
+  ENDIF
+
+  contKappa  = 0
 
   WHILE ~contKappa DO BEGIN
 
      ;;Trim energies vector if attempting to fit below peak
      IF KEYWORD_SET(kCurvefit_opt.trim_energies_below_peak) THEN BEGIN 
-        X                        = Xorig[energy_inds[0]:energy_inds[1]] 
-        Y                        = Yorig[energy_inds[0]:energy_inds[1]] 
+
+        X                    = Xorig[energy_inds[0]:energy_inds[1]] 
+        Y                    = Yorig[energy_inds[0]:energy_inds[1]] 
+
+        IF N_ELEMENTS(Yorig_error) NE 0 THEN BEGIN
+           Yerror            = Yorig_error[energy_inds[0]:energy_inds[1]] 
+
+           thesens           = WHERE(Yerror GT 0.)
+           weights           = MAKE_ARRAY(N_ELEMENTS(Yerror),/FLOAT,VALUE=0.)
+           CASE kCurvefit_opt.fit1D__weighting OF
+              1: BEGIN          ;linear
+                 weights[thesens]  = 1./ABS(Yerror[thesens])
+
+              END
+              2: BEGIN
+                 weights[thesens]  = 1./ABS(Yerror[thesens])^2
+              END
+           ENDCASE
+        ENDIF ELSE BEGIN
+           thesens           = WHERE(Y GT 0.)
+           weights           = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+           CASE kCurvefit_opt.fit1D__weighting OF
+              1: BEGIN          ;linear
+                 weights[thesens]  = 1./ABS(Y[thesens])
+              END
+              2: BEGIN
+                 weights[thesens]  = 1./ABS(Y[thesens])^2
+              END
+           ENDCASE
+        ENDELSE
+        
      ENDIF
 
      IF KEYWORD_SET(kCurvefit_opt.thresh_eFlux) THEN BEGIN
         
-        thresh                   = 1e4
-        badBoys                  = WHERE(Y LE thresh, $
-                                         nBad, $
-                                         COMPLEMENT=goodBoys, $
-                                         NCOMPLEMENT=nGood)
+        CASE STRUPCASE(units) OF
+           'EFLUX': BEGIN
+              thresh   = 1.e4
+           END
+           'FLUX': BEGIN
+              thresh   = weights > 10.
+           END
+        ENDCASE
+        ;; badBoys  = WHERE(Y LE thresh, $
+        badBoys  = WHERE((Y - thresh) LT 0, $
+                         nBad, $
+                         COMPLEMENT=goodBoys, $
+                         NCOMPLEMENT=nGood)
         IF nBad GT 0 THEN BEGIN
            X                     = X[goodBoys]
            Y                     = Y[goodBoys]
+           weights               = weights[goodBoys]
+
+           ;; IF N_ELEMENTS(Yorig_error) NE 0 THEN BEGIN
+           ;;    Yerror             = Yorig_error[goodBoys]
+
+           ;;    thesens            = WHERE(Yerror GT 0.)
+           ;;    weights            = MAKE_ARRAY(N_ELEMENTS(Yerror),/FLOAT,VALUE=0.)
+           ;;    weights[thesens]   = 1./ABS(Yerror[thesens])
+           ;; ENDIF ELSE BEGIN
+           ;;    thesens            = WHERE(Y GT 0.)
+           ;;    weights            = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+           ;;    weights[thesens]   = 1./ABS(Y[thesens])^2
+           ;; ENDELSE
            ;; PRINT,"Dropped " + STRCOMPRESS(nBad,/REMOVE_ALL) + " bad boys from the club."
         ENDIF
+
      ENDIF
 
      ;;Alternate
-     weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
-     weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
+     ;; IF N_ELEMENTS(Yorig_error) NE 0 THEN BEGIN
+     ;;    weights                       = MAKE_ARRAY(N_ELEMENTS(Yorig_error),/FLOAT,VALUE=0.)
+     ;;    weights[WHERE(Yorig_error GT 0.)]  = 1./ABS(Yorig_error[WHERE(Yorig_error GT 0.)])
+     ;; ENDIF ELSE BEGIN
+     ;;    weights                  = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+     ;;    weights[WHERE(Y GT 0.)]  = 1./ABS(Y[WHERE(Y GT 0.)])^2
+     ;; ENDELSE
 
      UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak
      ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
      ;;                                        ERANGE_PEAK=eRange_peak)
 
+     ;;Tell routine which units we like
      A        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
                          X,Y, $
                          WEIGHTS=weights, $
@@ -198,7 +265,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                     pVal:pVal}
 
      IF KEYWORD_SET(add_full_fits) THEN BEGIN
-        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,A)
+        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,A,UNITS=units)
         kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",Xorig,"yFull",yFull)
      ENDIF
 
@@ -217,8 +284,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;; ENDIF
 
         ;;Alternate
-        weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
-        weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
+        ;; weights                     = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+        ;; weights[WHERE(Y GT 0.)]     = 1./ABS(Y[WHERE(Y GT 0.)])^2
 
         UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_peak
         ;; gaussParamStruct = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
@@ -333,7 +400,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                  MAXWELLIAN_1,Xorig,AGauss_SDT,yGaussFull
               END
               ELSE: BEGIN
-                 yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss)
+                 yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss,UNITS=units)
               END
            ENDCASE
            gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",Xorig,"yFull",yGaussFull)

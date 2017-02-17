@@ -9,10 +9,12 @@
 ; A[5]: m,         Particle mass (in this case electron mass), in eV/c^2
 ;2016/07/19
 FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
+   ONLY_1D_FITS=only_1D_fits, $
    FIT1D__TOLERANCE=fit_tol, $
    FIT1D__MAX_ITERATIONS=max_iter, $
    FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
    FIT1D__NFLUX=fit1D__nFlux, $
+   FIT1D__WEIGHTING=fit1D__weighting, $
    FIT2D__TOLERANCE=fit2D_tol, $
    FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
    FIT2D__ONLY_FIT_DENSANGLES=fit2D__only_fit_densAngles, $
@@ -24,6 +26,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
+   FIT2D__WEIGHTING=fit2D__weighting, $
    FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
    N_ENERGIES_ABOVE_PEAK=n_above_peak, $
@@ -40,6 +43,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    TEMPERATURE_EST=T, $
    KAPPA_EST=kappa, $
    BULK_OFFSET=bulk_offset, $
+   UNITS=units, $
    _EXTRA=e
 
 
@@ -57,7 +61,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
   ;;default mass given in eV/(km/s)^2, per SDT
   defKappaFitA                               = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
 
-  kCurvefit_opt                              = {fit_tol                     : defFit_tol, $
+  kCurvefit_opt                              = {only_1D_fits                : 0B, $
+                                                fit_tol                     : defFit_tol, $
                                                 fit2D_tol                   : defFit2D_tol, $
                                                 fit2D_only_dens_angles      : 0B, $
                                                 fit2D_only_eAngles          : 0B, $
@@ -68,12 +73,14 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 fit2D__exclude_lca_from_densCalc :  0B, $
                                                 fit2D__disable_bFunc        : 0B, $
                                                 fit2D__keep_wholeFit        : 0B, $
+                                                fit2D__weighting            : 1B, $
                                                 max_iter                    : defMax_iter, $
                                                 fit2D_max_iter              : defFit2D_max_iter, $
                                                 fita                        : defKappaFitA, $
                                                 fit1D_dens__each_angle      : 0B, $
                                                 fit1D__sc_eSpec             : 0B, $
                                                 fit1D__nFlux                : 0B, $
+                                                fit1D__weighting            : 1B, $
                                                 n_below_peak                : defNEn_below_peak, $
                                                 n_above_peak                : defNEn_above_peak, $
                                                 n_below_peak2D              : defNEn_below_peak, $
@@ -85,7 +92,16 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 add_gaussian_estimate       : defAdd_gaussian_estimate, $
                                                 use_SDT_Gaussian_fit        :  0B, $
                                                 use_mpFit1D                 :  0B, $
-                                                bulk_offset                 :  0.0}
+                                                bulk_offset                 :  0.0, $
+                                                units                       : 'eFlux'}
+
+
+  IF N_ELEMENTS(only_1D_fits) GT 0 THEN BEGIN
+     kCurvefit_opt.only_1D_fits              = only_1D_fits
+
+     PRINT,FORMAT='("kCurvefit_opt.only_1D_fits",T45,":",T48,F0.2)', $
+     kCurvefit_opt.only_1D_fits           
+  ENDIF
 
   IF N_ELEMENTS(fit_tol) GT 0 THEN BEGIN
      kCurvefit_opt.fit_tol                   = fit_tol
@@ -204,9 +220,26 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
   IF N_ELEMENTS(fit1D__nFlux) GT 0 THEN BEGIN
      kCurvefit_opt.fit1D__nFlux               = fit1D__nFlux
+     IF KEYWORD_SET(fit1D__nFlux) THEN BEGIN
+        kCurvefit_opt.units                   = 'flux'
+     ENDIF
 
      PRINT,FORMAT='("kCurvefit_opt.fit1D__nFlux",T45,":",T48,I0)', $
      kCurvefit_opt.fit1D__nFlux
+  ENDIF
+
+  IF N_ELEMENTS(fit1D__weighting) GT 0 THEN BEGIN
+     IF fit1D__weighting GT 2 OR fit1D__weighting LT 1 THEN BEGIN
+        PRINT,"Illegal weighting option!"
+        PRINT,"Linear = 1 ( w = 1/ABS(Yerr) )"
+        PRINT,"Square = 1 ( w = 1/(Yerr)^2  )"
+        STOP
+     ENDIF
+
+     kCurvefit_opt.fit1D__weighting  = fit1D__weighting
+
+     PRINT,FORMAT='("kCurvefit_opt.fit1D__weighting",T45,":",T48,I0)', $
+     kCurvefit_opt.fit1D__weighting
   ENDIF
 
   IF N_ELEMENTS(n_est) GT 0 THEN BEGIN
@@ -298,6 +331,27 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
      PRINT,FORMAT='("kCurvefit_opt.fit2D__keep_wholeFit",T45,":",T48,I0)', $
      kCurvefit_opt.fit2D__keep_wholeFit
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__weighting) GT 0 THEN BEGIN
+     IF fit2D__weighting GT 2 OR fit2D__weighting LT 1 THEN BEGIN
+        PRINT,"Illegal weighting option!"
+        PRINT,"Linear = 1 ( w = 1/ABS(Yerr) )"
+        PRINT,"Square = 1 ( w = 1/(Yerr)^2  )"
+        STOP
+     ENDIF
+
+     kCurvefit_opt.fit2D__weighting  = fit2D__weighting
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__weighting",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D__weighting
+  ENDIF
+
+  IF N_ELEMENTS(units) GT 0 THEN BEGIN
+     kCurvefit_opt.units = units
+
+     PRINT,FORMAT='("kCurvefit_opt.units",T45,":",T48,I0)', $
+     kCurvefit_opt.units
   ENDIF
 
   PRINT,''

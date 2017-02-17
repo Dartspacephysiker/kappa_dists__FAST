@@ -7,6 +7,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    fa, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    ITIME=iTime, $
+   UNITS=units, $
    OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
    OUT_ERANGE_I=eRange_i
   
@@ -20,7 +21,15 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   wts                = curDataStr.ddata
   wts[*]             = 0.0D
   nz_i               = WHERE(curDataStr.ddata GT 0,/NULL)
-  wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])^2
+  CASE KF2D_curveFit_opt.fit2D__weighting OF
+     1: BEGIN
+        wts[nz_i]    = 1.D/ABS(curDataStr.ddata[nz_i])
+     END
+     2: BEGIN
+        wts[nz_i]    = 1.D/(curDataStr.ddata[nz_i])^2
+     END
+  ENDCASE
+  ;; wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
@@ -92,6 +101,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
 
   fa  = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
          Bingham_style     : 1, $
-         is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit)}
+         is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit), $
+         units             : units }
 
 END

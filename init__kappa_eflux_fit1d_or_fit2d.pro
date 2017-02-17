@@ -16,14 +16,17 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   COMPILE_OPT IDL2
 
   KF__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
+                     ONLY_1D_FITS=only_1D_fits, $
                      FIT1D__TOLERANCE=fit_tol, $
                      FIT1D__MAX_ITERATIONS=max_iter, $
                      FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
                      FIT1D__NFLUX=fit1D__nFlux, $
+                     FIT1D__WEIGHTING=fit1D__weighting, $
                      FIT2D__TOLERANCE=fit2d_tol, $
                      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
                      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
+                     FIT2D__WEIGHTING=fit2D__weighting, $
                      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
                      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
@@ -44,6 +47,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      DENSITY_EST=n_est, $
                      TEMPERATURE_EST=T, $
                      KAPPA_EST=kappa, $
+                     UNITS=units, $
                      _EXTRA=e)  ;, $
   ;; BULK_OFFSET=bulk_offset)
 
@@ -91,7 +95,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
                               CUSTOM_E_ANGLERANGE=KF__SDTData_opt.electron_angleRange, $
                               ANGLESTR=angleStr, $
-                              ESPECUNITS=eSpecUnits, $
+                              ESPECUNITS=KF__Curvefit_opt.units, $
                               ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
                               SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                               _EXTRA=e
@@ -121,12 +125,16 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $
                                    ANGLE=e_angle, $
+                                   ESPECUNITS=KF__Curvefit_opt.units, $
                                    ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                    /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
                                    OUT_ONEDAT=out_oneDat, $
+                                   DEF_ONECOUNT=dEF_oneCount, $
                                    QUIET=quiet
 
-     GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
+     IF KEYWORD_SET(old_mode) THEN BEGIN
+        GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
+     ENDIF
   ENDIF
 
   ;;Times and strings

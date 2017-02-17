@@ -3,19 +3,19 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
 
   COMPILE_OPT IDL2
 
-orbs     = [1773]
+  orbs     = [1773]
 
-orbTimes = [ $
-           ['97-02-01/09:25:30','97-02-01/09:28:00'] $
-           ]
-
-kStats_startStops__ees = LIST(LIST('1997-02-01/' + [['09:26:12','09:26:23'], $
-                                                       ['09:26:53','09:27:07.5']]))
-
-
-bonusPrefs = [ $
-             '--oDoyleRules--0--Elphic_et_al_1998' $
+  orbTimes = [ $
+             ['97-02-01/09:25:30','97-02-01/09:28:00'] $
              ]
+
+  kStats_startStops__ees = LIST(LIST('1997-02-01/' + [['09:26:12','09:26:23'], $
+                                                      ['09:26:53','09:27:07.5']]))
+
+
+  bonusPrefs = [ $
+               '--oDoyleRules--0--Elphic_et_al_1998' $
+               ]
 
   show_post_plots      = 0
   save_kappa_plot      = 0
@@ -24,9 +24,17 @@ bonusPrefs = [ $
   ;; debug__skip_to_this_time  = STR_TO_TIME('97-02-01/09:26:31')
   ;; debug__break_on_this_time = STR_TO_TIME('97-02-01/09:26:31')
 
-  fit1D__save_plotSlices          = 0
-  fit2D__save_all_candidate_plots = 0
-  fit2D__show_each_candidate = 0
+  only_1D_fits                      = 1
+  fit1D__sourceCone_energy_spectrum = 1
+  fit1D__nFlux                      = 0
+  fit1D__weighting                  = 1 ;1 = lin 2 = square
+  
+  add_oneCount_curve                = 1
+
+  fit1D__save_plotSlices            = 1
+  fit2D__save_all_candidate_plots   = 0
+  fit2D__show_each_candidate        = 0
+  fit2D__weighting                  = 1 ;1 = lin 2 = square
 
   show_Strangeway_summary  = 0
   sway__save_ps            = 1
@@ -96,9 +104,15 @@ bonusPrefs = [ $
                         T1STR=t1Str, $
                         T2STR=t2Str, $
                         SHOW_POST_PLOTS=show_post_plots, $
+                        ONLY_1D_FITS=only_1D_fits, $
+                        FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
+                        FIT1D__NFLUX=fit1D__nFlux, $
+                        FIT1D__WEIGHTING=fit1D__weighting, $
                         FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                         FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
                         FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+                        FIT2D__WEIGHTING=fit2D__weighting, $
+                        ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                         SAVE_KAPPA_PLOTS=save_kappa_plot, $
                         SAVEKAPPA_BONUSPREF=bonusPref, $
                         CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $

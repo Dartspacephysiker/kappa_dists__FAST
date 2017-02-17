@@ -28,7 +28,8 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     OUT_PARAMSTR=out_paramStr, $
                     ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     DONT_PRINT_FITINFO=dont_print_fitInfo, $
-                    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt
+                    FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
+                    UNITS=units
 
   COMMON FIT_MASS,mass
 
