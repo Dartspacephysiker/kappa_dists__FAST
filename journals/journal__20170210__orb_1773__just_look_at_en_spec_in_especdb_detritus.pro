@@ -7,20 +7,36 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
   ;; detritus  = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_1773_0.sav'
 
   diffEFDir = '~/software/sdt/batch_jobs/saves_output_etc/'
-  diffEFFil = 'orb_1773--diff_eflux--ees--output_from_get_losscone_and_eflux_data.sav'
+  diffEFFil = 'orb_1773-diff_eflux-ees-e_angle_-24.0-24.0--classics--3--Elphic_et_al_1998-fit_above_500_eV-No_bFunc-exc_LCA.sav'
+
+  upgoing   = 1
 
   RESTORE,diffEFDir+diffEFFil
 
   ;; strtStr = '1997-02-01/09:25:30'
   ;; stopStr = '1997-02-01/09:28:01'
-  strtStr = '1997-02-01/09:26:00'
-  stopStr = '1997-02-01/09:27:30'
+  ;; strtStr = '1997-02-01/09:26:00'
+  ;; stopStr = '1997-02-01/09:27:30'
 
   no_strict_types = 1
 
+  CASE upgoing OF
+     0: BEGIN
+        ;; diffEFFil = 'orb_1773-diff_eflux-ees-e_angle_156.0-204.0--classics--3--Elphic_et_al_1998-fit_above_500_eV-No_bFunc-exc_LCA.sav'
+        strtStr      = '1997-02-01/09:26:00'
+        stopStr      = '1997-02-01/09:27:30'
+        directionStr = 'downgoing'
+        angle        = [-30,30]
+     END
+     1: BEGIN
+        strtStr      = '1997-02-01/09:25:50'
+        stopStr      = '1997-02-01/09:28:00'
+        directionStr = 'upgoing'
+        angle        = [150,210]
+     END
+  ENDCASE
   ;; RESTORE,detritDir+detritus
 
-  angle       = [-30,30]
   tmpespec_lc = GET_EN_SPEC__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle, $
                                              /RETRACE)
   tmpspec_lc  = GET_EN_SPEC__FROM_DIFF_EFLUX(diff_eFlux,ANGLE=angle, $
@@ -92,7 +108,7 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
   OPTIONS,'eSpec','spec',1                                              ; set for spectrogram
   ZLIM,'eSpec',6,9,0                                                    ; set z limits
   YLIM,'eSpec',4,40000,1                                                ; set y limits
-  OPTIONS,'eSpec','ytitle','e- downgoing !C!CEnergy (eV)'               ; y title
+  OPTIONS,'eSpec','ytitle','e- ' + directionStr + ' !C!CEnergy (eV)'    ; y title
   OPTIONS,'eSpec','ztitle','Log Eflux!C!CeV/cm!U2!N-s-sr-eV'            ; z title
   OPTIONS,'eSpec','x_no_interp',1                                       ; don't interpolate
   OPTIONS,'eSpec','y_no_interp',1                                       ; don't interpolate
@@ -113,7 +129,7 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
   OPTIONS,'spec','spec',1                                              ; set for spectrogram
   ZLIM,'spec',4,7,0                                                    ; set z limits
   YLIM,'spec',4,40000,1                                                ; set y limits
-  OPTIONS,'spec','ytitle','e- downgoing !C!CEnergy (eV)'               ; y title
+  OPTIONS,'spec','ytitle','e- ' + directionStr + ' !C!CEnergy (eV)'               ; y title
   OPTIONS,'spec','ztitle','Log nFlux!C!C#/cm!U2!N-s-sr-eV'             ; z title
   OPTIONS,'spec','x_no_interp',1                                       ; don't interpolate
   OPTIONS,'spec','y_no_interp',1                                       ; don't interpolate
@@ -133,38 +149,6 @@ PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
         TRANGE=[t1,t2]
 
   STOP
-
-  getTime = '1997-02-01/09:26:20'
-  tInd    = VALUE_CLOSEST2(tmpeSpec_lc.x,STR_TO_TIME(getTime))
-  ;; ind   = 0
-  Xorig       = REFORM(tmpeSpec_lc.v[tInd,*])
-  Yorig       = REFORM(tmpeSpec_lc.y[tInd,*])
-  junk        = MAX(Yorig,peak_ind)
-  peak_energy = Xorig[peak_ind]
-
-  estFacs      = {T:1.0, $
-                  N:1.0, $
-                  B_E:1.0, $
-                  TGauss:1.0, $
-                  NGauss:1.0, $
-                  B_EGauss:1.0}
-
-  KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
-                         minEInd,maxEInd,nEnergies, $
-                         peak_ind,peak_energy,eRange_peak, $
-                         ANGLES=angles, $
-                         N_ANGLES_IN_RANGE=n_angles_in_range, $
-                         BULKANGLE_STRUCT=angleStr, $
-                         DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
-                         KAPPA_EST=kappa, $
-                         E_ANGLE=e_angle_range, $
-                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
-                         USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
-                         ESTFACS=estFacs, $
-                         A_OUT=A, $
-                         AGAUSS_OUT=AGauss, $
-                         DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                         TEST_NOREV=test_noRev
 
 
 END

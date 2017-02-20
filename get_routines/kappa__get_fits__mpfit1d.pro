@@ -35,6 +35,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   COMPILE_OPT idl2
 
+  kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
+  gaussFunc  = 'MAXWELL_FLUX__FUNC'
+
   OKStatus   = [1,2,3,4]        ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
   IF ~KEYWORD_SET(units) THEN BEGIN
      units   = 'eFlux'
@@ -138,7 +141,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      ;;                                        ERANGE_PEAK=eRange_peak)
 
      ;;Tell routine which units we like
-     A        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
+     A        = MPFITFUN(kappaFunc, $
                          X,Y, $
                          WEIGHTS=weights, $
                          FUNCTARGS=fa, $
@@ -291,7 +294,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;; gaussParamStruct = INIT_KAPPA_FITPARAM_INFO(AGauss,gauss_fixA, $
         ;;                                        ERANGE_PEAK=eRange_peak)
 
-        AGauss        = MPFITFUN('KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC', $
+        AGauss        = MPFITFUN(gaussFunc, $
                                  X,Y, $
                                  WEIGHTS=weights, $
                                  FUNCTARGS=fa, $

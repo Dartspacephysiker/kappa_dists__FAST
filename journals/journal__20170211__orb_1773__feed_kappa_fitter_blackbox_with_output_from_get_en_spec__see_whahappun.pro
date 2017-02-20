@@ -26,7 +26,7 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
 
   only_1D_fits                      = 1
   fit1D__sourceCone_energy_spectrum = 1
-  fit1D__nFlux                      = 0
+  fit1D__nFlux                      = 1
   fit1D__weighting                  = 1 ;1 = lin 2 = square
   
   add_oneCount_curve                = 1

@@ -363,8 +363,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            peak_ind,peak_energy, $
            BULK_OFFSET=KF2D__Curvefit_opt.bulk_offset, $
            CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
-           MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy
+           MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
+           MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
+           PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
+           ONECOUNT_STR=oneCurve
         
+        IF peak_energy EQ -1 THEN CONTINUE
+
         ;; minEInd        = (peak_ind - KF2D__Curvefit_opt.n_below_peak) > 0
         ;; maxEInd        = (peak_ind + KF2D__Curvefit_opt.n_above_peak) < nEnergies-1
 
@@ -769,7 +774,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                         STRINGS=KF2D__strings, $
                         ADD_GAUSSIAN_ESTIMATE=KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate), $
                         /ADD_FITPARAMS_TEXT, $
-                        /ADD_ANGLE_LABEL, $
+                        ;; /ADD_ANGLE_LABEL, $
+                        ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
+                        ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
                         /ADD_CHI_VALUE, $
                         ADD_WINTITLE=add_winTitle, $
                         /SAVE_FITPLOTS, $

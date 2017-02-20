@@ -21,7 +21,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   wts                = curDataStr.ddata
   wts[*]             = 0.0D
   nz_i               = WHERE(curDataStr.ddata GT 0,/NULL)
-  CASE KF2D_curveFit_opt.fit2D__weighting OF
+  CASE KF2D__curveFit_opt.fit2D__weighting OF
      1: BEGIN
         wts[nz_i]    = 1.D/ABS(curDataStr.ddata[nz_i])
      END

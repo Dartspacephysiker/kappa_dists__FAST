@@ -34,6 +34,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    N_ABOVE_PEAK2D=n_above_peak2D, $
    TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
    MIN_PEAK_ENERGY=min_peak_energy, $
+   MAX_PEAK_ENERGY=max_peak_energy, $
+   PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
    DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
    ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
@@ -87,6 +89,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 n_above_peak2D              : defNEn_above_peak, $
                                                 trim_energies_below_peak    : 1, $
                                                 min_peak_energy             : defMin_peak_energy, $
+                                                peak_energy__start_at_highE : 0B, $
                                                 thresh_eFlux                : 0.0D, $
                                                 estimate_A_from_data        : 1, $
                                                 add_gaussian_estimate       : defAdd_gaussian_estimate, $
@@ -171,6 +174,20 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
      PRINT,FORMAT='("kCurvefit_opt.min_peak_energy",T45,":",T48,I0)', $
      kCurvefit_opt.min_peak_energy
+  ENDIF
+
+  IF N_ELEMENTS(max_peak_energy) GT 0 THEN BEGIN
+     STR_ELEMENT,kCurvefit_opt,'max_peak_energy',max_peak_energy,/ADD_REPLACE
+
+     PRINT,FORMAT='("kCurvefit_opt.max_peak_energy",T45,":",T48,I0)', $
+     kCurvefit_opt.max_peak_energy
+  ENDIF
+
+  IF N_ELEMENTS(peak_energy__start_at_highE) GT 0 THEN BEGIN
+     kCurvefit_opt.peak_energy__start_at_highE           = peak_energy__start_at_highE
+
+     PRINT,FORMAT='("kCurvefit_opt.peak_energy__start_at_highE",T45,":",T48,I0)', $
+     kCurvefit_opt.peak_energy__start_at_highE
   ENDIF
 
   IF N_ELEMENTS(dont_fit_below_thresh_value) GT 0 THEN BEGIN

@@ -11,6 +11,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    MIN_PEAK_ENERGY=min_peak_energy, $
+   MAX_PEAK_ENERGY=max_peak_energy, $
+   PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
    N_ENERGIES_ABOVE_PEAK=n_above_peak, $
    N_BELOW_PEAK2D=n_below_peak2D, $
@@ -125,6 +127,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      N_ABOVE_PEAK2D=n_above_peak2D, $
      TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
      MIN_PEAK_ENERGY=min_peak_energy, $
+     MAX_PEAK_ENERGY=max_peak_energy, $
+     PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
      DONT_FIT_BELOW_THRESH_VALUE=dont_fit_below_thresh_value, $
      ESTIMATE_A_FROM_DATA=estimate_A_from_data, $
      ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $

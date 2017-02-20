@@ -3,7 +3,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ELECTRON_SOURCECONEANGLE=electron_angleRange, $
                           ELECTRON_LOSSCONEANGLE=electron_lca, $
                           ENERGY_ELECTRONS=energy_electrons, $
+                          UPGOING=upgoing, $
                           MIN_PEAK_ENERGY=min_peak_energy, $
+                          MAX_PEAK_ENERGY=max_peak_energy, $
+                          PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
                           EEB_OR_EES=eeb_or_ees, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                           SOUTH=south, $
@@ -101,6 +104,22 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   ;; fit2D__bulk_e_anis_factor  = 0.3
   IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN fit2D__density_angleRange     = [-32,32]
 
+  IF KEYWORD_SET(upgoing) THEN BEGIN
+     fit2D__density_angleRange += 180
+     electron_angleRange       += 180
+     electron_lca              += 180
+
+     n_below_peak               = 2
+     n_above_peak               = 15
+     n_below_peak2D             = 2
+     n_above_peak2D             = 15
+  ENDIF ELSE BEGIN
+     n_below_peak               = 3
+     n_above_peak               = 15
+     n_below_peak2D             = 3
+     n_above_peak2D             = 15
+  ENDELSE
+  
   use_mpFit1D                   = 1
 
   fit1D__skip_bad_fits          = 1
@@ -120,10 +139,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   dont_print_fitinfo            = 1
   print_2DFitInfo               = 1
 
-  n_below_peak                  = 3
-  n_above_peak                  = 15
-  n_below_peak2D                = 3
-  n_above_peak2D                = 15
   dont_fit_below_thresh_value   = 0
   bulk_offset                   = 0
 
@@ -173,28 +188,33 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   plotNamePref    = KEYWORD_SET(bonusPref) ? bonusPref : ''
   CASE 1 OF
      KEYWORD_SET(fit2D__only_fit_peak_eRange): BEGIN
-        plotNamePref += '--only_fit_peak_eRange'
+        plotNamePref += '-only_fit_peak_eRange'
      END
      KEYWORD_SET(fit2D__only_fit_aboveMin): BEGIN
-        plotNamePref += STRING(FORMAT='("--fit_above_",I0,"_eV")',min_peak_energy)
+        plotNamePref += STRING(FORMAT='("-fit_above_",I0,"_eV")',min_peak_energy)
      END
      ELSE: BEGIN
      END
   ENDCASE
   
   IF KEYWORD_SET(fit2D__disable_bFunc) THEN BEGIN
-     plotNamePref    += '--No_bFunc'
+     plotNamePref    += '-No_bFunc'
   ENDIF
 
   IF KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
-     plotNamePref    += '--exc_LCA'
+     plotNamePref    += '-exc_LCA'
   ENDIF
 
-  fitFile              = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
-                         '--Kappa_fits_and_Gauss_fits--' + eeb_or_ees + '--horseshoe2d'
+  fitFile              = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
+                         '-Kappa_fits_and_Gauss_fits-' + eeb_or_ees + '-horseshoe2d'
+
+  angleStr             = STRING(FORMAT='("-e_angle_",F0.1,"-",F0.1)', $
+                                electron_angleRange[0], $
+                                electron_angleRange[1])
+  
 
   IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
-     save_diff_eFlux_to_file = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
+     save_diff_eFlux_to_file = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + eeb_or_ees + angleStr + $
                                plotNamePref + '.sav'
   ENDIF
   IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
@@ -208,7 +228,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
            ENDELSE
         END
         ELSE: BEGIN
-           diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '--diff_eflux--' + eeb_or_ees + $
+           diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + eeb_or_ees + angleStr + $
                                plotNamePref + '.sav'
         END
      ENDCASE
@@ -235,6 +255,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         EEB_OR_EES=eeb_or_ees, $
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
         MIN_PEAK_ENERGY=min_peak_energy, $
+        MAX_PEAK_ENERGY=max_peak_energy, $
+        PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
         N_ENERGIES_BELOW_PEAK=n_below_peak, $
         N_ENERGIES_ABOVE_PEAK=n_above_peak, $
         N_BELOW_PEAK2D=n_below_peak2D, $
@@ -316,6 +338,14 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         'ees': BEGIN
            GET_2DT_TS,'j_2d_b','fa_ees',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
            GET_2DT_TS,'je_2d_b','fa_ees',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+        END
+        'ieb': BEGIN
+           GET_2DT_TS,'j_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+           GET_2DT_TS,'je_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+        END
+        'ies': BEGIN
+           GET_2DT_TS,'j_2d_b','fa_ies',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+           GET_2DT_TS,'je_2d_b','fa_ies',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
         END
      ENDCASE
 
