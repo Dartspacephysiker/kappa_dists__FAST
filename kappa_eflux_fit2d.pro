@@ -7,6 +7,9 @@ PRO KAPPA_EFLUX_FIT2D, $
    ENERGY_ELECTRONS=energy_electrons, $
    LOAD_DAT_FROM_FILE=loadFile, $
    SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
+   JUST_DIFF_EFLUX=just_diff_eFlux, $
+   DIFF_EFLUX=diff_eFlux, $
+   DEF_ONECOUNT=dEF_oneCount, $
    LOAD_DIR=loadDir, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -140,6 +143,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      EEB_OR_EES=eeb_or_ees, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      DO_ALL_TIMES=do_all_times, $
+     TIME_ARR=time_arr, $
      ENERGY_ELECTRONS=energy_electrons, $
      ELECTRON_ANGLERANGE=electron_angleRange, $
      ELECTRON_LOSSCONE_ANGLE=electron_lca, $
@@ -154,6 +158,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      ADD_ANGLE_LABEL=add_angle_label, $
      FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
      _REF_EXTRA=e
+
+  IF KEYWORD_SET(just_diff_eFlux) THEN RETURN
 
   KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                     BOUNDS=bounds, $

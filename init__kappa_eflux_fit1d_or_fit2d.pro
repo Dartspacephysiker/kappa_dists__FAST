@@ -10,6 +10,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    TIMES=times, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
+   TIME_ARR=time_arr, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
    _REF_EXTRA=e
 
@@ -112,11 +113,35 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
      RETURN
   ENDIF
 
-  IF KEYWORD_SET(do_all_times) THEN BEGIN
-     PRINT,"Doing all times ..."
-     nBounds                           = N_ELEMENTS(diff_eFlux.time)
-     bounds                            = INDGEN(nBounds)
-  END
+  nBounds                           = N_ELEMENTS(diff_eFlux.time)
+  CASE 1 OF
+     KEYWORD_SET(do_all_times): BEGIN
+        PRINT,"Doing all times ..."
+        bounds                      = INDGEN(nBounds)
+     END
+     KEYWORD_SET(time_arr): BEGIN
+        dims = SIZE(time_arr,/DIMENSIONS)
+        CASE N_ELEMENTS(dims) OF
+           1: BEGIN
+           END
+           2: BEGIN
+              IF dims[0] NE 2 THEN STOP
+              bounds = !NULL
+              FOR k=0,dims[1] DO BEGIN
+                 extr_i = !NULL
+                 inds   = VALUE_CLOSEST2(diff_eFlux.time,time_arr[*,k],EXTREME_I=extr_i)
+                 IF (extr_i[0] NE -1) OR $
+                    ( (WHERE((inds LT 0) OR (inds GE nBounds)))[0] NE -1) $
+                 THEN STOP
+                 bounds = [bounds,[inds[0]:inds[1]]]
+              ENDFOR
+           END
+           ELSE: BEGIN
+              STOP
+           ENDELSE
+        ENDCASE
+     END
+  ENDCASE
 
   ;;Onecount curve?
   IF KEYWORD_SET(KF__Plot_opt.add_oneCount_curve) THEN BEGIN

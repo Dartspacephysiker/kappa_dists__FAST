@@ -207,7 +207,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         pVal            = -1
      ENDIF ELSE BEGIN
 
-        chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) )
+        chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
 
      IF FINITE(chi2) THEN BEGIN
         pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-N_ELEMENTS(WHERE(~kappa_fixA))) ;Subtract number of free params
@@ -371,7 +371,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
            ;;need to adjust Y bounds?
            ;; yMax               = MAX(yGaussFit) > yMax
 
-           chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) )
+           chi2           = TOTAL( (Y-yGaussFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
 
            IF FINITE(chi2) THEN BEGIN
               pValGauss       = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-3) ;3 for the 3 params that were allowed to participate in this fit

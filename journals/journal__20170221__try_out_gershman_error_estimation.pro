@@ -1,7 +1,9 @@
-;;02/11/17
-PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET_EN_SPEC__SEE_WHAHAPPUN
+;2017/02/11
+PRO JOURNAL__20170221__TRY_OUT_GERSHMAN_ERROR_ESTIMATION
 
   COMPILE_OPT IDL2
+
+  just_diff_eFlux      = 1
 
   orbs     = [1773]
 
@@ -50,8 +52,8 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
 
   kStats__save_stuff   = 1
 
-  save_diff_eFlux_file = 0
-  load_diff_eFlux_file = '~/software/sdt/batch_jobs/saves_output_etc/orb_1773-diff_eflux-ees-e_angle_-24.0-24.0--classics--3--Elphic_et_al_1998-fit_above_500_eV-No_bFunc-exc_LCA.sav'
+  ;; save_diff_eFlux_file = 1
+  load_diff_eFlux_file = '~/software/sdt/batch_jobs/saves_output_etc/orb_1773-diff_eflux-ees-e_angle_-24.0-24.0--oDoyleRules--0--Elphic_et_al_1998-fit_above_500_eV-No_bFunc-exc_LCA.sav'
   ;; restore_fitFile      = 1
 
   evtNum               = 0
@@ -91,6 +93,9 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
                         ELECTRON_SOURCECONEANGLE=electron_angleRange, $
                         ELECTRON_LOSSCONEANGLE=electron_lca, $
                         ENERGY_ELECTRONS=energy_electrons, $
+                        JUST_DIFF_EFLUX=just_diff_eFlux, $
+                        DIFF_EFLUX=diff_eFlux, $
+                        DEF_ONECOUNT=dEF_oneCount, $
                         MIN_PEAK_ENERGY=min_peak_energy, $
                         EEB_OR_EES=eeb_or_ees, $
                         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -143,4 +148,5 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
                         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
 END
+
 

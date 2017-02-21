@@ -819,7 +819,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
   ENDFOR
 
-  IF KEYWORD_SET(synthPackage) THEN BEGIN
+  IF KEYWORD_SET(synthPackage) AND ~KEYWORD_SET(KF2D__Curvefit_opt.only_1D_fits) THEN BEGIN
      
      IF KEYWORD_SET(fit1D__skip_bad_fits) THEN BEGIN
         tmpTimeK_i = keepK_iTime

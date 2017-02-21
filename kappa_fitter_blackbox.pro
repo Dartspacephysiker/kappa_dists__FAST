@@ -3,6 +3,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ELECTRON_SOURCECONEANGLE=electron_angleRange, $
                           ELECTRON_LOSSCONEANGLE=electron_lca, $
                           ENERGY_ELECTRONS=energy_electrons, $
+                          JUST_DIFF_EFLUX=just_diff_eFlux, $
+                          DIFF_EFLUX=diff_eFlux, $
+                          DEF_ONECOUNT=dEF_oneCount, $
                           UPGOING=upgoing, $
                           MIN_PEAK_ENERGY=min_peak_energy, $
                           MAX_PEAK_ENERGY=max_peak_energy, $
@@ -78,19 +81,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
      IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4
   ENDIF
-
-  ;; bounds                    = [160:210:50]/spectra_avg_interval & bounds  = bounds[uniq(bounds)]
-  ;; bounds                    = [126:138]/spectra_avg_interval & bounds  = bounds[uniq(bounds)]
-  ;; ;; bounds                    = [126:226:2]/spectra_avg_interval
-
-  ;; bounds                       = [87,88,89,90,91,95,99]
-  ;; bounds                        = [88:187]
-  ;; bounds  = INDGEN(5)
-  ;; Use survey bounds
-  ;; 16  1997-02-07/20:49:41.338
-  ;; 28  1997-02-07/20:49:48.934
-  ;; eeb_or_ees                = 'ees'
-  ;; bounds                    = [46:54:spectra_avg_interval]
 
   do_all_times                  = 1
   add_full_fits                 = 1
@@ -249,6 +239,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         SDT_TIME_INDS=bounds, $
         DO_ALL_TIMES=do_all_times, $
         ENERGY_ELECTRONS=energy_electrons, $
+        JUST_DIFF_EFLUX=just_diff_eFlux, $
+        DIFF_EFLUX=diff_eFlux, $
+        DEF_ONECOUNT=dEF_oneCount, $
         LOAD_DAT_FROM_FILE=diff_eFlux_file, $
         LOAD_DIR=outDir, $
         SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
@@ -330,27 +323,38 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
-     CASE eeb_or_ees OF
-        'eeb': BEGIN
-           GET_2DT_TS,'j_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-           GET_2DT_TS,'je_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-        END
-        'ees': BEGIN
-           GET_2DT_TS,'j_2d_b','fa_ees',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-           GET_2DT_TS,'je_2d_b','fa_ees',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-        END
-        'ieb': BEGIN
-           GET_2DT_TS,'j_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-           GET_2DT_TS,'je_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-        END
-        'ies': BEGIN
-           GET_2DT_TS,'j_2d_b','fa_ies',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-           GET_2DT_TS,'je_2d_b','fa_ies',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-        END
-     ENDCASE
+     ;; CASE eeb_or_ees OF
+     ;;    'eeb': BEGIN
+     ;;       GET_2DT_TS,'j_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;       GET_2DT_TS,'je_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;    END
+     ;;    'ees': BEGIN
+     ;;       GET_2DT_TS,'j_2d_b','fa_ees',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;       GET_2DT_TS,'je_2d_b','fa_ees',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;    END
+     ;;    'ieb': BEGIN
+     ;;       GET_2DT_TS,'j_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;       GET_2DT_TS,'je_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;    END
+     ;;    'ies': BEGIN
+     ;;       GET_2DT_TS,'j_2d_b','fa_ies',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;       GET_2DT_TS,'je_2d_b','fa_ies',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
+     ;;    END
+     ;; ENDCASE
 
-     GET_DATA,'Je',DATA=je
-     GET_DATA,'Jee',DATA=jee
+     ;; GET_DATA,'Je',DATA=je
+     ;; GET_DATA,'Jee',DATA=jee
+
+     je  = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     jee = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     n   = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+
+     error_estimates = 1
+     IF KEYWORD_SET(error_estimates) THEN BEGIN
+        ;; errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+        errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,QUIET=quiet, $
+                                                  /CONV_TO_CM)
+     ENDIF
 
      PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                              A=a, $
