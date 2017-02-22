@@ -55,6 +55,8 @@
 ;                 }
 ;-
 FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
+                                       DENERGY=dEnergy, $
+                                       DTHETA=dTheta, $
                                        ;; NO_PRESSURE_COVAR_CALC=no_pressure_covar_calc, $
                                        ;; NO_HEATFLUX_COVAR_CALC=no_heatFlux_covar_calc
                                        PRESSURE_COVAR_CALC=pressure_covar_calc, $
@@ -72,7 +74,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
   revPhi                  = 0
   CHECK_SORTED,energy,en_is_sorted,/QUIET
   CHECK_SORTED,theta,theta_is_sorted,/QUIET
-  IF ~en_is_sorted THEN BEGIN
+  IF ~(en_is_sorted OR KEYWORD_SET(dEnergy)) THEN BEGIN
      CHECK_SORTED,REVERSE(energy),en_is_sorted,/QUIET
      revEn                =  en_is_sorted
 
@@ -80,11 +82,14 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         energy            = REVERSE(energy   )
         f                 = REVERSE(f      ,1)
         sigma_f           = REVERSE(sigma_f,1)
+        IF KEYWORD_SET(dEnergy) THEN BEGIN
+           dEnergy        = REVERSE(dEnergy)
+        ENDIF
      ENDIF ELSE BEGIN
         STOP
      ENDELSE
   ENDIF
-  IF ~theta_is_sorted THEN BEGIN
+  IF ~(theta_is_sorted OR KEYWORD_SET(dTheta)) THEN BEGIN
      CHECK_SORTED,REVERSE(theta),theta_is_sorted,/QUIET
      revTheta             =  theta_is_sorted
 
@@ -92,8 +97,16 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         theta             = REVERSE(theta    )
         f                 = REVERSE(f      ,2)
         sigma_f           = REVERSE(sigma_f,2)
+        IF KEYWORD_SET(dEnergy) THEN BEGIN
+           dTheta         = REVERSE(dTheta)
+        ENDIF
      ENDIF ELSE BEGIN
         STOP
+        sort_i            = SORT(theta)
+        theta             = theta[sort_i]
+        dTheta            = dTheta[sort_i]
+        f                 = f[*,sort_i]
+        sigma_f           = f[*,sort_i]
      ENDELSE
   ENDIF
 
@@ -123,6 +136,23 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
   ENDCASE
 
   vs                      = SQRT(2*energy*energy_1eV/mass) ; convert energy (eV) array to velocity (m/s)
+  IF KEYWORD_SET(dEnergy) THEN BEGIN
+     dVel                 = SQRT(2*dEnergy*energy_1eV/mass) ; convert energy (eV) array to velocity (m/s)
+  ENDIF ELSE BEGIN
+     dVel                 = [vs[0],vs[1:-1]-vs[0:-2]]
+     ;; IF vii GT 0 THEN BEGIN
+     ;;    dv = vs[vii]-vs[vii-1]
+     ;; ENDIF ELSE BEGIN
+     ;;    dv = vs[vii]
+     ;; ENDELSE
+  ;; ENDELSE
+  ENDELSE
+
+  IF KEYWORD_SET(dTheta) THEN BEGIN
+     dTh    = dTheta*!DTOR
+  ENDIF ELSE BEGIN
+     dTh    = (theta[tii]-theta[tii-1])*!DTOR
+  ENDELSE
 
   ;;Number of bins in each dimension
   Nen                     = N_ELEMENTS(energy)
@@ -155,38 +185,40 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         vzs    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vz value at each bin center
         vms    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; sqrt(vx^2+vy^2+vz^2) value at each bin center
         d3vs   = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; phase space volume of each bin
+        dOmega = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; solid angle
 
-        cphi              = 0.
+        cphi   = 0.
         ;; cphi              = !PI/4.
 
         FOR tii=0,Ntheta-1 DO BEGIN
            FOR vii=0,Nen-1 DO BEGIN
 
-              cv = vs[vii]
-              ctheta = theta[tii]*!pi/180.0
+              ;; cv = vs[vii]
+              ;; ctheta = theta[tii]*!pi/180.0
 
-              vxs[vii,tii] = cv*SIN(ctheta)*COS(cphi)
-              vys[vii,tii] = cv*SIN(ctheta)*SIN(cphi)
-              ;; vxs[vii,tii] = cv*SIN(ctheta)
-              vzs[vii,tii] = cv*COS(ctheta)
-              vms[vii,tii] = cv
+              vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*COS(cphi)
+              vys[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
+              ;; vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)
+              vzs[vii,tii] = vs[vii]*COS(theta[tii]*!DTOR)
+              vms[vii,tii] = vs[vii]
               v0s[vii,tii] = 1.
 
               ;; form phase space volumes using left-Riemann sum (assumes values increase with index)
-              IF vii GT 0 THEN BEGIN
-                 dv = vs[vii]-vs[vii-1]
-              ENDIF ELSE BEGIN
-                 dv = vs[vii]
-              ENDELSE
+              ;; IF vii GT 0 THEN BEGIN
+              ;;    dv = vs[vii]-vs[vii-1]
+              ;; ENDIF ELSE BEGIN
+              ;;    dv = vs[vii]
+              ;; ENDELSE
+              
 
-              IF tii GT 0 THEN BEGIN
-                 dtheta = (theta[tii]-theta[tii-1])*!pi/180.0
-              ENDIF ELSE BEGIN
-                 dtheta = theta[tii]*!pi/180.0
-              ENDELSE
+              ;; IF tii GT 0 THEN BEGIN
+              ;;    dtheta = (theta[tii]-theta[tii-1])*!pi/180.0
+              ;; ENDIF ELSE BEGIN
+              ;;    dtheta = theta[tii]*!pi/180.0
+              ;; ENDELSE
 
-              d3vs[vii,tii] = cv^2*SIN(ctheta)*dtheta*dv
-
+              d3vs[vii,tii]   = (vs[vii])^2*SIN(theta[tii]*!DTOR)*dTh[tii]*dVel[vii]
+              dOmega[vii,tii] = SIN(theta[tii]*!DTOR)*dTh[tii]
            ENDFOR
         ENDFOR
 
@@ -207,14 +239,14 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
            FOR tii=0,Ntheta-1 DO BEGIN
               FOR vii=0,Nen-1 DO BEGIN
 
-                 cv = vs[vii]
-                 ctheta = theta[tii]*!pi/180.0
+                 ;; cv = vs[vii]
+                 ;; ctheta = theta[tii]*!pi/180.0
                  cphi = phi[pii]*!pi/180.0
 
-                 vxs[vii,tii,pii] = cv*SIN(ctheta)*COS(cphi)
-                 vys[vii,tii,pii] = cv*SIN(ctheta)*SIN(cphi)
-                 vzs[vii,tii,pii] = cv*COS(ctheta)
-                 vms[vii,tii,pii] = cv
+                 vxs[vii,tii,pii] = vs[vii]*SIN(theta[tii]*!DTOR)*COS(cphi)
+                 vys[vii,tii,pii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
+                 vzs[vii,tii,pii] = vs[vii]*COS(theta[tii]*!DTOR)
+                 vms[vii,tii,pii] = vs[vii]
                  v0s[vii,tii,pii] = 1.
 
                  ;; form phase space volumes using left-Riemann sum (assumes values increase with index)
@@ -240,7 +272,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                     dphi = dphi + 2.0*!pi
                  ENDIF
 
-                 d3vs[vii,tii,pii] = cv^2*SIN(ctheta)*dtheta*dphi*dv
+                 d3vs[vii,tii,pii] = vs[vii]^2*SIN(theta[tii]*!DTOR)*dtheta*dphi*dv
 
               ENDFOR
            ENDFOR

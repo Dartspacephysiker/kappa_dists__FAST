@@ -323,6 +323,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
+     ;;Used these lines before the advent of my way awesome __FROM_DIFF_EFLUX series of routines.
      ;; CASE eeb_or_ees OF
      ;;    'eeb': BEGIN
      ;;       GET_2DT_TS,'j_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
@@ -345,16 +346,31 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;; GET_DATA,'Je',DATA=je
      ;; GET_DATA,'Jee',DATA=jee
 
-     je  = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     jee = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     n   = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
      error_estimates = 1
      IF KEYWORD_SET(error_estimates) THEN BEGIN
-        ;; errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-        errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,QUIET=quiet, $
-                                                  /CONV_TO_CM)
+        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+        n1       = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+
+        errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet,/CONV_TO_CM)
+        errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,QUIET=quiet,/CONV_TO_CM)
+
+        nerr        = MAKE_ARRAY(473,/FLOAT)
+        n1err       = MAKE_ARRAY(473,/FLOAT)
+        FOR k=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
+           nerr[k]  = errors[k].n
+           n1err[k] = errors1[k].n
+        ENDFOR
+        fracN       = nerr/nOne.y
+        fracN1      = n1err/n1.y
+        ;; errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,QUIET=quiet, $
+        ;;                                           /CONV_TO_CM)
      ENDIF
+
+     je  = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     jee = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+
+     je1  = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     jee1 = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
 
      PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                              A=a, $
