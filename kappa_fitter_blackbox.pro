@@ -92,7 +92,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   fit2D__exclude_lca_from_densCalc = 1
   fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
-  IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN fit2D__density_angleRange     = [-32,32]
+  IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN BEGIN
+     fit2D__density_angleRange  = [-32,32]
+  ENDIF
 
   IF KEYWORD_SET(upgoing) THEN BEGIN
      fit2D__density_angleRange += 180
@@ -114,7 +116,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   fit1D__skip_bad_fits          = 1
   fit1D__show_and_prompt        = 0
-  IF ~KEYWORD_SET(fit2D__show_each_candidate) THEN fit2D__show_each_candidate = 0
+  IF ~KEYWORD_SET(fit2D__show_each_candidate) THEN BEGIN
+     fit2D__show_each_candidate = 0
+  ENDIF
   fit2D__add_boundaries         = 1
   fit_fail__user_prompt         = 0
 
@@ -173,58 +177,19 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                    NGauss:NGauss_est_fac, $
                                    B_EGauss:bulkEGauss_est_fac}
 
-
   ;;... And strings!!!!
-  plotNamePref    = KEYWORD_SET(bonusPref) ? bonusPref : ''
-  CASE 1 OF
-     KEYWORD_SET(fit2D__only_fit_peak_eRange): BEGIN
-        plotNamePref += '-only_fit_peak_eRange'
-     END
-     KEYWORD_SET(fit2D__only_fit_aboveMin): BEGIN
-        plotNamePref += STRING(FORMAT='("-fit_above_",I0,"_eV")',min_peak_energy)
-     END
-     ELSE: BEGIN
-     END
-  ENDCASE
-  
-  IF KEYWORD_SET(fit2D__disable_bFunc) THEN BEGIN
-     plotNamePref    += '-No_bFunc'
-  ENDIF
-
-  IF KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
-     plotNamePref    += '-exc_LCA'
-  ENDIF
-
-  fitFile              = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
-                         '-Kappa_fits_and_Gauss_fits-' + eeb_or_ees + '-horseshoe2d'
-
-  angleStr             = STRING(FORMAT='("-e_angle_",F0.1,"-",F0.1)', $
-                                electron_angleRange[0], $
-                                electron_angleRange[1])
-  
-
-  IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
-     save_diff_eFlux_to_file = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + eeb_or_ees + angleStr + $
-                               plotNamePref + '.sav'
-  ENDIF
-  IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
-     CASE SIZE(load_diff_eFlux_file,/TYPE) OF
-        7: BEGIN
-           IF FILE_TEST(load_diff_eFlux_file) THEN BEGIN
-              diff_eFlux_file = load_diff_eFlux_file
-           ENDIF ELSE BEGIN
-              PRINT,"Couldn't find file: " + load_diff_eFlux_file
-              STOP
-           ENDELSE
-        END
-        ELSE: BEGIN
-           diff_eFlux_file   = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + eeb_or_ees + angleStr + $
-                               plotNamePref + '.sav'
-        END
-     ENDCASE
-  ENDIF
-
-  fitFile                       = fitFile + plotNamePref + '.sav'
+  KAPPA_FITTER__FSTRINGS, $
+     ORBIT=orbit, $
+     EEB_OR_EES=eeb_or_ees, $
+     ELECTRON_ANGLERANGE=electron_angleRange ,$
+     BONUSPREF=bonusPref ,$
+     SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
+     LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+     FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
+     FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
+     FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
+     FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+     FITFILE=fitFile
 
   IF KEYWORD_SET(restore_fitFile) THEN BEGIN
 
