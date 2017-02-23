@@ -64,6 +64,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
    USE_MPFIT1D=use_mpFit1D, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+   FIT_EACH_ANGLE=fit_each_angle, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    ADD_ANGLE_LABEL=add_angle_label, $
    FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
@@ -154,6 +155,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      PLOTDIR=plotDir, $
      PLOTNAMEPREF=plotNamePref, $
      ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+     FIT_EACH_ANGLE=fit_each_angle, $
      ADD_FITPARAMS_TEXT=add_fitParams_text, $
      ADD_ANGLE_LABEL=add_angle_label, $
      FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $

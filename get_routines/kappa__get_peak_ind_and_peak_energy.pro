@@ -5,6 +5,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
+   CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    ONECOUNT_STR=oneCurve
 
   COMPILE_OPT idl2
@@ -101,7 +102,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
      END
      ELSE: BEGIN
            inds         = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0)
-           IF inds[0] EQ -1 THEN BEGIN
+           IF inds[0] EQ -1 AND ~KEYWORD_SET(its_OK__everyone_has_feelings) THEN BEGIN
               PRINT,"Can't find any good energy inds! Maybe lower your energy requirement."
               STOP
            ENDIF

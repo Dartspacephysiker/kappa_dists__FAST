@@ -185,11 +185,13 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      BONUSPREF=bonusPref ,$
      SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+     OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
      FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
      FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
      FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
-     FITFILE=fitFile
+     FITFILE=fitFile, $
+     LOADDIR=outDir
 
   IF KEYWORD_SET(restore_fitFile) THEN BEGIN
 
@@ -263,6 +265,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
         USE_MPFIT1D=use_mpFit1D, $
         ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+        FIT_EACH_ANGLE=fit_each_angle, $
         ADD_FITPARAMS_TEXT=add_fitParams_text, $
         ADD_ANGLE_LABEL=add_angle_label, $
         FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $

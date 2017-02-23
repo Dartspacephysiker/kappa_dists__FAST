@@ -12,9 +12,15 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    DO_ALL_TIMES=do_all_times, $
    TIME_ARR=time_arr, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+   FIT_EACH_ANGLE=fit_each_angle, $
    _REF_EXTRA=e
 
   COMPILE_OPT IDL2
+
+  ;;Perma-set because we like having all angles for diff eFlux files
+  IF N_ELEMENTS(fit_each_angle) EQ 0 THEN BEGIN
+     fit_each_angle = 1
+  ENDIF
 
   KF__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
                      ONLY_1D_FITS=only_1D_fits, $
@@ -95,7 +101,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
                               OUT_ORB=orb, $
                               OUT_ANGLERANGE=e_angle, $
-                              /FIT_EACH_ANGLE, $ ;Perma-set because we need all angles here
+                              FIT_EACH_ANGLE=fit_each_angle, $
                               CUSTOM_E_ANGLERANGE=KF__SDTData_opt.electron_angleRange, $
                               ANGLESTR=angleStr, $
                               ESPECUNITS=KF__Curvefit_opt.units, $
