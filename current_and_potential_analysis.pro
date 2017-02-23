@@ -31,6 +31,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
    DENS_ERRORS=dens_errors, $
+   MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList
    
@@ -226,7 +227,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               ;; CASE STRMATCH(STRUPCASE(eeb_or_ees),'EE*') OF
               ;;    0: BEGIN
               ;; angleRange = (360.*(angleRange/360.-FLOOR(angleRange/360.)))
-              angleRange = lc_angleRange - 180.
+              ;; angleRange = lc_angleRange - 180.
+              angleRange = (360.*((lc_angleRange-180)/360.-FLOOR((lc_angleRange-180)/360.)))
               ;;    END
               ;; ENDCASE
            END
@@ -398,6 +400,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           chare1_list, $
           peak_ind_list, $
           peak_energy_list, $
+          aRange_oMoments_list, $
+          aRange_oCharE_list, $
+          aRange_oPeakEn_list, $          
           FILENAME=outDir+datFile
   ENDELSE
 
@@ -459,19 +464,34 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpTimes  = (j_list[realK]).x[theseInds]
 
         ;;Pick up temps
-        tmpJ      = (j_list[realK]).y[theseInds]   * (ions ? 1. : (-1.))
-        tmpJe     = (je_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
+        tmpJ       = (j_list[realK]).y[theseInds]   * (ions ? 1. : (-1.))
+        tmpJe      = (je_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
         ;; tmpCharE = CHAR_ENERGY(tmpJ,tmpJe)
-        tmpCharE  = (chare_list[realK])[theseInds]
-        tmpPeakE  = (peak_energy_list[realK])[theseInds]
+        tmpCharE   = (chare_list[realK])[theseInds]
+        tmpPeakE   = (peak_energy_list[realK])[theseInds]
 
-        tmpJ1     = (j1_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
-        tmpJe1    = (je1_list[realK]).y[theseInds] * (ions ? 1. : (-1.))
-        tmpCharE1 = (chare1_list[realK])[theseInds]
+        tmpJ1      = (j1_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
+        tmpJe1     = (je1_list[realK]).y[theseInds] * (ions ? 1. : (-1.))
+        tmpCharE1  = (chare1_list[realK])[theseInds]
 
+        IF KEYWORD_SET(map_to_100km) THEN BEGIN
+           GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,orbit,tmpTimes, $
+                                            OUT_TSORTED_I=tSort_i, $
+                                            OUT_ALT=alt, $
+                                            OUT_MLT=mlt, $
+                                            OUT_ILAT=ilat, $
+                                            OUT_MAPRATIO=mapRatio, $
+                                            OUT_NEVENTS=nEvents, $
+                                            LOGLUN=logLun
+           IF N_ELEMENTS(tSort_i) GT 0 THEN STOP
+
+           tmpJ  *= mapRatio
+           tmpJe *= mapRatio
+
+        ENDIF
         ;;Get current (flip sign of current for electrons)
-        tmpCur   = tmpJ  * 1.6e-9 
-        tmpCur1  = tmpJ1 * 1.6e-9 
+        tmpCur    = tmpJ  * 1.6e-9 
+        tmpCur1   = tmpJ1 * 1.6e-9 
 
         ;;Make outward current positive in both hemis
         ;; ;;(You know, field lines going in at the NH, going out at the SH, yadda yadda)
@@ -531,6 +551,5 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      PRINT,"Saving it all to " + saveCurPotFile
      SAVE,curPotList,FILENAME=outDir+saveCurPotFile
   ENDIF
-  STOP
 
 END
