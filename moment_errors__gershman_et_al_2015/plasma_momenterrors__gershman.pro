@@ -61,8 +61,8 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                                        ;; NO_HEATFLUX_COVAR_CALC=no_heatFlux_covar_calc
                                        PRESSURE_COVAR_CALC=pressure_covar_calc, $
                                        HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
-                                       SANS_PHI=sans_phi, $
-                                       CONV_TO_CM=conv_to_cm
+                                       SANS_PHI=sans_phi;; , $
+                                       ;; CONV_TO_CM=conv_to_cm ;;What were you thinking? This calculates RELATIVE errors
 
   COMPILE_OPT idl2
 
@@ -179,7 +179,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
      KEYWORD_SET(sans_phi): BEGIN
 
         ;; create arrays for fast Riemann-sum integration
-        v0s    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; array of 1s
+        v0s    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=1.D) ; array of 1s
         vxs    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vx value at each bin center
         vys    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vy value at each bin center
         vzs    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vz value at each bin center
@@ -201,7 +201,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
               ;; vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)
               vzs[vii,tii] = vs[vii]*COS(theta[tii]*!DTOR)
               vms[vii,tii] = vs[vii]
-              v0s[vii,tii] = 1.
+
 
               ;; form phase space volumes using left-Riemann sum (assumes values increase with index)
               ;; IF vii GT 0 THEN BEGIN
@@ -228,7 +228,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         Nphi    = N_ELEMENTS(phi)
 
         ;; create arrays for fast Riemann-sum integration
-        v0s     = MAKE_ARRAY(Nen,Ntheta,Nphi,/DOUBLE,VALUE=0.D) ; array of 1s
+        v0s     = MAKE_ARRAY(Nen,Ntheta,Nphi,/DOUBLE,VALUE=1.D) ; array of 1s
         vxs     = MAKE_ARRAY(Nen,Ntheta,Nphi,/DOUBLE,VALUE=0.D) ; vx value at each bin center
         vys     = MAKE_ARRAY(Nen,Ntheta,Nphi,/DOUBLE,VALUE=0.D) ; vy value at each bin center
         vzs     = MAKE_ARRAY(Nen,Ntheta,Nphi,/DOUBLE,VALUE=0.D) ; vz value at each bin center
@@ -247,7 +247,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                  vys[vii,tii,pii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
                  vzs[vii,tii,pii] = vs[vii]*COS(theta[tii]*!DTOR)
                  vms[vii,tii,pii] = vs[vii]
-                 v0s[vii,tii,pii] = 1.
+
 
                  ;; form phase space volumes using left-Riemann sum (assumes values increase with index)
                  IF vii GT 0 THEN BEGIN
@@ -5490,12 +5490,13 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
   moments_errs.Uy                = ABS(sigma_Uy)
   moments_errs.Uz                = ABS(sigma_Uz)
 
-  IF KEYWORD_SET(conv_to_cm) THEN BEGIN
-     moments_errs.n             /= 1d6
-     moments_errs.Ux            *= 100.
-     moments_errs.Uy            *= 100.
-     moments_errs.Uz            *= 100.
-  ENDIF
+  ;;Sherlock, this calculates RELATIVE errors
+  ;; IF KEYWORD_SET(conv_to_cm) THEN BEGIN
+  ;;    moments_errs.n             /= 1d6
+  ;;    moments_errs.Ux            *= 100.
+  ;;    moments_errs.Uy            *= 100.
+  ;;    moments_errs.Uz            *= 100.
+  ;; ENDIF
 
   IF ~KEYWORD_SET(no_pressure_covar_calc) THEN BEGIN
 

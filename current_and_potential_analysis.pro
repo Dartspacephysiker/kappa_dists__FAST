@@ -85,8 +85,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF
 
   nCalcLoop              = N_ELEMENTS(label)
+  preString = datFile + ' ...'
   IF FILE_TEST(outDir+datFile) AND ~KEYWORD_SET(remake_masterFile) THEN BEGIN
      RESTORE,outDir+datFile
+     afterString = "Restored "
+
   ENDIF ELSE BEGIN
 
      nDEFLoop             = N_ELEMENTS(eeb_or_eesArr)
@@ -98,13 +101,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      err1_list            = LIST()
      n_list               = LIST()
      nerr_list            = LIST()
-     fracN_list           = LIST()
+     ;; fracN_list           = LIST() ;;Foolish, this is what Gershman's routine does!!
      j_list               = LIST()
      je_list              = LIST()
      chare_list           = LIST()
      n1_list              = LIST()
      n1err_list           = LIST()
-     fracN1_list          = LIST()
+     ;; fracN1_list          = LIST()
      j1_list              = LIST()
      je1_list             = LIST()
      chare1_list          = LIST()
@@ -338,8 +341,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;Error everything
         IF KEYWORD_SET(error_estimates) THEN BEGIN
 
-           errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet,/CONV_TO_CM)
-           errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,QUIET=quiet,/CONV_TO_CM)
+           errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
+           errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,QUIET=quiet)
 
            IF KEYWORD_SET(dens_errors) THEN BEGIN
               nerr        = MAKE_ARRAY(nHere,/FLOAT)
@@ -350,8 +353,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                  n1err[l] = errors1[l].n
               ENDFOR
 
-              fracN       = nerr/n.y
-              fracN1      = n1err/n1.y
+              ;; fracN       = nerr/n.y
+              ;; fracN1      = n1err/n1.y
 
            ENDIF
 
@@ -385,26 +388,27 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF KEYWORD_SET(dens_errors) THEN BEGIN
            nerr_list.Add,TEMPORARY(nerr)
-           fracN_list.Add,TEMPORARY(fracN)
+           ;; fracN_list.Add,TEMPORARY(fracN)
 
            n1err_list.Add,TEMPORARY(n1err)
-           fracN1_list.Add,TEMPORARY(fracN1)
+           ;; fracN1_list.Add,TEMPORARY(fracN1)
         ENDIF
 
      ENDFOR
 
+     afterString = "Made "
      SAVE,north_southArr_list, $
           err_list, $
           err1_list, $
           n_list, $
           nerr_list, $
-          fracN_list, $
+          ;; fracN_list, $
           j_list, $
           je_list, $
           chare_list, $
           n1_list, $
           n1err_list, $
-          fracN1_list, $
+          ;; fracN1_list, $
           j1_list, $
           je1_list, $
           chare1_list, $
@@ -415,6 +419,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oPeakEn_list, $          
           FILENAME=outDir+datFile
   ENDELSE
+  PRINT,preString + afterString
+
 
   ;;Now the calculations
   PRINT,"Now whittling to selected times"
@@ -462,10 +468,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlPeakE   = !NULL
      itvlN       = !NULL
      itvlNerr    = !NULL
-     itvlFracN   = !NULL
+     ;; itvlFracN   = !NULL
      itvlN1      = !NULL
      itvlN1err   = !NULL
-     itvlFracN1  = !NULL
+     ;; itvlFracN1  = !NULL
      FOR realK=0,nSegs-1 DO BEGIN
 
         tmpT1 = tmpT[0,realK]
@@ -498,9 +504,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
            tmpNerr    = (Nerr_list[k])[theseInds]
-           tmpFracN   = (fracN_list[k])[theseInds]
+           ;; tmpFracN   = (fracN_list[k])[theseInds]
            tmpN1err   = (N1err_list[k])[theseInds]
-           tmpFracN1  = (fracN1_list[k])[theseInds]
+           ;; tmpFracN1  = (fracN1_list[k])[theseInds]
         ENDIF
 
         IF KEYWORD_SET(map_to_100km) THEN BEGIN
@@ -556,9 +562,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         itvlN1         = [itvlN1    ,tmpN1    ]
         IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
            itvlNerr    = [itvlNerr  ,tmpNerr  ]
-           itvlFracN   = [itvlFracN ,tmpFracN ]
+           ;; itvlFracN   = [itvlFracN ,tmpFracN ]
            itvlN1err   = [itvlN1err ,tmpN1err ]
-           itvlFracN1  = [itvlFracN1,tmpFracN1]
+           ;; itvlFracN1  = [itvlFracN1,tmpFracN1]
         ENDIF
         itvlPeakE      = [itvlPeakE ,tmpPeakE ]
 
@@ -574,14 +580,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                             chare  : TEMPORARY(itvlcharE)               , $
                             N      : TEMPORARY(itvlN)                   , $
                             Nerr   : TEMPORARY(itvlNerr)                , $
-                            fracN  : TEMPORARY(itvlFracN)               , $
+                            ;; fracN  : TEMPORARY(itvlFracN)               , $
                             j1     : TEMPORARY(itvlJ1)                  , $
                             je1    : TEMPORARY(itvlJe1)                 , $
                             cur1   : TEMPORARY(itvlCur1)                , $
                             chare1 : TEMPORARY(itvlcharE1)              , $
                             N1     : TEMPORARY(itvlN1)                  , $
                             N1err  : TEMPORARY(itvlN1err)               , $
-                            fracN1 : TEMPORARY(itvlFracN1)              , $
+                            ;; fracN1 : TEMPORARY(itvlFracN1)              , $
                             peakE  : TEMPORARY(itvlPeakE)               , $
                             energy : energyArr[*,k]                     , $
                             angles : {charE   : aRange_oCharE_list[k]   , $
