@@ -52,8 +52,19 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
 
      END
      KEYWORD_SET(peak_energy__start_at_highE): BEGIN
-        inds            = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0)
-        whichWy        = FIX(ABS((Xorig[inds[0]]-Xorig[inds[-1]]))/(Xorig[inds[0]]-Xorig[inds[-1]]))
+        inds            = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0,nInds)
+        IF (inds[0] EQ -1) THEN BEGIN
+           peak_ind     = -1
+           peak_energy  = -1
+           RETURN
+        ENDIF
+        IF nInds EQ 1 THEN BEGIN
+           peak_ind     = inds[0]
+           peak_energy  = Xorig[peak_ind]
+           RETURN
+        ENDIF
+
+        whichWy         = FIX(ABS((Xorig[inds[0]]-Xorig[inds[-1]]))/(Xorig[inds[0]]-Xorig[inds[-1]]))
         junk            = MIN(ABS(Xorig[inds]-minE),minEInd_ii)
         junk            = MIN(ABS(Xorig[inds]-maxE),maxEInd_ii)
         minEInd         = inds[minEInd_ii]
@@ -72,14 +83,23 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
         ;; candidate       = (Yorig[k] GT Yorig[k+whichWy]) + (Yorig[k] GT Yorig[k+whichWy+whichWy])
         ;;Stricter
         facDecrease     = 0.05
-        candidate       = ((Yorig[k        ] - Yorig[k+whichWy  ])/Yorig[k        ] GT facDecrease) + $
-                          ((Yorig[k+whichWy] - Yorig[k+whichWy*2])/Yorig[k+whichWy] GT facDecrease)
+        CASE (minEInd-k) OF
+           2: BEGIN
+              candidate       = ((Yorig[k        ] - Yorig[k+whichWy  ])/Yorig[k        ] GT facDecrease) + $
+                                ((Yorig[k+whichWy] - Yorig[k+whichWy*2])/Yorig[k+whichWy] GT facDecrease)
+           END
+           1: BEGIN
+              candidate       = ((Yorig[k-1] - Yorig[k        ])/Yorig[k-1] GT facDecrease) + $
+                                ((Yorig[k  ] - Yorig[k+whichWy])/Yorig[k  ] GT facDecrease)
+           END
+           ELSE:
+        ENDCASE
         ;; IF ~(candidate EQ 2) THEN BEGIN
         ;;    k           += whichWy
         ;;    candidate    = ((Yorig[k]         - Yorig[k+whichWy])/Yorig[k] GT facDecrease) + $
         ;;                   ((Yorig[k+whichWy] - Yorig[k-whichWy])/Yorig[k] GT facDecrease)
         ;; ENDIF
-        WHILE (k NE minEInd) AND ~(candidate EQ 2) DO BEGIN
+        WHILE ((k+1) NE minEInd) AND ~(candidate EQ 2) DO BEGIN
            ;;Less strict
            ;; candidate    = (Yorig[k] GT Yorig[k+whichWy]) + (Yorig[k] GT Yorig[k-whichWy])
 

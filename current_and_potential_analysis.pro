@@ -49,24 +49,33 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      ;; order                   = [0,2,1]
      order                   = [0,1,2]
+     ;; order                   = [2,1,0]
      label                   = ['downgoing_e','upgoing_e','upgoing_i']
 
      label__which_eeb        = [0,0,1]
      label__which_times      = [0,0,0]
-     energyArr               = [[3e1,3.0e4],[3e1,3.0e4],[1e2,2.4e4]]
+     ;; energyArr               = [[3e1,3.0e4],[3e1,3.0e4],[1e2,2.4e4]]
+     ;; energyArr               = [[4,3.0e4],[4,3.0e4],[4,2.4e4]]
+     energyArr               = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
-     aRange__moments_e_down  = [0,360]
-     aRange__moments_i_up    = [0,360]
+     aRange__moments_e_down  = [0.,360.]
+     aRange__moments_i_up    = [0.,360.]
+     aRange__moments_e_up    = !NULL
+     
+     ;; aRange__moments_e_down  = [330.,30.]
+     ;; aRange__moments_i_up    = [150.,210.]
+     ;; aRange__moments_e_up    = [150.,210.]
 
-     aRange__moments_list    = LIST(aRange__moments_e_down,!NULL,aRange__moments_i_up)
-     ;; aRange__peakEn_list     = LIST(!NULL,!NULL,[150,-150])
+     aRange__moments_list    = LIST(aRange__moments_e_down,aRange__moments_e_up,aRange__moments_i_up)
+     aRange__moments_list    = LIST(aRange__moments_e_down,aRange__moments_e_up,aRange__moments_i_up)
+     ;; aRange__peakEn_list     = LIST(!NULL,!NULL,[150,210])
      aRange__peakEn_list     = LIST(!NULL,!NULL,!NULL)
      aRange__charE_list      = LIST(!NULL,!NULL,!NULL)
 
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
-     min_peak_energyArr      = [300,100,100]
+     min_peak_energyArr      = [4,4,4]
      max_peak_energyArr      = [3e4,3e4,2.4e4]
 
      ;;If doing upgoing electrons
@@ -323,10 +332,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_ind_list.Add,TEMPORARY(peak_indArr)
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
 
+        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
+        n1       = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
+
         ;;Error everything
         IF KEYWORD_SET(error_estimates) THEN BEGIN
-           n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-           n1       = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
 
            errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet,/CONV_TO_CM)
            errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,QUIET=quiet,/CONV_TO_CM)
@@ -424,55 +434,74 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      tmpNS = north_southArr_list[t_k]
      nSegs = N_ELEMENTS(tmpT[0,*])
 
-     itvlTime   = !NULL
-     itvlJ      = !NULL
-     itvlJe     = !NULL
-     itvlCur    = !NULL
-     itvlcharE  = !NULL
-     itvlJ1     = !NULL
-     itvlJe1    = !NULL
-     itvlCur1   = !NULL
-     itvlcharE1 = !NULL
-     itvlPeakE  = !NULL
+     IF (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS((j_list[k]).y      )) OR $
+        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS((je_list[k]).y     )) OR $
+        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS(peak_ind_list[k]   )) OR $
+        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS(peak_energy_list[k]))    $
+     THEN BEGIN
+        PRINT,"It's unequal everywhere"
+        STOP
+     ENDIF
+
+     IF ~ARRAY_EQUAL((n_list[k]).x,(j_list[k]).x      ) OR $
+        ~ARRAY_EQUAL((n_list[k]).x,(je_list[k]).x     )    $
+     THEN BEGIN
+        PRINT,"It's unequal everywhere"
+        STOP
+     ENDIF
+
+     itvlTime    = !NULL
+     itvlJ       = !NULL
+     itvlJe      = !NULL
+     itvlCur     = !NULL
+     itvlcharE   = !NULL
+     itvlJ1      = !NULL
+     itvlJe1     = !NULL
+     itvlCur1    = !NULL
+     itvlcharE1  = !NULL
+     itvlPeakE   = !NULL
+     itvlN       = !NULL
+     itvlNerr    = !NULL
+     itvlFracN   = !NULL
+     itvlN1      = !NULL
+     itvlN1err   = !NULL
+     itvlFracN1  = !NULL
      FOR realK=0,nSegs-1 DO BEGIN
 
         tmpT1 = tmpT[0,realK]
         tmpT2 = tmpT[1,realK]
         
-        IF (N_ELEMENTS((n_list[realK]).y) NE N_ELEMENTS((j_list[realK]).y      )) OR $
-           (N_ELEMENTS((n_list[realK]).y) NE N_ELEMENTS((je_list[realK]).y     )) OR $
-           (N_ELEMENTS((n_list[realK]).y) NE N_ELEMENTS(peak_ind_list[realK]   )) OR $
-           (N_ELEMENTS((n_list[realK]).y) NE N_ELEMENTS(peak_energy_list[realK]))    $
-        THEN BEGIN
-           PRINT,"It's unequal everywhere"
-           STOP
-        ENDIF
-
-        IF ~ARRAY_EQUAL((n_list[realK]).x,(j_list[realK]).x      ) OR $
-           ~ARRAY_EQUAL((n_list[realK]).x,(je_list[realK]).x     )    $
-        THEN BEGIN
-           PRINT,"It's unequal everywhere"
-           STOP
-        ENDIF
-
-        theseInds = WHERE( ( (j_list[realK]).x GE tmpT1 ) AND $
-                           ( (j_list[realK]).x LE tmpT2 ), $
+        theseInds = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
+                           ( (j_list[k]).x LE tmpT2 ), $
                            nThese)
 
         IF nThese EQ 0 THEN STOP
 
-        tmpTimes  = (j_list[realK]).x[theseInds]
+        theseInds = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
+        CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET & IF ~is_sorted THEN STOP
+        IF nThese EQ 0 THEN STOP
+
+        tmpTimes  = (j_list[k]).x[theseInds]
 
         ;;Pick up temps
-        tmpJ       = (j_list[realK]).y[theseInds]   * (ions ? 1. : (-1.))
-        tmpJe      = (je_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
+        tmpJ       = (j_list[k]).y[theseInds]   * (ions ? 1. : (-1.))
+        tmpJe      = (je_list[k]).y[theseInds]  * (ions ? 1. : (-1.))
         ;; tmpCharE = CHAR_ENERGY(tmpJ,tmpJe)
-        tmpCharE   = (chare_list[realK])[theseInds]
-        tmpPeakE   = (peak_energy_list[realK])[theseInds]
+        tmpCharE   = (chare_list[k])[theseInds]
+        tmpPeakE   = (peak_energy_list[k])[theseInds]
+        tmpN       = (N_list[k]).y[theseInds]
 
-        tmpJ1      = (j1_list[realK]).y[theseInds]  * (ions ? 1. : (-1.))
-        tmpJe1     = (je1_list[realK]).y[theseInds] * (ions ? 1. : (-1.))
-        tmpCharE1  = (chare1_list[realK])[theseInds]
+        tmpJ1      = (j1_list[k]).y[theseInds]  * (ions ? 1. : (-1.))
+        tmpJe1     = (je1_list[k]).y[theseInds] * (ions ? 1. : (-1.))
+        tmpCharE1  = (chare1_list[k])[theseInds]
+        tmpN1      = (N1_list[k]).y[theseInds]
+
+        IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
+           tmpNerr    = (Nerr_list[k])[theseInds]
+           tmpFracN   = (fracN_list[k])[theseInds]
+           tmpN1err   = (N1err_list[k])[theseInds]
+           tmpFracN1  = (fracN1_list[k])[theseInds]
+        ENDIF
 
         IF KEYWORD_SET(map_to_100km) THEN BEGIN
            GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,orbit,tmpTimes, $
@@ -514,35 +543,73 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;; PRINT,"Saving " + tmpFile
         ;; SAVE,tmpJ,tmpJe,tmpCharE,tmpPeakE,tmpCur,FILENAME=outDir+tmpFile
 
-        itvlTime   = [itvlTime  ,tmpTimes ]
-        itvlJ      = [itvlJ     ,tmpJ     ]
-        itvlJe     = [itvlJe    ,tmpJe    ]
-        itvlCur    = [itvlCur   ,tmpCur   ]
-        itvlcharE  = [itvlcharE ,tmpChare ]
-        itvlJ1     = [itvlJ1    ,tmpJ1    ]
-        itvlJe1    = [itvlJe1   ,tmpJe1   ]
-        itvlCur1   = [itvlCur1  ,tmpCur1  ]
-        itvlcharE1 = [itvlcharE1,tmpChare1]
-        itvlPeakE  = [itvlPeakE ,tmpPeakE ]
+        itvlTime       = [itvlTime  ,tmpTimes ]
+        itvlJ          = [itvlJ     ,tmpJ     ]
+        itvlJe         = [itvlJe    ,tmpJe    ]
+        itvlCur        = [itvlCur   ,tmpCur   ]
+        itvlcharE      = [itvlcharE ,tmpChare ]
+        itvlN          = [itvlN     ,tmpN     ]
+        itvlJ1         = [itvlJ1    ,tmpJ1    ]
+        itvlJe1        = [itvlJe1   ,tmpJe1   ]
+        itvlCur1       = [itvlCur1  ,tmpCur1  ]
+        itvlcharE1     = [itvlcharE1,tmpChare1]
+        itvlN1         = [itvlN1    ,tmpN1    ]
+        IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
+           itvlNerr    = [itvlNerr  ,tmpNerr  ]
+           itvlFracN   = [itvlFracN ,tmpFracN ]
+           itvlN1err   = [itvlN1err ,tmpN1err ]
+           itvlFracN1  = [itvlFracN1,tmpFracN1]
+        ENDIF
+        itvlPeakE      = [itvlPeakE ,tmpPeakE ]
 
      ENDFOR
 
-     tmpStruct     = {label  : label[k],$
-                      time   : TEMPORARY(itvlTime)                , $
-                      j      : TEMPORARY(itvlJ)                   , $
-                      je     : TEMPORARY(itvlJe)                  , $
-                      cur    : TEMPORARY(itvlCur)                 , $
-                      chare  : TEMPORARY(itvlcharE)               , $
-                      j1     : TEMPORARY(itvlJ1)                  , $
-                      je1    : TEMPORARY(itvlJe1)                 , $
-                      cur1   : TEMPORARY(itvlCur1)                , $
-                      chare1 : TEMPORARY(itvlcharE1)              , $
-                      peakE  : TEMPORARY(itvlPeakE)               , $
-                      energy : energyArr[*,k]                     , $
-                      angles : {charE   : aRange_oCharE_list[k]   , $
-                                moments : aRange_oMoments_list[k] , $
-                                peakEn  : aRange_oPeakEn_list[k]} $
-                     }
+     CASE 1 OF
+        (KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors)): BEGIN
+           tmpStruct     = {label  : label[k],$
+                            time   : TEMPORARY(itvlTime)                , $
+                            j      : TEMPORARY(itvlJ)                   , $
+                            je     : TEMPORARY(itvlJe)                  , $
+                            cur    : TEMPORARY(itvlCur)                 , $
+                            chare  : TEMPORARY(itvlcharE)               , $
+                            N      : TEMPORARY(itvlN)                   , $
+                            Nerr   : TEMPORARY(itvlNerr)                , $
+                            fracN  : TEMPORARY(itvlFracN)               , $
+                            j1     : TEMPORARY(itvlJ1)                  , $
+                            je1    : TEMPORARY(itvlJe1)                 , $
+                            cur1   : TEMPORARY(itvlCur1)                , $
+                            chare1 : TEMPORARY(itvlcharE1)              , $
+                            N1     : TEMPORARY(itvlN1)                  , $
+                            N1err  : TEMPORARY(itvlN1err)               , $
+                            fracN1 : TEMPORARY(itvlFracN1)              , $
+                            peakE  : TEMPORARY(itvlPeakE)               , $
+                            energy : energyArr[*,k]                     , $
+                            angles : {charE   : aRange_oCharE_list[k]   , $
+                                      moments : aRange_oMoments_list[k] , $
+                                      peakEn  : aRange_oPeakEn_list[k]} $
+                           }           
+        END
+        ELSE: BEGIN
+           tmpStruct     = {label  : label[k],$
+                            time   : TEMPORARY(itvlTime)                , $
+                            j      : TEMPORARY(itvlJ)                   , $
+                            je     : TEMPORARY(itvlJe)                  , $
+                            cur    : TEMPORARY(itvlCur)                 , $
+                            chare  : TEMPORARY(itvlcharE)               , $
+                            N      : TEMPORARY(itvlN)                   , $
+                            j1     : TEMPORARY(itvlJ1)                  , $
+                            je1    : TEMPORARY(itvlJe1)                 , $
+                            cur1   : TEMPORARY(itvlCur1)                , $
+                            chare1 : TEMPORARY(itvlcharE1)              , $
+                            N1     : TEMPORARY(itvlN1)                  , $
+                            peakE  : TEMPORARY(itvlPeakE)               , $
+                            energy : energyArr[*,k]                     , $
+                            angles : {charE   : aRange_oCharE_list[k]   , $
+                                      moments : aRange_oMoments_list[k] , $
+                                      peakEn  : aRange_oPeakEn_list[k]} $
+                           }
+        END
+     ENDCASE
 
      curPotList.Add,tmpStruct
   ENDFOR
