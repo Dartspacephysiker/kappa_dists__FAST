@@ -5,6 +5,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    ELECTRON_ANGLERANGE=electron_angleRange ,$
    FIT_EACH_ANGLE=fit_each_angle, $
    BONUSPREF=bonusPref ,$
+   ADD_ONECOUNT_STATS=add_oneCount_stats, $
    SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
@@ -46,6 +47,10 @@ PRO KAPPA_FITTER__FSTRINGS, $
      END
   ENDCASE
   
+  IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
+     plotNamePref    += 'w_1count_stats'
+  ENDIF
+
   IF KEYWORD_SET(fit2D__disable_bFunc) THEN BEGIN
      plotNamePref    += '-No_bFunc'
   ENDIF
