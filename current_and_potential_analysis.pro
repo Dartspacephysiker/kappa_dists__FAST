@@ -554,8 +554,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
-           tmpCurErr  = tmpJ  * 1.6e-9 * (ions ? 1. : (-1.))
-           tmpCur1Err = tmpJ1 * 1.6e-9 * (ions ? 1. : (-1.))
+           tmpCurErr  = tmpJerr  * 1.6e-9 * (ions ? 1. : (-1.))
+           tmpCur1Err = tmpJ1err * 1.6e-9 * (ions ? 1. : (-1.))
         ENDIF
 
         ;;Make outward current positive in both hemis
