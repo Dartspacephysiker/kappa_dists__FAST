@@ -61,7 +61,8 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                                        ;; NO_HEATFLUX_COVAR_CALC=no_heatFlux_covar_calc
                                        PRESSURE_COVAR_CALC=pressure_covar_calc, $
                                        HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
-                                       SANS_PHI=sans_phi;; , $
+                                       SANS_PHI=sans_phi, $
+                                       SANS_OFFDIAG=sans_offDiag;; , $
                                        ;; CONV_TO_CM=conv_to_cm ;;What were you thinking? This calculates RELATIVE errors
 
   COMPILE_OPT idl2
@@ -187,7 +188,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         d3vs   = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; phase space volume of each bin
         dOmega = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; solid angle
 
-        cphi   = 0.
+        ;; cphi   = 0.D
         ;; cphi              = !PI/4.
 
         FOR tii=0,Ntheta-1 DO BEGIN
@@ -196,8 +197,13 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
               ;; cv = vs[vii]
               ;; ctheta = theta[tii]*!pi/180.0
 
-              vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*COS(cphi)
-              vys[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
+              ;; vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*COS(cphi)
+              ;; vys[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
+
+              ;;Stop kidding yourself. There's no need to waste time with vy
+              vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)
+              ;; vys[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)*SIN(cphi)
+
               ;; vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)
               vzs[vii,tii] = vs[vii]*COS(theta[tii]*!DTOR)
               vms[vii,tii] = vs[vii]
@@ -221,6 +227,8 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
               dOmega[vii,tii] = SIN(theta[tii]*!DTOR)*dTh[tii]
            ENDFOR
         ENDFOR
+
+        ;; vys     = vxs
 
      END
      ELSE: BEGIN
@@ -946,68 +954,92 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
      + (1)*(1)*(cov_vxs_vxs)*1.0
   sigma_n_Ux   = (SQRT(err_n_Ux)/calc_n_Ux)
 
-  err_n_Uy     =   $
-     + (1)*(1)*(cov_vys_vys)*1.0
-  sigma_n_Uy   = (SQRT(err_n_Uy)/calc_n_Uy)
+  ;; IF KEYWORD_SET(sans_phi) THEN BEGIN
+     
+  ;;    ;; err_n_Ux  = err_n_Ux
+  ;;    sigma_n_Uy = sigma_n_Ux
+
+  ;; ENDIF ELSE BEGIN
+
+     err_n_Uy     =   $
+        + (1)*(1)*(cov_vys_vys)*1.0
+     sigma_n_Uy   = (SQRT(err_n_Uy)/calc_n_Uy)
+
+  ;; ENDELSE
 
   err_n_Uz     =   $
      + (1)*(1)*(cov_vzs_vzs)*1.0
   sigma_n_Uz   = (SQRT(err_n_Uz)/calc_n_Uz)
 
   ;;U-related stuff
-  err_Ux_Ux    = (-2*n_vxs^2/n_v0s^3)*(-2*n_vxs^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vxs^2/n_v0s^3)*(2*n_vxs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-    + (2*n_vxs/n_v0s^2)*(2*n_vxs/n_v0s^2)*(cov_vxs_vxs)*1.0
-  sigma_Ux_Ux  = (SQRT(err_Ux_Ux)/calc_Ux_Ux)
+  ;; err_Ux_Ux    = (-2*n_vxs^2/n_v0s^3)*(-2*n_vxs^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+  ;;   + (-2*n_vxs^2/n_v0s^3)*(2*n_vxs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+  ;;   + (2*n_vxs/n_v0s^2)*(2*n_vxs/n_v0s^2)*(cov_vxs_vxs)*1.0
+  ;; sigma_Ux_Ux  = (SQRT(err_Ux_Ux)/calc_Ux_Ux)
 
   err_Ux       = (-n_vxs/n_v0s^2)*(-n_vxs/n_v0s^2)*(cov_v0s_v0s)*1.0 $
     + (-n_vxs/n_v0s^2)*(1/n_v0s)*(cov_v0s_vxs)*2.0  $
     + (1/n_v0s)*(1/n_v0s)*(cov_vxs_vxs)*1.0
   sigma_Ux     = (SQRT(err_Ux)/calc_Ux)
 
-  err_Ux_Uy    = (-2*n_vxs*n_vys/n_v0s^3)*(-2*n_vxs*n_vys/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vxs*n_vys/n_v0s^3)*(n_vys/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-    + (-2*n_vxs*n_vys/n_v0s^3)*(n_vxs/n_v0s^2)*(cov_v0s_vys)*2.0  $
-    + (n_vys/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-    + (n_vys/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vxs_vys)*2.0 $
-    + (n_vxs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vys_vys)*1.0
-  sigma_Ux_Uy  = (SQRT(err_Ux_Uy)/calc_Ux_Uy)
-
-  err_Ux_Uz    = (-2*n_vxs*n_vzs/n_v0s^3)*(-2*n_vxs*n_vzs/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vxs*n_vzs/n_v0s^3)*(n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-    + (-2*n_vxs*n_vzs/n_v0s^3)*(n_vxs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-    + (n_vzs/n_v0s^2)*(n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-    + (n_vzs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-    + (n_vxs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vzs_vzs)*1.0
-  sigma_Ux_Uz  = (SQRT(err_Ux_Uz)/calc_Ux_Uz)
-
-  err_Uy_Uy    = (-2*n_vys^2/n_v0s^3)*(-2*n_vys^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vys^2/n_v0s^3)*(2*n_vys/n_v0s^2)*(cov_v0s_vys)*2.0  $
-    + (2*n_vys/n_v0s^2)*(2*n_vys/n_v0s^2)*(cov_vys_vys)*1.0
-  sigma_Uy_Uy  = (SQRT(err_Uy_Uy)/calc_Uy_Uy)
+  ;; err_Uy_Uy    = (-2*n_vys^2/n_v0s^3)*(-2*n_vys^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+  ;;   + (-2*n_vys^2/n_v0s^3)*(2*n_vys/n_v0s^2)*(cov_v0s_vys)*2.0  $
+  ;;   + (2*n_vys/n_v0s^2)*(2*n_vys/n_v0s^2)*(cov_vys_vys)*1.0
+  ;; sigma_Uy_Uy  = (SQRT(err_Uy_Uy)/calc_Uy_Uy)
 
   err_Uy       = (-n_vys/n_v0s^2)*(-n_vys/n_v0s^2)*(cov_v0s_v0s)*1.0 $
     + (-n_vys/n_v0s^2)*(1/n_v0s)*(cov_v0s_vys)*2.0  $
     + (1/n_v0s)*(1/n_v0s)*(cov_vys_vys)*1.0
   sigma_Uy     = (SQRT(err_Uy)/calc_Uy)
 
-  err_Uy_Uz    = (-2*n_vys*n_vzs/n_v0s^3)*(-2*n_vys*n_vzs/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vys*n_vzs/n_v0s^3)*(n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
-    + (-2*n_vys*n_vzs/n_v0s^3)*(n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-    + (n_vzs/n_v0s^2)*(n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
-    + (n_vzs/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vys_vzs)*2.0 $
-    + (n_vys/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
-  sigma_Uy_Uz  = (SQRT(err_Uy_Uz)/calc_Uy_Uz)
-
-  err_Uz_Uz    = (-2*n_vzs^2/n_v0s^3)*(-2*n_vzs^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-    + (-2*n_vzs^2/n_v0s^3)*(2*n_vzs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-    + (2*n_vzs/n_v0s^2)*(2*n_vzs/n_v0s^2)*(cov_vzs_vzs)*1.0
-  sigma_Uz_Uz  = (SQRT(err_Uz_Uz)/calc_Uz_Uz)
+  ;; err_Uz_Uz    = (-2*n_vzs^2/n_v0s^3)*(-2*n_vzs^2/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+  ;;   + (-2*n_vzs^2/n_v0s^3)*(2*n_vzs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+  ;;   + (2*n_vzs/n_v0s^2)*(2*n_vzs/n_v0s^2)*(cov_vzs_vzs)*1.0
+  ;; sigma_Uz_Uz  = (SQRT(err_Uz_Uz)/calc_Uz_Uz)
 
   err_Uz       = (-n_vzs/n_v0s^2)*(-n_vzs/n_v0s^2)*(cov_v0s_v0s)*1.0 $
     + (-n_vzs/n_v0s^2)*(1/n_v0s)*(cov_v0s_vzs)*2.0  $
     + (1/n_v0s)*(1/n_v0s)*(cov_vzs_vzs)*1.0
   sigma_Uz     = (SQRT(err_Uz)/calc_Uz)
+
+  ;; IF KEYWORD_SET(sans_offDiag) THEN BEGIN
+
+  ;;    err_Ux_Uy   = 0.D
+  ;;    sigma_Ux_Uy = 0.D
+
+  ;;    err_Ux_Uz   = 0.D
+  ;;    sigma_Ux_Uz = 0.D
+
+  ;;    err_Uy_Uz   = 0.D
+  ;;    sigma_Uy_Uz = 0.D
+
+  ;; ENDIF ELSE BEGIN
+
+     err_Ux_Uy    = (-2*n_vxs*n_vys/n_v0s^3)*(-2*n_vxs*n_vys/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                    + (-2*n_vxs*n_vys/n_v0s^3)*(n_vys/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                    + (-2*n_vxs*n_vys/n_v0s^3)*(n_vxs/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                    + (n_vys/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                    + (n_vys/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                    + (n_vxs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vys_vys)*1.0
+     sigma_Ux_Uy  = (SQRT(err_Ux_Uy)/calc_Ux_Uy)
+
+     err_Ux_Uz    = (-2*n_vxs*n_vzs/n_v0s^3)*(-2*n_vxs*n_vzs/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                    + (-2*n_vxs*n_vzs/n_v0s^3)*(n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                    + (-2*n_vxs*n_vzs/n_v0s^3)*(n_vxs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                    + (n_vzs/n_v0s^2)*(n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                    + (n_vzs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                    + (n_vxs/n_v0s^2)*(n_vxs/n_v0s^2)*(cov_vzs_vzs)*1.0
+     sigma_Ux_Uz  = (SQRT(err_Ux_Uz)/calc_Ux_Uz)
+
+     err_Uy_Uz    = (-2*n_vys*n_vzs/n_v0s^3)*(-2*n_vys*n_vzs/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                    + (-2*n_vys*n_vzs/n_v0s^3)*(n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                    + (-2*n_vys*n_vzs/n_v0s^3)*(n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                    + (n_vzs/n_v0s^2)*(n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
+                    + (n_vzs/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                    + (n_vys/n_v0s^2)*(n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
+     sigma_Uy_Uz  = (SQRT(err_Uy_Uz)/calc_Uy_Uz)
+
+  ;; ENDELSE
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Pressure-related stuff
@@ -1021,13 +1053,22 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (n_v0s)*(n_v0s)*(cov_vxstvxs_vxstvxs)*1.0
      sigma_n_Pxx    = (SQRT(err_n_Pxx)/calc_n_Pxx)
 
-     err_n_Pyy      = (n_vystvys)*(n_vystvys)*(cov_v0s_v0s)*1.0  $
-                      + (n_vystvys)*(-2*n_vys)*(cov_v0s_vys)*2.0  $
-                      + (n_vystvys)*(n_v0s)*(cov_v0s_vystvys)*2.0 $
-                      + (-2*n_vys)*(-2*n_vys)*(cov_vys_vys)*1.0 $
-                      + (-2*n_vys)*(n_v0s)*(cov_vys_vystvys)*2.0  $
-                      + (n_v0s)*(n_v0s)*(cov_vystvys_vystvys)*1.0
-     sigma_n_Pyy    = (SQRT(err_n_Pyy)/calc_n_Pyy)
+     ;; IF KEYWORD_SET(sans_phi) THEN BEGIN
+
+        ;; err_n_Pyy   = err_n_Pxx
+     ;;    sigma_n_Pyy = sigma_n_Pxx
+
+     ;; ENDIF ELSE BEGIN
+     
+        err_n_Pyy   = (n_vystvys)*(n_vystvys)*(cov_v0s_v0s)*1.0  $
+                         + (n_vystvys)*(-2*n_vys)*(cov_v0s_vys)*2.0  $
+                         + (n_vystvys)*(n_v0s)*(cov_v0s_vystvys)*2.0 $
+                         + (-2*n_vys)*(-2*n_vys)*(cov_vys_vys)*1.0 $
+                         + (-2*n_vys)*(n_v0s)*(cov_vys_vystvys)*2.0  $
+                         + (n_v0s)*(n_v0s)*(cov_vystvys_vystvys)*1.0
+        sigma_n_Pyy = (SQRT(err_n_Pyy)/calc_n_Pyy)
+
+     ;; ENDELSE
 
      err_n_Pzz      = (n_vzstvzs)*(n_vzstvzs)*(cov_v0s_v0s)*1.0  $
                       + (n_vzstvzs)*(-2*n_vzs)*(cov_v0s_vzs)*2.0  $
@@ -1037,42 +1078,57 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (n_v0s)*(n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_n_Pzz    = (SQRT(err_n_Pzz)/calc_n_Pzz)
 
-     err_n_Pxy      = (n_vxstvys)*(n_vxstvys)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxstvys)*(-n_vys)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxstvys)*(n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vxstvys)*(-n_vxs)*(cov_v0s_vys)*2.0  $
-                      + (-n_vys)*(-n_vys)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys)*(n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys)*(-n_vxs)*(cov_vxs_vys)*2.0 $
-                      + (n_v0s)*(n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-n_vxs)*(n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs)*(-n_vxs)*(cov_vys_vys)*1.0
-     sigma_n_Pxy    = (SQRT(err_n_Pxy)/calc_n_Pxy)
+     IF KEYWORD_SET(sans_offDiag) THEN BEGIN
 
-     err_n_Pxz      = (n_vxstvzs)*(n_vxstvzs)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxstvzs)*(-n_vzs)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxstvzs)*(n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vxstvzs)*(-n_vxs)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs)*(-n_vzs)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs)*(n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs)*(-n_vxs)*(cov_vxs_vzs)*2.0 $
-                      + (n_v0s)*(n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-n_vxs)*(n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs)*(-n_vxs)*(cov_vzs_vzs)*1.0
-     sigma_n_Pxz    = (SQRT(err_n_Pxz)/calc_n_Pxz)
+        ;; err_n_Pxy   = 0.D
+        sigma_n_Pxy = 0.D
 
-     err_n_Pyz      = (n_vystvzs)*(n_vystvzs)*(cov_v0s_v0s)*1.0  $
-                      + (n_vystvzs)*(-n_vzs)*(cov_v0s_vys)*2.0  $
-                      + (n_vystvzs)*(n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vystvzs)*(-n_vys)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs)*(-n_vzs)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs)*(n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs)*(-n_vys)*(cov_vys_vzs)*2.0 $
-                      + (n_v0s)*(n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys)*(n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys)*(-n_vys)*(cov_vzs_vzs)*1.0
-     sigma_n_Pyz    = (SQRT(err_n_Pyz)/calc_n_Pyz)
+        ;; err_n_Pxz   = 0.D
+        sigma_n_Pxz = 0.D
 
+        ;; err_n_Pyz   = 0.D
+        sigma_n_Pyz = 0.D
+
+     ENDIF ELSE BEGIN
+
+        err_n_Pxy      = (n_vxstvys)*(n_vxstvys)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxstvys)*(-n_vys)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxstvys)*(n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vxstvys)*(-n_vxs)*(cov_v0s_vys)*2.0  $
+                         + (-n_vys)*(-n_vys)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys)*(n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys)*(-n_vxs)*(cov_vxs_vys)*2.0 $
+                         + (n_v0s)*(n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-n_vxs)*(n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs)*(-n_vxs)*(cov_vys_vys)*1.0
+        sigma_n_Pxy    = (SQRT(err_n_Pxy)/calc_n_Pxy)
+
+        err_n_Pxz      = (n_vxstvzs)*(n_vxstvzs)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxstvzs)*(-n_vzs)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxstvzs)*(n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vxstvzs)*(-n_vxs)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs)*(-n_vzs)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs)*(n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs)*(-n_vxs)*(cov_vxs_vzs)*2.0 $
+                         + (n_v0s)*(n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-n_vxs)*(n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs)*(-n_vxs)*(cov_vzs_vzs)*1.0
+        sigma_n_Pxz    = (SQRT(err_n_Pxz)/calc_n_Pxz)
+
+        err_n_Pyz      = (n_vystvzs)*(n_vystvzs)*(cov_v0s_v0s)*1.0  $
+                         + (n_vystvzs)*(-n_vzs)*(cov_v0s_vys)*2.0  $
+                         + (n_vystvzs)*(n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vystvzs)*(-n_vys)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs)*(-n_vzs)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs)*(n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs)*(-n_vys)*(cov_vys_vzs)*2.0 $
+                         + (n_v0s)*(n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys)*(n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys)*(-n_vys)*(cov_vzs_vzs)*1.0
+        sigma_n_Pyz    = (SQRT(err_n_Pyz)/calc_n_Pyz)
+
+     ENDELSE
+     
      err_Ux_Pxx     = (n_vxs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(n_vxs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
                       + (n_vxs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*((n_v0s*n_vxstvxs - 3*n_vxs^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
                       + (n_vxs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vxstvxs)*2.0  $
@@ -1104,48 +1160,6 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (-2*n_vxs*n_vzs/n_v0s^2)*(n_vxs/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
                       + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Ux_Pzz   = (SQRT(err_Ux_Pzz)/calc_Ux_Pzz)
-
-     err_Ux_Pxy     = (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vxstvys)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vxs^2/n_v0s^2)*(cov_v0s_vys)*2.0 $
-                      + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vxstvys)*2.0 $
-                      + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vxs_vys)*2.0  $
-                      + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-n_vxs^2/n_v0s^2)*(n_vxs/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs^2/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vys_vys)*1.0
-     sigma_Ux_Pxy   = (SQRT(err_Ux_Pxy)/calc_Ux_Pxy)
-
-     err_Ux_Pxz     = (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vxs^2/n_v0s^2)*(cov_v0s_vzs)*2.0 $
-                      + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vxstvzs)*2.0 $
-                      + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vxs_vzs)*2.0  $
-                      + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-n_vxs^2/n_v0s^2)*(n_vxs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs^2/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Ux_Pxz   = (SQRT(err_Ux_Pxz)/calc_Ux_Pxz)
-
-     err_Ux_Pyz     = (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vxs*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0 $
-                      + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vystvzs)*2.0  $
-                      + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vxs*n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0 $
-                      + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0  $
-                      + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vystvzs)*2.0 $
-                      + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vxs_vzs)*2.0  $
-                      + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*n_vzs/n_v0s^2)*(n_vxs/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vxs*n_vys/n_v0s^2)*(n_vxs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vxs*n_vys/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Ux_Pyz   = (SQRT(err_Ux_Pyz)/calc_Ux_Pyz)
-
 
      err_Uy_Pxx     = (n_vys*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(n_vys*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
                       + (n_vys*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(-2*n_vxs*n_vys/n_v0s^2)*(cov_v0s_vxs)*2.0 $
@@ -1179,47 +1193,6 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Uy_Pzz   = (SQRT(err_Uy_Pzz)/calc_Uy_Pzz)
 
-     err_Uy_Pxy     = (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vys^2/n_v0s^2)*(cov_v0s_vxs)*2.0 $
-                      + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vxstvys)*2.0  $
-                      + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (-n_vys^2/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys^2/n_v0s^2)*(n_vys/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys^2/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vys)*2.0  $
-                      + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vxstvys)*2.0 $
-                      + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vys_vys)*1.0
-     sigma_Uy_Pxy   = (SQRT(err_Uy_Pxy)/calc_Uy_Pxy)
-
-     err_Uy_Pxz     = (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0 $
-                      + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
-                      + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vxs*n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0 $
-                      + (-n_vys*n_vzs/n_v0s^2)*(-n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys*n_vzs/n_v0s^2)*(n_vys/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vys*n_vzs/n_v0s^2)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0  $
-                      + (-n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vxstvzs)*2.0 $
-                      + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vys_vzs)*2.0  $
-                      + (-n_vxs*n_vys/n_v0s^2)*(n_vys/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*n_vys/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Uy_Pxz   = (SQRT(err_Uy_Pxz)/calc_Uy_Pxz)
-
-     err_Uy_Pyz     = (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vystvzs)*2.0  $
-                      + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vys^2/n_v0s^2)*(cov_v0s_vzs)*2.0 $
-                      + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vystvzs)*2.0 $
-                      + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vys_vzs)*2.0  $
-                      + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys^2/n_v0s^2)*(n_vys/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys^2/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Uy_Pyz   = (SQRT(err_Uy_Pyz)/calc_Uy_Pyz)
-
      err_Uz_Pxx     = (n_vzs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(n_vzs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
                       + (n_vzs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(-2*n_vxs*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0 $
                       + (n_vzs*(-n_v0s*n_vxstvxs + 2*n_vxs^2)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vxstvxs)*2.0  $
@@ -1251,47 +1224,6 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + ((n_v0s*n_vzstvzs - 3*n_vzs^2)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vzstvzs)*2.0 $
                       + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Uz_Pzz   = (SQRT(err_Uz_Pzz)/calc_Uz_Pzz)
-
-     err_Uz_Pxy     = (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0 $
-                      + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0  $
-                      + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vxs*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0 $
-                      + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vys*n_vzs/n_v0s^2)*(-n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys*n_vzs/n_v0s^2)*(n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vys*n_vzs/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0  $
-                      + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-n_vxs*n_vzs/n_v0s^2)*(n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*n_vzs/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0  $
-                      + ((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0 $
-                      + ((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Uz_Pxy   = (SQRT(err_Uz_Pxy)/calc_Uz_Pxy)
-
-     err_Uz_Pxz     = (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vzs^2/n_v0s^2)*(cov_v0s_vxs)*2.0 $
-                      + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
-                      + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs^2/n_v0s^2)*(-n_vzs^2/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs^2/n_v0s^2)*(n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs^2/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vzs)*2.0  $
-                      + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0 $
-                      + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Uz_Pxz   = (SQRT(err_Uz_Pxz)/calc_Uz_Pxz)
-
-     err_Uz_Pyz     = (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
-                      + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vzs^2/n_v0s^2)*(cov_v0s_vys)*2.0 $
-                      + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0  $
-                      + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs^2/n_v0s^2)*(-n_vzs^2/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs^2/n_v0s^2)*(n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs^2/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vys_vzs)*2.0  $
-                      + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0 $
-                      + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Uz_Pyz   = (SQRT(err_Uz_Pyz)/calc_Uz_Pyz)
 
      err_Pxx_Pxx    = (2*n_vxs^2*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^3)*(2*n_vxs^2*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
                       + (2*n_vxs^2*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^3)*(-4*n_vxs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
@@ -1343,63 +1275,6 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Pxx_Pzz  = (SQRT(err_Pxx_Pzz)/calc_Pxx_Pzz)
 
-     err_Pxx_Pxy    = (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
-                      + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vxstvys)*2.0 $
-                      + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vxstvxs)*2.0  $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vys_vys)*1.0
-     sigma_Pxx_Pxy  = (SQRT(err_Pxx_Pxy)/calc_Pxx_Pxy)
-
-     err_Pxx_Pxz    = (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
-                      + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vxstvzs)*2.0 $
-                      + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvxs)*2.0  $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxx_Pxz  = (SQRT(err_Pxx_Pxz)/calc_Pxx_Pxz)
-
-     err_Pxx_Pyz    = ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
-                      + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
-                      + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vystvzs)*2.0  $
-                      + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vystvzs)*2.0 $
-                      + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvxs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvxs)*2.0  $
-                      + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxx_Pyz  = (SQRT(err_Pxx_Pyz)/calc_Pxx_Pyz)
-
      err_Pyy_Pyy    = (2*n_vys^2*(n_v0s*n_vystvys - n_vys^2)/n_v0s^3)*(2*n_vys^2*(n_v0s*n_vystvys - n_vys^2)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
                       + (2*n_vys^2*(n_v0s*n_vystvys - n_vys^2)/n_v0s^3)*(-4*n_vys*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_v0s_vys)*2.0  $
                       + (2*n_vys^2*(n_v0s*n_vystvys - n_vys^2)/n_v0s^3)*(2*n_vystvys - 2*n_vys^2/n_v0s)*(cov_v0s_vystvys)*2.0 $
@@ -1433,63 +1308,6 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Pyy_Pzz  = (SQRT(err_Pyy_Pzz)/calc_Pyy_Pzz)
 
-     err_Pyy_Pxy    = (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vystvys)*2.0 $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vystvys)*2.0  $
-                      + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (n_vystvys - n_vys^2/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vystvys)*2.0 $
-                      + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vystvys)*2.0  $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vystvys_vystvys)*1.0
-     sigma_Pyy_Pxy  = (SQRT(err_Pyy_Pxy)/calc_Pyy_Pxy)
-
-     err_Pyy_Pxz    = ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vystvys)*2.0 $
-                      + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vystvys)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (n_vystvys - n_vys^2/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vystvys)*2.0 $
-                      + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vxstvzs)*2.0  $
-                      + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vystvys)*2.0  $
-                      + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vystvys_vystvys)*1.0 $
-                      + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vystvys)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pyy_Pxz  = (SQRT(err_Pyy_Pxz)/calc_Pyy_Pxz)
-
-     err_Pyy_Pyz    = (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vystvys)*2.0 $
-                      + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vystvys)*2.0  $
-                      + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vystvys_vystvys)*1.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vystvys_vystvzs)*2.0 $
-                      + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vystvys)*2.0  $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pyy_Pyz  = (SQRT(err_Pyy_Pyz)/calc_Pyy_Pyz)
-
      err_Pzz_Pzz    = (2*n_vzs^2*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^3)*(2*n_vzs^2*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
                       + (2*n_vzs^2*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^3)*(-4*n_vzs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
                       + (2*n_vzs^2*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^3)*(2*n_vzstvzs - 2*n_vzs^2/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
@@ -1506,204 +1324,532 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                       + (1)*(1)*(cov_vzstvzs_vzstvzs)*1.0
      sigma_Pzz      = (SQRT(err_Pzz)/calc_Pzz)
 
-     err_Pzz_Pxy    = ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
-                      + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vzstvzs)*2.0  $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vzstvzs)*2.0 $
-                      + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vzstvzs)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vxstvys)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0 $
-                      + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
-     sigma_Pzz_Pxy  = (SQRT(err_Pzz_Pxy)/calc_Pzz_Pxy)
+     IF KEYWORD_SET(sans_offDiag) THEN BEGIN
 
-     err_Pzz_Pxz    = (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vzstvzs)*2.0  $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vzstvzs)*2.0 $
-                      + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_vzs_vzs)*1.0 $
-                      + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
-     sigma_Pzz_Pxz  = (SQRT(err_Pzz_Pxz)/calc_Pzz_Pxz)
+        ;;Velocity/pressure off-diags
+        ;; err_Ux_Pxy     = 0.D
+        sigma_Ux_Pxy   = 0.D
 
-     err_Pzz_Pyz    = (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vzstvzs)*2.0  $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vystvzs_vzstvzs)*2.0 $
-                      + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_vzs_vzs)*1.0 $
-                      + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
-     sigma_Pzz_Pyz  = (SQRT(err_Pzz_Pyz)/calc_Pzz_Pyz)
+        ;; err_Ux_Pxz     = 0.D
+        sigma_Ux_Pxz   = 0.D
 
-     err_Pxy_Pxy    = (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vys)*1.0
-     sigma_Pxy_Pxy  = (SQRT(err_Pxy_Pxy)/calc_Pxy_Pxy)
+        ;; err_Ux_Pyz     = 0.D
+        sigma_Ux_Pyz   = 0.D
 
-     err_Pxy        = (n_vxs*n_vys/n_v0s^2)*(n_vxs*n_vys/n_v0s^2)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxs*n_vys/n_v0s^2)*(-n_vys/n_v0s)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*n_vys/n_v0s^2)*(1)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vxs*n_vys/n_v0s^2)*(-n_vxs/n_v0s)*(cov_v0s_vys)*2.0  $
-                      + (-n_vys/n_v0s)*(-n_vys/n_v0s)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys/n_v0s)*(1)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys/n_v0s)*(-n_vxs/n_v0s)*(cov_vxs_vys)*2.0 $
-                      + (1)*(1)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (-n_vxs/n_v0s)*(1)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs/n_v0s)*(-n_vxs/n_v0s)*(cov_vys_vys)*1.0
-     sigma_Pxy      = (SQRT(err_Pxy)/calc_Pxy)
+        ;; err_Uy_Pxy     = 0.D
+        sigma_Uy_Pxy   = 0.D
 
-     err_Pxy_Pxz    = (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vxstvzs)*2.0 $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vxstvzs)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxy_Pxz  = (SQRT(err_Pxy_Pxz)/calc_Pxy_Pxz)
+        ;; err_Uy_Pxz     = 0.D
+        sigma_Uy_Pxz   = 0.D
 
-     err_Pxy_Pyz    = (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0 $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
-                      + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vystvzs)*2.0  $
-                      + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vystvzs)*2.0 $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0  $
-                      + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxy_Pyz  = (SQRT(err_Pxy_Pyz)/calc_Pxy_Pyz)
+        ;; err_Uy_Pyz     = 0.D
+        sigma_Uy_Pyz   = 0.D
 
-     err_Pxz_Pxz    = (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxz_Pxz  = (SQRT(err_Pxz_Pxz)/calc_Pxz_Pxz)
+        ;; err_Uz_Pxy     = 0.D
+        sigma_Uz_Pxy   = 0.D
 
-     err_Pxz        = (n_vxs*n_vzs/n_v0s^2)*(n_vxs*n_vzs/n_v0s^2)*(cov_v0s_v0s)*1.0  $
-                      + (n_vxs*n_vzs/n_v0s^2)*(-n_vzs/n_v0s)*(cov_v0s_vxs)*2.0  $
-                      + (n_vxs*n_vzs/n_v0s^2)*(1)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vxs*n_vzs/n_v0s^2)*(-n_vxs/n_v0s)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs/n_v0s)*(-n_vzs/n_v0s)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs/n_v0s)*(1)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs/n_v0s)*(-n_vxs/n_v0s)*(cov_vxs_vzs)*2.0 $
-                      + (1)*(1)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (-n_vxs/n_v0s)*(1)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs/n_v0s)*(-n_vxs/n_v0s)*(cov_vzs_vzs)*1.0
-     sigma_Pxz      = (SQRT(err_Pxz)/calc_Pxz)
+        ;; err_Uz_Pxz     = 0.D
+        sigma_Uz_Pxz   = 0.D
 
-     err_Pxz_Pyz    = (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
-                      + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
-                      + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vystvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vzs)*2.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
-                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vystvzs)*2.0 $
-                      + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pxz_Pyz  = (SQRT(err_Pxz_Pyz)/calc_Pxz_Pyz)
+        ;; err_Uz_Pyz     = 0.D
+        sigma_Uz_Pyz   = 0.D
 
-     err_Pyz_Pyz    = (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
-                      + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
-                      + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0 $
-                      + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
-                      + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
-                      + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vys_vzs)*2.0 $
-                      + (2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
-                      + (-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
-     sigma_Pyz_Pyz  = (SQRT(err_Pyz_Pyz)/calc_Pyz_Pyz)
+        ;;Pressure off-diags
+        ;; err_Pxx_Pxy    = 0.D
+        sigma_Pxx_Pxy  = 0.D
 
-     err_Pyz        = (n_vys*n_vzs/n_v0s^2)*(n_vys*n_vzs/n_v0s^2)*(cov_v0s_v0s)*1.0  $
-                      + (n_vys*n_vzs/n_v0s^2)*(-n_vzs/n_v0s)*(cov_v0s_vys)*2.0  $
-                      + (n_vys*n_vzs/n_v0s^2)*(1)*(cov_v0s_vystvzs)*2.0 $
-                      + (n_vys*n_vzs/n_v0s^2)*(-n_vys/n_v0s)*(cov_v0s_vzs)*2.0  $
-                      + (-n_vzs/n_v0s)*(-n_vzs/n_v0s)*(cov_vys_vys)*1.0 $
-                      + (-n_vzs/n_v0s)*(1)*(cov_vys_vystvzs)*2.0  $
-                      + (-n_vzs/n_v0s)*(-n_vys/n_v0s)*(cov_vys_vzs)*2.0 $
-                      + (1)*(1)*(cov_vystvzs_vystvzs)*1.0 $
-                      + (-n_vys/n_v0s)*(1)*(cov_vzs_vystvzs)*2.0  $
-                      + (-n_vys/n_v0s)*(-n_vys/n_v0s)*(cov_vzs_vzs)*1.0
-     sigma_Pyz      = (SQRT(err_Pyz)/calc_Pyz)
+        ;; err_Pxx_Pxz    = 0.D
+        sigma_Pxx_Pxz  = 0.D
 
+        ;; err_Pxx_Pyz    = 0.D
+        sigma_Pxx_Pyz  = 0.D
+
+        ;; err_Pyy_Pxy    = 0.D
+        sigma_Pyy_Pxy  = 0.D
+
+        ;; err_Pyy_Pxz    = 0.D
+        sigma_Pyy_Pxz  = 0.D
+
+        ;; err_Pyy_Pyz    = 0.D
+        sigma_Pyy_Pyz  = 0.D
+
+        ;; err_Pzz_Pxy    = 0.D
+        sigma_Pzz_Pxy  = 0.D
+
+        ;; err_Pzz_Pxz    = 0.D
+        sigma_Pzz_Pxz  = 0.D
+
+        ;; err_Pzz_Pyz    = 0.D
+        sigma_Pzz_Pyz  = 0.D
+        
+        ;; err_Pxy_Pxz    = 0.D
+        sigma_Pxy_Pxz  = 0.D
+
+        ;; err_Pxy        = 0.D
+        sigma_Pxy      = 0.D
+
+        ;; err_Pxy_Pxz    = 0.D
+        sigma_Pxy_Pxz  = 0.D
+
+        ;; err_Pxy_Pyz    = 0.D
+        sigma_Pxy_Pyz  = 0.D
+
+        ;; err_Pxz_Pxz    = 0.D
+        sigma_Pxz_Pxz  = 0.D
+
+        ;; err_Pxz        = 0.D
+        sigma_Pxz      = 0.D
+
+        ;; err_Pxz_Pyz    = 0.D
+        sigma_Pxz_Pyz  = 0.D
+
+        ;; err_Pyz_Pyz    = 0.D
+        sigma_Pyz_Pyz  = 0.D
+
+        ;; err_Pyz        = 0.D
+        sigma_Pyz      = 0.D
+
+     ENDIF ELSE BEGIN
+
+        ;;Velocity/pressure off-diags
+        err_Ux_Pxy     = (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vxstvys)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vxs^2/n_v0s^2)*(cov_v0s_vys)*2.0 $
+                         + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vxstvys)*2.0 $
+                         + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vxs_vys)*2.0  $
+                         + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-n_vxs^2/n_v0s^2)*(n_vxs/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs^2/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vys_vys)*1.0
+        sigma_Ux_Pxy   = (SQRT(err_Ux_Pxy)/calc_Ux_Pxy)
+
+        err_Ux_Pxz     = (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vxs^2/n_v0s^2)*(cov_v0s_vzs)*2.0 $
+                         + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vxstvzs)*2.0 $
+                         + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vxs_vzs)*2.0  $
+                         + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-n_vxs^2/n_v0s^2)*(n_vxs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs^2/n_v0s^2)*(-n_vxs^2/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Ux_Pxz   = (SQRT(err_Ux_Pxz)/calc_Ux_Pxz)
+
+        err_Ux_Pyz     = (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vxs*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0 $
+                         + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vxs/n_v0s)*(cov_v0s_vystvzs)*2.0  $
+                         + (n_vxs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vxs*n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0 $
+                         + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0  $
+                         + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxs/n_v0s)*(cov_vxs_vystvzs)*2.0 $
+                         + ((n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vxs_vzs)*2.0  $
+                         + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*n_vzs/n_v0s^2)*(n_vxs/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vxs/n_v0s)*(n_vxs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vxs*n_vys/n_v0s^2)*(n_vxs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vxs*n_vys/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Ux_Pyz   = (SQRT(err_Ux_Pyz)/calc_Ux_Pyz)
+
+        err_Uy_Pxy     = (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vys^2/n_v0s^2)*(cov_v0s_vxs)*2.0 $
+                         + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vxstvys)*2.0  $
+                         + (n_vys*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (-n_vys^2/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys^2/n_v0s^2)*(n_vys/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys^2/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vys)*2.0  $
+                         + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vxstvys)*2.0 $
+                         + ((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - 2*n_vxs*n_vys)/n_v0s^2)*(cov_vys_vys)*1.0
+        sigma_Uy_Pxy   = (SQRT(err_Uy_Pxy)/calc_Uy_Pxy)
+
+        err_Uy_Pxz     = (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0 $
+                         + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
+                         + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vxs*n_vys/n_v0s^2)*(cov_v0s_vzs)*2.0 $
+                         + (-n_vys*n_vzs/n_v0s^2)*(-n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys*n_vzs/n_v0s^2)*(n_vys/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vys*n_vzs/n_v0s^2)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0  $
+                         + (-n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vxstvzs)*2.0 $
+                         + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + ((n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vys_vzs)*2.0  $
+                         + (-n_vxs*n_vys/n_v0s^2)*(n_vys/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*n_vys/n_v0s^2)*(-n_vxs*n_vys/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Uy_Pxz   = (SQRT(err_Uy_Pxz)/calc_Uy_Pxz)
+
+        err_Uy_Pyz     = (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vys/n_v0s)*(cov_v0s_vystvzs)*2.0  $
+                         + (n_vys*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vys^2/n_v0s^2)*(cov_v0s_vzs)*2.0 $
+                         + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(n_vys/n_v0s)*(cov_vys_vystvzs)*2.0 $
+                         + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vys_vzs)*2.0  $
+                         + (n_vys/n_v0s)*(n_vys/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys^2/n_v0s^2)*(n_vys/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys^2/n_v0s^2)*(-n_vys^2/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Uy_Pyz   = (SQRT(err_Uy_Pyz)/calc_Uy_Pyz)
+
+        err_Uz_Pxy     = (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0 $
+                         + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0  $
+                         + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*(-n_vxs*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0 $
+                         + (n_vzs*(-n_v0s*n_vxstvys + 2*n_vxs*n_vys)/n_v0s^3)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vys*n_vzs/n_v0s^2)*(-n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys*n_vzs/n_v0s^2)*(n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vys*n_vzs/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0  $
+                         + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-n_vxs*n_vzs/n_v0s^2)*(n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*n_vzs/n_v0s^2)*(-n_vxs*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*n_vzs/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0  $
+                         + ((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0 $
+                         + ((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*((n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Uz_Pxy   = (SQRT(err_Uz_Pxy)/calc_Uz_Pxy)
+
+        err_Uz_Pxz     = (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(-n_vzs^2/n_v0s^2)*(cov_v0s_vxs)*2.0 $
+                         + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0  $
+                         + (n_vzs*(-n_v0s*n_vxstvzs + 2*n_vxs*n_vzs)/n_v0s^3)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs^2/n_v0s^2)*(-n_vzs^2/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs^2/n_v0s^2)*(n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs^2/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vzs)*2.0  $
+                         + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0 $
+                         + ((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*((n_v0s*n_vxstvzs - 2*n_vxs*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Uz_Pxz   = (SQRT(err_Uz_Pxz)/calc_Uz_Pxz)
+
+        err_Uz_Pyz     = (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0 $
+                         + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(-n_vzs^2/n_v0s^2)*(cov_v0s_vys)*2.0 $
+                         + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*(n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0  $
+                         + (n_vzs*(-n_v0s*n_vystvzs + 2*n_vys*n_vzs)/n_v0s^3)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs^2/n_v0s^2)*(-n_vzs^2/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs^2/n_v0s^2)*(n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs^2/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vys_vzs)*2.0  $
+                         + (n_vzs/n_v0s)*(n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0 $
+                         + ((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*((n_v0s*n_vystvzs - 2*n_vys*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Uz_Pyz   = (SQRT(err_Uz_Pyz)/calc_Uz_Pyz)
+
+        ;;Pressure off-diags
+        err_Pxx_Pxy    = (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys) + n_vys*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
+                         + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-2*n_vxs*n_vxstvys/n_v0s - n_vxstvxs*n_vys/n_v0s + 3*n_vxs^2*n_vys/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vxstvys)*2.0 $
+                         + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vxstvxs)*2.0  $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vys_vys)*1.0
+        sigma_Pxx_Pxy  = (SQRT(err_Pxx_Pxy)/calc_Pxx_Pxy)
+
+        err_Pxx_Pxz    = (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vxs*(n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
+                         + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-2*n_vxs*n_vxstvzs/n_v0s - n_vxstvxs*n_vzs/n_v0s + 3*n_vxs^2*n_vzs/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vxstvzs)*2.0 $
+                         + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvxs)*2.0  $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(-n_vxs*n_vxstvxs/n_v0s + n_vxs^3/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxx_Pxz  = (SQRT(err_Pxx_Pxz)/calc_Pxx_Pxz)
+
+        err_Pxx_Pyz    = ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvxs)*2.0 $
+                         + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + ((n_vxs^2*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*n_vzs*(n_v0s*n_vxstvxs - n_vxs^2))/n_v0s^3)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvxs)*2.0  $
+                         + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxs_vystvzs)*2.0  $
+                         + (-2*n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvxs_vxstvxs)*1.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vxstvxs_vystvzs)*2.0 $
+                         + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvxs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vxstvxs - n_vxs^2/n_v0s)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvxs)*2.0  $
+                         + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(n_vxstvxs - n_vxs^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvxs - n_vxs^2)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxx_Pyz  = (SQRT(err_Pxx_Pyz)/calc_Pxx_Pyz)
+
+        err_Pyy_Pxy    = (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvys - n_vys^2) + n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vystvys)*2.0 $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vystvys)*2.0  $
+                         + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (n_vystvys - n_vys^2/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vystvys)*2.0 $
+                         + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*n_vystvys/n_v0s - 2*n_vxstvys*n_vys/n_v0s + 3*n_vxs*n_vys^2/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vystvys)*2.0  $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vystvys_vystvys)*1.0
+        sigma_Pyy_Pxy  = (SQRT(err_Pyy_Pxy)/calc_Pyy_Pxy)
+
+        err_Pyy_Pxz    = ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vystvys)*2.0 $
+                         + ((n_vxs*n_vzs*(n_v0s*n_vystvys - n_vys^2) + n_vys^2*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vystvys)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (n_vystvys - n_vys^2/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vystvys)*2.0 $
+                         + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vxstvzs)*2.0  $
+                         + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vystvys)*2.0  $
+                         + (-2*n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vystvys_vystvys)*1.0 $
+                         + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vystvys)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vystvys - n_vys^2)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pyy_Pxz  = (SQRT(err_Pyy_Pxz)/calc_Pyy_Pxz)
+
+        err_Pyy_Pyz    = (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vystvys)*2.0 $
+                         + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(n_vystvys - n_vys^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vys*(n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vystvys - n_vys^2))/n_v0s^3)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vystvys)*2.0  $
+                         + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-2*n_vys*n_vystvzs/n_v0s - n_vystvys*n_vzs/n_v0s + 3*n_vys^2*n_vzs/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vystvys_vystvys)*1.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vystvys_vystvzs)*2.0 $
+                         + (n_vystvys - n_vys^2/n_v0s)*(n_vystvys - n_vys^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vystvys)*2.0  $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(n_vystvys - n_vys^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(-n_vys*n_vystvys/n_v0s + n_vys^3/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pyy_Pyz  = (SQRT(err_Pyy_Pyz)/calc_Pyy_Pyz)
+
+        err_Pzz_Pxy    = ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + ((n_vxs*n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs^2*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
+                         + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (-n_vys*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vzstvzs)*2.0  $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vzstvzs)*2.0 $
+                         + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (-n_vxs*(n_v0s*n_vzstvzs - n_vzs^2)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vzstvzs)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vxstvys)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0 $
+                         + (-2*n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
+        sigma_Pzz_Pxy  = (SQRT(err_Pzz_Pxy)/calc_Pzz_Pxy)
+
+        err_Pzz_Pxz    = (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vzstvzs)*2.0  $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vzstvzs)*2.0 $
+                         + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(cov_vzs_vzs)*1.0 $
+                         + (-n_vxs*n_vzstvzs/n_v0s - 2*n_vxstvzs*n_vzs/n_v0s + 3*n_vxs*n_vzs^2/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
+        sigma_Pzz_Pxz  = (SQRT(err_Pzz_Pxz)/calc_Pzz_Pxz)
+
+        err_Pzz_Pyz    = (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (n_vzs*(n_vys*(n_v0s*n_vzstvzs - n_vzs^2) + n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vzstvzs)*2.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (-n_vzs*n_vzstvzs/n_v0s + n_vzs^3/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vzstvzs)*2.0  $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (n_vzstvzs - n_vzs^2/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vystvzs_vzstvzs)*2.0 $
+                         + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(n_vzstvzs - n_vzs^2/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(cov_vzs_vzs)*1.0 $
+                         + (-n_vys*n_vzstvzs/n_v0s - 2*n_vystvzs*n_vzs/n_v0s + 3*n_vys*n_vzs^2/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vzstvzs)*2.0  $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzstvzs_vzstvzs)*1.0
+        sigma_Pzz_Pyz  = (SQRT(err_Pzz_Pyz)/calc_Pzz_Pyz)
+
+        err_Pxy_Pxy    = (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (2*n_vxs*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-2*n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(2*n_vxstvys - 2*n_vxs*n_vys/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vys)*1.0
+        sigma_Pxy_Pxy  = (SQRT(err_Pxy_Pxy)/calc_Pxy_Pxy)
+
+        err_Pxy        = (n_vxs*n_vys/n_v0s^2)*(n_vxs*n_vys/n_v0s^2)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxs*n_vys/n_v0s^2)*(-n_vys/n_v0s)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*n_vys/n_v0s^2)*(1)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vxs*n_vys/n_v0s^2)*(-n_vxs/n_v0s)*(cov_v0s_vys)*2.0  $
+                         + (-n_vys/n_v0s)*(-n_vys/n_v0s)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys/n_v0s)*(1)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys/n_v0s)*(-n_vxs/n_v0s)*(cov_vxs_vys)*2.0 $
+                         + (1)*(1)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (-n_vxs/n_v0s)*(1)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs/n_v0s)*(-n_vxs/n_v0s)*(cov_vys_vys)*1.0
+        sigma_Pxy      = (SQRT(err_Pxy)/calc_Pxy)
+
+        err_Pxy_Pxz    = (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vxs*(n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vxstvys*n_vzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vxstvzs)*2.0 $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vxstvzs)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-n_vxs*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxy_Pxz  = (SQRT(err_Pxy_Pxz)/calc_Pxy_Pxz)
+
+        err_Pxy_Pyz    = (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvys)*2.0 $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vys*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vzs*(n_v0s*n_vxstvys - n_vxs*n_vys))/n_v0s^3)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvys)*2.0  $
+                         + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxs_vystvzs)*2.0  $
+                         + (-n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvys_vxstvys)*1.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vxstvys_vystvzs)*2.0 $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvys)*2.0  $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvys*n_vzs/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vxstvys - n_vxs*n_vys/n_v0s)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvys)*2.0  $
+                         + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(n_vxstvys - n_vxs*n_vys/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(-n_vys*(n_v0s*n_vxstvys - n_vxs*n_vys)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxy_Pyz  = (SQRT(err_Pxy_Pyz)/calc_Pxy_Pyz)
+
+        err_Pxz_Pxz    = (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (2*n_vxs*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^3)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(2*n_vxstvzs - 2*n_vxs*n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-2*n_vxs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxz_Pxz  = (SQRT(err_Pxz_Pxz)/calc_Pxz_Pxz)
+
+        err_Pxz        = (n_vxs*n_vzs/n_v0s^2)*(n_vxs*n_vzs/n_v0s^2)*(cov_v0s_v0s)*1.0  $
+                         + (n_vxs*n_vzs/n_v0s^2)*(-n_vzs/n_v0s)*(cov_v0s_vxs)*2.0  $
+                         + (n_vxs*n_vzs/n_v0s^2)*(1)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vxs*n_vzs/n_v0s^2)*(-n_vxs/n_v0s)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs/n_v0s)*(-n_vzs/n_v0s)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs/n_v0s)*(1)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs/n_v0s)*(-n_vxs/n_v0s)*(cov_vxs_vzs)*2.0 $
+                         + (1)*(1)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (-n_vxs/n_v0s)*(1)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs/n_v0s)*(-n_vxs/n_v0s)*(cov_vzs_vzs)*1.0
+        sigma_Pxz      = (SQRT(err_Pxz)/calc_Pxz)
+
+        err_Pxz_Pyz    = (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vxs)*2.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_v0s_vxstvzs)*2.0 $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vzs*(n_vxs*(n_v0s*n_vystvzs - n_vys*n_vzs) + n_vys*(n_v0s*n_vxstvzs - n_vxs*n_vzs))/n_v0s^3)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vxs_vxs)*1.0 $
+                         + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxs_vxstvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vxs_vys)*2.0 $
+                         + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxs_vystvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vxs_vzs)*2.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vxstvzs_vxstvzs)*1.0 $
+                         + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vxstvzs_vystvzs)*2.0 $
+                         + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vys_vxstvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs*(n_v0s*n_vxstvzs - n_vxs*n_vzs)/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (n_vxstvzs - n_vxs*n_vzs/n_v0s)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzs_vxstvzs)*2.0  $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(n_vxstvzs - n_vxs*n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(-n_vxs*n_vystvzs/n_v0s - n_vxstvzs*n_vys/n_v0s + 2*n_vxs*n_vys*n_vzs/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pxz_Pyz  = (SQRT(err_Pxz_Pyz)/calc_Pxz_Pyz)
+
+        err_Pyz_Pyz    = (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(cov_v0s_v0s)*1.0  $
+                         + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vys)*2.0  $
+                         + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_v0s_vystvzs)*2.0 $
+                         + (2*n_vys*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^3)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_v0s_vzs)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vys_vys)*1.0 $
+                         + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vys_vystvzs)*2.0  $
+                         + (-2*n_vzs*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vys_vzs)*2.0 $
+                         + (2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(2*n_vystvzs - 2*n_vys*n_vzs/n_v0s)*(cov_vzs_vystvzs)*2.0  $
+                         + (-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(-2*n_vys*(n_v0s*n_vystvzs - n_vys*n_vzs)/n_v0s^2)*(cov_vzs_vzs)*1.0
+        sigma_Pyz_Pyz  = (SQRT(err_Pyz_Pyz)/calc_Pyz_Pyz)
+
+        err_Pyz        = (n_vys*n_vzs/n_v0s^2)*(n_vys*n_vzs/n_v0s^2)*(cov_v0s_v0s)*1.0  $
+                         + (n_vys*n_vzs/n_v0s^2)*(-n_vzs/n_v0s)*(cov_v0s_vys)*2.0  $
+                         + (n_vys*n_vzs/n_v0s^2)*(1)*(cov_v0s_vystvzs)*2.0 $
+                         + (n_vys*n_vzs/n_v0s^2)*(-n_vys/n_v0s)*(cov_v0s_vzs)*2.0  $
+                         + (-n_vzs/n_v0s)*(-n_vzs/n_v0s)*(cov_vys_vys)*1.0 $
+                         + (-n_vzs/n_v0s)*(1)*(cov_vys_vystvzs)*2.0  $
+                         + (-n_vzs/n_v0s)*(-n_vys/n_v0s)*(cov_vys_vzs)*2.0 $
+                         + (1)*(1)*(cov_vystvzs_vystvzs)*1.0 $
+                         + (-n_vys/n_v0s)*(1)*(cov_vzs_vystvzs)*2.0  $
+                         + (-n_vys/n_v0s)*(-n_vys/n_v0s)*(cov_vzs_vzs)*1.0
+        sigma_Pyz      = (SQRT(err_Pyz)/calc_Pyz)
+
+     ENDELSE
+     
   ENDIF
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3568,7 +3714,63 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Pressure- and Heat flux–related stuff
-  IF ~(KEYWORD_SET(no_pressure_covar_calc) OR KEYWORD_SET(no_heatFlux_covar_calc)) THEN BEGIN
+  IF (KEYWORD_SET(no_pressure_covar_calc) OR KEYWORD_SET(no_heatFlux_covar_calc)) THEN BEGIN
+
+     err_Pxx_Hx    = 0.D
+     sigma_Pxx_Hx  = 0.D
+
+     err_Pxx_Hy    = 0.D
+     sigma_Pxx_Hy  = 0.D
+
+     err_Pxx_Hz    = 0.D
+     sigma_Pxx_Hz  = 0.D
+
+     err_Pyy_Hx    = 0.D
+     sigma_Pyy_Hx  = 0.D
+
+     err_Pyy_Hy    = 0.D
+     sigma_Pyy_Hy  = 0.D
+
+     err_Pyy_Hz    = 0.D
+     sigma_Pyy_Hz  = 0.D
+
+     err_Pzz_Hx    = 0.D
+     sigma_Pzz_Hx  = 0.D
+
+     err_Pzz_Hy    = 0.D
+     sigma_Pzz_Hy  = 0.D
+
+     err_Pzz_Hz    = 0.D
+     sigma_Pzz_Hz  = 0.D
+
+     err_Pxy_Hx    = 0.D
+     sigma_Pxy_Hx  = 0.D
+
+     err_Pxy_Hy    = 0.D
+     sigma_Pxy_Hy  = 0.D
+
+     err_Pxy_Hz    = 0.D
+     sigma_Pxy_Hz  = 0.D
+
+     err_Pxz_Hx    = 0.D
+     sigma_Pxz_Hx  = 0.D
+
+     err_Pxz_Hy    = 0.D
+     sigma_Pxz_Hy  = 0.D
+
+     err_Pxz_Hz    = 0.D
+     sigma_Pxz_Hz  = 0.D
+
+     err_Pyz_Hx    = 0.D
+     sigma_Pyz_Hx  = 0.D
+
+     err_Pyz_Hy    = 0.D
+     sigma_Pyz_Hy  = 0.D
+
+     err_Pyz_Hz    = 0.D                
+     sigma_Pyz_Hz  = 0.D
+
+  ENDIF ELSE BEGIN
 
      err_Pxx_Hx    = ((n_vxs^2*(n_v0s^2*(n_vxstvxstvxs + n_vxstvystvys + n_vxstvzstvzs) - n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) + 2.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)) + (n_v0s*n_vxstvxs - n_vxs^2)*(n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) - 4.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)))/n_v0s^4)*((n_vxs^2*(n_v0s^2*(n_vxstvxstvxs + n_vxstvystvys + n_vxstvzstvzs) - n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) + 2.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)) + (n_v0s*n_vxstvxs - n_vxs^2)*(n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) - 4.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)))/n_v0s^4)*(cov_v0s_v0s)*1.0 $
                      + ((n_vxs^2*(n_v0s^2*(n_vxstvxstvxs + n_vxstvystvys + n_vxstvzstvzs) - n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) + 2.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)) + (n_v0s*n_vxstvxs - n_vxs^2)*(n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) - 4.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)))/n_v0s^4)*(-(2*n_vxs*(n_v0s^2*(n_vxstvxstvxs + n_vxstvystvys + n_vxstvzstvzs) - n_v0s*(3.0*n_vxs*n_vxstvxs + n_vxs*n_vystvys + n_vxs*n_vzstvzs + 2.0*n_vxstvys*n_vys + 2.0*n_vxstvzs*n_vzs) + 2.0*n_vxs*(n_vxs^2 + n_vys^2 + n_vzs^2)) - (n_v0s*n_vxstvxs - n_vxs^2)*(-n_v0s*(3.0*n_vxstvxs + n_vystvys + n_vzstvzs) + 6.0*n_vxs^2 + 2.0*n_vys^2 + 2.0*n_vzs^2))/n_v0s^3)*(cov_v0s_vxs)*2.0 $
@@ -5049,7 +5251,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                      + (n_vystvzs - n_vys*n_vzs/n_v0s)*(n_vystvzs - n_vys*n_vzs/n_v0s)*(cov_vzstvzstvzs_vzstvzstvzs)*1.0
      sigma_Pyz_Hz  = (SQRT(err_Pyz_Hz)/calc_Pyz_Hz)
 
-  ENDIF
+  ENDELSE
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Moments
@@ -5229,26 +5431,29 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         moments_errs.R[12 ,4  ]  = (sigma_Pxx_Hz^2.0 - sigma_Pxx^2.0 - sigma_Hz^2.0)/(2.0*sigma_Pxx*sigma_Hz)
 
      ENDIF
+     IF ~KEYWORD_SET(sans_phi) THEN BEGIN ;Otherwise the y terms are just NaNs anyway; check for yourself!
 
-     moments_errs.R[5  ,0  ]     = (sigma_n_Pyy^2.0 - sigma_Pyy^2.0 - sigma_n^2.0)/(2.0*sigma_Pyy*sigma_n)
-     moments_errs.R[0  ,5  ]     = (sigma_n_Pyy^2.0 - sigma_Pyy^2.0 - sigma_n^2.0)/(2.0*sigma_Pyy*sigma_n)
-     moments_errs.R[5  ,1  ]     = (sigma_Ux_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyy*sigma_Ux)
-     moments_errs.R[1  ,5  ]     = (sigma_Ux_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyy*sigma_Ux)
-     moments_errs.R[5  ,2  ]     = (sigma_Uy_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyy*sigma_Uy)
-     moments_errs.R[2  ,5  ]     = (sigma_Uy_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyy*sigma_Uy)
-     moments_errs.R[5  ,3  ]     = (sigma_Uz_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyy*sigma_Uz)
-     moments_errs.R[3  ,5  ]     = (sigma_Uz_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyy*sigma_Uz)
-     moments_errs.R[5  ,4  ]     = (sigma_Pxx_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyy*sigma_Pxx)
-     moments_errs.R[4  ,5  ]     = (sigma_Pxx_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyy*sigma_Pxx)
-     moments_errs.R[5  ,5  ]     = 1.0
-     moments_errs.R[5  ,6  ]     = (sigma_Pyy_Pzz^2.0 - sigma_Pyy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyy*sigma_Pzz)
-     moments_errs.R[6  ,5  ]     = (sigma_Pyy_Pzz^2.0 - sigma_Pyy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyy*sigma_Pzz)
-     moments_errs.R[5  ,7  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pyy^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyy*sigma_Pxy)
-     moments_errs.R[7  ,5  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pyy^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyy*sigma_Pxy)
-     moments_errs.R[5  ,8  ]     = (sigma_Pyy_Pxz^2.0 - sigma_Pyy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyy*sigma_Pxz)
-     moments_errs.R[8  ,5  ]     = (sigma_Pyy_Pxz^2.0 - sigma_Pyy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyy*sigma_Pxz)
-     moments_errs.R[5  ,9  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pyy*sigma_Pyz)
-     moments_errs.R[9  ,5  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pyy*sigma_Pyz)
+        moments_errs.R[5  ,0  ]     = (sigma_n_Pyy^2.0 - sigma_Pyy^2.0 - sigma_n^2.0)/(2.0*sigma_Pyy*sigma_n)
+        moments_errs.R[0  ,5  ]     = (sigma_n_Pyy^2.0 - sigma_Pyy^2.0 - sigma_n^2.0)/(2.0*sigma_Pyy*sigma_n)
+        moments_errs.R[5  ,1  ]     = (sigma_Ux_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyy*sigma_Ux)
+        moments_errs.R[1  ,5  ]     = (sigma_Ux_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyy*sigma_Ux)
+        moments_errs.R[5  ,2  ]     = (sigma_Uy_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyy*sigma_Uy)
+        moments_errs.R[2  ,5  ]     = (sigma_Uy_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyy*sigma_Uy)
+        moments_errs.R[5  ,3  ]     = (sigma_Uz_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyy*sigma_Uz)
+        moments_errs.R[3  ,5  ]     = (sigma_Uz_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyy*sigma_Uz)
+        moments_errs.R[5  ,4  ]     = (sigma_Pxx_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyy*sigma_Pxx)
+        moments_errs.R[4  ,5  ]     = (sigma_Pxx_Pyy^2.0 - sigma_Pyy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyy*sigma_Pxx)
+        moments_errs.R[5  ,5  ]     = 1.0
+        moments_errs.R[5  ,6  ]     = (sigma_Pyy_Pzz^2.0 - sigma_Pyy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyy*sigma_Pzz)
+        moments_errs.R[6  ,5  ]     = (sigma_Pyy_Pzz^2.0 - sigma_Pyy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyy*sigma_Pzz)
+        moments_errs.R[5  ,7  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pyy^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyy*sigma_Pxy)
+        moments_errs.R[7  ,5  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pyy^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyy*sigma_Pxy)
+        moments_errs.R[5  ,8  ]     = (sigma_Pyy_Pxz^2.0 - sigma_Pyy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyy*sigma_Pxz)
+        moments_errs.R[8  ,5  ]     = (sigma_Pyy_Pxz^2.0 - sigma_Pyy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyy*sigma_Pxz)
+        moments_errs.R[5  ,9  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pyy*sigma_Pyz)
+        moments_errs.R[9  ,5  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pyy*sigma_Pyz)
+
+     ENDIF
 
      IF ~KEYWORD_SET(no_heatFlux_covar_calc) THEN BEGIN
 
@@ -5292,25 +5497,29 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
      ENDIF
 
-     moments_errs.R[7  ,0  ]     = (sigma_n_Pxy^2.0 - sigma_Pxy^2.0 - sigma_n^2.0)/(2.0*sigma_Pxy*sigma_n)
-     moments_errs.R[0  ,7  ]     = (sigma_n_Pxy^2.0 - sigma_Pxy^2.0 - sigma_n^2.0)/(2.0*sigma_Pxy*sigma_n)
-     moments_errs.R[7  ,1  ]     = (sigma_Ux_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pxy*sigma_Ux)
-     moments_errs.R[1  ,7  ]     = (sigma_Ux_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pxy*sigma_Ux)
-     moments_errs.R[7  ,2  ]     = (sigma_Uy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pxy*sigma_Uy)
-     moments_errs.R[2  ,7  ]     = (sigma_Uy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pxy*sigma_Uy)
-     moments_errs.R[7  ,3  ]     = (sigma_Uz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pxy*sigma_Uz)
-     moments_errs.R[3  ,7  ]     = (sigma_Uz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pxy*sigma_Uz)
-     moments_errs.R[7  ,4  ]     = (sigma_Pxx_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pxy*sigma_Pxx)
-     moments_errs.R[4  ,7  ]     = (sigma_Pxx_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pxy*sigma_Pxx)
-     moments_errs.R[7  ,5  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pxy*sigma_Pyy)
-     moments_errs.R[5  ,7  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pxy*sigma_Pyy)
-     moments_errs.R[7  ,6  ]     = (sigma_Pzz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pxy*sigma_Pzz)
-     moments_errs.R[6  ,7  ]     = (sigma_Pzz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pxy*sigma_Pzz)
-     moments_errs.R[7  ,7  ]     = 1.0
-     moments_errs.R[7  ,8  ]     = (sigma_Pxy_Pxz^2.0 - sigma_Pxy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pxy*sigma_Pxz)
-     moments_errs.R[8  ,7  ]     = (sigma_Pxy_Pxz^2.0 - sigma_Pxy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pxy*sigma_Pxz)
-     moments_errs.R[7  ,9  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pxy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pxy*sigma_Pyz)
-     moments_errs.R[9  ,7  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pxy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pxy*sigma_Pyz)
+     IF ~KEYWORD_SET(sans_phi) THEN BEGIN
+     
+        moments_errs.R[7  ,0  ]     = (sigma_n_Pxy^2.0 - sigma_Pxy^2.0 - sigma_n^2.0)/(2.0*sigma_Pxy*sigma_n)
+        moments_errs.R[0  ,7  ]     = (sigma_n_Pxy^2.0 - sigma_Pxy^2.0 - sigma_n^2.0)/(2.0*sigma_Pxy*sigma_n)
+        moments_errs.R[7  ,1  ]     = (sigma_Ux_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pxy*sigma_Ux)
+        moments_errs.R[1  ,7  ]     = (sigma_Ux_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pxy*sigma_Ux)
+        moments_errs.R[7  ,2  ]     = (sigma_Uy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pxy*sigma_Uy)
+        moments_errs.R[2  ,7  ]     = (sigma_Uy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pxy*sigma_Uy)
+        moments_errs.R[7  ,3  ]     = (sigma_Uz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pxy*sigma_Uz)
+        moments_errs.R[3  ,7  ]     = (sigma_Uz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pxy*sigma_Uz)
+        moments_errs.R[7  ,4  ]     = (sigma_Pxx_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pxy*sigma_Pxx)
+        moments_errs.R[4  ,7  ]     = (sigma_Pxx_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pxy*sigma_Pxx)
+        moments_errs.R[7  ,5  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pxy*sigma_Pyy)
+        moments_errs.R[5  ,7  ]     = (sigma_Pyy_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pxy*sigma_Pyy)
+        moments_errs.R[7  ,6  ]     = (sigma_Pzz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pxy*sigma_Pzz)
+        moments_errs.R[6  ,7  ]     = (sigma_Pzz_Pxy^2.0 - sigma_Pxy^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pxy*sigma_Pzz)
+        moments_errs.R[7  ,7  ]     = 1.0
+        moments_errs.R[7  ,8  ]     = (sigma_Pxy_Pxz^2.0 - sigma_Pxy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pxy*sigma_Pxz)
+        moments_errs.R[8  ,7  ]     = (sigma_Pxy_Pxz^2.0 - sigma_Pxy^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pxy*sigma_Pxz)
+        moments_errs.R[7  ,9  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pxy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pxy*sigma_Pyz)
+        moments_errs.R[9  ,7  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pxy^2.0 - sigma_Pyz^2.0)/(2.0*sigma_Pxy*sigma_Pyz)
+
+     ENDIF
 
      IF ~KEYWORD_SET(no_heatFlux_covar_calc) THEN BEGIN
 
@@ -5354,25 +5563,29 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
      ENDIF
 
-     moments_errs.R[9  ,0  ]     = (sigma_n_Pyz^2.0 - sigma_Pyz^2.0 - sigma_n^2.0)/(2.0*sigma_Pyz*sigma_n)
-     moments_errs.R[0  ,9  ]     = (sigma_n_Pyz^2.0 - sigma_Pyz^2.0 - sigma_n^2.0)/(2.0*sigma_Pyz*sigma_n)
-     moments_errs.R[9  ,1  ]     = (sigma_Ux_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyz*sigma_Ux)
-     moments_errs.R[1  ,9  ]     = (sigma_Ux_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyz*sigma_Ux)
-     moments_errs.R[9  ,2  ]     = (sigma_Uy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyz*sigma_Uy)
-     moments_errs.R[2  ,9  ]     = (sigma_Uy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyz*sigma_Uy)
-     moments_errs.R[9  ,3  ]     = (sigma_Uz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyz*sigma_Uz)
-     moments_errs.R[3  ,9  ]     = (sigma_Uz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyz*sigma_Uz)
-     moments_errs.R[9  ,4  ]     = (sigma_Pxx_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyz*sigma_Pxx)
-     moments_errs.R[4  ,9  ]     = (sigma_Pxx_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyz*sigma_Pxx)
-     moments_errs.R[9  ,5  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pyz*sigma_Pyy)
-     moments_errs.R[5  ,9  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pyz*sigma_Pyy)
-     moments_errs.R[9  ,6  ]     = (sigma_Pzz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyz*sigma_Pzz)
-     moments_errs.R[6  ,9  ]     = (sigma_Pzz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyz*sigma_Pzz)
-     moments_errs.R[9  ,7  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyz*sigma_Pxy)
-     moments_errs.R[7  ,9  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyz*sigma_Pxy)
-     moments_errs.R[9  ,8  ]     = (sigma_Pxz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyz*sigma_Pxz)
-     moments_errs.R[8  ,9  ]     = (sigma_Pxz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyz*sigma_Pxz)
-     moments_errs.R[9  ,9  ]     = 1.0
+     IF ~KEYWORD_SET(sans_phi) THEN BEGIN
+
+        moments_errs.R[9  ,0  ]     = (sigma_n_Pyz^2.0 - sigma_Pyz^2.0 - sigma_n^2.0)/(2.0*sigma_Pyz*sigma_n)
+        moments_errs.R[0  ,9  ]     = (sigma_n_Pyz^2.0 - sigma_Pyz^2.0 - sigma_n^2.0)/(2.0*sigma_Pyz*sigma_n)
+        moments_errs.R[9  ,1  ]     = (sigma_Ux_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyz*sigma_Ux)
+        moments_errs.R[1  ,9  ]     = (sigma_Ux_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Ux^2.0)/(2.0*sigma_Pyz*sigma_Ux)
+        moments_errs.R[9  ,2  ]     = (sigma_Uy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyz*sigma_Uy)
+        moments_errs.R[2  ,9  ]     = (sigma_Uy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uy^2.0)/(2.0*sigma_Pyz*sigma_Uy)
+        moments_errs.R[9  ,3  ]     = (sigma_Uz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyz*sigma_Uz)
+        moments_errs.R[3  ,9  ]     = (sigma_Uz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Uz^2.0)/(2.0*sigma_Pyz*sigma_Uz)
+        moments_errs.R[9  ,4  ]     = (sigma_Pxx_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyz*sigma_Pxx)
+        moments_errs.R[4  ,9  ]     = (sigma_Pxx_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxx^2.0)/(2.0*sigma_Pyz*sigma_Pxx)
+        moments_errs.R[9  ,5  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pyz*sigma_Pyy)
+        moments_errs.R[5  ,9  ]     = (sigma_Pyy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pyy^2.0)/(2.0*sigma_Pyz*sigma_Pyy)
+        moments_errs.R[9  ,6  ]     = (sigma_Pzz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyz*sigma_Pzz)
+        moments_errs.R[6  ,9  ]     = (sigma_Pzz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pzz^2.0)/(2.0*sigma_Pyz*sigma_Pzz)
+        moments_errs.R[9  ,7  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyz*sigma_Pxy)
+        moments_errs.R[7  ,9  ]     = (sigma_Pxy_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxy^2.0)/(2.0*sigma_Pyz*sigma_Pxy)
+        moments_errs.R[9  ,8  ]     = (sigma_Pxz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyz*sigma_Pxz)
+        moments_errs.R[8  ,9  ]     = (sigma_Pxz_Pyz^2.0 - sigma_Pyz^2.0 - sigma_Pxz^2.0)/(2.0*sigma_Pyz*sigma_Pxz)
+        moments_errs.R[9  ,9  ]     = 1.0
+
+     ENDIF
 
      IF ~KEYWORD_SET(no_heatFlux_covar_calc) THEN BEGIN
 
@@ -5485,10 +5698,10 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
   ENDIF
 
-  moments_errs.n                 = ABS(sigma_n)
-  moments_errs.Ux                = ABS(sigma_Ux)
-  moments_errs.Uy                = ABS(sigma_Uy)
-  moments_errs.Uz                = ABS(sigma_Uz)
+  moments_errs.n                 = ABS(TEMPORARY(sigma_n))
+  moments_errs.Ux                = ABS(TEMPORARY(sigma_Ux))
+  moments_errs.Uy                = ABS(TEMPORARY(sigma_Uy))
+  moments_errs.Uz                = ABS(TEMPORARY(sigma_Uz))
 
   ;;Sherlock, this calculates RELATIVE errors
   ;; IF KEYWORD_SET(conv_to_cm) THEN BEGIN
@@ -5500,23 +5713,31 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
   IF ~KEYWORD_SET(no_pressure_covar_calc) THEN BEGIN
 
-     moments_errs.Pxx               = ABS(sigma_Pxx)
-     moments_errs.Pyy               = ABS(sigma_Pyy)
-     moments_errs.Pzz               = ABS(sigma_Pzz)
-     moments_errs.Pxy               = ABS(sigma_Pxy)
-     moments_errs.Pxz               = ABS(sigma_Pxz)
-     moments_errs.Pyz               = ABS(sigma_Pyz)
+     moments_errs.Pxx               = ABS(TEMPORARY(sigma_Pxx))
+     moments_errs.Pyy               = ABS(TEMPORARY(sigma_Pyy))
+     moments_errs.Pzz               = ABS(TEMPORARY(sigma_Pzz))
+     moments_errs.Pxy               = ABS(TEMPORARY(sigma_Pxy))
+     moments_errs.Pxz               = ABS(TEMPORARY(sigma_Pxz))
+     moments_errs.Pyz               = ABS(TEMPORARY(sigma_Pyz))
 
   ENDIF
 
   IF ~KEYWORD_SET(no_heatFlux_covar_calc) THEN BEGIN
 
-     moments_errs.Hx                = ABS(sigma_Hx)
-     moments_errs.Hy                = ABS(sigma_Hy)
-     moments_errs.Hz                = ABS(sigma_Hz)
+     moments_errs.Hx                = ABS(TEMPORARY(sigma_Hx))
+     moments_errs.Hy                = ABS(TEMPORARY(sigma_Hy))
+     moments_errs.Hz                = ABS(TEMPORARY(sigma_Hz))
 
   ENDIF
   
+  IF KEYWORD_SET(sans_phi) THEN BEGIN
+
+     moments_errs.Uy                = moments_errs.Ux
+     moments_errs.Pyy               = moments_errs.Pxx
+     moments_errs.Hy                = moments_errs.Hx
+
+  ENDIF
+
   RETURN,moments_errs
 
 END

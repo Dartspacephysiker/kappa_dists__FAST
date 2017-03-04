@@ -179,7 +179,7 @@ FUNCTION PLASMA_MOMENTERRORS_2D,f,sigma_f,species,energy,theta,phi, $
      KEYWORD_SET(sans_phi): BEGIN
 
         ;; create arrays for fast Riemann-sum integration
-        v0s    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; array of 1s
+        v0s    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=1.D) ; array of 1s
         vxs    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vx value at each bin center
         ;; vys    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vy value at each bin center
         vzs    = MAKE_ARRAY(Nen,Ntheta,/DOUBLE,VALUE=0.D) ; vz value at each bin center
@@ -201,7 +201,7 @@ FUNCTION PLASMA_MOMENTERRORS_2D,f,sigma_f,species,energy,theta,phi, $
               ;; vxs[vii,tii] = vs[vii]*SIN(theta[tii]*!DTOR)
               vzs[vii,tii] = vs[vii]*COS(theta[tii]*!DTOR)
               vms[vii,tii] = vs[vii]
-              v0s[vii,tii] = 1.
+              ;; v0s[vii,tii] = 1.
 
               ;; form phase space volumes using left-Riemann sum (assumes values increase with index)
               ;; IF vii GT 0 THEN BEGIN

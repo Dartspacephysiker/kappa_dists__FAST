@@ -6,47 +6,66 @@ PRO ADD_FNAME_SUFF,fName,suff
 END
 PRO ERROR_J,j,errors,jerr
 
-  FOR l=0,N_ELEMENTS(j.x)-1 DO BEGIN
-     jerr[l] = SQRT((j.y[l])^(2.D) * $
-                    ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )  
-  ENDFOR
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  ;; FOR l=0,N_ELEMENTS(j.x)-1 DO BEGIN
+     ;; jerr[l] = SQRT((j.y[l])^(2.D) * $
+     ;;                ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )  
+     ;; jerr[l] = SQRT((j.y[l])^(2.D) * $
+     ;;                ( (errors.n[l])^(2.D) + (errors.Uz[l])^(2.D) + errors.n[l]*errors.Uz[l]*errors.R[0,3,l] ) )  
+  ;; ENDFOR
+  jerr = SQRT((j.y)^(2.D) * $
+                 ( (errors.n)^(2.D) + (errors.Uz)^(2.D) + errors.n*errors.Uz*errors.R[*,0,3] ) )  
 
 END
 
 PRO ERROR_N,n,errors,nerr
 
-  FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
-     nerr[l] = n.y[l]  * errors[l].n
-  ENDFOR
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  ;; FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
+     ;; nerr[l] = n.y[l]  * errors[l].n
+     ;; nerr[l] = n.y[l]  * errors.n[l]
+  ;; ENDFOR
+     nerr = n.y  * errors.n
   
 END
 
-PRO ERROR_T,T,n,enErr,errors,Terr
+;; PRO ERROR_T,T,n,enErr,errors,Terr
+PRO ERROR_T,T,n,errors,Terr
 
-  FOR l=0,N_ELEMENTS(T.x)-1 DO BEGIN
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
-     t1 = (enErr[l]/T.y[l])^2
+  Tavg = REFORM(T.y[3,*])
+  PPar = REFORM(T.y[2,*])*n.y
+  PPrp = REFORM(T.y[0,*])*n.y
 
-     Terr[l] = T.y[l]  * errors[l].n
+  ;;pi=1/3N, and is for convenience
+  piSq = 1.D/(9.D*n.y*n.y)
 
-  ENDFOR
-  
+  ;;other = 2*pi*Tavg/N, and is also for convenience
+  other = 2.D*Tavg/(3.D*n.y*n.y)
+
+  Terr  = SQRT( piSq*((errors.Pzz*Ppar)^2.D                                               + $
+                      4.D*errors.Pzz*errors.Pxx*errors.R[*,6,4]*errors.R[*,6,4]*Ppar*PPrp + $
+                      4.D*(errors.Pxx*Pprp)^2.D                                             ) $
+                + $
+                (-1.D)*other*(errors.R[*,0,6]*errors.n*errors.Pzz*n.y*PPar                 + $
+                              2.D*errors.R[*,0,4]*errors.n*errors.Pxx*n.y*PPrp               ) $
+                + $
+                (Tavg*errors.n)^(2.D))
+  ;; (Tavg/n.y*errors.n*n.y)^(2.D)
 END
 
-PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr, $
-               ENERGY_ERROR=enErr
+PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr;; , $
+               ;; ENERGY_ERROR=enErr
 
   ERROR_J,j,errors,jerr
   ERROR_N,n,errors,nerr
-  IF KEYWORD_SET(enErr) THEN BEGIN
-     ERROR_T,T,n,enErr,errors,Terr
-  ENDIF
-
-  FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-     ;; jerr[l]      = ERROR_J(j,errors)
-     nerr[l]      = n.y[l]  * errors[l].n
-     ;; Terr[l]      = 
-  ENDFOR
+  ;; IF KEYWORD_SET(enErr) THEN BEGIN
+     ;; ERROR_T,T,n,enErr,errors,Terr
+     ERROR_T,T,n,errors,Terr
+  ;; ENDIF
 
 END
 
@@ -88,7 +107,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF ~KEYWORD_SET(timesList) THEN BEGIN
      PRINT,"Making timesList from downTimesStr and upTimesStr ..."
@@ -600,6 +619,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                               ANGLE=aRange__moments, $
                                                               SC_POT=sc_pot, $
                                                               EEB_OR_EES=eeb_or_ees, $
+                                                              ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
+                                                              /PRESSURE_COVAR_CALC, $
+                                                              HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
                                                               QUIET=quiet)
 
            ;; IF KEYWORD_SET(dens_errors) THEN BEGIN
@@ -607,13 +629,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            jerr            = MAKE_ARRAY(nHere,/FLOAT)
            Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
-           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr, $
-                      ENERGY_ERROR=peak_dE_list[fakeK]
+           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr;; , $
+                      ;; ENERGY_ERROR=peak_dE_list[fakeK]
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy, $
+              errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                                              ENERGY=energy, $
+                                                              ANGLE=aRange__moments, $
                                                               SC_POT=sc_pot, $
                                                               EEB_OR_EES=eeb_or_ees, $
+                                                              ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
+                                                              /PRESSURE_COVAR_CALC, $
+                                                              HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
                                                               QUIET=quiet)
               n1err        = MAKE_ARRAY(nHere,/FLOAT)
               j1err        = MAKE_ARRAY(nHere,/FLOAT)
@@ -779,7 +806,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpPeakE        = (peak_energy_list[k])[theseInds]
         tmpPeakdE       = (peak_dE_list[k])[theseInds]
         tmpN            = (N_list[k]).y[theseInds]
-        tmpT            = (T_list[k]).y[theseInds]
+        tmpT            = (T_list[k]).y[*,theseInds]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
@@ -787,7 +814,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            tmpJe1       = (je1_list[k]).y[theseInds]
            tmpCharE1    = (chare1_list[k])[theseInds]
            tmpN1        = (N1_list[k]).y[theseInds]
-           tmpT1        = (T1_list[k]).y[theseInds]
+           tmpT1        = (T1_list[k]).y[*,theseInds]
         ENDIF
 
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
@@ -993,6 +1020,27 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      curPotList.Add,tmpStruct
   ENDFOR
+
+  looking         = 3B
+  ind             = 0
+  WHILE (looking GT 0) DO BEGIN
+     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*DOWN*E') THEN BEGIN
+        looking--
+        edind = ind
+     ENDIF
+
+     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*E') THEN BEGIN
+        looking--
+        euind = ind
+     ENDIF
+
+     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*I') THEN BEGIN
+        looking--
+        iuind = ind
+     ENDIF
+     ind++
+  ENDWHILE
+
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
      PRINT,"Saving it all to " + saveCurPotFile
