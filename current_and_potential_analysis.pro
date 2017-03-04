@@ -152,6 +152,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   ENDIF
 
+  IF KEYWORD_SET(outDir) THEN BEGIN
+     diffEfluxDir = outDir.Replace('cur_and_pot_analysis/','diff_eFlux/')
+  ENDIF
+
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MEGA
   nCalcLoop              = N_ELEMENTS(label)
@@ -171,8 +175,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      err_list              = LIST()
      err1_list             = LIST()
+
      n_list                = LIST()
      nerr_list             = LIST()
+
+     T_list                = LIST()
+     Terr_list             = LIST()
 
      j_list                = LIST()
      je_list               = LIST()
@@ -182,6 +190,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
         n1_list            = LIST()
         n1err_list         = LIST()
+
+        T1_list            = LIST()
+        T1err_list         = LIST()
+
         j1_list            = LIST()
         je1_list           = LIST()
         chare1_list        = LIST()
@@ -232,14 +244,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
            FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
            FITFILE=fitFile, $
-           LOADDIR=outDir
+           LOADDIR=diffEfluxDir
 
         preString = diff_eFlux_file + ' ...'
-        IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(outDir+diff_eFlux_file)) AND $
+        IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(diffEfluxDir+diff_eFlux_file)) AND $
            KEYWORD_SET(load_diff_eFlux_file) $
         THEN BEGIN
            afterString = "Restored "
-           realFile    = (FILE_TEST(diff_eFlux_file) ? '' : outDir ) + diff_eFlux_file
+           realFile    = (FILE_TEST(diff_eFlux_file) ? '' : diffEfluxDir ) + diff_eFlux_file
            RESTORE,realFile
         ENDIF ELSE BEGIN
            afterString = "Made "
@@ -255,7 +267,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                           LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
                           DIFF_EFLUX_FILE=diff_eFlux_file, $
-                          LOAD_DIR=outDir
+                          LOAD_DIR=diffEfluxDir
         ENDELSE
         PRINT,preString + afterString
 
@@ -277,7 +289,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                          SAVE_DEF_ONECOUNT_TO_FILE=save_dEF_oneCount_to_file, $
                                          LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
                                          DIFF_EFLUX_FILE=diff_eFlux_file, $
-                                         LOAD_DIR=outDir, $
+                                         LOAD_DIR=diffEfluxDir, $
                                          QUIET=quiet
 
            also_oneCount = N_ELEMENTS(dEF_oneCount) GT 0
@@ -469,6 +481,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                          SC_POT=sc_pot, $
                                          EEB_OR_EES=eeb_or_ees, $
                                          QUIET=quiet)
+        T        = T_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
         j        = J_2D__FROM_DIFF_EFLUX(diff_eFlux, $
                                          ENERGY=energy, $
                                          ANGLE=aRange__moments, $
@@ -494,6 +512,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
            n1    = N_2D__FROM_DIFF_EFLUX(def_onecount, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+           T1    = T_2D__FROM_DIFF_EFLUX(def_onecount, $
                                          ENERGY=energy, $
                                          ANGLE=aRange__moments, $
                                          SC_POT=sc_pot, $
@@ -535,6 +559,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;; IF KEYWORD_SET(dens_errors) THEN BEGIN
            nerr            = MAKE_ARRAY(nHere,/FLOAT)
            jerr            = MAKE_ARRAY(nHere,/FLOAT)
+           Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy, $
@@ -543,18 +568,21 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                               QUIET=quiet)
               n1err        = MAKE_ARRAY(nHere,/FLOAT)
               j1err        = MAKE_ARRAY(nHere,/FLOAT)
+              T1err        = MAKE_ARRAY(nHere,/FLOAT)
            ENDIF
 
            FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-              nerr[l]      = n.y[l]  * errors[l].n
               jerr[l]      = SQRT((j.y[l])^(2.D) * $
                               ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )
+              nerr[l]      = n.y[l]  * errors[l].n
+              ;; Terr[l]      = 
            ENDFOR
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
                  j1err[l]  = SQRT((j1.y[l])^(2.D) * $
                                  ( (errors1[l].n)^(2.D) + (errors1[l].Uz)^(2.D) + errors1[l].n*errors1[l].Uz*errors1[l].R[0,3] ) )
                  n1err[l]  = n1.y[l] * errors1[l].n
+                 ;; T1err[l]  = 
               ENDFOR
            ENDIF
 
@@ -563,19 +591,23 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;Update lists
         err_list.Add,TEMPORARY(errors)
         n_list.Add,TEMPORARY(n)
+        T_list.Add,TEMPORARY(T)
         j_list.Add,TEMPORARY(j)
         je_list.Add,TEMPORARY(je)
         chare_list.Add,CHAR_ENERGY((TEMPORARY(jC)).y,(TEMPORARY(jeC)).y)
         nerr_list.Add,TEMPORARY(nerr)
+        Terr_list.Add,TEMPORARY(Terr)
         jerr_list.Add,TEMPORARY(jerr)
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            err1_list.Add,TEMPORARY(errors1)
            n1_list.Add,TEMPORARY(n1)
+           T1_list.Add,TEMPORARY(T1)
            j1_list.Add,TEMPORARY(j1)
            je1_list.Add,TEMPORARY(je1)
            chare1_list.Add,CHAR_ENERGY((TEMPORARY(j1C)).y,(TEMPORARY(je1C)).y)
            n1err_list.Add,TEMPORARY(n1err)
+           T1err_list.Add,TEMPORARY(T1err)
            j1err_list.Add,TEMPORARY(j1err)
         ENDIF
 
@@ -587,14 +619,16 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           err1_list, $
           n_list, $
           nerr_list, $
-          ;; fracN_list, $
+          T_list, $
+          Terr_list, $
           j_list, $
           je_list, $
           chare_list, $
           jerr_list, $
           n1_list, $
           n1err_list, $
-          ;; fracN1_list, $
+          T1_list, $
+          T1err_list, $
           j1_list, $
           je1_list, $
           chare1_list, $
@@ -652,6 +686,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlPeakdE  = !NULL
      itvlN       = !NULL
      itvlNerr    = !NULL
+     itvlT       = !NULL
+     itvlTerr    = !NULL
      itvlJerr    = !NULL
      itvlCurErr  = !NULL
 
@@ -661,6 +697,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlcharE1  = !NULL
      itvlN1      = !NULL
      itvlN1err   = !NULL
+     itvlT1      = !NULL
+     itvlT1err   = !NULL
      itvlJ1err   = !NULL
      itvlCur1Err = !NULL
 
@@ -689,6 +727,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpPeakE        = (peak_energy_list[k])[theseInds]
         tmpPeakdE       = (peak_dE_list[k])[theseInds]
         tmpN            = (N_list[k]).y[theseInds]
+        tmpT            = (T_list[k]).y[theseInds]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
@@ -696,15 +735,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            tmpJe1       = (je1_list[k]).y[theseInds]
            tmpCharE1    = (chare1_list[k])[theseInds]
            tmpN1        = (N1_list[k]).y[theseInds]
+           tmpT1        = (T1_list[k]).y[theseInds]
         ENDIF
 
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
            tmpNerr      = (nerr_list[k])[theseInds]
+           tmpTerr      = (Terr_list[k])[theseInds]
            tmpJerr      = (jerr_list[k])[theseInds]
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               tmpN1err  = (n1err_list[k])[theseInds]
+              tmpT1err  = (T1err_list[k])[theseInds]
               tmpJ1err  = (j1err_list[k])[theseInds]
            ENDIF
         ENDIF
@@ -793,6 +835,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         itvlCur        = [itvlCur   ,tmpCur   ]
         itvlcharE      = [itvlcharE ,tmpChare ]
         itvlN          = [itvlN     ,tmpN     ]
+        itvlT          = [itvlT     ,tmpT     ]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            itvlJ1         = [itvlJ1    ,tmpJ1    ]
@@ -800,16 +843,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            itvlCur1       = [itvlCur1  ,tmpCur1  ]
            itvlcharE1     = [itvlcharE1,tmpChare1]
            itvlN1         = [itvlN1    ,tmpN1    ]
+           itvlT1         = [itvlT1    ,tmpT1    ]
         ENDIF
         
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
            itvlNerr    = [itvlNerr  ,tmpNerr  ]
+           itvlTerr    = [itvlTerr  ,tmpTerr  ]
            itvlJerr    = [itvlJerr  ,tmpJerr  ]
            itvlCurErr  = [itvlCurErr  ,tmpCurErr  ]
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               itvlN1err   = [itvlN1err ,tmpN1err ]
+              itvlT1err   = [itvlT1err ,tmpT1err ]
               itvlJ1err   = [itvlJ1err ,tmpJ1err ]
               itvlCur1Err = [itvlCur1Err ,tmpCur1Err ]
            ENDIF
@@ -829,7 +875,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              cur      : TEMPORARY(itvlCur)    , $
                              chare    : TEMPORARY(itvlcharE)  , $
                              N        : TEMPORARY(itvlN)      , $
+                             T        : TEMPORARY(itvlT)      , $
                              Nerr     : TEMPORARY(itvlNerr)   , $
+                             Terr     : TEMPORARY(itvlTerr)   , $
                              Jerr     : TEMPORARY(itvlJerr)   , $
                              CurErr   : TEMPORARY(itvlCurErr)}
 
@@ -839,7 +887,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              cur1     : TEMPORARY(itvlCur1)   , $
                              chare1   : TEMPORARY(itvlcharE1) , $
                              N1       : TEMPORARY(itvlN1)     , $
+                             T1       : TEMPORARY(itvlT1)     , $
                              N1err    : TEMPORARY(itvlN1err)  , $
+                             T1err    : TEMPORARY(itvlT1err)  , $
                              J1Err    : TEMPORARY(itvlJ1Err)  , $
                              Cur1Err  : TEMPORARY(itvlCur1Err)}
               tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(tmp1Struct))
@@ -863,14 +913,16 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              je       : TEMPORARY(itvlJe)     , $
                              cur      : TEMPORARY(itvlCur)    , $
                              chare    : TEMPORARY(itvlcharE)  , $
-                             N        : TEMPORARY(itvlN)      }
+                             N        : TEMPORARY(itvlN)      , $
+                             T        : TEMPORARY(itvlT)      }
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               tmp1Struct  = {j1       : TEMPORARY(itvlJ1)     , $
                              je1      : TEMPORARY(itvlJe1)    , $
                              cur1     : TEMPORARY(itvlCur1)   , $
                              chare1   : TEMPORARY(itvlcharE1) , $
-                             N1       : TEMPORARY(itvlN1)     }
+                             N1       : TEMPORARY(itvlN1)     , $
+                             T1       : TEMPORARY(itvlT1)     }
               tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(tmp1Struct))
            ENDIF
 
