@@ -1,4 +1,9 @@
 ;;2017/02/22
+PRO ADD_FNAME_SUFF,fName,suff
+        fNameTmp     = STRSPLIT(fName,'.',/EXTRACT)
+        fNameTmp[0] += suff
+        fName        = STRJOIN(TEMPORARY(fNameTmp),'.')
+END
 PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORBIT=orbit, $
    ORBTIMES=orbTimes, $
@@ -22,6 +27,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
    ENERGYARR=energyArr, $
+   USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
@@ -45,6 +51,67 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      timesList               = LIST(downTimes,upTimes)
   ENDIF
 
+  IF KEYWORD_SET(aRange__moments_e_down) THEN BEGIN
+
+     fSuff = STRING(FORMAT='("-aR_mom_eD_",I0,"-",I0)',aRange__moments_e_down[0],aRange__moments_e_down[1])
+     IF KEYWORD_SET(datFile) THEN BEGIN
+        ADD_FNAME_SUFF,datFile,fSuff
+     ENDIF
+
+     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+        ADD_FNAME_SUFF,saveCurPotFile,fSuff
+     ENDIF
+
+  ENDIF
+
+  IF KEYWORD_SET(aRange__moments_i_up) THEN BEGIN
+
+     IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
+
+        fSuff = STRING(FORMAT='("-aR_mom_iU_",I0,"-",I0)',aRange__moments_i_up[0],aRange__moments_i_up[1])
+        IF KEYWORD_SET(datFile) THEN BEGIN
+           ADD_FNAME_SUFF,datFile,fSuff
+        ENDIF
+
+        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+           ADD_FNAME_SUFF,saveCurPotFile,fSuff
+        ENDIF
+
+     ENDIF
+
+  ENDIF
+
+  IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
+
+     IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
+
+        fSuff = '-sc_pot'
+        IF KEYWORD_SET(datFile) THEN BEGIN
+           ADD_FNAME_SUFF,datFile,fSuff
+        ENDIF
+
+        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+           ADD_FNAME_SUFF,saveCurPotFile,fSuff
+        ENDIF
+
+     ENDIF
+
+  ENDIF
+
+  IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
+     ;;Whatever datFile is, tack one '-oneCount' before the prefix
+
+     fSuff = '-w_1Count'
+     IF KEYWORD_SET(datFile) THEN BEGIN
+        ADD_FNAME_SUFF,datFile,fSuff
+     ENDIF
+
+     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+        ADD_FNAME_SUFF,saveCurPotFile,fSuff
+     ENDIF
+
+  ENDIF
+
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = ['ees','ies']
 
@@ -60,8 +127,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      energyArr               = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
-     aRange__moments_e_down  = [0.,360.]
-     aRange__moments_i_up    = [0.,360.]
+     aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
+     aRange__moments_i_up    = KEYWORD_SET(aRange__moments_i_up  ) ? aRange__moments_i_up   : [0.,360.]
      aRange__moments_e_up    = !NULL
 
      ;; aRange__moments_e_down  = [330.,30.]
@@ -87,7 +154,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MEGA
-
   nCalcLoop              = N_ELEMENTS(label)
   preString = datFile + ' ...'
   IF FILE_TEST(outDir+datFile) AND ~KEYWORD_SET(remake_masterFile) THEN BEGIN
@@ -122,6 +188,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         j1err_list         = LIST()
      ENDIF
 
+     IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
+        sc_pot_list        = LIST()
+     ENDIF
+
      peak_ind_list         = LIST()
      peak_energy_list      = LIST()
      peak_dE_list          = LIST()
@@ -152,7 +222,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            EEB_OR_EES=eeb_or_ees, $
            ELECTRON_ANGLERANGE=electron_angleRange ,$
            BONUSPREF=bonusPref ,$
-           ADD_ONECOUNT_STATS=add_oneCount_stats, $
+           ;; ADD_ONECOUNT_STATS=add_oneCount_stats, $
            SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
            SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file,$
            LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file,$
@@ -189,13 +259,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDELSE
         PRINT,preString + afterString
 
-        dEF_list.Add,TEMPORARY(diff_eFlux)
-
         IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
            
            PRINT,"Getting oneCount curve ..."
+           save_dEF_oneCount_to_file = KEYWORD_SET(save_diff_eFlux_to_file)
            GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
-                                         ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
                                          EEB_OR_EES=eeb_or_ees, $
                                          SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                                          IN_PROTOSTRUCT=diff_eFlux, $
@@ -206,14 +274,27 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                          FIT_EACH_ANGLE=fit_each_angle, $ ;Perma-set because we do all angles for 2D fitting
                                          OUT_ONEDAT=out_oneDat, $
                                          DEF_ONECOUNT=dEF_oneCount, $
+                                         SAVE_DEF_ONECOUNT_TO_FILE=save_dEF_oneCount_to_file, $
+                                         LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
+                                         DIFF_EFLUX_FILE=diff_eFlux_file, $
+                                         LOAD_DIR=outDir, $
                                          QUIET=quiet
 
-           have_oneCount = N_ELEMENTS(dEF_oneCount) GT 0
+           also_oneCount = N_ELEMENTS(dEF_oneCount) GT 0
 
            dEF_1c_list.Add,TEMPORARY(dEF_oneCount)
 
         ENDIF
         
+        dEF_list.Add,TEMPORARY(diff_eFlux)
+
+        IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
+           GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1],DATA=sc_pot, $
+                            /FROM_FILE, $
+                            ORBIT=orbit
+           sc_pot_list.Add,sc_pot
+        ENDIF
+
      ENDFOR
 
      ;;Now the calculations
@@ -228,16 +309,27 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            dEF_oneCount              = dEF_1c_list[eeb_k]
         ENDIF
+        IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
+           sc_pot                    = sc_pot_list[eeb_k]
+        ENDIF
 
-        energy                       = energyArr[*,k]
+        eeb_or_ees                   = eeb_or_eesArr[eeb_k]
+
+        ;; energy                       = energyArr[*,k]
+        energy                       = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
+                                                                          ENERGY=energyArr[*,k], $
+                                                                          SC_POT=sc_pot, $
+                                                                          EEB_OR_EES=eeb_or_ees)
+
         min_peak_energy              = min_peak_energyArr[k]
         max_peak_energy              = max_peak_energyArr[k]
         peak_energy__start_at_highE  = peak_energy__start_at_highEArr[k]
         upgoing                      = upgoingArr[k]
 
-        GET_FA_ORBIT,LIST_TO_1DARRAY(timesList[t_k]),/TIME_ARRAY
+        tmpTimes                     = LIST_TO_1DARRAY(timesList[t_k])
+        GET_FA_ORBIT,tmpTimes,/TIME_ARRAY
         GET_DATA,'ILAT',DATA=ilat
-        north_southArr       = ABS(ilat.y)/ilat.y
+        north_southArr               = ABS(ilat.y)/ilat.y
 
         north_southArr_list.Add,TEMPORARY(north_southArr)
 
@@ -281,7 +373,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__peakEn",aRange__peakEn
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__charE",aRange__charE
         ;; PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"angleRange",angleRange
-        PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"energy",energy
+        PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"energy",MEAN(energy,DIMENSION=2)
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"min_peak_energy",min_peak_energy
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"max_peak_energy",max_peak_energy
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"peak_energy__start_at_highE",peak_energy__start_at_highE
@@ -364,33 +456,91 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
         peak_dE_list.Add,TEMPORARY(peak_dEArr)
 
+        
+        ;; en_arr   = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
+        ;;                                               ENERGY=energy, $
+        ;;                                               SC_POT=sc_pot, $
+        ;;                                               EEB_OR_EES=eeb_or_ees)
+        ;; energy   = TEMPORARY(en_arr)
 
-        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-        j        = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-        je       = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-        jC       = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE,QUIET=quiet)
-        jeC      = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE,QUIET=quiet)
+        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+        j        = J_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+        je       = JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                          ENERGY=energy, $
+                                          ANGLE=aRange__moments, $
+                                          SC_POT=sc_pot, $
+                                          EEB_OR_EES=eeb_or_ees, $
+                                          QUIET=quiet)
+        jC       = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+        jeC      = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE, $
+                                          SC_POT=sc_pot, $
+                                          EEB_OR_EES=eeb_or_ees, $
+                                          QUIET=quiet)
 
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
-           n1    = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-           j1    = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-           je1   = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
-           j1C   = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE,QUIET=quiet)
-           je1C  = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE,QUIET=quiet)
+
+           n1    = N_2D__FROM_DIFF_EFLUX(def_onecount, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+           j1    = J_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__moments, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+           je1   = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                          ENERGY=energy, $
+                                          ANGLE=aRange__moments, $
+                                          SC_POT=sc_pot, $
+                                          EEB_OR_EES=eeb_or_ees, $
+                                          QUIET=quiet)
+           j1C   = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE, $
+                                         SC_POT=sc_pot, $
+                                         EEB_OR_EES=eeb_or_ees, $
+                                         QUIET=quiet)
+           je1C  = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE, $
+                                          SC_POT=sc_pot, $
+                                          EEB_OR_EES=eeb_or_ees, $
+                                          QUIET=quiet)
+
         ENDIF
 
         ;;Error everything
         IF KEYWORD_SET(error_estimates) THEN BEGIN
 
-           errors          = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__moments,QUIET=quiet)
+           errors          = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                                              ENERGY=energy, $
+                                                              ANGLE=aRange__moments, $
+                                                              SC_POT=sc_pot, $
+                                                              EEB_OR_EES=eeb_or_ees, $
+                                                              QUIET=quiet)
 
            ;; IF KEYWORD_SET(dens_errors) THEN BEGIN
            nerr            = MAKE_ARRAY(nHere,/FLOAT)
            jerr            = MAKE_ARRAY(nHere,/FLOAT)
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,QUIET=quiet)
+              errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy, $
+                                                              SC_POT=sc_pot, $
+                                                              EEB_OR_EES=eeb_or_ees, $
+                                                              QUIET=quiet)
               n1err        = MAKE_ARRAY(nHere,/FLOAT)
               j1err        = MAKE_ARRAY(nHere,/FLOAT)
            ENDIF
