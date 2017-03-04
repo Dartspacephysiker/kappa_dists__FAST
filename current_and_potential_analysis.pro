@@ -21,18 +21,26 @@ PRO ERROR_N,n,errors,nerr
   
 END
 
-PRO ERROR_T,T,n,errors,Terr
+PRO ERROR_T,T,n,enErr,errors,Terr
 
   FOR l=0,N_ELEMENTS(T.x)-1 DO BEGIN
+
+     t1 = (enErr[l]/T.y[l])^2
+
      Terr[l] = T.y[l]  * errors[l].n
+
   ENDFOR
   
 END
 
-PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr
+PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr, $
+               ENERGY_ERROR=enErr
 
   ERROR_J,j,errors,jerr
   ERROR_N,n,errors,nerr
+  IF KEYWORD_SET(enErr) THEN BEGIN
+     ERROR_T,T,n,enErr,errors,Terr
+  ENDIF
 
   FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
      ;; jerr[l]      = ERROR_J(j,errors)
@@ -599,7 +607,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            jerr            = MAKE_ARRAY(nHere,/FLOAT)
            Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
-           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr
+           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr, $
+                      ENERGY_ERROR=peak_dE_list[fakeK]
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy, $
