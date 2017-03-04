@@ -4,6 +4,44 @@ PRO ADD_FNAME_SUFF,fName,suff
         fNameTmp[0] += suff
         fName        = STRJOIN(TEMPORARY(fNameTmp),'.')
 END
+PRO ERROR_J,j,errors,jerr
+
+  FOR l=0,N_ELEMENTS(j.x)-1 DO BEGIN
+     jerr[l] = SQRT((j.y[l])^(2.D) * $
+                    ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )  
+  ENDFOR
+
+END
+
+PRO ERROR_N,n,errors,nerr
+
+  FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
+     nerr[l] = n.y[l]  * errors[l].n
+  ENDFOR
+  
+END
+
+PRO ERROR_T,T,n,errors,Terr
+
+  FOR l=0,N_ELEMENTS(T.x)-1 DO BEGIN
+     Terr[l] = T.y[l]  * errors[l].n
+  ENDFOR
+  
+END
+
+PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr
+
+  ERROR_J,j,errors,jerr
+  ERROR_N,n,errors,nerr
+
+  FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
+     ;; jerr[l]      = ERROR_J(j,errors)
+     nerr[l]      = n.y[l]  * errors[l].n
+     ;; Terr[l]      = 
+  ENDFOR
+
+END
+
 PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORBIT=orbit, $
    ORBTIMES=orbTimes, $
@@ -561,6 +599,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            jerr            = MAKE_ARRAY(nHere,/FLOAT)
            Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
+           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr
+
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy, $
                                                               SC_POT=sc_pot, $
@@ -569,22 +609,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               n1err        = MAKE_ARRAY(nHere,/FLOAT)
               j1err        = MAKE_ARRAY(nHere,/FLOAT)
               T1err        = MAKE_ARRAY(nHere,/FLOAT)
+
+              ERROR_CALC,dEF_oneCount,errors1,j1,n1,T1,j1err,n1err,T1err
+
            ENDIF
 
-           FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-              jerr[l]      = SQRT((j.y[l])^(2.D) * $
-                              ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )
-              nerr[l]      = n.y[l]  * errors[l].n
-              ;; Terr[l]      = 
-           ENDFOR
-           IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-                 j1err[l]  = SQRT((j1.y[l])^(2.D) * $
-                                 ( (errors1[l].n)^(2.D) + (errors1[l].Uz)^(2.D) + errors1[l].n*errors1[l].Uz*errors1[l].R[0,3] ) )
-                 n1err[l]  = n1.y[l] * errors1[l].n
-                 ;; T1err[l]  = 
-              ENDFOR
-           ENDIF
+           ;; FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
+           ;;    jerr[l]      = SQRT((j.y[l])^(2.D) * $
+           ;;                    ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )
+           ;;    nerr[l]      = n.y[l]  * errors[l].n
+           ;;    ;; Terr[l]      = 
+           ;; ENDFOR
+           ;; IF KEYWORD_SET(also_oneCount) THEN BEGIN
+           ;;    ;; FOR l=0,N_ELEMENTS(dEF_oneCount.time)-1 DO BEGIN
+           ;;    ;;    j1err[l]  = SQRT((j1.y[l])^(2.D) * $
+           ;;    ;;                    ( (errors1[l].n)^(2.D) + (errors1[l].Uz)^(2.D) + errors1[l].n*errors1[l].Uz*errors1[l].R[0,3] ) )
+           ;;    ;;    n1err[l]  = n1.y[l] * errors1[l].n
+           ;;    ;;    ;; T1err[l]  = 
+           ;;    ;; ENDFOR
+           ;; ENDIF
 
         ENDIF
 
