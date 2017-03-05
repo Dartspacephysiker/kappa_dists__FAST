@@ -36,25 +36,31 @@ PRO ERROR_T,T,n,errors,Terr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  Tavg = REFORM(T.y[3,*])
-  PPar = REFORM(T.y[2,*])*n.y
-  PPrp = REFORM(T.y[0,*])*n.y
+  Tavg             = REFORM(T.y[3,*])
+  PPar             = REFORM(T.y[2,*])*n.y
+  PPrp             = REFORM(T.y[0,*])*n.y
+
+  sigma_N_PPar     = errors.R[*,0,6]*(errors.N*N.y)*(errors.Pzz*PPar)
+  sigma_N_PPrp     = errors.R[*,0,4]*(errors.N*N.y)*(errors.Pxx*PPrp)
+  sigma_PPar_PPrp  = errors.R[*,6,4]*(errors.Pzz*PPar)*(errors.Pxx*PPrp)
 
   ;;pi=1/3N, and is for convenience
-  piSq = 1.D/(9.D*n.y*n.y)
+  piSq             = 1.D/(9.D*n.y*n.y)
 
-  ;;other = 2*pi*Tavg/N, and is also for convenience
-  other = 2.D*Tavg/(3.D*n.y*n.y)
+  ;;other          = 2*pi*Tavg/N, and is also for convenience
+  other            = 2.D*Tavg/(3.D*n.y*n.y)
 
-  Terr  = SQRT( piSq*((errors.Pzz*Ppar)^2.D                                               + $
-                      4.D*errors.Pzz*errors.Pxx*errors.R[*,6,4]*errors.R[*,6,4]*Ppar*PPrp + $
-                      4.D*(errors.Pxx*Pprp)^2.D                                             ) $
-                + $
-                (-1.D)*other*(errors.R[*,0,6]*errors.n*errors.Pzz*n.y*PPar                 + $
-                              2.D*errors.R[*,0,4]*errors.n*errors.Pxx*n.y*PPrp               ) $
-                + $
-                (Tavg*errors.n)^(2.D))
-  ;; (Tavg/n.y*errors.n*n.y)^(2.D)
+  Terr             = SQRT( piSq*((errors.Pzz*PPar)^2.D                                        + $
+                                 4.D*errors.R[*,6,4]*(errors.Pzz*PPar)*(errors.Pxx*PPrp)      + $
+                                 4.D*(errors.Pxx*PPrp)^2.D                                    ) $
+                           +                                                                    $
+                           (-1.D)*other*(sigma_N_PPar     + $
+                                         2.D*sigma_N_PPrp ) $
+                           + $
+                           (Tavg*errors.n)^(2.D)                                                )
+                           ;; See? the n.y terms cancel each other. Hence the simplification above
+                           ;; (Tavg/n.y*errors.n*n.y)^(2.D)
+
 END
 
 PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr;; , $
@@ -769,6 +775,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlTerr    = !NULL
      itvlJerr    = !NULL
      itvlCurErr  = !NULL
+     itvlErrors  = !NULL
 
      itvlJ1      = !NULL
      itvlJe1     = !NULL
@@ -780,53 +787,62 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlT1err   = !NULL
      itvlJ1err   = !NULL
      itvlCur1Err = !NULL
+     itvlErrors1 = !NULL
+
+     ;; itvlErrors  = MAKE_BLANK_GERSHMAN_ERROR_STRUCT(2000, $
+     ;;                                                /PRESSURE_COVAR_CALC, $
+     ;;                                                HEATFLUX_COVAR_CALC=heatFlux_covar_calc)
 
      FOR realK=0,nSegs-1 DO BEGIN
 
-        tmpT1           = tmpT[0,realK]
-        tmpT2           = tmpT[1,realK]
+        tmpT1            = tmpT[0,realK]
+        tmpT2            = tmpT[1,realK]
 
-        theseInds       = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
+        theseInds        = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
                                ( (j_list[k]).x LE tmpT2 ), $
                                nThese)
 
         IF nThese EQ 0 THEN STOP
 
-        theseInds       = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
-        CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET & IF ~is_sorted THEN STOP
+        theseInds        = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
+        CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET
+        IF ~is_sorted THEN STOP
         IF nThese EQ 0 THEN STOP
 
-        tmpTimes        = (j_list[k]).x[theseInds]
+        tmpTimes         = (j_list[k]).x[theseInds]
 
         ;;Pick up temps
-        tmpJ            = (j_list[k]).y[theseInds]
-        tmpJe           = (je_list[k]).y[theseInds]
-        ;; tmpCharE     = CHAR_ENERGY(tmpJ,tmpJe)
-        tmpCharE        = (chare_list[k])[theseInds]
-        tmpPeakE        = (peak_energy_list[k])[theseInds]
-        tmpPeakdE       = (peak_dE_list[k])[theseInds]
-        tmpN            = (N_list[k]).y[theseInds]
-        tmpT            = (T_list[k]).y[*,theseInds]
+        tmpJ             = (j_list[k]).y[theseInds]
+        tmpJe            = (je_list[k]).y[theseInds]
+        ;; tmpCharE      = CHAR_ENERGY(tmpJ,tmpJe)
+        tmpCharE         = (chare_list[k])[theseInds]
+        tmpPeakE         = (peak_energy_list[k])[theseInds]
+        tmpPeakdE        = (peak_dE_list[k])[theseInds]
+        tmpN             = (N_list[k]).y[theseInds]
+        tmpT             = (T_list[k]).y[*,theseInds]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
-           tmpJ1        = (j1_list[k]).y[theseInds]
-           tmpJe1       = (je1_list[k]).y[theseInds]
-           tmpCharE1    = (chare1_list[k])[theseInds]
-           tmpN1        = (N1_list[k]).y[theseInds]
-           tmpT1        = (T1_list[k]).y[*,theseInds]
+           tmpJ1         = (j1_list[k]).y[theseInds]
+           tmpJe1        = (je1_list[k]).y[theseInds]
+           tmpCharE1     = (chare1_list[k])[theseInds]
+           tmpN1         = (N1_list[k]).y[theseInds]
+           tmpT1         = (T1_list[k]).y[*,theseInds]
         ENDIF
 
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
-           tmpNerr      = (nerr_list[k])[theseInds]
-           tmpTerr      = (Terr_list[k])[theseInds]
-           tmpJerr      = (jerr_list[k])[theseInds]
+
+           tmpNerr       = (nerr_list[k])[theseInds]
+           tmpTerr       = (Terr_list[k])[theseInds]
+           tmpJerr       = (jerr_list[k])[theseInds]
+           ;; SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,tmpErrors
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmpN1err  = (n1err_list[k])[theseInds]
-              tmpT1err  = (T1err_list[k])[theseInds]
-              tmpJ1err  = (j1err_list[k])[theseInds]
+              tmpN1err   = (n1err_list[k])[theseInds]
+              tmpT1err   = (T1err_list[k])[theseInds]
+              tmpJ1err   = (j1err_list[k])[theseInds]
+              ;; SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,tmpErrors1
            ENDIF
         ENDIF
 
@@ -841,17 +857,17 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                             LOGLUN=logLun
            IF N_ELEMENTS(tSort_i) GT 0 THEN STOP
 
-           tmpJ        *= mapRatio
-           tmpJe       *= mapRatio
+           tmpJ         *= mapRatio
+           tmpJe        *= mapRatio
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmpJ1       *= mapRatio
-              tmpJe1      *= mapRatio
+              tmpJ1     *= mapRatio
+              tmpJe1    *= mapRatio
            ENDIF
 
            ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
            IF KEYWORD_SET(error_estimates) THEN BEGIN
-              tmpJerr  *= mapRatio
+              tmpJerr   *= mapRatio
 
               IF KEYWORD_SET(also_oneCount) THEN BEGIN
                  tmpJ1err *= mapRatio
@@ -923,6 +939,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            itvlcharE1     = [itvlcharE1,tmpChare1]
            itvlN1         = [itvlN1    ,tmpN1    ]
            itvlT1         = [itvlT1    ,tmpT1    ]
+
         ENDIF
         
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
@@ -932,13 +949,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            itvlJerr    = [itvlJerr  ,tmpJerr  ]
            itvlCurErr  = [itvlCurErr  ,tmpCurErr  ]
 
+           SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,itvlErrors, $
+                                        /ADD_TO_ERROROUT
+
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               itvlN1err   = [itvlN1err ,tmpN1err ]
               itvlT1err   = [itvlT1err ,tmpT1err ]
               itvlJ1err   = [itvlJ1err ,tmpJ1err ]
               itvlCur1Err = [itvlCur1Err ,tmpCur1Err ]
+              SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,itvlErrors1, $
+                                           /ADD_TO_ERROROUT
            ENDIF
         ENDIF
+
         itvlPeakE      = [itvlPeakE ,tmpPeakE ]
         itvlPeakdE     = [itvlPeakdE ,tmpPeakdE ]
 
@@ -958,7 +981,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              Nerr     : TEMPORARY(itvlNerr)   , $
                              Terr     : TEMPORARY(itvlTerr)   , $
                              Jerr     : TEMPORARY(itvlJerr)   , $
-                             CurErr   : TEMPORARY(itvlCurErr)}
+                             CurErr   : TEMPORARY(itvlCurErr) , $
+                             errors   : TEMPORARY(itvlErrors)}
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               tmp1Struct  = {j1       : TEMPORARY(itvlJ1)     , $
@@ -970,7 +994,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              N1err    : TEMPORARY(itvlN1err)  , $
                              T1err    : TEMPORARY(itvlT1err)  , $
                              J1Err    : TEMPORARY(itvlJ1Err)  , $
-                             Cur1Err  : TEMPORARY(itvlCur1Err)}
+                             Cur1Err  : TEMPORARY(itvlCur1Err) , $
+                             errors1  : TEMPORARY(itvlErrors1)}
               tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(tmp1Struct))
            ENDIF
 
@@ -1021,25 +1046,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      curPotList.Add,tmpStruct
   ENDFOR
 
-  looking         = 3B
-  ind             = 0
-  WHILE (looking GT 0) DO BEGIN
-     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*DOWN*E') THEN BEGIN
-        looking--
-        edind = ind
-     ENDIF
+  ;; looking         = 3B
+  ;; ind             = 0
+  ;; WHILE (looking GT 0) DO BEGIN
+  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*DOWN*E') THEN BEGIN
+  ;;       looking--
+  ;;       edind = ind
+  ;;    ENDIF
 
-     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*E') THEN BEGIN
-        looking--
-        euind = ind
-     ENDIF
+  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*E') THEN BEGIN
+  ;;       looking--
+  ;;       euind = ind
+  ;;    ENDIF
 
-     IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*I') THEN BEGIN
-        looking--
-        iuind = ind
-     ENDIF
-     ind++
-  ENDWHILE
+  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*I') THEN BEGIN
+  ;;       looking--
+  ;;       iuind = ind
+  ;;    ENDIF
+  ;;    ind++
+  ;; ENDWHILE
 
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN

@@ -1219,6 +1219,8 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
 
         sigma_Uy_Pxx  = sigma_Ux_Pxx
 
+        sigma_Uy_Pyy  = sigma_Ux_Pxx
+
         sigma_Uy_Pzz  = sigma_Ux_Pzz
 
         sigma_Uz_Pyy  = sigma_Uz_Pxx
@@ -1226,6 +1228,8 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
         sigma_Pxx_Pyy = sigma_Pxx_Pxx
 
         sigma_Pyy_Pyy = sigma_Pxx_Pxx
+
+        sigma_Pyy     = sigma_Pxx
 
         sigma_Pyy_Pzz = sigma_Pxx_Pzz
 
