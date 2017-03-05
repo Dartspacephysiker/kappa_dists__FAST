@@ -230,9 +230,13 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            tDiff      : tDiff     [safe_i] , $
                            phiBar     : phiBar    [safe_i] , $
                            phiBarErr  : phiBarErr [safe_i] , $
-                           pBarAll    : {ed : phiBar_ed[safe_i], $
-                                         eu : phiBar_eu[safe_i], $
+                           pBarAll    : {ed    : phiBar_ed[safe_i], $
+                                         eu    : phiBar_eu[safe_i], $
                                          edErr : phiBarErr_ed[safe_i], $
-                                         euErr : phiBarErr_eu[safe_i]}}
+                                         euErr : phiBarErr_eu[safe_i]}, $
+                           NDown      : curPotList[edind].N[safe_i], $
+                           NDownErr   : curPotList[edind].Nerr[safe_i], $
+                           TDown      : REFORM(curPotList[edind].T[3,safe_i]), $
+                           TDownErr   : curPotList[edind].Terr[safe_i]}
 
 END

@@ -195,7 +195,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      label__which_times      = [0,0,0]
      ;; energyArr               = [[3e1,3.0e4],[3e1,3.0e4],[1e2,2.4e4]]
      ;; energyArr               = [[4,3.0e4],[4,3.0e4],[4,2.4e4]]
-     energyArr               = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
+     IF ~KEYWORD_SET(energyArr) THEN BEGIN
+        energyArr            = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
+     ENDIF
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
      aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
