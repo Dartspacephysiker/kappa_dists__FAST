@@ -52,7 +52,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
                       DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
-  COMPILE_OPT idl2
+  COMPILE_OPT idl2,STRICTARRSUBS
 
   ;;For updating K_EA__gFunc,K_EA__bFunc
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
@@ -366,6 +366,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
            MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
            PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
+           /CONTINUE_IF_NOMATCH, $
            ONECOUNT_STR=oneCurve
         
         IF peak_energy EQ -1 THEN CONTINUE

@@ -31,9 +31,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                              UNITS=units
 
-  COMMON FIT_MASS,mass
+  COMPILE_OPT idl2,STRICTARRSUBS
 
-  COMPILE_OPT idl2
+  COMMON FIT_MASS,mass
 
   kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
   gaussFunc  = 'MAXWELL_FLUX__FUNC'
@@ -53,6 +53,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   ENDIF
 
   contKappa  = 0
+
+  ;;Keep the original guesses
+  Aorig = A
+  IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+     AGaussOrig = AGauss
+  ENDIF
 
   WHILE ~contKappa DO BEGIN
 
@@ -265,7 +271,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                     time_index:bounds_i, $
                                     fitStatus:fitStatus, $
                                     chi2:chi2, $
-                                    pVal:pVal}
+                                    pVal:pVal, $
+                                    A_SDT:Aorig}
 
      IF KEYWORD_SET(add_full_fits) THEN BEGIN
         yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,A,UNITS=units)
@@ -395,6 +402,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                  fitStatus:gaussFitStatus, $
                                  chi2:chi2, $
                                  pVal:pValGauss, $
+                                 A_SDT:AGaussOrig, $
                                  is_sdt_fit:KEYWORD_SET(use_SDT_Gaussian_fit)}
 
         IF KEYWORD_SET(add_full_fits) THEN BEGIN

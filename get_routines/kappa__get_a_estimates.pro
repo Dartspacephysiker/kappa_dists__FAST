@@ -81,7 +81,7 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            UNITS=units
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT idl2,STRICTARRSUBS
 
   COMMON FIT_MASS,mass
 

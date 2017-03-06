@@ -74,9 +74,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                   ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  IF SIZE(load_diff_eFlux_file,/TYPE) NE 7 THEN BEGIN
+  ;; IF SIZE(load_diff_eFlux_file,/TYPE) NE 7 THEN BEGIN
      outDir               = '~/software/sdt/batch_jobs/saves_output_etc/'
-  ENDIF
+  ;; ENDIF
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
      IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4
@@ -188,6 +188,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
      FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
      FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
+     MIN_PEAK_ENERGY=min_peak_energy, $
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
      FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
      FITFILE=fitFile, $
@@ -314,31 +315,36 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;; GET_DATA,'Je',DATA=je
      ;; GET_DATA,'Jee',DATA=jee
 
-     error_estimates = 1
-     IF KEYWORD_SET(error_estimates) THEN BEGIN
-        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-        n1       = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
-        errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet,/CONV_TO_CM)
-        errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,QUIET=quiet,/CONV_TO_CM)
-
-        nerr        = MAKE_ARRAY(473,/FLOAT)
-        n1err       = MAKE_ARRAY(473,/FLOAT)
-        FOR k=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-           nerr[k]  = errors[k].n
-           n1err[k] = errors1[k].n
-        ENDFOR
-        fracN       = nerr/nOne.y
-        fracN1      = n1err/n1.y
-        ;; errors = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,QUIET=quiet, $
-        ;;                                           /CONV_TO_CM)
-     ENDIF
+     n   = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     n1  = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
 
      je  = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
      jee = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
 
      je1  = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
      jee1 = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+
+     T   = T_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+     T1  = T_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
+
+     error_estimates = 1
+     IF KEYWORD_SET(error_estimates) THEN BEGIN
+
+        errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet,/PRESSURE_COVAR_CALC)
+        errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,QUIET=quiet,/PRESSURE_COVAR_CALC)
+
+        ;; nHere    = N_ELEMENTS(n.x)
+
+        ERROR_N_2D,n,errors,nerr
+        ERROR_N_2D,n1,errors1,n1err
+
+        ERROR_J_2D,je,errors,jerr
+        ERROR_J_2D,je1,errors1,j1err
+
+        ERROR_T_2D,T,n,errors,Terr
+        ERROR_T_2D,T1,n1,errors1,T1err
+
+     ENDIF
 
      PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                              A=a, $
@@ -403,6 +409,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         IF N_ELEMENTS(fit2DGauss_inf_list) GT 0 THEN BEGIN
            saveStr += 'fit2DGauss_inf_list,'
+        ENDIF
+
+        IF KEYWORD_SET(error_estimates) THEN BEGIN
+              saveStr += 'nErr,jErr,TErr,errors,'
         ENDIF
 
         PRINT,'Saving ' + fitFile + ' ...'

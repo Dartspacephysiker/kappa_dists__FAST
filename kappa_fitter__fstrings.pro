@@ -114,7 +114,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
 
   defFitFile           = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
                         '-Kappa_fits_and_Gauss_fits-' + eeb_or_ees + '-horseshoe2d' + plotNamePref + '.sav'
-  IF KEYWORD_SET(fitFile) THEN BEGIN
+  ;; IF KEYWORD_SET(fitFile) THEN BEGIN
      CASE SIZE(fitFile,/TYPE) OF
         7: BEGIN
            IF ~(FILE_TEST(fitFile) OR FILE_TEST(loadDir+fitFile)) THEN BEGIN
@@ -128,6 +128,6 @@ PRO KAPPA_FITTER__FSTRINGS, $
            fitFile    = defEFluxFile
         END
      ENDCASE
-  ENDIF
+  ;; ENDIF
 
 END
