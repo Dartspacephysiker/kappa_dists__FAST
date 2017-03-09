@@ -21,7 +21,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         OUT_BAD_T=exclude_t, $                                        
                                         FIT_TYPE=fit_type
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   exclString = 'Excluded '
   IF KEYWORD_SET(dont_shrink_list) THEN exclString = 'Should have excluded '

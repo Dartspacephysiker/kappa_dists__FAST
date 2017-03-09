@@ -75,7 +75,7 @@ PRO KAPPA_EFLUX_FIT, $
    OUT_STRINGS=strings, $
    TXTOUTPUTDIR=txtOutputDir
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Defaults

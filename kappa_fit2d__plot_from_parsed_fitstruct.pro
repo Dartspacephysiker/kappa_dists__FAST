@@ -13,7 +13,7 @@ PRO KAPPA_FIT2D__PLOT_FROM_PARSED_FITSTRUCT,curDataStr,fit2DStruct, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
    KAPPA_FIT__SHOW__QUIT=show__quit
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
 

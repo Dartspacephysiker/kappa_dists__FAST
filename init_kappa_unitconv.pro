@@ -1,7 +1,7 @@
 ;2016/09/02
 PRO INIT_KAPPA_UNITCONV,curDataStr
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 
   @kappa_unitconversion_common.pro

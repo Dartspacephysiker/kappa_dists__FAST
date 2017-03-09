@@ -24,7 +24,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     BUFFER=buffer, $
                     UNITS=units
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   skipping             = KEYWORD_SET(skip_bad_fits)
 

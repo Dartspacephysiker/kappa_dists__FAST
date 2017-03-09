@@ -63,7 +63,7 @@ FUNCTION PLOT_KAPPA_FITPARAMS__TIME_SERIES,fit2D, $
    ORBIT=orbit, $
    CLOSE_WINDOW_AFTER_SAVE=close_window_after_save
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF KEYWORD_SET(suppress_line) AND KEYWORD_SET(suppress_scatter) THEN BEGIN
      PRINT,"Well, you've disabled everything. Great job."

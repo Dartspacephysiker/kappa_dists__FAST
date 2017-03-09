@@ -18,7 +18,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    FITFILE=fitFile, $
    LOADDIR=loadDir
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 ;; fit2D__only_fit_peak_eRange
 ;; fit2D__only_fit_aboveMin

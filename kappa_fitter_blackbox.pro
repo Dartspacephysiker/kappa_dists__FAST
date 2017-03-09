@@ -65,7 +65,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
                           DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
      SET_PLOT_DIR,plotDir, $

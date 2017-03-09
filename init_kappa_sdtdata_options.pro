@@ -7,7 +7,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                                     _EXTRA=e
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   defEEB_or_EES                = 'eeb'
   defSpectra_average_interval  = 0

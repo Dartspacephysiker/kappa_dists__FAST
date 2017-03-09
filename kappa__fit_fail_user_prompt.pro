@@ -4,7 +4,7 @@ PRO KAPPA__FIT_FAIL_USER_PROMPT,A,fixA,energy_inds, $
                                 STRINGS=strings, $
                                 BOUNDS_I=bounds_i
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
    
   ;; failedlasttime = 1
 

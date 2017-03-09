@@ -17,7 +17,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST,fit2D_inf_list, $
                                 ;; BESTFIT_CHI=bestFit_chi, $
                                 ;; BESTFIT_2DCHI=bestFit_2DChi
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF ~KEYWORD_SET(highDens_thresh) THEN BEGIN
      highDens_thresh = 10        ;We want nothing to do with it if it's above 5 cm^-3

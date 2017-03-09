@@ -65,7 +65,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
                                        SANS_OFFDIAG=sans_offDiag;; , $
                                        ;; CONV_TO_CM=conv_to_cm ;;What were you thinking? This calculates RELATIVE errors
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   no_pressure_covar_calc  = ~KEYWORD_SET(pressure_covar_calc)
   no_heatFlux_covar_calc  = ~KEYWORD_SET(heatFlux_covar_calc)

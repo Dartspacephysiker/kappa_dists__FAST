@@ -11,7 +11,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
    KAPPA_FIT__SHOW__QUIT=show__quit, $
    FIT2D__PA_ZRANGE=fit2D__PA_zRange
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
 

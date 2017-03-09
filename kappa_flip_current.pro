@@ -1,6 +1,6 @@
 PRO KAPPA_FLIP_CURRENT,kappa_current,gauss_current,obs_current
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Flip current signs if they're negative
   flipMeK                     = WHERE(kappa_current LT 0,nFlipK,COMPLEMENT=posK_i,NCOMPLEMENT=nPosK)

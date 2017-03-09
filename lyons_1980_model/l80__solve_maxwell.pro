@@ -5,7 +5,7 @@ PRO L80__SOLVE_MAXWELL,V1,V2,kmWid,nSteps, $
                        SHOW=show, $
                        RTOL=rTol, $
                        ATOL=aTol
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
 

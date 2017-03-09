@@ -11,7 +11,7 @@ PRO   KAPPA_FIT_DEFAULTS, $
    ENERGY_ELECTRONS=energy_electrons, $
    ESTIMATE_A_FROM_DATA=estimate_A_from_data
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF ~KEYWORD_SET(kappa) THEN BEGIN
      kappa                     = 3.0 ;Why not?

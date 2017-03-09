@@ -49,7 +49,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    _EXTRA=e
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   defFit_tol                                 = 1.e-3
   defFit2D_tol                               = 1.e-3

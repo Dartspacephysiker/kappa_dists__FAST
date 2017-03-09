@@ -5,7 +5,7 @@ FUNCTION INIT_KAPPA_STRING_STRUCT,diff_eFlux, $
                                   angleStr, $
                                   kSDTData_opt
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
     kStrings                              = {today:GET_TODAY_STRING(/DO_YYYYMMDD_FMT), $
                                           eeb_or_ees:kSDTData_opt.eeb_or_ees, $

@@ -1,7 +1,7 @@
 PRO PRINT_KAPPA_LOOP_FIT_SUMMARY,fitStatus,gaussfitStatus
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   badFits_i                    = WHERE(fitStatus GT 0,nBadFits)  
   

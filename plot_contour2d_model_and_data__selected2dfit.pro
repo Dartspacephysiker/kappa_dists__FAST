@@ -5,7 +5,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    FITSTRING=fitString
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro

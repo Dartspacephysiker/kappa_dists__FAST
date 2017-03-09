@@ -6,7 +6,7 @@ PRO KAPPA__GET_GOOD_INDS_FROM_FITSTRUCTS,kappaFits,time_index,runIndex,curThetas
                                          good_kappaFits_i, $
                                          OUT_KAPPAFITS_LIST=kappaFits_list
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
      nGoodFits               = 0L
      goodAngles              = !NULL

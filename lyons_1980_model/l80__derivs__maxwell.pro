@@ -4,7 +4,7 @@
 ;;iPotD[1] gives the value of phi'[x] at x
 FUNCTION L80__DERIVS__MAXWELL,x,iPotD
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
   @common__l80_model.pro

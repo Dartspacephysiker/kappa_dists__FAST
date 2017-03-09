@@ -5,7 +5,7 @@
 ;R_B    : Mirror ratio
 PRO L80__INIT_MODEL_PARAMS__MAXWELL,T_m,dens_m,R_B
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
 

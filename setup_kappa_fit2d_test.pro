@@ -19,7 +19,7 @@ PRO SETUP_KAPPA_FIT2D_TEST,good_angleBin_i,good_fits_i,iWin, $
                            OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                            OUT_ERANGE_I=eRange_i
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   iAngle             = good_angleBin_i[iWin]
   iFit               = good_fits_i[iWin]

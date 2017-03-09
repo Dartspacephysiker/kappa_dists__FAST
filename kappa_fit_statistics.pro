@@ -8,7 +8,7 @@ PRO KAPPA_FIT_STATISTICS,kappa2d,gauss2d,potStruct, $
                          CHITHRESH=chiThresh, $
                          BUFFER=buffer
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   defChiThresh = 5.0
 

@@ -1,7 +1,7 @@
 ;;02/11/17
 PRO JOURNAL__20170210__ORB_1773__JUST_LOOK_AT_EN_SPEC_IN_ESPECDB_DETRITUS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; detritDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/Newell_batch_output/ions_included/'
   ;; detritus  = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_1773_0.sav'

@@ -13,7 +13,7 @@ PRO KAPPA_FITFILE_STRING,outSuff, $
                          OUT_PARED_SUFF=paredSuff
                          
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(R_B) GT 0 THEN magRatio = R_B ELSE magRatio = 3.0
 

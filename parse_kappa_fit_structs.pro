@@ -11,7 +11,7 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
                             FITSTATUS=fitStatus, $
                             USE_MPFIT1D=use_mpFit1D
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   NStructs = N_ELEMENTS(fits)
 

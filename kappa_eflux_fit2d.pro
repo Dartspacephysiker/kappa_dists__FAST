@@ -90,7 +90,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
    DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
 

@@ -6,7 +6,7 @@ FUNCTION MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX,data3d, $
    APPEND_DATA_NAME=append_data_name, $
    REPLACE_DATA_NAME=replace_data_name
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   nStructs = N_ELEMENTS(data3d.data_name)
   keep_i   = INDGEN(nStructs)

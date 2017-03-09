@@ -8,7 +8,7 @@ PRO GET_KAPPA_AND_MAXWELLIAN_CURRENT,kappa2D,Gauss2D, $
                                      MAKE_CURRENTS_POSITIVE=make_currents_positive, $
                                      QUIET=quiet
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   CASE 1 OF
      KEYWORD_SET(dens_kappa2D): BEGIN

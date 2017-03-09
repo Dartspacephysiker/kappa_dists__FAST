@@ -49,7 +49,7 @@ PRO KAPPA_FIT__LOOP__ONE_ANGLE,times,energies,data,oneCount_data,angles, $
                                TXTOUTPUTDIR=txtOutputDir
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Loop over provided indices, plot data as well as fit, and optionally save
   IF KEYWORD_SET(add_oneCount_curve) THEN BEGIN

@@ -3,7 +3,7 @@ PRO PARSE_KAPPA_2DFITS,fitParams, $
                        STRUCT_A=Astruct, $
                        NAMES_A=A_names
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   NStructs = N_ELEMENTS(fits)
 

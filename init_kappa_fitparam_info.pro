@@ -10,7 +10,7 @@
 FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                                   ;; ERANGE_PEAK=eRange_peak
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; AMaxStep        = REPLICATE(0.D,N_ELEMENTS(A))
   ;; ;;Don't let bulk energy get out of hand

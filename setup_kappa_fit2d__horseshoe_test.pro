@@ -11,7 +11,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
    OUT_ERANGE_I=eRange_i
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
 

@@ -60,7 +60,7 @@ PRO KAPPA_FIT__LOOP__EACH_ANGLE,times,diff_eFlux,dEF_oneCount, $
                                 TXTOUTPUTDIR=txtOutputDir
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
   energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])

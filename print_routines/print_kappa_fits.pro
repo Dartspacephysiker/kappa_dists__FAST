@@ -6,7 +6,7 @@ PRO PRINT_KAPPA_FITS,pot, $
                      OUTFILE=filename, $
                      OUTDIR=outDir
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   PARSE_KAPPA_FIT_STRUCTS,fit_struct, $
                           A=A, $

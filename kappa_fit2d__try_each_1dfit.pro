@@ -19,7 +19,7 @@ PRO KAPPA_FIT2D__TRY_EACH_1DFIT,keep_iTime,iTime, $
                                 PRINT_2DFITINFO=print_2DFitInfo, $
                                 PRINT_2DWININFO=print_2DWinInfo
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; just_eRange_peak  = 1
 

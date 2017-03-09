@@ -3,7 +3,7 @@ PRO POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir, $
                            CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
      pap    = PLOT_KAPPA_FITPARAMS__TIME_SERIES(fit2DK, $
                                                 /KAPPA, $

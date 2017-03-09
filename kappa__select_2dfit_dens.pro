@@ -5,7 +5,7 @@ FUNCTION KAPPA__SELECT_2DFIT_DENS,fit2D, $
                                   FITTYPE__STRING=fitType__string, $
                                   QUIET=quiet
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(fitType__string) GT 0 THEN BEGIN
      ft_str = fitType__string

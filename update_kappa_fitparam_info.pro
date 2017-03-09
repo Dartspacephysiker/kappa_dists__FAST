@@ -13,7 +13,7 @@ PRO UPDATE_KAPPA_FITPARAM_INFO,paramInfo,A,fixA,eRange_peak, $
                                NO_FIXA=no_fixA, $
                                NO_ERANGE_PEAK=no_eRange_peak
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;update this guy first
   IF ~KEYWORD_SET(no_eRange_peak) THEN BEGIN

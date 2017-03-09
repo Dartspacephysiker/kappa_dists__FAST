@@ -9,7 +9,7 @@ PRO L80__INIT_MSPHERE_POTENTIAL,V1,V2,mWidm,R_B, $
                                 USE_VOLTS=use_volts, $
                                 SHOW=show
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__l80_model.pro
 

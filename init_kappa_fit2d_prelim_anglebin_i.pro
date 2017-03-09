@@ -4,7 +4,7 @@ PRO INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
                                        OUT_NREQ_ANGLES=nReqAngles, $
                                        OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
 

@@ -3,7 +3,7 @@ PRO PRINT_DIAGNOSTICS__BIG_KAPPA_AND_GAUSS_CURRENT,refCurrent,pot, $
    kappa_current,kappaTime,Astruct, $
    maxwell_current,gaussTime,AstructGauss
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(kappa_current) GT 0 AND N_ELEMENTS(kappaTime) GT 0 AND N_ELEMENTS(Astruct) GT 0 THEN BEGIN
      bigKCur_i    = WHERE(ABS(kappa_current) GE MAX(ABS(refCurrent),maxInd_jMag),nBigKCur)  

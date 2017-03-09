@@ -82,7 +82,7 @@ PRO KAPPA_FIT__USE_SDT_DATA_STRUCT, $ ;X,A,F,pders, $
    OUT_PARAMSTR=out_paramStr, $
    TXTOUTPUTDIR=txtOutputDir
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Defaults

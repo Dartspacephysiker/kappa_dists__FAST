@@ -15,7 +15,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    FIT_EACH_ANGLE=fit_each_angle, $
    _REF_EXTRA=e
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Perma-set because we like having all angles for diff eFlux files
   IF N_ELEMENTS(fit_each_angle) EQ 0 THEN BEGIN

@@ -17,7 +17,7 @@ FUNCTION PLOT_KAPPA_MAXWELL_OBSERVED_CURRENT_VS_POTENTIAL,kappa_current,gauss_cu
    WINDOW=window, $
    BUFFER=buffer
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;All kinds of plot preliminaries

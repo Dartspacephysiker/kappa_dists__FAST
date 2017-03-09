@@ -13,7 +13,7 @@ PRO SETUP_POTENTIAL_AND_CURRENT,setup, $
                                 NO_CHARI_FOR_POT=no_charI_for_pot, $
                                 USE_CALCKED_JDIFF_EFLUX=use_calcked_Jdiff_eFlux
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; setup = {kappaS:Astruct, $
   ;;          gaussS:AStructGauss, $

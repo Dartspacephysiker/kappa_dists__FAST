@@ -7,7 +7,7 @@ PRO L80__SOLVE_KAPPA__SIGMA_P,V1,V2,kmWid,nSteps, $
                               ATOL=aTol, $
                               EXPERIMENTAL=experimental, $
                               SAVE_CONVERGED_PLOT=save_converged_plot
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @~/idl/lib/hatch_idl_utils/knight_relation_funcs/common__dk_ode18.pro
   @common__l80_model.pro

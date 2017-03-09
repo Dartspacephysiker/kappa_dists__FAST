@@ -6,7 +6,7 @@ PRO KAPPA__GET_DENSITY_ESTIMATES,dat, $
                                  STRINGS=strings, $
                                  TXTOUTPUTDIR=txtOutputDir
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(txtOutputDir) EQ 0 THEN BEGIN
      CASE 1 OF

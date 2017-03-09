@@ -21,7 +21,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            PRINT_2DWININFO=print_2DWinInfo, $
                            UNITS=units
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro

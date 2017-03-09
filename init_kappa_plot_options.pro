@@ -10,7 +10,7 @@ FUNCTION INIT_KAPPA_PLOT_OPTIONS,NO_PLOTS=no_plots, $
                                  _EXTRA=e
 
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   defAdd_oneCount_curve            = 1
 

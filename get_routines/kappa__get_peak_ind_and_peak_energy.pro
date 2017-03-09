@@ -8,7 +8,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    ONECOUNT_STR=oneCurve
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 
   b_offset              = KEYWORD_SET(bulk_offset) ? bulk_offset : 0 ;bulk offset

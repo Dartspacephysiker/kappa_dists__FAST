@@ -33,7 +33,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
   COMMON FIT_MASS,mass
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(kappa_fixA) EQ 0 THEN BEGIN
      kappa_fixA               = [1,1,1,1,0,0,0] ;Vary bulk E [0], Temperature [1], kappa [2], and density [3]

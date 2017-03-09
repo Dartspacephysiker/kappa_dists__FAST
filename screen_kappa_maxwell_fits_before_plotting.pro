@@ -5,7 +5,7 @@ PRO SCREEN_KAPPA_MAXWELL_FITS_BEFORE_PLOTTING,kappa_current,gauss_current,obs_cu
    MAX_KAPPA=max_kappa, $
    EXCLUDE_BAD_FITS=exclude_bad_fits
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF KEYWORD_SET(exclude_bad_fits) THEN BEGIN
      badFits_i = WHERE(fitStatus GE 1,nBadFits,COMPLEMENT=goodFits_i,NCOMPLEMENT=nGoodFits)

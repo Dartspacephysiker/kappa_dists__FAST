@@ -11,7 +11,7 @@ PRO KAPPA_FIT2D__1DFIT_EACH_ANGLE,curDataStr,curFitStr, $
                                   FIT2D_INF_LIST=fit2D_inf_list, $
                                   OUT_1D_DENS_ESTS=out_1D_dens_ests
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   OKStatus         = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
   nTotAngles       = N_ELEMENTS(allAngles)

@@ -1,7 +1,7 @@
 ;2016/07/14 Now get the thing back
 FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX,data3d,ind
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 this = ndimen(data3d.geomfactor)
 

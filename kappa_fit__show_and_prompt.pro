@@ -10,7 +10,7 @@ PRO KAPPA_FIT__SHOW_AND_PROMPT,diff_eFlux,synthKappa, $
                                FINISH_AND_SAVE_ALL=finish_and_save_all, $
                                KAPPA_FIT__SHOW__QUIT=show__quit
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   CASE 1 OF
      KEYWORD_SET(prompt__cont_to_next_fit): BEGIN

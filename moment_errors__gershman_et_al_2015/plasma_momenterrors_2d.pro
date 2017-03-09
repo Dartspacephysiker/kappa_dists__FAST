@@ -64,7 +64,7 @@ FUNCTION PLASMA_MOMENTERRORS_2D,f,sigma_f,species,energy,theta,phi, $
                                 SANS_PHI=sans_phi, $
                                 CONV_TO_CM=conv_to_cm
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   no_pressure_covar_calc  = ~KEYWORD_SET(pressure_covar_calc)
   no_heatFlux_covar_calc  = ~KEYWORD_SET(heatFlux_covar_calc)

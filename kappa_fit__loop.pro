@@ -60,7 +60,7 @@ PRO KAPPA_FIT__LOOP,times,energies,data,oneCount_data,angles, $
                     OUT_PARAMSTR=out_paramStr, $
                     TXTOUTPUTDIR=txtOutputDir
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   CASE 1 OF
      KEYWORD_SET(fit_each_angle): BEGIN
