@@ -99,6 +99,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    WHICH_TIMES__LABEL=label__which_times, $
    ENERGYARR=energyArr, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
+   POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
+   POT__CHASTON_STYLE=pot__Chaston_style, $
+   POT__FROM_FILE=pot__from_file, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
@@ -124,7 +127,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   IF KEYWORD_SET(aRange__moments_e_down) THEN BEGIN
 
-     fSuff = STRING(FORMAT='("-aR_mom_eD_",I0,"-",I0)',aRange__moments_e_down[0],aRange__moments_e_down[1])
+     CASE SIZE(aRange__moments_e_down,/TYPE) OF
+        7: BEGIN
+           IF STRUPCASE(aRange__moments_e_down[0]) EQ 'LC' THEN BEGIN
+              fSuff = "-aR_mom_eD_LC"
+           ENDIF ELSE BEGIN
+              STOP
+           ENDELSE
+        END
+        ELSE: BEGIN
+           fSuff = STRING(FORMAT='("-aR_mom_eD_",I0,"-",I0)',aRange__moments_e_down[0],aRange__moments_e_down[1])
+        END
+     ENDCASE
+
      IF KEYWORD_SET(datFile) THEN BEGIN
         ADD_FNAME_SUFF,datFile,fSuff
      ENDIF
@@ -208,7 +223,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;; aRange__moments_i_up    = [150.,210.]
      ;; aRange__moments_e_up    = [150.,210.]
 
-     aRange__moments_list    = LIST(aRange__moments_e_down,aRange__moments_e_up,aRange__moments_i_up)
      aRange__moments_list    = LIST(aRange__moments_e_down,aRange__moments_e_up,aRange__moments_i_up)
      ;; aRange__peakEn_list     = LIST(!NULL,!NULL,[150,210])
      aRange__peakEn_list     = LIST(!NULL,!NULL,!NULL)
@@ -375,7 +389,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
            GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1],DATA=sc_pot, $
-                            /FROM_FILE, $
+                            FROM_FA_POTENTIAL=pot__from_fa_potential, $
+                            CHASTON_STYLE=pot__Chaston_style, $
+                            FROM_FILE=pot__from_file, $
                             ORBIT=orbit
            sc_pot_list.Add,sc_pot
         ENDIF
@@ -447,6 +463,33 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange
+
+        IF SIZE(aRange__moments[0],/TYPE) EQ 7 THEN BEGIN
+           IF STRUPCASE(aRange__moments[0]) EQ 'LC' THEN BEGIN
+              aRange__moments = lc_angleRange
+           ENDIF ELSE BEGIN
+              PRINT,"Huh?"
+              STOP
+           ENDELSE
+        ENDIF
+
+        IF SIZE(aRange__peakEn[0],/TYPE) EQ 7 THEN BEGIN
+           IF STRUPCASE(aRange__peakEn[0]) EQ 'LC' THEN BEGIN
+              aRange__peakEn  = lc_angleRange
+           ENDIF ELSE BEGIN
+              PRINT,"Huh?"
+              STOP
+           ENDELSE
+        ENDIF
+
+        IF SIZE(aRange__charE[0],/TYPE) EQ 7 THEN BEGIN
+           IF STRUPCASE(aRange__charE[0]) EQ 'LC' THEN BEGIN
+              aRange__charE   = lc_angleRange
+           ENDIF ELSE BEGIN
+              PRINT,"Huh?"
+              STOP
+           ENDELSE
+        ENDIF
 
         aRange_oMoments_list.Add,aRange__moments
         aRange_oPeakEn_list.Add,aRange__peakEn
