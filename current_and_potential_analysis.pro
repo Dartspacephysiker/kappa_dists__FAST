@@ -4,6 +4,19 @@ PRO ADD_FNAME_SUFF,fName,suff
         fNameTmp[0] += suff
         fName        = STRJOIN(TEMPORARY(fNameTmp),'.')
 END
+
+PRO ERROR_N,n,errors,nerr
+
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  ;; FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
+     ;; nerr[l] = n.y[l]  * errors[l].n
+     ;; nerr[l] = n.y[l]  * errors.n[l]
+  ;; ENDFOR
+     nerr = n.y  * errors.n
+  
+END
+
 PRO ERROR_J,j,errors,jerr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -19,26 +32,69 @@ PRO ERROR_J,j,errors,jerr
 
 END
 
-PRO ERROR_N,n,errors,nerr
+PRO ERROR_JE,n,j,je,T,errors,jeErr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  ;; FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
-     ;; nerr[l] = n.y[l]  * errors[l].n
-     ;; nerr[l] = n.y[l]  * errors.n[l]
-  ;; ENDFOR
-     nerr = n.y  * errors.n
-  
+  eV_cm2sec_to_mW_m2 = 1.60218D-12
+  eV_cm3_to_J_m3     = 1.60218D-13
+
+  ;;I guess we'll SI-a-tize everything here
+  vPar              = j.y/n.y/1D2                             ;j.y in #/cm^2-sec and n.y in cm^-3, so mult. by 1e-2 to get m/s
+  PPar              = REFORM(T.y[2,*])*n.y*3.D*eV_cm3_to_J_m3 ;T.y in eV, so P in eV/cm^3
+  PPrp              = REFORM(T.y[0,*])*n.y*3.D*eV_cm3_to_J_m3
+  ;; jePar          = je.y*1D-3                               ;W/m^3
+
+  ;;Parallel heat flux, from Hvec = Qvec - vVec dot P_tensor - 0.5 * vVec * Trace(P_tensor)
+  ;; HPar_mW_m2        = je.y - 1.5D * eV_cm2sec_to_mW_m2 * (vPar * PPar - vPar * PPrp) * 1D2 /eV_cm3_to_J_m3 ;in mW/m2
+  HPar              = (je.y*1D-3) - 1.5D * (vPar * PPar - vPar * PPrp)                                     ;in W/m2
+
+  ;;sigmas
+  sigmaVParSquared  = vPar * vPar * errors.Uz  * errors.Uz
+  sigmaPParSquared  = PPar * PPar * errors.Pzz * errors.Pzz
+  sigmaPPrpSquared  = PPrp * PPrp * errors.Pxx * errors.Pxx
+  sigmaHParSquared  = errors.Hz * errors.Hz * HPar * HPar
+
+  ;;covars
+  covarVParPPar     = errors.R[*,3, 6] * (vPar * errors.Uz ) * (HPar * errors.Hz)
+  covarVParPPrp     = errors.R[*,3, 4] * (vPar * errors.Uz ) * (PPar * errors.Pzz)
+  covarVParHPar     = errors.R[*,3,12] * (vPar * errors.Uz ) * (HPar * errors.Hz)
+  covarPParPPrp     = errors.R[*,6, 4] * (PPar * errors.Pzz) * (PPrp * errors.Pxx)
+  covarPParHPar     = errors.R[*,6,12] * (PPar * errors.Pzz) * (HPar * errors.Hz)
+  covarPPrpHPar     = errors.R[*,4,12] * (PPrp * errors.Pxx) * (HPar * errors.Hz)
+
+  jeErr = SQRT(sigmaHParSquared + $
+               (1.5D*PPar + PPrp) * ( 2.D * TEMPORARY(covarVParHPar) + (1.5D*PPar + PPrp) * TEMPORARY(sigmaVParSquared) ) + $
+               vPar * (3.D * TEMPORARY(covarPParHPar) + 2.D * TEMPORARY(covarPPrpHPar) + $
+                       (1.5D * PPar + PPrp) * (3.D * TEMPORARY(covarVParPPar) + 2.D * TEMPORARY(covarVParPprp) )        ) + $
+               vPar * vPar * (2.25D * TEMPORARY(sigmaPParSquared) + 3.D * covarPParPPrp + TEMPORARY(sigmaPPrpSquared)   )   ) $
+          * 1D3 ;Convert back to mW/m^2
+
 END
 
-;; PRO ERROR_T,T,n,enErr,errors,Terr
+PRO ERROR_CHARE,j,je,jerr,jeErr,errors,charEErr
+
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+
+  const          = 6.242D*1.0D11
+
+  covarJParJePar = 0.D
+
+  charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * covarJParJePar )
+
+END
+
 PRO ERROR_T,T,n,errors,Terr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   Tavg             = REFORM(T.y[3,*])
-  PPar             = REFORM(T.y[2,*])*n.y
-  PPrp             = REFORM(T.y[0,*])*n.y
+  PPar             = REFORM(T.y[2,*])*n.y*3.D
+  PPrp             = REFORM(T.y[0,*])*n.y*3.D
 
   sigma_N_PPar     = errors.R[*,0,6]*(errors.N*N.y)*(errors.Pzz*PPar)
   sigma_N_PPrp     = errors.R[*,0,4]*(errors.N*N.y)*(errors.Pxx*PPrp)
@@ -63,14 +119,21 @@ PRO ERROR_T,T,n,errors,Terr
 
 END
 
-PRO ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr;; , $
+PRO ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr;; , $
                ;; ENERGY_ERROR=enErr
 
-  ERROR_J,j,errors,jerr
-  ERROR_N,n,errors,nerr
+  ;Raise
+  ERROR_N ,n,errors,nerr
+
+  ;The
+  ERROR_J ,j,errors,jerr
+  ERROR_JE,n,j,je,T,errors,jeErr
+  ERROR_CHARE,j,je,jerr,jeErr,errors,charEErr
+
+  ;Stakes
   ;; IF KEYWORD_SET(enErr) THEN BEGIN
      ;; ERROR_T,T,n,enErr,errors,Terr
-     ERROR_T,T,n,errors,Terr
+  ERROR_T,T,n,errors,Terr
   ;; ENDIF
 
 END
@@ -272,7 +335,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      j_list                = LIST()
      je_list               = LIST()
      chare_list            = LIST()
+
      jerr_list             = LIST()
+     jeErr_list            = LIST()
+     charEErr_list         = LIST()
 
      IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
         n1_list            = LIST()
@@ -285,6 +351,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         je1_list           = LIST()
         chare1_list        = LIST()
         j1err_list         = LIST()
+        je1Err_list        = LIST()
+        charE1Err_list     = LIST()
+
      ENDIF
 
      IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
@@ -388,8 +457,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         dEF_list.Add,TEMPORARY(diff_eFlux)
 
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
-           GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1],DATA=sc_pot, $
+           GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1], $
+                            DATA=sc_pot, $
                             FROM_FA_POTENTIAL=pot__from_fa_potential, $
+                            /REPAIR, $
                             CHASTON_STYLE=pot__Chaston_style, $
                             FROM_FILE=pot__from_file, $
                             ORBIT=orbit
@@ -672,16 +743,17 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                               EEB_OR_EES=eeb_or_ees, $
                                                               ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
                                                               /PRESSURE_COVAR_CALC, $
-                                                              HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
+                                                              ;; HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
+                                                              /HEATFLUX_COVAR_CALC, $
                                                               QUIET=quiet)
 
            ;; IF KEYWORD_SET(dens_errors) THEN BEGIN
-           nerr            = MAKE_ARRAY(nHere,/FLOAT)
-           jerr            = MAKE_ARRAY(nHere,/FLOAT)
-           Terr            = MAKE_ARRAY(nHere,/FLOAT)
+           ;; nerr            = MAKE_ARRAY(nHere,/FLOAT)
+           ;; jerr            = MAKE_ARRAY(nHere,/FLOAT)
+           ;; Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
-           ERROR_CALC,diff_eFlux,errors,j,n,T,jerr,nerr,Terr;; , $
-                      ;; ENERGY_ERROR=peak_dE_list[fakeK]
+           ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr
+           ;; ERROR_CALC,diff_eFlux,errors,j,je,n,T,jerr,jeErr,nerr,Terr
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
@@ -691,13 +763,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                               EEB_OR_EES=eeb_or_ees, $
                                                               ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
                                                               /PRESSURE_COVAR_CALC, $
-                                                              HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
+                                                              ;; HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
+                                                              /HEATFLUX_COVAR_CALC, $
                                                               QUIET=quiet)
               n1err        = MAKE_ARRAY(nHere,/FLOAT)
               j1err        = MAKE_ARRAY(nHere,/FLOAT)
               T1err        = MAKE_ARRAY(nHere,/FLOAT)
 
-              ERROR_CALC,dEF_oneCount,errors1,j1,n1,T1,j1err,n1err,T1err
+              ERROR_CALC,dEF_oneCount,errors1,n1,j1,je1,T1,n1err,j1err,je1Err,charE1Err,T1err
+              ;; ERROR_CALC,dEF_oneCount,errors1,j1,je1,n1,T1,j1err,je1Err,n1err,T1err
 
            ENDIF
 
@@ -726,8 +800,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         je_list.Add,TEMPORARY(je)
         chare_list.Add,CHAR_ENERGY((TEMPORARY(jC)).y,(TEMPORARY(jeC)).y)
         nerr_list.Add,TEMPORARY(nerr)
-        Terr_list.Add,TEMPORARY(Terr)
         jerr_list.Add,TEMPORARY(jerr)
+        jeErr_list.Add,TEMPORARY(jeErr)
+        charEErr_list.Add,TEMPORARY(charEErr)
+        Terr_list.Add,TEMPORARY(Terr)
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            err1_list.Add,TEMPORARY(errors1)
@@ -737,8 +813,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            je1_list.Add,TEMPORARY(je1)
            chare1_list.Add,CHAR_ENERGY((TEMPORARY(j1C)).y,(TEMPORARY(je1C)).y)
            n1err_list.Add,TEMPORARY(n1err)
-           T1err_list.Add,TEMPORARY(T1err)
            j1err_list.Add,TEMPORARY(j1err)
+           je1Err_list.Add,TEMPORARY(je1Err)
+           charE1Err_list.Add,TEMPORARY(charE1Err)
+           T1err_list.Add,TEMPORARY(T1err)
         ENDIF
 
      ENDFOR
@@ -748,21 +826,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           err_list, $
           err1_list, $
           n_list, $
-          nerr_list, $
-          T_list, $
-          Terr_list, $
           j_list, $
           je_list, $
           chare_list, $
+          T_list, $
+          nerr_list, $
           jerr_list, $
+          jeErr_list, $
+          charEErr_list, $
+          Terr_list, $
           n1_list, $
-          n1err_list, $
-          T1_list, $
-          T1err_list, $
           j1_list, $
           je1_list, $
           chare1_list, $
+          T1_list, $
+          n1err_list, $
           j1err_list, $
+          je1Err_list, $
+          charE1Err_list, $
+          T1err_list, $
           peak_ind_list, $
           peak_energy_list,peak_dE_list, $
           aRange_oMoments_list, $
@@ -807,32 +889,36 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         STOP
      ENDIF
 
-     itvlTime    = !NULL
-     itvlJ       = !NULL
-     itvlJe      = !NULL
-     itvlCur     = !NULL
-     itvlcharE   = !NULL
-     itvlPeakE   = !NULL
-     itvlPeakdE  = !NULL
-     itvlN       = !NULL
-     itvlNerr    = !NULL
-     itvlT       = !NULL
-     itvlTerr    = !NULL
-     itvlJerr    = !NULL
-     itvlCurErr  = !NULL
-     itvlErrors  = !NULL
+     itvlTime       = !NULL
+     itvlN          = !NULL
+     itvlJ          = !NULL
+     itvlJe         = !NULL
+     itvlcharE      = !NULL
+     itvlPeakE      = !NULL
+     itvlT          = !NULL
+     itvlCur        = !NULL
+     itvlNerr       = !NULL
+     itvlJerr       = !NULL
+     itvlJeErr      = !NULL
+     itvlcharEErr   = !NULL
+     itvlPeakdE     = !NULL
+     itvlTerr       = !NULL
+     itvlCurErr     = !NULL
+     itvlErrors     = !NULL
 
-     itvlJ1      = !NULL
-     itvlJe1     = !NULL
-     itvlCur1    = !NULL
-     itvlcharE1  = !NULL
-     itvlN1      = !NULL
-     itvlN1err   = !NULL
-     itvlT1      = !NULL
-     itvlT1err   = !NULL
-     itvlJ1err   = !NULL
-     itvlCur1Err = !NULL
-     itvlErrors1 = !NULL
+     itvlN1         = !NULL
+     itvlJ1         = !NULL
+     itvlJe1        = !NULL
+     itvlcharE1     = !NULL
+     itvlT1         = !NULL
+     itvlCur1       = !NULL
+     itvlN1err      = !NULL
+     itvlJ1err      = !NULL
+     itvlJe1Err     = !NULL
+     itvlCharE1Err  = !NULL
+     itvlT1err      = !NULL
+     itvlCur1Err    = !NULL
+     itvlErrors1    = !NULL
 
      ;; itvlErrors  = MAKE_BLANK_GERSHMAN_ERROR_STRUCT(2000, $
      ;;                                                /PRESSURE_COVAR_CALC, $
@@ -840,53 +926,58 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      FOR realK=0,nSegs-1 DO BEGIN
 
-        tmpT1            = tmpT[0,realK]
-        tmpT2            = tmpT[1,realK]
+        tmpT1               = tmpT[0,realK]
+        tmpT2               = tmpT[1,realK]
 
-        theseInds        = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
+        theseInds           = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
                                ( (j_list[k]).x LE tmpT2 ), $
                                nThese)
 
         IF nThese EQ 0 THEN STOP
 
-        theseInds        = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
+        theseInds           = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
         CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET
         IF ~is_sorted THEN STOP
         IF nThese EQ 0 THEN STOP
 
-        tmpTimes         = (j_list[k]).x[theseInds]
+        tmpTimes            = (j_list[k]).x[theseInds]
 
         ;;Pick up temps
-        tmpJ             = (j_list[k]).y[theseInds]
-        tmpJe            = (je_list[k]).y[theseInds]
-        ;; tmpCharE      = CHAR_ENERGY(tmpJ,tmpJe)
-        tmpCharE         = (chare_list[k])[theseInds]
-        tmpPeakE         = (peak_energy_list[k])[theseInds]
-        tmpPeakdE        = (peak_dE_list[k])[theseInds]
-        tmpN             = (N_list[k]).y[theseInds]
-        tmpT             = (T_list[k]).y[*,theseInds]
+        tmpN                = (N_list[k]).y[theseInds]
+        tmpJ                = (j_list[k]).y[theseInds]
+        tmpJe               = (je_list[k]).y[theseInds]
+        ;; tmpCharE         = CHAR_ENERGY(tmpJ,tmpJe)
+        tmpCharE            = (chare_list[k])[theseInds]
+        tmpPeakE            = (peak_energy_list[k])[theseInds]
+        tmpPeakdE           = (peak_dE_list[k])[theseInds]
+        tmpT                = (T_list[k]).y[*,theseInds]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
-           tmpJ1         = (j1_list[k]).y[theseInds]
-           tmpJe1        = (je1_list[k]).y[theseInds]
-           tmpCharE1     = (chare1_list[k])[theseInds]
-           tmpN1         = (N1_list[k]).y[theseInds]
-           tmpT1         = (T1_list[k]).y[*,theseInds]
+           tmpN1            = (N1_list[k]).y[theseInds]
+           tmpJ1            = (j1_list[k]).y[theseInds]
+           tmpJe1           = (je1_list[k]).y[theseInds]
+           tmpCharE1        = (chare1_list[k])[theseInds]
+           tmpT1            = (T1_list[k]).y[*,theseInds]
+
         ENDIF
 
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
 
-           tmpNerr       = (nerr_list[k])[theseInds]
-           tmpTerr       = (Terr_list[k])[theseInds]
-           tmpJerr       = (jerr_list[k])[theseInds]
+           tmpNerr          = (nerr_list[k])[theseInds]
+           tmpJerr          = (jerr_list[k])[theseInds]
+           tmpJeErr         = (jeErr_list[k])[theseInds]
+           tmpcharEErr      = (charEErr_list[k])[theseInds]
+           tmpTerr          = (Terr_list[k])[theseInds]
            ;; SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,tmpErrors
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmpN1err   = (n1err_list[k])[theseInds]
-              tmpT1err   = (T1err_list[k])[theseInds]
-              tmpJ1err   = (j1err_list[k])[theseInds]
+              tmpN1err      = (n1err_list[k])[theseInds]
+              tmpJ1err      = (j1err_list[k])[theseInds]
+              tmpJe1Err     = (je1Err_list[k])[theseInds]
+              tmpcharE1Err  = (charE1Err_list[k])[theseInds]
+              tmpT1err      = (T1err_list[k])[theseInds]
               ;; SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,tmpErrors1
            ENDIF
         ENDIF
@@ -969,46 +1060,53 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;; PRINT,"Saving " + tmpFile
         ;; SAVE,tmpJ,tmpJe,tmpCharE,tmpPeakE,tmpCur,FILENAME=outDir+tmpFile
 
-        itvlTime       = [itvlTime  ,tmpTimes ]
-        itvlJ          = [itvlJ     ,tmpJ     ]
-        itvlJe         = [itvlJe    ,tmpJe    ]
-        itvlCur        = [itvlCur   ,tmpCur   ]
-        itvlcharE      = [itvlcharE ,tmpChare ]
-        itvlN          = [itvlN     ,tmpN     ]
-        itvlT          = [itvlT     ,tmpT     ]
+        itvlTime             = [itvlTime      ,tmpTimes     ]
+        itvlN                = [itvlN         ,tmpN         ]
+        itvlJ                = [itvlJ         ,tmpJ         ]
+        itvlJe               = [itvlJe        ,tmpJe        ]
+        itvlcharE            = [itvlcharE     ,tmpChare     ]
+        itvlT                = [itvlT         ,tmpT         ]
+        itvlCur              = [itvlCur       ,tmpCur       ]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
-           itvlJ1         = [itvlJ1    ,tmpJ1    ]
-           itvlJe1        = [itvlJe1   ,tmpJe1   ]
-           itvlCur1       = [itvlCur1  ,tmpCur1  ]
-           itvlcharE1     = [itvlcharE1,tmpChare1]
-           itvlN1         = [itvlN1    ,tmpN1    ]
-           itvlT1         = [itvlT1    ,tmpT1    ]
+
+           itvlN1            = [itvlN1        ,tmpN1        ]
+           itvlJ1            = [itvlJ1        ,tmpJ1        ]
+           itvlJe1           = [itvlJe1       ,tmpJe1       ]
+           itvlcharE1        = [itvlcharE1    ,tmpChare1    ]
+           itvlT1            = [itvlT1        ,tmpT1        ]
+           itvlCur1          = [itvlCur1      ,tmpCur1      ]
 
         ENDIF
         
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
-           itvlNerr    = [itvlNerr  ,tmpNerr  ]
-           itvlTerr    = [itvlTerr  ,tmpTerr  ]
-           itvlJerr    = [itvlJerr  ,tmpJerr  ]
-           itvlCurErr  = [itvlCurErr  ,tmpCurErr  ]
 
-           SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,itvlErrors, $
-                                        /ADD_TO_ERROROUT
+           itvlNerr          = [itvlNerr      ,tmpNerr      ]
+           itvlJerr          = [itvlJerr      ,tmpJerr      ]
+           itvlJeErr         = [itvlJeErr     ,tmpJeErr     ]
+           itvlcharEErr      = [itvlcharEErr  ,tmpcharEErr  ]
+           itvlTerr          = [itvlTerr      ,tmpTerr      ]
+           itvlCurErr        = [itvlCurErr    ,tmpCurErr    ]
+
+           SHRINK_GERSHMAN_ERROR_STRUCT       ,err_list[k   ],theseInds,itvlErrors, $
+                                               /ADD_TO_ERROROUT
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              itvlN1err   = [itvlN1err ,tmpN1err ]
-              itvlT1err   = [itvlT1err ,tmpT1err ]
-              itvlJ1err   = [itvlJ1err ,tmpJ1err ]
-              itvlCur1Err = [itvlCur1Err ,tmpCur1Err ]
-              SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,itvlErrors1, $
-                                           /ADD_TO_ERROROUT
+
+              itvlN1err      = [itvlN1err     ,tmpN1err     ]
+              itvlJ1err      = [itvlJ1err     ,tmpJ1err     ]
+              itvlJe1Err     = [itvlJe1Err    ,tmpJe1Err    ]
+              itvlcharE1Err  = [itvlcharE1Err ,tmpcharE1Err ]
+              itvlT1err      = [itvlT1err     ,tmpT1err     ]
+              itvlCur1Err    = [itvlCur1Err   ,tmpCur1Err   ]
+              SHRINK_GERSHMAN_ERROR_STRUCT    ,err1_list[k  ],theseInds,itvlErrors1, $
+                                               /ADD_TO_ERROROUT
            ENDIF
         ENDIF
 
-        itvlPeakE      = [itvlPeakE ,tmpPeakE ]
-        itvlPeakdE     = [itvlPeakdE ,tmpPeakdE ]
+        itvlPeakE            = [itvlPeakE     ,tmpPeakE     ]
+        itvlPeakdE           = [itvlPeakdE    ,tmpPeakdE    ]
 
      ENDFOR
 
@@ -1017,28 +1115,32 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
            tmpStruct      = {label    : label[k],$
                              time     : TEMPORARY(itvlTime)   , $
+                             N        : TEMPORARY(itvlN)      , $
                              j        : TEMPORARY(itvlJ)      , $
                              je       : TEMPORARY(itvlJe)     , $
-                             cur      : TEMPORARY(itvlCur)    , $
                              chare    : TEMPORARY(itvlcharE)  , $
-                             N        : TEMPORARY(itvlN)      , $
                              T        : TEMPORARY(itvlT)      , $
+                             cur      : TEMPORARY(itvlCur)    , $
                              Nerr     : TEMPORARY(itvlNerr)   , $
-                             Terr     : TEMPORARY(itvlTerr)   , $
                              Jerr     : TEMPORARY(itvlJerr)   , $
+                             JeErr    : TEMPORARY(itvlJeErr)   , $
+                             charEErr : TEMPORARY(itvlcharEErr)   , $
+                             Terr     : TEMPORARY(itvlTerr)   , $
                              CurErr   : TEMPORARY(itvlCurErr) , $
                              errors   : TEMPORARY(itvlErrors)}
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmp1Struct  = {j1       : TEMPORARY(itvlJ1)     , $
+              tmp1Struct  = {N1       : TEMPORARY(itvlN1)     , $
+                             j1       : TEMPORARY(itvlJ1)     , $
                              je1      : TEMPORARY(itvlJe1)    , $
                              cur1     : TEMPORARY(itvlCur1)   , $
                              chare1   : TEMPORARY(itvlcharE1) , $
-                             N1       : TEMPORARY(itvlN1)     , $
                              T1       : TEMPORARY(itvlT1)     , $
                              N1err    : TEMPORARY(itvlN1err)  , $
-                             T1err    : TEMPORARY(itvlT1err)  , $
                              J1Err    : TEMPORARY(itvlJ1Err)  , $
+                             Je1Err    : TEMPORARY(itvlJe1Err)   , $
+                             charE1Err : TEMPORARY(itvlcharE1Err)   , $
+                             T1err    : TEMPORARY(itvlT1err)  , $
                              Cur1Err  : TEMPORARY(itvlCur1Err) , $
                              errors1  : TEMPORARY(itvlErrors1)}
               tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(tmp1Struct))
@@ -1058,12 +1160,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ELSE: BEGIN
            tmpStruct      = {label    : label[k],$
                              time     : TEMPORARY(itvlTime)   , $
+                             N        : TEMPORARY(itvlN)      , $
                              j        : TEMPORARY(itvlJ)      , $
                              je       : TEMPORARY(itvlJe)     , $
-                             cur      : TEMPORARY(itvlCur)    , $
                              chare    : TEMPORARY(itvlcharE)  , $
-                             N        : TEMPORARY(itvlN)      , $
-                             T        : TEMPORARY(itvlT)      }
+                             T        : TEMPORARY(itvlT)      , $
+                             cur      : TEMPORARY(itvlCur)    }
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               tmp1Struct  = {j1       : TEMPORARY(itvlJ1)     , $
