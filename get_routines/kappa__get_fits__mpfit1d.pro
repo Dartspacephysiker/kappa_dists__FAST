@@ -29,11 +29,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                              DONT_PRINT_FITINFO=dont_print_fitinfo, $
                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
-                             UNITS=units
+                             UNITS=units, $
+                             MASS=mass
 
   COMPILE_OPT idl2,STRICTARRSUBS
 
-  COMMON FIT_MASS,mass
+  ;; COMMON FIT_MASS,mass
 
   kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
   gaussFunc  = 'MAXWELL_FLUX__FUNC'
@@ -42,7 +43,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   IF ~KEYWORD_SET(units) THEN BEGIN
      units   = 'eFlux'
   ENDIF
-  fa         = {units : units}
+  ;; fa         = {units : units}
+  fa         = {units : units, $
+                mass  : mass   }
 
   orig       = {x:Xorig, $
                 y:Yorig, $

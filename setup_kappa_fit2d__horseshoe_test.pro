@@ -8,6 +8,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    ITIME=iTime, $
    UNITS=units, $
+   ;; MASS=mass, $
    OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
    OUT_ERANGE_I=eRange_i
   
@@ -102,6 +103,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   fa  = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
          Bingham_style     : 1, $
          is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit), $
-         units             : units }
+         units             : units, $
+         mass              : mass}
 
 END

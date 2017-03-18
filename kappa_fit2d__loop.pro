@@ -460,7 +460,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                        OUT_PARAMSTR=out_paramStr, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
-                                       UNITS=units
+                                       UNITS=units, $
+                                       MASS=dat.mass
 
            END
            ELSE: BEGIN
