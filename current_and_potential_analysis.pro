@@ -153,7 +153,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    LABEL=label, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
+   ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
    ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
+   ARANGE__PEAKEN_E_DOWN=aRange__peakEn_e_down, $
+   ARANGE__PEAKEN_E_UP=aRange__peakEn_e_up, $
+   ARANGE__PEAKEN_I_UP=aRange__peakEn_i_up, $
+   ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
+   ARANGE__CHARE_E_UP=aRange__charE_e_up, $
+   ARANGE__CHARE_I_UP=aRange__charE_i_up, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
    ENERGYARR=energyArr, $
@@ -292,7 +299,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
      aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
      aRange__moments_i_up    = KEYWORD_SET(aRange__moments_i_up  ) ? aRange__moments_i_up   : [0.,360.]
-     aRange__moments_e_up    = !NULL
+     aRange__moments_e_up    = KEYWORD_SET(aRange__moments_e_up  ) ? aRange__moments_e_up   : !NULL
+
+     aRange__peakEn_e_down   = KEYWORD_SET(aRange__peakEn_e_down ) ? aRange__peakEn_e_down  : !NULL
+     aRange__peakEn_e_up     = KEYWORD_SET(aRange__peakEn_e_up   ) ? aRange__peakEn_e_up    : !NULL
+     aRange__peakEn_i_up     = KEYWORD_SET(aRange__peakEn_i_up   ) ? aRange__peakEn_i_up    : !NULL
+
+     aRange__charE_e_down    = KEYWORD_SET(aRange__charE_e_down  ) ? aRange__charE_e_down   : !NULL
+     aRange__charE_e_up      = KEYWORD_SET(aRange__charE_e_up    ) ? aRange__charE_e_up     : !NULL
+     aRange__charE_i_up      = KEYWORD_SET(aRange__charE_i_up    ) ? aRange__charE_i_up     : !NULL
 
      ;; aRange__moments_e_down  = [330.,30.]
      ;; aRange__moments_i_up    = [150.,210.]
@@ -300,8 +315,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      aRange__moments_list    = LIST(aRange__moments_e_down,aRange__moments_e_up,aRange__moments_i_up)
      ;; aRange__peakEn_list     = LIST(!NULL,!NULL,[150,210])
-     aRange__peakEn_list     = LIST(!NULL,!NULL,!NULL)
-     aRange__charE_list      = LIST(!NULL,!NULL,!NULL)
+     aRange__peakEn_list     = LIST(aRange__peakEn_e_down,aRange__peakEn_e_up,aRange__peakEn_i_up)
+     aRange__charE_list      = LIST(aRange__charE_e_down,aRange__charE_e_up,aRange__charE_i_up)
 
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
