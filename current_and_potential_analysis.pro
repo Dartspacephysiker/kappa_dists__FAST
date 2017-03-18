@@ -21,12 +21,7 @@ PRO ERROR_J,j,errors,jerr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  ;; FOR l=0,N_ELEMENTS(j.x)-1 DO BEGIN
-     ;; jerr[l] = SQRT((j.y[l])^(2.D) * $
-     ;;                ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )  
-     ;; jerr[l] = SQRT((j.y[l])^(2.D) * $
-     ;;                ( (errors.n[l])^(2.D) + (errors.Uz[l])^(2.D) + errors.n[l]*errors.Uz[l]*errors.R[0,3,l] ) )  
-  ;; ENDFOR
+  ;;In #/cm^2-s
   jerr = SQRT((j.y)^(2.D) * $
                  ( (errors.n)^(2.D) + (errors.Uz)^(2.D) + errors.n*errors.Uz*errors.R[*,0,3] ) )  
 
@@ -56,9 +51,9 @@ PRO ERROR_JE,n,j,je,T,errors,jeErr
   sigmaHParSquared  = errors.Hz * errors.Hz * HPar * HPar
 
   ;;covars
-  covarVParPPar     = errors.R[*,3, 6] * (vPar * errors.Uz ) * (HPar * errors.Hz)
-  covarVParPPrp     = errors.R[*,3, 4] * (vPar * errors.Uz ) * (PPar * errors.Pzz)
-  covarVParHPar     = errors.R[*,3,12] * (vPar * errors.Uz ) * (HPar * errors.Hz)
+  covarVParPPar     = errors.R[*,3, 6] * (vPar * errors.Uz ) * (PPar * errors.Pzz)
+  covarVParPPrp     = errors.R[*,3, 4] * (vPar * errors.Uz ) * (PPar * errors.Pxx)
+  covarVParHPar     = errors.R[*,3,12] * (vPar * errors.Uz ) * (HPar * errors.Hz )
   covarPParPPrp     = errors.R[*,6, 4] * (PPar * errors.Pzz) * (PPrp * errors.Pxx)
   covarPParHPar     = errors.R[*,6,12] * (PPar * errors.Pzz) * (HPar * errors.Hz)
   covarPPrpHPar     = errors.R[*,4,12] * (PPrp * errors.Pxx) * (HPar * errors.Hz)
@@ -72,19 +67,20 @@ PRO ERROR_JE,n,j,je,T,errors,jeErr
 
 END
 
-PRO ERROR_CHARE,j,je,jerr,jeErr,errors,charEErr
+PRO ERROR_CHARE,j,je,jerr,jeErr,jje_coVar,errors,charEErr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
-  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
-  PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
+  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
 
   const          = 6.242D*1.0D11
 
-  covarJParJePar = 0.D
+  ;; covarJParJePar = 0.D * jerr * jeErr
 
-  charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * covarJParJePar )
+  ;; charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * covarJParJePar )
+  charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * jje_coVar )
 
 END
 
@@ -119,7 +115,7 @@ PRO ERROR_T,T,n,errors,Terr
 
 END
 
-PRO ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr;; , $
+PRO ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr,jje_coVar;; , $
                ;; ENERGY_ERROR=enErr
 
   ;Raise
@@ -128,7 +124,7 @@ PRO ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr;; , $
   ;The
   ERROR_J ,j,errors,jerr
   ERROR_JE,n,j,je,T,errors,jeErr
-  ERROR_CHARE,j,je,jerr,jeErr,errors,charEErr
+  ERROR_CHARE,j,je,jerr,jeErr,jje_coVar,errors,charEErr
 
   ;Stakes
   ;; IF KEYWORD_SET(enErr) THEN BEGIN
@@ -161,6 +157,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
    ENERGYARR=energyArr, $
+   USE_PEAKE_BOUNDS_FOR_MOMENT_CALC=use_peakE_bounds_for_moments, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
    POT__CHASTON_STYLE=pot__Chaston_style, $
@@ -498,6 +495,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_energy__start_at_highE  = peak_energy__start_at_highEArr[k]
         upgoing                      = upgoingArr[k]
 
+        ;;Set up, uh, n_below_peak and n_above_peak
+        @kappa_fitter__defaults.pro
+
         tmpTimes                     = LIST_TO_1DARRAY(timesList[t_k])
         GET_FA_ORBIT,tmpTimes,/TIME_ARRAY
         GET_DATA,'ILAT',DATA=ilat
@@ -580,59 +580,60 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,""
 
         PRINT,"Getting eSpecs ..."
-        eSpec          = GET_EN_SPEC__FROM_DIFF_EFLUX( $
-                         diff_eFlux, $
-                         /RETRACE, $
-                         ANGLE=aRange__peakEn, $
-                         UNITS=units)
+        eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
+                                diff_eFlux, $
+                                /RETRACE, $
+                                ANGLE=aRange__peakEn, $
+                                UNITS=units)
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
-           oneCount_eSpec = GET_EN_SPEC__FROM_DIFF_EFLUX( $
-                            dEF_oneCount, $
-                            /RETRACE, $
-                            ANGLE=aRange__peakEn, $
-                            UNITS=units)
+           oneCount_eSpec     = GET_EN_SPEC__FROM_DIFF_EFLUX( $
+                                dEF_oneCount, $
+                                /RETRACE, $
+                                ANGLE=aRange__peakEn, $
+                                UNITS=units)
         ENDIF
         
-        angles         = TRANSPOSE(diff_eFlux.theta,[1,0,2])
-        energies       = TRANSPOSE(diff_eFlux.energy,[1,0,2])
-        nEnergies      = N_ELEMENTS(eSpec.v[*,0])
+        angles                = TRANSPOSE(diff_eFlux.theta,[1,0,2])
+        energies              = TRANSPOSE(diff_eFlux.energy,[1,0,2])
+        nEnergies             = N_ELEMENTS(eSpec.v[0,*])
 
-        iAngle         = 0
-        nHere          = N_ELEMENTS(eSpec.x)
-        peak_indArr    = MAKE_ARRAY(nHere,VALUE=-999,/LONG)
-        peak_energyArr = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
-        peak_dEArr     = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
+        iAngle                = 0
+        nHere                 = N_ELEMENTS(eSpec.x)
+        peak_indArr           = MAKE_ARRAY(nHere,VALUE=-999,/LONG)
+        peak_energyArr        = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
+        peak_dEArr            = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
+        peak_EBoundsArr       = MAKE_ARRAY(2,nHere,VALUE=-999,/FLOAT)
         FOR iTime=0,nHere-1 DO BEGIN
 
-           XorigArr         = energies[*,*,iTime]
-           ;; YorigArr         = data[*,*,iTime]
-           ;; worigArr         = ddata[*,*,iTime]
+           XorigArr           = energies[*,*,iTime]
+           ;; YorigArr        = data[*,*,iTime]
+           ;; worigArr        = ddata[*,*,iTime]
            ;; IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
-           ;;    oneCountArr   = oneCount_data[*,*,iTime]
+           ;;    oneCountArr  = oneCount_data[*,*,iTime]
            ;; END
-           AorigArr = angles[*,*,iTime]
+           AorigArr           = angles[*,*,iTime]
 
            ;;And now the order becomes [angle,energy] for each of these arrays
-           Xorig    = REFORM(eSpec.v[iTime,*])
-           Yorig    = REFORM(eSpec.y[iTime,*])
-           worig    = REFORM(eSpec.yerr[iTime,*])
-           Aorig    = REFORM(AorigArr[iAngle,*])
+           Xorig              = REFORM(eSpec.v[iTime,*])
+           Yorig              = REFORM(eSpec.y[iTime,*])
+           worig              = REFORM(eSpec.yerr[iTime,*])
+           Aorig              = REFORM(AorigArr[iAngle,*])
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              oneCurve = {x:Xorig, $
-                          y:REFORM(oneCount_eSpec.y[iTime,*]), $
-                          NAME:"One Count"}
+              oneCurve        = {x:Xorig, $
+                                 y:REFORM(oneCount_eSpec.y[iTime,*]), $
+                                 NAME:"One Count"}
            ENDIF
            
            IF KEYWORD_SET(min_peak_energy) THEN BEGIN
               ;;Try taking it from the top
-              min_peak_ind  = MAX(WHERE(REFORM(XorigArr[0,*]) GE min_peak_energy))
+              min_peak_ind    = MAX(WHERE(REFORM(XorigArr[0,*]) GE min_peak_energy))
               IF min_peak_ind EQ -1 THEN BEGIN
                  STOP
               ENDIF
            ENDIF ELSE BEGIN
-              min_peak_ind  = nEnergies-1
+              min_peak_ind    = nEnergies-1
            ENDELSE
 
            KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
@@ -646,16 +647,27 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               /CONTINUE_IF_NOMATCH, $
               ONECOUNT_STR=oneCurve
 
-           peak_dEArr[iTime]     = eSpec.vErr[iTime,peak_ind]
-           peak_energyArr[iTime] = TEMPORARY(peak_energy)
-           peak_indArr[iTime]    = TEMPORARY(peak_ind)
+           ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
+           ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
+           ;;  for fitting—namely, n_below_peak and n_above_peak
+           maxEInd                   = (peak_ind + n_below_peak) < nEnergies-1
+           minEInd                   = (peak_ind - n_above_peak) > 0
+
+           peak_dEArr[iTime]         = eSpec.vErr[iTime,peak_ind]
+           peak_energyArr[iTime]     = TEMPORARY(peak_energy)
+           peak_indArr[iTime]        = TEMPORARY(peak_ind)
+           peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(minEInd)],Xorig[TEMPORARY(maxEInd)]]
         ENDFOR
 
         peak_ind_list.Add,TEMPORARY(peak_indArr)
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
         peak_dE_list.Add,TEMPORARY(peak_dEArr)
 
-        
+        IF KEYWORD_SET(use_peakE_bounds_for_moments) THEN BEGIN
+           energy[0,*]               = peak_EBoundsArr[0,*] > energy[0,*]
+           energy[1,*]               = peak_EBoundsArr[1,*] < energy[1,*]
+        ENDIF
+
         ;; en_arr   = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
         ;;                                               ENERGY=energy, $
         ;;                                               SC_POT=sc_pot, $
@@ -686,14 +698,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                           SC_POT=sc_pot, $
                                           EEB_OR_EES=eeb_or_ees, $
                                           QUIET=quiet)
-        jC       = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE, $
+        jC       = J_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__charE, $
                                          SC_POT=sc_pot, $
                                          EEB_OR_EES=eeb_or_ees, $
                                          QUIET=quiet)
-        jeC      = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy,ANGLE=aRange__charE, $
+        jeC      = JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                          ENERGY=energy, $
+                                          ANGLE=aRange__charE, $
                                           SC_POT=sc_pot, $
                                           EEB_OR_EES=eeb_or_ees, $
                                           QUIET=quiet)
+        jje_coVar  = (TEMPORARY(JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
+                                                       ENERGY=energy, $
+                                                       ANGLE=aRange__charE, $
+                                                       SC_POT=sc_pot, $
+                                                       EEB_OR_EES=eeb_or_ees, $
+                                                       /JJE, $
+                                                       QUIET=quiet))).y - je.y*j.y
 
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
@@ -722,14 +745,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                           SC_POT=sc_pot, $
                                           EEB_OR_EES=eeb_or_ees, $
                                           QUIET=quiet)
-           j1C   = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE, $
+           j1C   = J_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                         ENERGY=energy, $
+                                         ANGLE=aRange__charE, $
                                          SC_POT=sc_pot, $
                                          EEB_OR_EES=eeb_or_ees, $
                                          QUIET=quiet)
-           je1C  = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy,ANGLE=aRange__charE, $
+           je1C  = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                          ENERGY=energy, $
+                                          ANGLE=aRange__charE, $
                                           SC_POT=sc_pot, $
                                           EEB_OR_EES=eeb_or_ees, $
                                           QUIET=quiet)
+           jje1_coVar = (TEMPORARY(JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
+                                          ENERGY=energy, $
+                                          ANGLE=aRange__charE, $
+                                          SC_POT=sc_pot, $
+                                          /JJE, $
+                                          EEB_OR_EES=eeb_or_ees, $
+                                          QUIET=quiet))).y - je1C.y * j1C.y
 
         ENDIF
 
@@ -752,7 +786,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;; jerr            = MAKE_ARRAY(nHere,/FLOAT)
            ;; Terr            = MAKE_ARRAY(nHere,/FLOAT)
 
-           ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr
+           ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr,jje_coVar
            ;; ERROR_CALC,diff_eFlux,errors,j,je,n,T,jerr,jeErr,nerr,Terr
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
@@ -766,11 +800,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                               ;; HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
                                                               /HEATFLUX_COVAR_CALC, $
                                                               QUIET=quiet)
-              n1err        = MAKE_ARRAY(nHere,/FLOAT)
-              j1err        = MAKE_ARRAY(nHere,/FLOAT)
-              T1err        = MAKE_ARRAY(nHere,/FLOAT)
+              ;; n1err        = MAKE_ARRAY(nHere,/FLOAT)
+              ;; j1err        = MAKE_ARRAY(nHere,/FLOAT)
+              ;; T1err        = MAKE_ARRAY(nHere,/FLOAT)
 
-              ERROR_CALC,dEF_oneCount,errors1,n1,j1,je1,T1,n1err,j1err,je1Err,charE1Err,T1err
+              ERROR_CALC,dEF_oneCount,errors1,n1,j1,je1,T1,n1err,j1err,je1Err,charE1Err,T1err,jje1_coVar
               ;; ERROR_CALC,dEF_oneCount,errors1,j1,je1,n1,T1,j1err,je1Err,n1err,T1err
 
            ENDIF

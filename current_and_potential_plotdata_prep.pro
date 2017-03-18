@@ -140,14 +140,15 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
         pot = curPotList[edind].charE
 
         ;;Nope, going to have to cop out for the time being
-        ;; potErr[*,0] = curPotList[edind].charEErr
-        potErr[*,0] = curPotList[edind].peakErr
+        potErr[*,0] = curPotList[edind].charEErr
+        ;; potErr[*,0] = curPotList[edind].peakErr
 
         IF KEYWORD_SET(add_iu_pot) THEN BEGIN
 
            pot        += curPotList[iuind].charE
 
-           potErr[*,1] = curPotList[iuind].peakErr
+           ;; potErr[*,1] = curPotList[iuind].peakErr
+           potErr[*,1] = curPotList[iuind].charEErr
 
         ENDIF
 
