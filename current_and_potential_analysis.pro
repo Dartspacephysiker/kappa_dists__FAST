@@ -173,6 +173,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
    ;; DENS_ERRORS=dens_errors, $
+   SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList
@@ -190,7 +191,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      CASE SIZE(aRange__moments_e_down,/TYPE) OF
         7: BEGIN
-           IF STRUPCASE(aRange__moments_e_down[0]) EQ 'LC' THEN BEGIN
+           IF STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'*LC') THEN BEGIN
               fSuff = "-aR_mom_eD_LC"
            ENDIF ELSE BEGIN
               STOP
@@ -213,24 +214,37 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   IF KEYWORD_SET(aRange__moments_i_up) THEN BEGIN
 
-     IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
+     CASE SIZE(aRange__moments_i_up,/TYPE) OF
+        7: BEGIN
+           IF STRMATCH(STRUPCASE(aRange__moments_i_up[0]),'*LC') THEN BEGIN
+              fSuff = "-aR_mom_iU_" + STRUPCASE(aRange__moments_i_up[0])
+           ENDIF ELSE BEGIN
+              STOP
+           ENDELSE
+        END
+        ELSE: BEGIN
 
-        fSuff = STRING(FORMAT='("-aR_mom_iU_",I0,"-",I0)',aRange__moments_i_up[0],aRange__moments_i_up[1])
-        IF KEYWORD_SET(datFile) THEN BEGIN
-           ADD_FNAME_SUFF,datFile,fSuff
-        ENDIF
+           IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
 
-        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-           ADD_FNAME_SUFF,saveCurPotFile,fSuff
-        ENDIF
+              fSuff = STRING(FORMAT='("-aR_mom_iU_",I0,"-",I0)',aRange__moments_i_up[0],aRange__moments_i_up[1])
+              IF KEYWORD_SET(datFile) THEN BEGIN
+                 ADD_FNAME_SUFF,datFile,fSuff
+              ENDIF
 
-     ENDIF
+              IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+                 ADD_FNAME_SUFF,saveCurPotFile,fSuff
+              ENDIF
+
+           ENDIF
+
+        END
+     ENDCASE
 
   ENDIF
 
   IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
 
-     IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
+     ;; IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
 
         fSuff = '-sc_pot'
         IF KEYWORD_SET(datFile) THEN BEGIN
@@ -241,7 +255,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ADD_FNAME_SUFF,saveCurPotFile,fSuff
         ENDIF
 
-     ENDIF
+     ;; ENDIF
 
   ENDIF
 
@@ -260,7 +274,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF
 
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
-     eeb_or_eesArr           = ['ees','ies']
+     eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
 
      ;; order                   = [0,2,1]
      order                   = [0,1,2]
@@ -397,7 +411,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
            FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
            FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
-           FITFILE=fitFile, $
+           ;; FITFILE=fitFile, $
            LOADDIR=diffEfluxDir
 
         preString = diff_eFlux_file + ' ...'
@@ -512,6 +526,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            lc_angleRange, $
            i_angle,i_angle_up, $
            north_south, $
+           OUT_LCW=lcw, $
            ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
            CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
            OUT_E_ANGLE=e_angle, $
@@ -538,8 +553,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange
 
         IF SIZE(aRange__moments[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRUPCASE(aRange__moments[0]) EQ 'LC' THEN BEGIN
-              aRange__moments = lc_angleRange
+           IF STRMATCH(STRUPCASE(aRange__moments[0]),'*LC') THEN BEGIN
+              IF STRLEN(aRange__moments[0]) GT 2 THEN BEGIN
+                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'LC',/EXTRACT))
+                 IF north_south[0] EQ -1 THEN BEGIN
+                    aRange__moments = [180.-factor*lcw,180+factor*lcw]
+                 ENDIF ELSE BEGIN
+                    aRange__moments = [360.-factor*lcw,factor*lcw]
+                 ENDELSE
+              ENDIF ELSE BEGIN
+                 aRange__moments = lc_angleRange
+              ENDELSE
+
+              IF upgoing THEN aRange__moments = (360.*((aRange__moments-180)/360.-FLOOR((aRange__moments-180)/360.)))
+
            ENDIF ELSE BEGIN
               PRINT,"Huh?"
               STOP
@@ -547,8 +574,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
         IF SIZE(aRange__peakEn[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRUPCASE(aRange__peakEn[0]) EQ 'LC' THEN BEGIN
-              aRange__peakEn  = lc_angleRange
+           IF STRMATCH(STRUPCASE(aRange__peakEn[0]),'*LC') THEN BEGIN
+              IF STRLEN(aRange__peakEn[0]) GT 2 THEN BEGIN
+                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__peakEn[0]),'LC',/EXTRACT))
+                 IF north_south[0] EQ -1 THEN BEGIN
+                    aRange__peakEn = [180.-factor*lcw,180+factor*lcw]
+                 ENDIF ELSE BEGIN
+                    aRange__peakEn = [360.-factor*lcw,factor*lcw]
+                 ENDELSE
+              ENDIF ELSE BEGIN
+                 aRange__peakEn  = lc_angleRange
+              ENDELSE
+
+              IF upgoing THEN aRange__peakEn = (360.*((aRange__peakEn-180)/360.-FLOOR((aRange__peakEn-180)/360.)))
+
            ENDIF ELSE BEGIN
               PRINT,"Huh?"
               STOP
@@ -556,8 +595,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
         IF SIZE(aRange__charE[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRUPCASE(aRange__charE[0]) EQ 'LC' THEN BEGIN
-              aRange__charE   = lc_angleRange
+           IF STRMATCH(STRUPCASE(aRange__charE[0]),'*LC') THEN BEGIN
+              IF STRLEN(aRange__charE[0]) GT 2 THEN BEGIN
+                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__charE[0]),'LC',/EXTRACT))
+                 IF north_south[0] EQ -1 THEN BEGIN
+                    aRange__charE = [180.-factor*lcw,180+factor*lcw]
+                 ENDIF ELSE BEGIN
+                    aRange__charE = [360.-factor*lcw,factor*lcw]
+                 ENDELSE
+              ENDIF ELSE BEGIN
+                 aRange__charE   = lc_angleRange
+              ENDELSE
+
+              IF upgoing THEN aRange__charE = (360.*((aRange__charE-180)/360.-FLOOR((aRange__charE-180)/360.)))
+
            ENDIF ELSE BEGIN
               PRINT,"Huh?"
               STOP
@@ -718,7 +769,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                        SC_POT=sc_pot, $
                                                        EEB_OR_EES=eeb_or_ees, $
                                                        /JJE, $
-                                                       QUIET=quiet))).y - je.y*j.y
+                                                       QUIET=quiet))).y - jeC.y*jC.y
 
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
