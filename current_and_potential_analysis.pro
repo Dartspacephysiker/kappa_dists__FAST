@@ -162,6 +162,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
    POT__CHASTON_STYLE=pot__Chaston_style, $
    POT__FROM_FILE=pot__from_file, $
+   POT__SAVE_FILE=pot__save_file, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
@@ -460,7 +461,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                             /REPAIR, $
                             CHASTON_STYLE=pot__Chaston_style, $
                             FROM_FILE=pot__from_file, $
-                            ORBIT=orbit
+                            ORBIT=orbit, $
+                            SAVE_FILE=pot__save_file
            sc_pot_list.Add,sc_pot
         ENDIF
 
