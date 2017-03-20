@@ -194,8 +194,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit
   PRINT_JV_FIT_PARAMS,AGauss
   PRINT,""
 
-  that = ERRORPLOT(X,Y,XError,YError,SYMBOL='*',LINESTYLE='')
-  ;; that = ERRORPLOT(X,Y,YError,SYMBOL='*',LINESTYLE='')
+  ;; that = ERRORPLOT(X,Y,XError,YError,SYMBOL='*',LINESTYLE='')
+  that = ERRORPLOT(X,Y,YError,SYMBOL='*',LINESTYLE='')
+  ;; that = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
   this = PLOT(X,YFit,COLOR='BLUE',/OVERPLOT)
   those = PLOT(X,yGaussFit,COLOR='Brown',/OVERPLOT)
 
