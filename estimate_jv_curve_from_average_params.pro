@@ -35,10 +35,10 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
                       [1,1], $
                       [1,1]]
   
-  Alimits         = [[1.501D   ,100   ] , $ ;kappa 
+  Alimits         = [[1.501D   ,3.0   ] , $ ;kappa 
                      [10      ,3.0e4 ] , $ ;Temp
                      [1e-4    ,100   ] , $ ;N
-                     [1       ,1D5 ]]    ;R_B
+                     [1       ,300 ]]    ;R_B
 
   ;;Make 'em play nice
   ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN
@@ -104,13 +104,13 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit
   gTol        = 1e-15
 
   ;;            kappa,            Temp,            Dens,  R_B
-  A           = [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 20]
+  A           = [  2.99,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 20]
 
   ;;Keep the original guesses
   Aorig       = A
   AGaussOrig  = A
 
-  kappa_fixA  = [0,1,1,0]
+  kappa_fixA  = [1,1,1,0]
   gauss_fixA  = [1,1,1,0]
 
   kappaParamStruct = INIT_JV_FITPARAM_INFO(           A,kappa_fixA)
