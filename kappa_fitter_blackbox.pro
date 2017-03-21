@@ -88,6 +88,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ELECTRON_ANGLERANGE=electron_angleRange ,$
      BONUSPREF=bonusPref ,$
      SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
+     SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
      OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
      FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
@@ -95,6 +96,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      MIN_PEAK_ENERGY=min_peak_energy, $
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
      FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      FITFILE=fitFile, $
      LOADDIR=outDir
 

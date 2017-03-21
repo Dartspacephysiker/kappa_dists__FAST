@@ -1,65 +1,64 @@
-;;02/11/17
-PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET_EN_SPEC__SEE_WHAHAPPUN
+;;2017/03/21
+PRO JOURNAL__20170321__ORB_1843__FITTER_HAPPIER
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  orbs     = [1773]
+  orbs                               = [1843]
 
-  orbTimes = [ $
-             ['97-02-01/09:25:30','97-02-01/09:28:00'] $
-             ]
+  orbTimes                           = '1997-02-07/' + $
+                                       [['20:49:30','20:50:10']]
 
-  kStats_startStops__ees = LIST(LIST('1997-02-01/' + [['09:26:12','09:26:23'], $
-                                                      ['09:26:53','09:27:07.5']]))
+  kStats_startStops__eeb             = LIST(LIST('1997-02-01/' + [['20:49:30','20:50:10']]))
 
 
-  bonusPrefs = [ $
-               '--oDoyleRules--0--Elphic_et_al_1998' $
+  bonusPrefs                         = [ $
+               '--oDoyleRules--0--Ergun_et_al_1998' $
                ]
 
-  show_post_plots      = 0
-  save_kappa_plot      = 0
-  close_kp_after_save  = 0
+  show_post_plots                    = 0
+  save_kappa_plot                    = 0
+  close_kp_after_save                = 0
 
-  ;; debug__skip_to_this_time  = STR_TO_TIME('97-02-01/09:26:31')
-  ;; debug__break_on_this_time = STR_TO_TIME('97-02-01/09:26:31')
-
-  only_1D_fits                      = 1
-  fit1D__sourceCone_energy_spectrum = 1
-  fit1D__nFlux                      = 1
-  fit1D__weighting                  = 1 ;1 = lin 2 = square
+  outfil = 'dimlessPot_vs_time__20170321__orb_1843__data_1DKappafit_1DMaxwfit__from_JOURNAL__20170321__ORB_1843__FITTER_HAPPIER.png'
   
-  add_oneCount_curve                = 1
+  ;; debug__skip_to_this_time        = STR_TO_TIME('97-02-01/09:26:31')
+  ;; debug__break_on_this_time       = STR_TO_TIME('97-02-01/09:26:31')
 
-  fit1D__save_plotSlices            = 1
-  fit2D__save_all_candidate_plots   = 0
-  fit2D__show_each_candidate        = 0
-  fit2D__weighting                  = 1 ;1 = lin 2 = square
+  only_1D_fits                       = 1
+  fit1D__sourceCone_energy_spectrum  = 1
+  fit1D__nFlux                       = 1
+  fit1D__weighting                   = 1 ;1 = lin 2 = square
+  
+  add_oneCount_curve                 = 1
 
-  show_Strangeway_summary  = 0
-  sway__save_ps            = 0
-  sway__add_kappa_panel    = 0
-  sway__add_chare_panel    = 1
-  sway__add_Newell_panel   = 0
-  sway__log_kappaPlot      = 0
+  fit1D__save_plotSlices             = 1
+  fit2D__save_all_candidate_plots    = 0
+  fit2D__show_each_candidate         = 0
+  fit2D__weighting                   = 1 ;1 = lin 2 = square
 
-  show_kappa_summary  = 1
-  kSum__save_ps       = 0
-  kSum__convert_to_Newell_interp = 1
-  kSum__add_chi2_line = 1
+  show_Strangeway_summary            = 0
+  sway__save_ps                      = 0
+  sway__add_kappa_panel              = 0
+  sway__add_chare_panel              = 1
+  sway__add_Newell_panel             = 0
+  sway__log_kappaPlot                = 0
 
-  kStats__save_stuff   = 1
+  show_kappa_summary                 = 1
+  kSum__save_ps                      = 0
+  kSum__convert_to_Newell_interp     = 1
+  kSum__add_chi2_line                = 1
+
+  kStats__save_stuff                 = 1
 
   save_diff_eFlux_file = 1
   load_diff_eFlux_file = 1
-  ;; load_diff_eFlux_file = '~/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/orb_1773-diff_eflux-ees-e_angle_-24.0-24.0--classics--3--Elphic_et_al_1998-fit_above_500_eV-No_bFunc-exc_LCA.sav'
   ;; restore_fitFile      = 1
 
   evtNum               = 0
 
   ;;survey window
-  eeb_or_ees           = 'ees'
-  spectra_average_interval = 3
+  eeb_or_ees           = 'eeb'
+  spectra_average_interval = 6
   burstItvl            = 0
 
   ;;String setup
@@ -69,12 +68,12 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
   bonusPref            = bonusPrefs[evtNum]
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
-     t1Str             = (orbBurstTimes[evtNum])[0,burstItvl]
-     t2Str             = (orbBurstTimes[evtNum])[1,burstItvl]
+     ;; t1Str             = (orbBurstTimes[evtNum])[0,burstItvl]
+     ;; t2Str             = (orbBurstTimes[evtNum])[1,burstItvl]
      bonusPref        += '--burstItvl_' + STRCOMPRESS(burstItvl,/REMOVE_ALL)
      kStats__include_these_startstops = (kStats_startStops__eeb[evtNum])[burstItvl]
   ENDIF ELSE BEGIN
-     kStats__include_these_startstops = kStats_startStops__ees[evtNum]
+     ;; kStats__include_these_startstops = kStats_startStops__ees[evtNum]
   ENDELSE
 
   ;;Thresholds for inclusion
@@ -198,10 +197,10 @@ PRO JOURNAL__20170211__ORB_1773__FEED_KAPPA_FITTER_BLACKBOX_WITH_OUTPUT_FROM_GET
   legend = LEGEND(TARGET=[plot,plotK,plotG], $
                   POSITION=[50,0.4],/DATA)
   outdir = '~/software/sdt/batch_jobs/plots/'
-  outfil = 'dimlessPot_vs_time__20170306__orb_1773__data_1DKappafit_1DMaxwfit__from_JOURNAL_20170211__ORB_1773__FEED.png'
   PRINT,"Saving " + outfil
   win.Save,outdir+outFil
   STOP
 
 END
+
 

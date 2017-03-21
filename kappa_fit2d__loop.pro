@@ -123,7 +123,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                 diff_eFlux, $
                 /RETRACE, $
                 ANGLE=KF2D__SDTData_opt.electron_angleRange, $
-                UNITS=units)
+                UNITS=units, $
+                OUT_AVGFACTORARR=avgFactorArr, $
+                OUT_NORMARR=normArr)
 
         tempAllAngles    = [0.]
         tempAngle        = 0.
@@ -461,7 +463,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
                                        UNITS=units, $
-                                       MASS=dat.mass
+                                       MASS=dat.mass, $
+                                       AVGFACTORARR=avgFactorArr
 
            END
            ELSE: BEGIN

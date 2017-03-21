@@ -1,4 +1,3 @@
-
 ;;02/14/17
 PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    KF__CURVEFIT_OPT=KF__curveFit_opt, $
@@ -12,6 +11,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    DO_ALL_TIMES=do_all_times, $
    TIME_ARR=time_arr, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
+   ELECTRON_ANGLERANGE=electron_angleRange, $
    FIT_EACH_ANGLE=fit_each_angle, $
    _REF_EXTRA=e
 
@@ -93,6 +93,20 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   ;;Get data
   ;; IF N_ELEMENTS(eSpec) EQ 0 OR N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
   ;; IF N_ELEMENTS(diff_eFlux) EQ 0 THEN BEGIN
+  CASE SIZE(KF__SDTData_opt.electron_angleRange,/TYPE) OF
+     0: BEGIN
+        custom_e_angleRange = !NULL
+     END
+     7: BEGIN
+        IF ~STRMATCH(STRUPCASE(KF__SDTData_opt.electron_angleRange),'*LC') THEN STOP
+        custom_e_angleRange = !NULL
+        pickMeUpLater       = 1
+     END
+     ELSE: BEGIN
+        custom_e_angleRange = KF__SDTData_opt.electron_angleRange
+     END
+  ENDCASE
+  
   GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
                               LOAD_DAT_FROM_FILE=loadFile, $
                               LOAD_DIR=loadDir, $
@@ -102,12 +116,17 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               OUT_ORB=orb, $
                               OUT_ANGLERANGE=e_angle, $
                               FIT_EACH_ANGLE=fit_each_angle, $
-                              CUSTOM_E_ANGLERANGE=KF__SDTData_opt.electron_angleRange, $
+                              CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
                               ANGLESTR=angleStr, $
                               ESPECUNITS=KF__Curvefit_opt.units, $
                               ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
                               SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                               _EXTRA=e
+
+  IF KEYWORD_SET(pickMeUpLater) THEN BEGIN
+     STR_ELEMENT,KF__SDTData_opt,'electron_angleRange',e_angle,/ADD_REPLACE
+     electron_angleRange = e_angle
+  ENDIF
 
   orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
   ;; ENDIF ELSE BEGIN

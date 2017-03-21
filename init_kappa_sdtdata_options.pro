@@ -13,7 +13,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   defSpectra_average_interval  = 0
   defEnergy_electrons          = [4,3.5e4]
   ;; defElectron_angleRange       = [-32,32]
-  defElectron_angleRange       = [150,-150]
+  ;; defElectron_angleRange       = [150,-150]
+  defElectron_angleRange       = 'lc'
   defFit2D_dens_angleRange     = [-150,150]
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
@@ -56,10 +57,19 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
 
   IF N_ELEMENTS(electron_angleRange) GT 0 THEN BEGIN
-     kSDTData_opt.electron_angleRange      = electron_angleRange
+     ;; kSDTData_opt.electron_angleRange      = electron_angleRange
+     STR_ELEMENT,kSDTData_opt,'electron_angleRange',electron_angleRange,/ADD_REPLACE
      ;; PRINT,FORMAT='("SDT electron angle range",T45,":",T48,2(F0.2))', $
-     PRINT,FORMAT='("kSDTData_opt.electron_angleRange",T45,":",T48,2(F0.2,:,", "))', $
-           kSDTData_opt.electron_angleRange
+     CASE SIZE(electron_angleRange,/TYPE) OF
+        7: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.electron_angleRange",T45,":",T48,A0)', $
+                 kSDTData_opt.electron_angleRange
+        END
+        ELSE: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.electron_angleRange",T45,":",T48,2(F0.2,:,", "))', $
+                 kSDTData_opt.electron_angleRange
+        END
+     ENDCASE
   ENDIF
   ;; kSDTData_opt.fit2D_dens_aRange           = kSDTData_opt.electron_angleRange
   

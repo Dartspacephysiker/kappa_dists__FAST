@@ -30,7 +30,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              DONT_PRINT_FITINFO=dont_print_fitinfo, $
                              FIT_FAIL__USER_PROMPT=fit_fail__user_prompt, $
                              UNITS=units, $
-                             MASS=mass
+                             MASS=mass, $
+                             AVGFACTORARR=avgFactorArr
 
   COMPILE_OPT idl2,STRICTARRSUBS
 
@@ -286,6 +287,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
      ENDIF
 
+     IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+        A[3] *= avgFactorArr[bounds_i]
+        kappaFit.A[3] *= avgFactorArr[bounds_i]
+     ENDIF
 
      ;; ENDIF
 
@@ -419,6 +424,11 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
            ENDCASE
            gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",Xorig,"yFull",yGaussFull)
 
+        ENDIF
+
+        IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+           AGauss[3] *= avgFactorArr[bounds_i]
+           gaussFit.A[3] *= avgFactorArr[bounds_i]
         ENDIF
 
         IF KEYWORD_SET(add_angleStr) THEN BEGIN

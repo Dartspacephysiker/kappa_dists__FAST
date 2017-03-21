@@ -260,7 +260,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            TDownErr   : curPotList[edind].Terr[safe_i]}
 
 
-  useInds = GET_INDS_FOR_PLOT_TEORIE(JVPlotData, $
+  useInds = GET_INDS_FOR_PLOT_THEORIE(JVPlotData, $
                                      USEINDS__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
                                      USEINDS__RELCHANGE=useInds__relChange, $
                                      FRACCHANGE_TDOWN=fracChange_TDown, $
