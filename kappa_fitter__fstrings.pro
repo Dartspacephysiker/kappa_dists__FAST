@@ -15,6 +15,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
    FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+   SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    FITFILE=fitFile, $
    LOADDIR=loadDir
 
@@ -57,6 +58,10 @@ PRO KAPPA_FITTER__FSTRINGS, $
 
   IF KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
      plotNamePref    += '-exc_LCA'
+  ENDIF
+
+  IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
+     plotNamePref    += '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
   ENDIF
 
   fitAngleStr         = ''

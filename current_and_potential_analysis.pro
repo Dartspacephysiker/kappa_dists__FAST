@@ -199,7 +199,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      CASE SIZE(aRange__moments_e_down,/TYPE) OF
         7: BEGIN
            IF STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'*LC') THEN BEGIN
-              fSuff = "-aR_mom_eD_LC"
+              LCStr = 'LC'
+              IF STRLEN(aRange__moments_e_down[0]) GT 2 THEN BEGIN
+                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_e_down[0]),'LC',/EXTRACT))
+                 LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
+              ENDIF
+              fSuff = "-aR_mom_eD_" + LCStr.Replace('.','_')
            ENDIF ELSE BEGIN
               STOP
            ENDELSE
@@ -224,7 +229,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      CASE SIZE(aRange__moments_i_up,/TYPE) OF
         7: BEGIN
            IF STRMATCH(STRUPCASE(aRange__moments_i_up[0]),'*LC') THEN BEGIN
-              fSuff = "-aR_mom_iU_" + STRUPCASE(aRange__moments_i_up[0])
+              LCStr = 'LC'
+              IF STRLEN(aRange__moments_i_up[0]) GT 2 THEN BEGIN
+                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_i_up[0]),'LC',/EXTRACT))
+                 LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
+              ENDIF
+              fSuff = "-aR_mom_iU_" + LCStr.Replace('.','_')
            ENDIF ELSE BEGIN
               STOP
            ENDELSE
@@ -270,6 +280,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;;Whatever datFile is, tack one '-oneCount' before the prefix
 
      fSuff = '-w_1Count'
+     IF KEYWORD_SET(datFile) THEN BEGIN
+        ADD_FNAME_SUFF,datFile,fSuff
+     ENDIF
+
+     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+        ADD_FNAME_SUFF,saveCurPotFile,fSuff
+     ENDIF
+
+  ENDIF
+
+  IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
+     ;;Whatever datFile is, tack one '-oneCount' before the prefix
+
+     fSuff = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
      IF KEYWORD_SET(datFile) THEN BEGIN
         ADD_FNAME_SUFF,datFile,fSuff
      ENDIF
@@ -406,7 +430,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF ELSE BEGIN
            t1Str             = orbTimes[0]
            t2Str             = orbTimes[1]
-           spectra_avg_itvl  = !NULL
+           spectra_avg_itvl  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : !NULL
         ENDELSE
         t1                   = STR_TO_TIME(t1Str)
         t2                   = STR_TO_TIME(t2Str)
@@ -426,6 +450,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
            FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
            FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
            ;; FITFILE=fitFile, $
            LOADDIR=diffEfluxDir
 
