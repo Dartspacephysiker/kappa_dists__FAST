@@ -354,6 +354,16 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   ENDIF
 
+  ;;Who be dat
+  fSuff = eeb_or_eesArr[0] + '-' + eeb_or_eesArr[1]
+  IF KEYWORD_SET(datFile) THEN BEGIN
+     ADD_FNAME_SUFF,datFile,fSuff
+  ENDIF
+
+  IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+     ADD_FNAME_SUFF,saveCurPotFile,fSuff
+  ENDIF
+
   IF KEYWORD_SET(outDir) THEN BEGIN
      diffEfluxDir = outDir.Replace('cur_and_pot_analysis/','diff_eFlux/')
   ENDIF

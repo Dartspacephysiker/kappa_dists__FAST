@@ -30,6 +30,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         SPNAME=spName, $
                                         OUT_SPNAME=out_spName, $
                                         ERROR_BAR_FACTOR=errorBarFac, $
+                                        USEI__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
                                         USEI__RELCHANGE=useInds__relChange, $
                                         FRACCHANGE_TDOWN=fracChange_TDown, $
                                         FRACCHANGE_NDOWN=fracChange_NDown, $
@@ -260,6 +261,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
 
   useInds = GET_INDS_FOR_PLOT_TEORIE(JVPlotData, $
+                                     USEINDS__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
                                      USEINDS__RELCHANGE=useInds__relChange, $
                                      FRACCHANGE_TDOWN=fracChange_TDown, $
                                      FRACCHANGE_NDOWN=fracChange_NDown, $

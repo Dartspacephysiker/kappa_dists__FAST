@@ -114,35 +114,38 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   PRINT,""
 
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-                    orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
-  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.2)',A[0],A[3])
-  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.2)',AGauss[3])
+                            orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
+  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
+  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
 
   window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 
-  ;; that          = ERRORPLOT(X,Y,XError,YError,SYMBOL='*',LINESTYLE='')
-  that             = ERRORPLOT(X,Y,YError,SYMBOL='*',LINESTYLE='', $
-                   NAME='Data', $
-                   TITLE=titleStr, $
-                   XTITLE='$\Phi$ (V)', $
-                   YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
-                   /CURRENT)
-                   
+  ;; that             = ERRORPLOT(X,Y,XError,YError, $
+  that             = ERRORPLOT(X,Y,YError, $
+                               SYMBOL='*', $
+                               LINESTYLE='', $
+                               NAME='Data', $
+                               TITLE=titleStr, $
+                               XTITLE='$\Phi$ (V)', $
+                               YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
+                               /CURRENT)
+  
   ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
   this             = PLOT(X,YFit, $
-              NAME=kappaName, $
-              COLOR='BLUE', $
-              /OVERPLOT)
+                          NAME=kappaName, $
+                          COLOR='BLUE', $
+                          /OVERPLOT)
   those            = PLOT(X,yGaussFit, $
-               NAME=gaussName, $
-               COLOR='Brown', $
-               /OVERPLOT)
+                          NAME=gaussName, $
+                          COLOR='Brown', $
+                          /OVERPLOT)
 
   ;; legPos__data  = [(MAX(X)-MIN(X))*0.2+MIN(X),(MAX(Y)-MIN(Y))*0.95+MIN(Y)]
-  legPos           = [0.5,0.85]
+  ;; legPos           = [0.5,0.85]
+  legPos           = [0.5,0.5]
   ;; leg           = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
   leg              = LEGEND(TARGET=[that,this,those], $
-               POSITION=legPos)
+                            POSITION=legPos)
 
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
