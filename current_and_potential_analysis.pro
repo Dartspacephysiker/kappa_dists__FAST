@@ -5,135 +5,6 @@ PRO ADD_FNAME_SUFF,fName,suff
         fName        = STRJOIN(TEMPORARY(fNameTmp),'.')
 END
 
-PRO ERROR_N,n,errors,nerr
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  ;; FOR l=0,N_ELEMENTS(n.x)-1 DO BEGIN
-     ;; nerr[l] = n.y[l]  * errors[l].n
-     ;; nerr[l] = n.y[l]  * errors.n[l]
-  ;; ENDFOR
-     nerr = n.y  * errors.n
-  
-END
-
-PRO ERROR_J,j,errors,jerr
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  ;;In #/cm^2-s
-  jerr = SQRT((j.y)^(2.D) * $
-                 ( (errors.n)^(2.D) + (errors.Uz)^(2.D) + errors.n*errors.Uz*errors.R[*,0,3] ) )  
-
-END
-
-PRO ERROR_JE,n,j,je,T,errors,jeErr
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  eV_cm2sec_to_mW_m2 = 1.60218D-12
-  eV_cm3_to_J_m3     = 1.60218D-13
-
-  ;;I guess we'll SI-a-tize everything here
-  vPar              = j.y/n.y/1D2                             ;j.y in #/cm^2-sec and n.y in cm^-3, so mult. by 1e-2 to get m/s
-  PPar              = REFORM(T.y[2,*])*n.y*3.D*eV_cm3_to_J_m3 ;T.y in eV, so P in eV/cm^3
-  PPrp              = REFORM(T.y[0,*])*n.y*3.D*eV_cm3_to_J_m3
-  ;; jePar          = je.y*1D-3                               ;W/m^3
-
-  ;;Parallel heat flux, from Hvec = Qvec - vVec dot P_tensor - 0.5 * vVec * Trace(P_tensor)
-  ;; HPar_mW_m2        = je.y - 1.5D * eV_cm2sec_to_mW_m2 * (vPar * PPar - vPar * PPrp) * 1D2 /eV_cm3_to_J_m3 ;in mW/m2
-  HPar              = (je.y*1D-3) - 1.5D * (vPar * PPar - vPar * PPrp)                                     ;in W/m2
-
-  ;;sigmas
-  sigmaVParSquared  = vPar * vPar * errors.Uz  * errors.Uz
-  sigmaPParSquared  = PPar * PPar * errors.Pzz * errors.Pzz
-  sigmaPPrpSquared  = PPrp * PPrp * errors.Pxx * errors.Pxx
-  sigmaHParSquared  = errors.Hz * errors.Hz * HPar * HPar
-
-  ;;covars
-  covarVParPPar     = errors.R[*,3, 6] * (vPar * errors.Uz ) * (PPar * errors.Pzz)
-  covarVParPPrp     = errors.R[*,3, 4] * (vPar * errors.Uz ) * (PPar * errors.Pxx)
-  covarVParHPar     = errors.R[*,3,12] * (vPar * errors.Uz ) * (HPar * errors.Hz )
-  covarPParPPrp     = errors.R[*,6, 4] * (PPar * errors.Pzz) * (PPrp * errors.Pxx)
-  covarPParHPar     = errors.R[*,6,12] * (PPar * errors.Pzz) * (HPar * errors.Hz)
-  covarPPrpHPar     = errors.R[*,4,12] * (PPrp * errors.Pxx) * (HPar * errors.Hz)
-
-  jeErr = SQRT(sigmaHParSquared + $
-               (1.5D*PPar + PPrp) * ( 2.D * TEMPORARY(covarVParHPar) + (1.5D*PPar + PPrp) * TEMPORARY(sigmaVParSquared) ) + $
-               vPar * (3.D * TEMPORARY(covarPParHPar) + 2.D * TEMPORARY(covarPPrpHPar) + $
-                       (1.5D * PPar + PPrp) * (3.D * TEMPORARY(covarVParPPar) + 2.D * TEMPORARY(covarVParPprp) )        ) + $
-               vPar * vPar * (2.25D * TEMPORARY(sigmaPParSquared) + 3.D * covarPParPPrp + TEMPORARY(sigmaPPrpSquared)   )   ) $
-          * 1D3 ;Convert back to mW/m^2
-
-END
-
-PRO ERROR_CHARE,j,je,jerr,jeErr,jje_coVar,errors,charEErr
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
-  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
-  ;; PRINT,"MISSING TERM: COVAR__JE_PAR__J_PAR (IT'S BEEN SET TO ZERO IN THE MEANTIME)!!!!"
-
-  const          = 6.242D*1.0D11
-
-  ;; covarJParJePar = 0.D * jerr * jeErr
-
-  ;; charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * covarJParJePar )
-  charEErr       = const * SQRT( (jeErr / j.y)^2.D + ( je.y * jErr / j.y^2.D )^2.D - 2.D * je.y / j.y^3.D * jje_coVar )
-
-END
-
-PRO ERROR_T,T,n,errors,Terr
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  Tavg             = REFORM(T.y[3,*])
-  PPar             = REFORM(T.y[2,*])*n.y*3.D
-  PPrp             = REFORM(T.y[0,*])*n.y*3.D
-
-  sigma_N_PPar     = errors.R[*,0,6]*(errors.N*N.y)*(errors.Pzz*PPar)
-  sigma_N_PPrp     = errors.R[*,0,4]*(errors.N*N.y)*(errors.Pxx*PPrp)
-  sigma_PPar_PPrp  = errors.R[*,6,4]*(errors.Pzz*PPar)*(errors.Pxx*PPrp)
-
-  ;;pi=1/3N, and is for convenience
-  piSq             = 1.D/(9.D*n.y*n.y)
-
-  ;;other          = 2*pi*Tavg/N, and is also for convenience
-  other            = 2.D*Tavg/(3.D*n.y*n.y)
-
-  Terr             = SQRT( piSq*((errors.Pzz*PPar)^2.D                                        + $
-                                 4.D*errors.R[*,6,4]*(errors.Pzz*PPar)*(errors.Pxx*PPrp)      + $
-                                 4.D*(errors.Pxx*PPrp)^2.D                                    ) $
-                           +                                                                    $
-                           (-1.D)*other*(sigma_N_PPar     + $
-                                         2.D*sigma_N_PPrp ) $
-                           + $
-                           (Tavg*errors.n)^(2.D)                                                )
-                           ;; See? the n.y terms cancel each other. Hence the simplification above
-                           ;; (Tavg/n.y*errors.n*n.y)^(2.D)
-
-END
-
-PRO ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr,jje_coVar;; , $
-               ;; ENERGY_ERROR=enErr
-
-  ;Raise
-  ERROR_N ,n,errors,nerr
-
-  ;The
-  ERROR_J ,j,errors,jerr
-  ERROR_JE,n,j,je,T,errors,jeErr
-  ERROR_CHARE,j,je,jerr,jeErr,jje_coVar,errors,charEErr
-
-  ;Stakes
-  ;; IF KEYWORD_SET(enErr) THEN BEGIN
-     ;; ERROR_T,T,n,enErr,errors,Terr
-  ERROR_T,T,n,errors,Terr
-  ;; ENDIF
-
-END
-
 PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORBIT=orbit, $
    ORBTIMES=orbTimes, $
@@ -785,155 +656,55 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;                                               EEB_OR_EES=eeb_or_ees)
         ;; energy   = TEMPORARY(en_arr)
 
-        n        = N_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-        T        = T_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-        j        = J_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-        je       = JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                          ENERGY=energy, $
-                                          ANGLE=aRange__moments, $
-                                          SC_POT=sc_pot, $
-                                          EEB_OR_EES=eeb_or_ees, $
-                                          QUIET=quiet)
-        jC       = J_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__charE, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-        jeC      = JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                          ENERGY=energy, $
-                                          ANGLE=aRange__charE, $
-                                          SC_POT=sc_pot, $
-                                          EEB_OR_EES=eeb_or_ees, $
-                                          QUIET=quiet)
-        jje_coVar  = (TEMPORARY(JE_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                                       ENERGY=energy, $
-                                                       ANGLE=aRange__charE, $
-                                                       SC_POT=sc_pot, $
-                                                       EEB_OR_EES=eeb_or_ees, $
-                                                       /JJE, $
-                                                       QUIET=quiet))).y - jeC.y*jC.y
-
+        MOMENT_SUITE_2D,diff_eFlux, $
+                        ENERGY=energy, $
+                        ARANGE__MOMENTS=aRange__moments, $
+                        ARANGE__CHARE=aRange__charE, $
+                        SC_POT=sc_pot, $
+                        EEB_OR_EES=eeb_OR_ees, $
+                        ERROR_ESTIMATES=error_estimates, $
+                        MAP_TO_100KM=map_to_100km, $ 
+                        ORBIT=orbit, $
+                        QUIET=quiet, $
+                        OUT_N=n, $
+                        OUT_J_=j, $
+                        OUT_JE=je, $
+                        OUT_T=T, $
+                        OUT_CHARE=charE, $
+                        OUT_CURRENT=cur, $
+                        OUT_JJE_COVAR=jje_coVar, $
+                        OUT_ERRORS=errors, $
+                        OUT_ERR_N=nErr, $
+                        OUT_ERR_J_=jErr, $
+                        OUT_ERR_JE=jeErr, $
+                        OUT_ERR_T=TErr, $
+                        OUT_ERR_CHARE=charEErr
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
-           n1    = N_2D__FROM_DIFF_EFLUX(def_onecount, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-           T1    = T_2D__FROM_DIFF_EFLUX(def_onecount, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-           j1    = J_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__moments, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-           je1   = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                          ENERGY=energy, $
-                                          ANGLE=aRange__moments, $
-                                          SC_POT=sc_pot, $
-                                          EEB_OR_EES=eeb_or_ees, $
-                                          QUIET=quiet)
-           j1C   = J_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                         ENERGY=energy, $
-                                         ANGLE=aRange__charE, $
-                                         SC_POT=sc_pot, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         QUIET=quiet)
-           je1C  = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                          ENERGY=energy, $
-                                          ANGLE=aRange__charE, $
-                                          SC_POT=sc_pot, $
-                                          EEB_OR_EES=eeb_or_ees, $
-                                          QUIET=quiet)
-           jje1_coVar = (TEMPORARY(JE_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                          ENERGY=energy, $
-                                          ANGLE=aRange__charE, $
-                                          SC_POT=sc_pot, $
-                                          /JJE, $
-                                          EEB_OR_EES=eeb_or_ees, $
-                                          QUIET=quiet))).y - je1C.y * j1C.y
-
-        ENDIF
-
-        ;;Error everything
-        IF KEYWORD_SET(error_estimates) THEN BEGIN
-
-           errors          = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux, $
-                                                              ENERGY=energy, $
-                                                              ANGLE=aRange__moments, $
-                                                              SC_POT=sc_pot, $
-                                                              EEB_OR_EES=eeb_or_ees, $
-                                                              ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
-                                                              /PRESSURE_COVAR_CALC, $
-                                                              ;; HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
-                                                              /HEATFLUX_COVAR_CALC, $
-                                                              QUIET=quiet)
-
-           ;; IF KEYWORD_SET(dens_errors) THEN BEGIN
-           ;; nerr            = MAKE_ARRAY(nHere,/FLOAT)
-           ;; jerr            = MAKE_ARRAY(nHere,/FLOAT)
-           ;; Terr            = MAKE_ARRAY(nHere,/FLOAT)
-
-           ERROR_CALC,diff_eFlux,errors,n,j,je,T,nerr,jerr,jeErr,charEErr,Terr,jje_coVar
-           ;; ERROR_CALC,diff_eFlux,errors,j,je,n,T,jerr,jeErr,nerr,Terr
-
-           IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              errors1      = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount, $
-                                                              ENERGY=energy, $
-                                                              ANGLE=aRange__moments, $
-                                                              SC_POT=sc_pot, $
-                                                              EEB_OR_EES=eeb_or_ees, $
-                                                              ;; PRESSURE_COVAR_CALC=pressure_covar_calc, $
-                                                              /PRESSURE_COVAR_CALC, $
-                                                              ;; HEATFLUX_COVAR_CALC=heatFlux_covar_calc, $
-                                                              /HEATFLUX_COVAR_CALC, $
-                                                              QUIET=quiet)
-              ;; n1err        = MAKE_ARRAY(nHere,/FLOAT)
-              ;; j1err        = MAKE_ARRAY(nHere,/FLOAT)
-              ;; T1err        = MAKE_ARRAY(nHere,/FLOAT)
-
-              ERROR_CALC,dEF_oneCount,errors1,n1,j1,je1,T1,n1err,j1err,je1Err,charE1Err,T1err,jje1_coVar
-              ;; ERROR_CALC,dEF_oneCount,errors1,j1,je1,n1,T1,j1err,je1Err,n1err,T1err
-
-           ENDIF
-
-           ;; FOR l=0,N_ELEMENTS(diff_eFlux.time)-1 DO BEGIN
-           ;;    jerr[l]      = SQRT((j.y[l])^(2.D) * $
-           ;;                    ( (errors[l].n)^(2.D) + (errors[l].Uz)^(2.D) + errors[l].n*errors[l].Uz*errors[l].R[0,3] ) )
-           ;;    nerr[l]      = n.y[l]  * errors[l].n
-           ;;    ;; Terr[l]      = 
-           ;; ENDFOR
-           ;; IF KEYWORD_SET(also_oneCount) THEN BEGIN
-           ;;    ;; FOR l=0,N_ELEMENTS(dEF_oneCount.time)-1 DO BEGIN
-           ;;    ;;    j1err[l]  = SQRT((j1.y[l])^(2.D) * $
-           ;;    ;;                    ( (errors1[l].n)^(2.D) + (errors1[l].Uz)^(2.D) + errors1[l].n*errors1[l].Uz*errors1[l].R[0,3] ) )
-           ;;    ;;    n1err[l]  = n1.y[l] * errors1[l].n
-           ;;    ;;    ;; T1err[l]  = 
-           ;;    ;; ENDFOR
-           ;; ENDIF
+           MOMENT_SUITE_2D,dEF_oneCount, $
+                           ENERGY=energy, $
+                           ARANGE__MOMENTS=aRange__moments, $
+                           ARANGE__CHARE=aRange__charE, $
+                           SC_POT=sc_pot, $
+                           EEB_OR_EES=eeb_OR_ees, $
+                           ERROR_ESTIMATES=error_estimates, $
+                           MAP_TO_100KM=map_to_100km, $ 
+                           ORBIT=orbit, $
+                           QUIET=quiet, $
+                           OUT_N=n1, $
+                           OUT_J_=j1, $
+                           OUT_JE=je1, $
+                           OUT_T=T1, $
+                           OUT_CHARE=charE1, $
+                           OUT_CURRENT=cur1, $
+                           OUT_JJE_COVAR=jje1_coVar, $
+                           OUT_ERRORS=errors1, $
+                           OUT_ERR_N=n1Err, $
+                           OUT_ERR_J_=j1Err, $
+                           OUT_ERR_JE=je1Err, $
+                           OUT_ERR_T=T1Err, $
+                           OUT_ERR_CHARE=charE1Err
 
         ENDIF
 
@@ -943,7 +714,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         T_list.Add,TEMPORARY(T)
         j_list.Add,TEMPORARY(j)
         je_list.Add,TEMPORARY(je)
-        chare_list.Add,CHAR_ENERGY((TEMPORARY(jC)).y,(TEMPORARY(jeC)).y)
+        chare_list.Add,charE
         nerr_list.Add,TEMPORARY(nerr)
         jerr_list.Add,TEMPORARY(jerr)
         jeErr_list.Add,TEMPORARY(jeErr)
@@ -956,7 +727,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            T1_list.Add,TEMPORARY(T1)
            j1_list.Add,TEMPORARY(j1)
            je1_list.Add,TEMPORARY(je1)
-           chare1_list.Add,CHAR_ENERGY((TEMPORARY(j1C)).y,(TEMPORARY(je1C)).y)
+           chare1_list.Add,charE1
            n1err_list.Add,TEMPORARY(n1err)
            j1err_list.Add,TEMPORARY(j1err)
            je1Err_list.Add,TEMPORARY(je1Err)
@@ -1127,36 +898,36 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ENDIF
         ENDIF
 
-        IF KEYWORD_SET(map_to_100km) THEN BEGIN
-           GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,orbit,tmpTimes, $
-                                            OUT_TSORTED_I=tSort_i, $
-                                            OUT_ALT=alt, $
-                                            OUT_MLT=mlt, $
-                                            OUT_ILAT=ilat, $
-                                            OUT_MAPRATIO=mapRatio, $
-                                            OUT_NEVENTS=nEvents, $
-                                            LOGLUN=logLun
-           IF N_ELEMENTS(tSort_i) GT 0 THEN STOP
+        ;; IF KEYWORD_SET(map_to_100km) THEN BEGIN
+        ;;    GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,orbit,tmpTimes, $
+        ;;                                     OUT_TSORTED_I=tSort_i, $
+        ;;                                     OUT_ALT=alt, $
+        ;;                                     OUT_MLT=mlt, $
+        ;;                                     OUT_ILAT=ilat, $
+        ;;                                     OUT_MAPRATIO=mapRatio, $
+        ;;                                     OUT_NEVENTS=nEvents, $
+        ;;                                     LOGLUN=logLun
+        ;;    IF N_ELEMENTS(tSort_i) GT 0 THEN STOP
 
-           tmpJ         *= mapRatio
-           tmpJe        *= mapRatio
+        ;;    tmpJ         *= mapRatio
+        ;;    tmpJe        *= mapRatio
 
-           IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmpJ1     *= mapRatio
-              tmpJe1    *= mapRatio
-           ENDIF
+        ;;    IF KEYWORD_SET(also_oneCount) THEN BEGIN
+        ;;       tmpJ1     *= mapRatio
+        ;;       tmpJe1    *= mapRatio
+        ;;    ENDIF
 
-           ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
-           IF KEYWORD_SET(error_estimates) THEN BEGIN
-              tmpJerr   *= mapRatio
+        ;;    ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
+        ;;    IF KEYWORD_SET(error_estimates) THEN BEGIN
+        ;;       tmpJerr   *= mapRatio
 
-              IF KEYWORD_SET(also_oneCount) THEN BEGIN
-                 tmpJ1err *= mapRatio
-              ENDIF
+        ;;       IF KEYWORD_SET(also_oneCount) THEN BEGIN
+        ;;          tmpJ1err *= mapRatio
+        ;;       ENDIF
 
-           ENDIF
+        ;;    ENDIF
 
-        ENDIF
+        ;; ENDIF
 
         ;;Get current (flip sign of current for electrons)
         tmpCur            = tmpJ  * 1.6e-9 * (ions ? 1. : (-1.))
@@ -1186,12 +957,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               IF KEYWORD_SET(also_oneCount) THEN BEGIN
                  tmpCur1 *= (-1.)
               ENDIF
-              ;;No, don't flip sign on error
-              ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
-              ;; IF KEYWORD_SET(error_estimates) THEN BEGIN
-              ;;    tmpCurErr  *= (-1.)
-              ;;    tmpCur1Err *= (-1.)
-              ;; ENDIF
 
            END
            0: BEGIN

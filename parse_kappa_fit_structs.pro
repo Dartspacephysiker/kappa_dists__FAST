@@ -42,8 +42,6 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
      match_i = INDGEN(N_ELEMENTS(A[0,*]))
   ENDELSE
 
-
-
   CASE KEYWORD_SET(use_mpFit1D) OF
      1: BEGIN
         Astruct = CREATE_STRUCT([A_names[0:3],A_names[6]], $

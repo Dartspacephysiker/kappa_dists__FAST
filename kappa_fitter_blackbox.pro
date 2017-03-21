@@ -198,59 +198,30 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
-     ;;Used these lines before the advent of my way awesome __FROM_DIFF_EFLUX series of routines.
-     ;; CASE eeb_or_ees OF
-     ;;    'eeb': BEGIN
-     ;;       GET_2DT_TS,'j_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;       GET_2DT_TS,'je_2d_b','fa_eeb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;    END
-     ;;    'ees': BEGIN
-     ;;       GET_2DT_TS,'j_2d_b','fa_ees',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;       GET_2DT_TS,'je_2d_b','fa_ees',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;    END
-     ;;    'ieb': BEGIN
-     ;;       GET_2DT_TS,'j_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;       GET_2DT_TS,'je_2d_b','fa_ieb',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;    END
-     ;;    'ies': BEGIN
-     ;;       GET_2DT_TS,'j_2d_b','fa_ies',T1=t1,T2=t2,NAME='Je',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;       GET_2DT_TS,'je_2d_b','fa_ies',T1=t1,T2=t2,NAME='Jee',ENERGY=energy_electrons,ANGLE=electron_angleRange
-     ;;    END
-     ;; ENDCASE
-
-     ;; GET_DATA,'Je',DATA=je
-     ;; GET_DATA,'Jee',DATA=jee
-
-     n   = N_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     n1  = N_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
-     je  = J_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     jee = JE_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
-     je1  = J_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     jee1 = JE_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
-     T   = T_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-     T1  = T_2D__FROM_DIFF_EFLUX(def_onecount,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet)
-
-     error_estimates = 1
-     IF KEYWORD_SET(error_estimates) THEN BEGIN
-
-        errors   = MOMENTERRORS_2D__FROM_DIFF_EFLUX(diff_eFlux,ENERGY=energy_electrons,ANGLE=electron_angleRange,QUIET=quiet,/PRESSURE_COVAR_CALC)
-        errors1  = MOMENTERRORS_2D__FROM_DIFF_EFLUX(dEF_oneCount,ENERGY=energy_electrons,QUIET=quiet,/PRESSURE_COVAR_CALC)
-
-        ;; nHere    = N_ELEMENTS(n.x)
-
-        ERROR_N_2D,n,errors,nerr
-        ERROR_N_2D,n1,errors1,n1err
-
-        ERROR_J_2D,je,errors,jerr
-        ERROR_J_2D,je1,errors1,j1err
-
-        ERROR_T_2D,T,n,errors,Terr
-        ERROR_T_2D,T1,n1,errors1,T1err
-
-     ENDIF
+       MOMENT_SUITE_2D,diff_eFlux, $
+                       ENERGY=energy, $
+                       ARANGE__MOMENTS=aRange__moments, $
+                       ARANGE__CHARE=aRange__charE, $
+                       SC_POT=sc_pot, $
+                       EEB_OR_EES=eeb_OR_ees, $
+                       ERROR_ESTIMATES=error_estimates, $
+                       /MAP_TO_100KM, $ 
+                       ORBIT=orbit, $
+                       QUIET=quiet, $
+                       OUT_N=n, $
+                       OUT_J_=j, $
+                       OUT_JE=je, $
+                       OUT_T=T, $
+                       OUT_CHARE=charE, $
+                       OUT_CURRENT=cur, $
+                       OUT_JJE_COVAR=jje_coVar, $
+                       OUT_ERRORS=errors, $
+                       OUT_ERR_N=nErr, $
+                       OUT_ERR_J_=jErr, $
+                       OUT_ERR_JE=jeErr, $
+                       OUT_ERR_T=TErr, $
+                       OUT_ERR_CHARE=charEErr, $
+                       OUT_ERR_CURRENT=curErr
 
      PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                              A=a, $
@@ -271,6 +242,23 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              PVAL=pValGauss, $
                              FITSTATUS=gaussfitStatus, $
                              USE_MPFIT1D=use_mpFit1D
+
+     ;;2017/03/21
+     ;;LOOK: All you've got to do is figure out a way to consistently get the ion contribution in here, and you're golden. Understand?
+     ;;THEN you can see what it's really like
+     R_B__Mguess = 900
+     gaussCur = KNIGHT_RELATION__DORS_KLETZING_4(AStructGauss.temperature, $
+                                                 AStructGauss.N, $
+                                                 jvplotdata.pot[useInds], $
+                                                 R_B__Mguess, $
+                                                 /NO_MULT_BY_CHARGE)
+
+     R_B__Kguess = 900
+     kappaCur = KNIGHT_RELATION__DORS_KLETZING_11(AStruct.kappa,AStruct.temperature, $
+                                                  AStruct.N, $
+                                                  jvplotdata.pot[useInds], $
+                                                  R_B__guess, $
+                                                  /NO_MULT_BY_CHARGE)
 
 
      PRINT_KAPPA_LOOP_FIT_SUMMARY,fitStatus,gaussfitStatus
@@ -318,7 +306,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ENDIF
 
         IF KEYWORD_SET(error_estimates) THEN BEGIN
-              saveStr += 'nErr,jErr,TErr,errors,'
+           saveStr += 'nErr,jErr,TErr,errors,'
         ENDIF
 
         PRINT,'Saving ' + fitFile + ' ...'

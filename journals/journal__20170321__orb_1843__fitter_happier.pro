@@ -31,7 +31,7 @@ PRO JOURNAL__20170321__ORB_1843__FITTER_HAPPIER
   
   add_oneCount_curve                 = 1
 
-  fit1D__save_plotSlices             = 1
+  fit1D__save_plotSlices             = 0
   fit2D__save_all_candidate_plots    = 0
   fit2D__show_each_candidate         = 0
   fit2D__weighting                   = 1 ;1 = lin 2 = square
