@@ -29,7 +29,25 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
                                         SPNAME=spName, $
                                         OUT_SPNAME=out_spName, $
-                                        ERROR_BAR_FACTOR=errorBarFac
+                                        ERROR_BAR_FACTOR=errorBarFac, $
+                                        USEI__RELCHANGE=useInds__relChange, $
+                                        FRACCHANGE_TDOWN=fracChange_TDown, $
+                                        FRACCHANGE_NDOWN=fracChange_NDown, $
+                                        FRACERROR_TDOWN=fracError_TDown, $
+                                        FRACERROR_NDOWN=fracError_NDown, $
+                                        USEI__TWOLUMPS=useInds__twoLumps, $
+                                        MAX_TDOWN=max_TDown, $
+                                        MIN_TDOWN=min_TDown, $
+                                        MAX_NDOWN=max_NDown, $
+                                        MIN_NDOWN=min_NDown, $
+                                        TRANGES=tRanges, $
+                                        MINPOT=minPot, $
+                                        MAXPOT=maxPot, $
+                                        MINCUR=minCur, $
+                                        MAXCUR=maxCur, $
+                                        USEINDS=useInds, $
+                                        PLOT_J_RATIOS=plot_j_ratios, $
+                                        OUT_AVGS_FOR_FITTING=avgs_JVfit
                                    
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -239,5 +257,86 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            NDownErr   : curPotList[edind].Nerr[safe_i], $
                            TDown      : REFORM(curPotList[edind].T[3,safe_i]), $
                            TDownErr   : curPotList[edind].Terr[safe_i]}
+
+
+  useInds = GET_INDS_FOR_PLOT_TEORIE(JVPlotData, $
+                                     USEINDS__RELCHANGE=useInds__relChange, $
+                                     FRACCHANGE_TDOWN=fracChange_TDown, $
+                                     FRACCHANGE_NDOWN=fracChange_NDown, $
+                                     FRACERROR_TDOWN=fracError_TDown, $
+                                     FRACERROR_NDOWN=fracError_NDown, $
+                                     USEINDS__TWOLUMPS=useInds__twoLumps, $
+                                     MAX_TDOWN=max_TDown, $
+                                     MIN_TDOWN=min_TDown, $
+                                     MAX_NDOWN=max_NDown, $
+                                     MIN_NDOWN=min_NDown, $
+                                     TRANGES=tRanges)
+
+  negcur_i                    = WHERE(jvplotdata.cur LE 0)
+  negcur_i                    = negcur_i[SORT(jvplotdata.pot[negcur_i])]
+
+  minPot                      = KEYWORD_SET(minPot) ? minPot : 0.D
+  maxPot                      = KEYWORD_SET(maxPot) ? maxPot : 4000
+
+  minCur                      = KEYWORD_SET(minCur) ? minCur : 1D-6
+  maxCur                      = KEYWORD_SET(maxCur) ? maxCur : 1D-3
+
+
+  IF N_ELEMENTS(useInds) EQ 0 THEN BEGIN
+     ;;The points that have a clear affinity for kappa = 2
+     thesepointslovekappa_ii  = WHERE((jvplotdata.pot[negcur_i] LE maxPot) AND $
+                                      (jvplotdata.pot[negcur_i] GE minPot) AND $
+                                      (jvplotdata.cur[negcur_i]*(-1D-6) GE minCur) AND $
+                                      (jvplotdata.cur[negcur_i]*(-1D-6) LE maxCur),nLovers)
+     PRINT,"THESE POINTS LOVE KAPPA=2.0"
+     loveKappa_i              = negcur_i[thesepointslovekappa_ii]
+     GET_STREAKS,loveKappa_i[SORT(loveKappa_i)],START_I=loveKappa_iStrt_ii,STOP_I=loveKappa_iStop_ii,OUT_STREAKLENS=streakLens
+     times                    = TIME_TO_STR(jvplotdata.time[loveKappa_i[SORT(jvplotdata.time[loveKappa_i])]],/MS)
+     FOR k=0,nLovers-1 DO BEGIN
+        PRINT,TIME_TO_STR(jvplotdata.time[loveKappa_i[k]])
+     ENDFOR
+
+     ;; useInds               = negcur_i
+     useInds                  = loveKappa_i
+
+  ENDIF
+
+  useInds                     = useInds[SORT(jvplotdata.pot[useInds])]
+  
+  fmtStr = '(A0," (min, max,stdDev) ",T35,": ",F0.2," (",F0.2,", ",F0.2,", ",F0.2,")")'
+
+  quantL = LIST(jvplotdata.Tdown[useInds],jvplotdata.Ndown[useInds])
+  navn   = ['T avg','N avg']
+  sNavn  = ['T','N']
+  IF KEYWORD_SET(ji_je_ratio) THEN BEGIN
+     quantL.Add,ji_je_ratio[useInds]
+     navn  = [navn,'Ji/Je avg']
+     sNavn = [sNavn,'JiJeRat']
+  ENDIF
+  
+  avgs_JVfit = {useInds : useInds}
+
+  FOR k=0,N_ELEMENTS(quantL)-1 DO BEGIN
+     tmpQuant = quantL[k]
+     PRINT,FORMAT=fmtStr, $
+           navn[k], $
+           MEAN(tmpQuant), $
+           MIN(tmpQuant), $
+           MAX(tmpQuant), $
+           STDDEV(tmpQuant)
+
+     execStr = sNavn[k] + ' = {avg:MEAN(tmpQuant),stddev:STDDEV(tmpQuant),min:MIN(tmpQuant),max:MAX(tmpQuant)}'
+     IF ~EXECUTE(execStr) THEN STOP
+
+     IF N_ELEMENTS(avgs_JVfit) EQ 0 THEN BEGIN
+        exec2Str = 'avgs_JVfit = {' + sNavn[k] + ' : ' + sNavn[k] + '}'
+     ENDIF ELSE BEGIN
+        exec2Str = 'avgs_JVfit = CREATE_STRUCT(avgs_JVfit,"' + sNavn[k] + '",' + sNavn[k] + ')'
+     ENDELSE
+
+     IF ~EXECUTE(exec2Str) THEN STOP
+
+  ENDFOR
+
 
 END

@@ -167,6 +167,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    USE_PEAKE_BOUNDS_FOR_MOMENT_CALC=use_peakE_bounds_for_moments, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
+   POT__ALL=pot__all, $
    POT__CHASTON_STYLE=pot__Chaston_style, $
    POT__FROM_FILE=pot__from_file, $
    POT__SAVE_FILE=pot__save_file, $
@@ -455,12 +456,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            LOADDIR=diffEfluxDir
 
         preString = diff_eFlux_file + ' ...'
+        gotIt = 0B
         IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(diffEfluxDir+diff_eFlux_file)) AND $
            KEYWORD_SET(load_diff_eFlux_file) $
         THEN BEGIN
            afterString = "Restored "
            realFile    = (FILE_TEST(diff_eFlux_file) ? '' : diffEfluxDir ) + diff_eFlux_file
            RESTORE,realFile
+           gotIt = SIZE(diff_eFlux,/TYPE) EQ 8
+        ENDIF
+
+        IF gotIt THEN BEGIN
+           afterString = "Restored "
         ENDIF ELSE BEGIN
            afterString = "Made "
 
@@ -512,6 +519,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1], $
                             DATA=sc_pot, $
                             FROM_FA_POTENTIAL=pot__from_fa_potential, $
+                            ALL=pot__all, $
                             /REPAIR, $
                             CHASTON_STYLE=pot__Chaston_style, $
                             FROM_FILE=pot__from_file, $

@@ -1,104 +1,14 @@
-;2017/03/03
-;Here are the winners from 2017/03/04's headbangerfest:
-;  aRange__moments_e_down  = [330.,30.]
-;  energyArr               = [[300,3.0e4],[0,3.0e4],[0,2.4e4]]
-
-;2017/03/17
-;A      = vector of function params:
-
-; A[0]: E_b,       Plasma bulk energy (eV)
-; A[1]: T,         Plasma kinetic temperature (eV)
-; A[2]: kappa,     Kappa (of course!)--or more specifically 3D kappa index, so that kappa = kappa_0 + 3/2
-; A[3]: n,         Plasma density (cm^-3)
-; A[4]: bulkAngle, Angle between bulk velocity, u_b, and velocity in direction for which we're interested in the distribution
-
-FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
-                                  ;; ERANGE_PEAK=eRange_peak
-
-  COMPILE_OPT IDL2,STRICTARRSUBS
-
-  ;; ;;And don't let kappa get out of hand
-  ;; AMaxStep[0]     = 1.0
-
-  ;; ;;And don't let temperature get out of hand
-  ;; AMaxStep[1]     = 30.
-
-  ;; ;;And don't let DENSITY get out of hand!
-  ;; AMaxStep[2]     = 0.5
-  AMaxStep        = DOUBLE([1.0, $
-                            30., $
-                            0.5, $
-                            1000])
-
-  Alimited         = [[1,1], $
-                      [1,1], $
-                      [1,1], $
-                      [1,1]]
-  
-  Alimits         = [[1.501D   ,100.0   ] , $ ;kappa 
-                     [10      ,3.0e4 ] , $ ;Temp
-                     [1e-4    ,100   ] , $ ;N
-                     [1       ,1e4 ]]    ;R_B
-
-  ;;Make 'em play nice
-  ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN
-  ;;    IF A[k] LT Alimits[0,k] THEN A[k] = Alimits[0,k]
-  ;;    IF A[k] GT Alimits[1,k] THEN A[k] = Alimits[1,k]
-  ;; ENDFOR
-
-  Alimited        = TRANSPOSE(Alimited)
-  Alimits         = TRANSPOSE(Alimits)
-
-  paramInfo = REPLICATE({value:0.D       , $
-                       fixed:0B        , $
-                       parname:''      , $
-                       ;; relstep:0.D     , $
-                       ;; mpmaxstep:0.D   , $
-                       limited:[0B,0]   , $
-                       limits:[0.D,0]} , $
-                      ;; 7)
-                      4)
-
-  ;;Starting values
-  paramInfo[*].value = A
-
-  ;;Which ones are fixednnn?
-  paramInfo[*].fixed = fixA
-
-  ;;And their names?
-  paramInfo[*].parName = ["kappa","T","N","R_B"]
-
-  ;;Got it. What about anything like, you know, a max step size?
-  ;; paramInfo[*].mpmaxstep  = AMaxStep
-
-  ;;So certain values can't be exceeded?
-  paramInfo[*].limited[0] = Alimited[*,0]
-  paramInfo[*].limited[1] = Alimited[*,1]
-
-  ;;What are the limits, then?
-  paramInfo[*].limits[0] = Alimits[*,0]
-  paramInfo[*].limits[1] = Alimits[*,1]
-
-  RETURN,paramInfo
-
-END
-
-PRO PRINT_JV_FIT_PARAMS,A
-  
-  PRINT,FORMAT='("Kappa",T10,"Plasma temp. (eV)",T30,"Density (cm^-3)",T45,"R_B")'
-  PRINT,FORMAT='(F-7.3,T10,F-15.3,T30,F-8.4,T45,G-10.2)', $
-        A[0], $
-        A[1], $
-        A[2], $
-        A[3]
-
-END
-
 ;2017/03/18
 PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                          ORBIT=orbit, $
                                           A_IN=A_in
 
   COMPILE_OPT IDL2,STRICTARRSUBS
+
+  orbPref     = ''
+  IF KEYWORD_SET(orbit) THEN BEGIN
+     orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
+  ENDIF
 
   maxIter     = 150
   fit_tol     = 1D-15
@@ -200,10 +110,35 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   PRINT_JV_FIT_PARAMS,AGauss
   PRINT,""
 
+  titleStr = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
+                    orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
+  kappaName = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.2)',A[0],A[3])
+  gaussName = STRING(FORMAT='("Maxwell, R!DB!N=",G0.2)',AGauss[3])
+
+  window = WINDOW(DIMENSION=[1000,800])
+
   ;; that = ERRORPLOT(X,Y,XError,YError,SYMBOL='*',LINESTYLE='')
-  that = ERRORPLOT(X,Y,YError,SYMBOL='*',LINESTYLE='')
+  that = ERRORPLOT(X,Y,YError,SYMBOL='*',LINESTYLE='', $
+                   NAME='Data', $
+                   TITLE=titleStr, $
+                   XTITLE='$\Phi$ (V)', $
+                   YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
+                   /CURRENT)
+                   
   ;; that = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
-  this = PLOT(X,YFit,COLOR='BLUE',/OVERPLOT)
-  those = PLOT(X,yGaussFit,COLOR='Brown',/OVERPLOT)
+  this = PLOT(X,YFit, $
+              NAME=kappaName, $
+              COLOR='BLUE', $
+              /OVERPLOT)
+  those = PLOT(X,yGaussFit, $
+               NAME=gaussName, $
+               COLOR='Brown', $
+               /OVERPLOT)
+
+  ;; legPos__data = [(MAX(X)-MIN(X))*0.2+MIN(X),(MAX(Y)-MIN(Y))*0.95+MIN(Y)]
+  legPos = [0.5,0.85]
+  ;; leg = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
+  leg = LEGEND(TARGET=[that,this,those], $
+               POSITION=legPos)
 
 END
