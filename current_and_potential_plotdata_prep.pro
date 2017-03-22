@@ -48,7 +48,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         MAXCUR=maxCur, $
                                         USEINDS=useInds, $
                                         PLOT_J_RATIOS=plot_j_ratios, $
-                                        OUT_AVGS_FOR_FITTING=avgs_JVfit
+                                        OUT_AVGS_FOR_FITTING=avgs_JVfit, $
+                                        _EXTRA=e
                                    
   COMPILE_OPT IDL2,STRICTARRSUBS
 
