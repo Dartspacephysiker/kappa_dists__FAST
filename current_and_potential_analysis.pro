@@ -1,10 +1,4 @@
 ;;2017/02/22
-PRO ADD_FNAME_SUFF,fName,suff
-        fNameTmp     = STRSPLIT(fName,'.',/EXTRACT)
-        fNameTmp[0] += suff
-        fName        = STRJOIN(TEMPORARY(fNameTmp),'.')
-END
-
 PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORBIT=orbit, $
    ORBTIMES=orbTimes, $
@@ -66,116 +60,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      timesList               = LIST(downTimes,upTimes)
   ENDIF
 
-  IF KEYWORD_SET(aRange__moments_e_down) THEN BEGIN
-
-     CASE SIZE(aRange__moments_e_down,/TYPE) OF
-        7: BEGIN
-           IF STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'*LC') THEN BEGIN
-              LCStr = 'LC'
-              IF STRLEN(aRange__moments_e_down[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_e_down[0]),'LC',/EXTRACT))
-                 LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
-              ENDIF
-              fSuff = "-aR_mom_eD_" + LCStr.Replace('.','_')
-           ENDIF ELSE BEGIN
-              STOP
-           ENDELSE
-        END
-        ELSE: BEGIN
-           fSuff = STRING(FORMAT='("-aR_mom_eD_",I0,"-",I0)',aRange__moments_e_down[0],aRange__moments_e_down[1])
-        END
-     ENDCASE
-
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
-     ENDIF
-
-     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-        ADD_FNAME_SUFF,saveCurPotFile,fSuff
-     ENDIF
-
-  ENDIF
-
-  IF KEYWORD_SET(aRange__moments_i_up) THEN BEGIN
-
-     CASE SIZE(aRange__moments_i_up,/TYPE) OF
-        7: BEGIN
-           IF STRMATCH(STRUPCASE(aRange__moments_i_up[0]),'*LC') THEN BEGIN
-              LCStr = 'LC'
-              IF STRLEN(aRange__moments_i_up[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_i_up[0]),'LC',/EXTRACT))
-                 LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
-              ENDIF
-              fSuff = "-aR_mom_iU_" + LCStr.Replace('.','_')
-           ENDIF ELSE BEGIN
-              STOP
-           ENDELSE
-        END
-        ELSE: BEGIN
-
-           IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
-
-              fSuff = STRING(FORMAT='("-aR_mom_iU_",I0,"-",I0)',aRange__moments_i_up[0],aRange__moments_i_up[1])
-              IF KEYWORD_SET(datFile) THEN BEGIN
-                 ADD_FNAME_SUFF,datFile,fSuff
-              ENDIF
-
-              IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-                 ADD_FNAME_SUFF,saveCurPotFile,fSuff
-              ENDIF
-
-           ENDIF
-
-        END
-     ENDCASE
-
-  ENDIF
-
-  IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
-
-     ;; IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
-
-        fSuff = '-sc_pot'
-        IF KEYWORD_SET(datFile) THEN BEGIN
-           ADD_FNAME_SUFF,datFile,fSuff
-        ENDIF
-
-        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-           ADD_FNAME_SUFF,saveCurPotFile,fSuff
-        ENDIF
-
-     ;; ENDIF
-
-  ENDIF
-
-  IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
-     ;;Whatever datFile is, tack one '-oneCount' before the prefix
-
-     fSuff = '-w_1Count'
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
-     ENDIF
-
-     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-        ADD_FNAME_SUFF,saveCurPotFile,fSuff
-     ENDIF
-
-  ENDIF
-
-  IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
-     ;;Whatever datFile is, tack one '-oneCount' before the prefix
-
-     fSuff = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
-     ENDIF
-
-     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-        ADD_FNAME_SUFF,saveCurPotFile,fSuff
-     ENDIF
-
-  ENDIF
-
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
 
@@ -225,15 +109,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   ENDIF
 
-  ;;Who be dat
-  fSuff = eeb_or_eesArr[0] + '-' + eeb_or_eesArr[1]
-  IF KEYWORD_SET(datFile) THEN BEGIN
-     ADD_FNAME_SUFF,datFile,fSuff
-  ENDIF
-
-  IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-     ADD_FNAME_SUFF,saveCurPotFile,fSuff
-  ENDIF
+  GET_CURRENT_AND_POTENTIAL_FILENAMES, $
+     ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
+     ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
+     USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
+     ADD_ONECOUNT_STATS=add_oneCount_stats, $
+     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     DATFILE=datFile, $
+     SAVECURPOTFILE=saveCurPotFile
 
   IF KEYWORD_SET(outDir) THEN BEGIN
      diffEfluxDir = outDir.Replace('cur_and_pot_analysis/','diff_eFlux/')
@@ -1088,27 +971,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      curPotList.Add,tmpStruct
   ENDFOR
-
-  ;; looking         = 3B
-  ;; ind             = 0
-  ;; WHILE (looking GT 0) DO BEGIN
-  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*DOWN*E') THEN BEGIN
-  ;;       looking--
-  ;;       edind = ind
-  ;;    ENDIF
-
-  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*E') THEN BEGIN
-  ;;       looking--
-  ;;       euind = ind
-  ;;    ENDIF
-
-  ;;    IF STRMATCH(STRUPCASE(curPotList[ind].label),'*UP*I') THEN BEGIN
-  ;;       looking--
-  ;;       iuind = ind
-  ;;    ENDIF
-  ;;    ind++
-  ;; ENDWHILE
-
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
      PRINT,"Saving it all to " + saveCurPotFile
