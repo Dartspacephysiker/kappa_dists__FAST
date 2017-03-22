@@ -37,7 +37,7 @@ PRO PARSE_KAPPA_FIT_STRUCTS,fits, $
              'Bulk_angle']
 
   IF KEYWORD_SET(match_times) THEN BEGIN
-     match_i = VALUE_CLOSEST2(time,match_times)
+     match_i = VALUE_CLOSEST2(time,match_times,/CONSTRAINED)
   ENDIF ELSE BEGIN
      match_i = INDGEN(N_ELEMENTS(A[0,*]))
   ENDELSE

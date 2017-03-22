@@ -2,6 +2,7 @@
 PRO CURRENT_AND_POTENTIAL_SUITE, $
    PLOT_T1=plot_t1, $
    PLOT_T2=plot_t2, $
+   USE_ALL_CURRENTS=use_all_currents, $
    USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
    USE_UPGOING_ION_CURRENT=use_iu_current, $
    USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
@@ -48,7 +49,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      TIMESLIST=timesList, $
      UNITS=units, $
      OUTDIR=outDir, $
-     DATFILE=datFile, $
+     MASTERFILE=masterFile, $
      REMAKE_MASTERFILE=remake_masterFile, $
      SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
@@ -82,13 +83,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      PEAK_ENERGY__START_AT_HIGHEARR=peak_energy__start_at_highEArr, $
      UPGOINGARR=upgoingArr, $
      ERROR_ESTIMATES=error_estimates, $
-     ;; DENS_ERRORS=dens_errors, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      MAP_TO_100KM=map_to_100km, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
      _EXTRA=e
-
 
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       T1=plot_t1, $
@@ -187,6 +186,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   IF KEYWORD_SET(plot_j_v__fixed_t_and_n) THEN BEGIN
 
+     avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
+
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                            ORBIT=orbit, $
                                            A_IN=A_in, $
@@ -195,31 +196,32 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            SPNAME=j_v__fixTandN__spName, $
                                            _EXTRA=e
 
-     nUsers       = N_ELEMENTS(useInds)
-     useInds      = useInds[SORT(jvplotdata.time[useInds])]
-
-     PRINT,FORMAT='(I0,T5,A0,T35,A0,T45,A0,T55,A0,T65,A0,T75,A0,T85,A0,T95,A0)', $
-           'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
-     FOR k=0,nUsers-1 DO BEGIN
-        PRINT,FORMAT='(I0,T5,A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,F-8.3,T75,F-8.3,T85,F-8.3,T95,F-8.3)', $
-              k, $
-              TIME_TO_STR(JVPlotData.time[useInds[k]]), $
-              JVPlotData.TDown[useInds[k]], $
-              JVPlotData.NDown[useInds[k]], $
-              JVPlotData.pot[useInds[k]], $
-              JVPlotData.cur[useInds[k]], $
-              JVPlotData.TDownErr[useInds[k]]/JVPlotData.TDown[useInds[k]], $
-              JVPlotData.NDownErr[useInds[k]]/JVPlotData.NDown[useInds[k]], $
-              ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]])
-        
-     ENDFOR
-     PRINT,FORMAT='(A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,G-8.3)', $
-           "Avg", $
-           MEAN(JVPlotData.TDown[useInds]), $
-           MEAN(JVPlotData.NDown[useInds]), $
-           MEAN(JVPlotData.pot[useInds]), $
-           MEAN(JVPlotData.cur[useInds])
-
+     avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
   ENDIF
+
+  nUsers       = N_ELEMENTS(useInds)
+  useInds      = useInds[SORT(jvplotdata.time[useInds])]
+
+  PRINT,FORMAT='(A0,T5,A0,T35,A0,T45,A0,T55,A0,T65,A0,T75,A0,T85,A0,T95,A0)', $
+        'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
+  FOR k=0,nUsers-1 DO BEGIN
+     PRINT,FORMAT='(I0,T5,A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,F-8.3,T75,F-8.3,T85,F-8.3,T95,F-8.3)', $
+           k, $
+           TIME_TO_STR(JVPlotData.time[useInds[k]]), $
+           JVPlotData.TDown[useInds[k]], $
+           JVPlotData.NDown[useInds[k]], $
+           JVPlotData.pot[useInds[k]], $
+           JVPlotData.cur[useInds[k]], $
+           JVPlotData.TDownErr[useInds[k]]/JVPlotData.TDown[useInds[k]], $
+           JVPlotData.NDownErr[useInds[k]]/JVPlotData.NDown[useInds[k]], $
+           ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]])
+     
+  ENDFOR
+  PRINT,FORMAT='(A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,G-8.3)', $
+        "Avg", $
+        MEAN(JVPlotData.TDown[useInds]), $
+        MEAN(JVPlotData.NDown[useInds]), $
+        MEAN(JVPlotData.pot[useInds]), $
+        MEAN(JVPlotData.cur[useInds])
 
 END

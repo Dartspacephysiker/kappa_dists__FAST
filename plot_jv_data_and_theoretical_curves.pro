@@ -58,116 +58,52 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
      KEYWORD_SET(fit_time_series): BEGIN
 
         maxIter     = 150
-        fit_tol     = 1D-15
+        fTol        = 1D-15
         gTol        = 1D-15
 
         ;;            kappa,            Temp,            Dens,  R_B
-        A           = KEYWORD_SET(A_in) ? A_in : [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D3]
+        kappa_A     = KEYWORD_SET(A_in) ? A_in : [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D3]
 
         ;;Keep the original guesses
-        Aorig       = A
-        AGaussOrig  = A
+        Aorig       = kappa_A
+        AGaussOrig  = kappa_A
 
         kappa_fixA  = [0,1,1,0]
         gauss_fixA  = [1,1,1,0]
+
+        TmultFac__kappa    = [1]
+        TmultFac__Maxwell  = [1]
 
         ;; PRINT,"Kappa startGuess: "
         ;; PRINT_JV_FIT_PARAMS,A
         ;; PRINT,"Gauss startGuess: "
         ;; PRINT_JV_FIT_PARAMS,AGaussOrig
 
-        kappaParamStruct = INIT_JV_FITPARAM_INFO(           A,kappa_fixA)
-        gaussParamStruct = INIT_JV_FITPARAM_INFO(TEMPORARY(A),gauss_fixA)
+        pot     = jvPlotData.pot[avgs_JVfit.useInds]
+        cur     = jvPlotData.cur[avgs_JVfit.useInds]*(-1.D)
+        potErr  = jvPlotData.potErr[avgs_JVfit.useInds]
+        curErr  = jvPlotData.curErr[avgs_JVfit.useInds]
+        T       = jvPlotData.TDown[avgs_JVfit.useInds]
+        N       = jvPlotData.NDown[avgs_JVfit.useInds]
 
-        fa_kappa    = {no_mult_by_charge : 1B, $
-                       is_Maxwellian_fit : 0B, $
-                       in_temperatures   : jvPlotData.TDown[avgs_JVfit.useInds], $
-                       in_densities      : jvPlotData.NDown[avgs_JVfit.useInds]}
+        FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
+                                          potErr,curErr, $
+                                          T,N, $
+                                          ;; USEINDS=avgs_JVfit.useInds, $
+                                          KAPPA_FIXA=kappa_fixA, $
+                                          GAUSS_FIXA=gauss_fixA, $
+                                          KAPPA_A=kappa_A, $
+                                          GAUSS_A=Gauss_A, $
+                                          MAXITER=maxIter, $
+                                          FTOL=fTol, $
+                                          GTOL=gTol, $
+                                          OUT_FITKAPPA_A=fitKappa_A, $
+                                          OUT_FITGAUSS_A=fitGauss_A
 
-        fa_Gauss    = {no_mult_by_charge : 1B, $
-                       is_Maxwellian_fit : 1B, $
-                       in_temperatures   : jvPlotData.TDown[avgs_JVfit.useInds], $
-                       in_densities      : jvPlotData.NDown[avgs_JVfit.useInds]}
+        kappas             = fitKappa_A[0]
+        R_Bs__K            = fitKappa_A[3]
+        R_Bs__M            = fitGauss_A[3]
 
-        jvFitFunc   = 'JV_CURVE_FIT__MAXWELL_KAPPA'
-        OKStatus    = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
-
-        X           = jvPlotData.pot[avgs_JVfit.useInds]
-        Y           = jvPlotData.cur[avgs_JVfit.useInds]*(-1D)
-        XError      = jvPlotData.potErr[avgs_JVfit.useInds]
-        YError      = jvPlotData.curErr[avgs_JVfit.useInds]
-        weights     = 1./ABS(jvPlotData.curErr[avgs_JVfit.useInds])^2
-
-        A           = MPFITFUN(jvFitFunc, $
-                               X,Y, $
-                               /NAN, $
-                               WEIGHTS=weights, $
-                               FUNCTARGS=fa_kappa, $
-                               BESTNORM=bestNorm, $
-                               NFEV=nfev, $
-                               FTOL=fit_tol, $
-                               GTOL=gTol, $
-                               STATUS=status, $
-                               BEST_RESID=best_resid, $
-                               PFREE_INDEX=ifree, $
-                               CALC_FJAC=calc_fjac, $
-                               BEST_FJAC=best_fjac, $
-                               PARINFO=kappaParamStruct, $
-                               QUERY=query, $
-                               NPEGGED=npegged, $
-                               NFREE=nfree, $
-                               DOF=dof, $
-                               COVAR=covar, $
-                               PERROR=perror, $
-                               MAXITER=maxIter, $
-                               NITER=itNum, $
-                               YFIT=yFit, $
-                               /QUIET, $
-                               ERRMSG=errMsg, $
-                               _EXTRA=extra)
-
-        AGauss      = MPFITFUN(jvFitFunc, $
-                               X,Y, $
-                               /NAN, $
-                               WEIGHTS=weights, $
-                               FUNCTARGS=fa_Gauss, $
-                               BESTNORM=bestNorm, $
-                               NFEV=nfev, $
-                               FTOL=fit_tol, $
-                               GTOL=gTol, $
-                               STATUS=gaussStatus, $
-                               BEST_RESID=best_resid, $
-                               PFREE_INDEX=ifree, $
-                               CALC_FJAC=calc_fjac, $
-                               BEST_FJAC=best_fjac, $
-                               PARINFO=gaussParamStruct, $
-                               QUERY=query, $
-                               NPEGGED=npegged, $
-                               NFREE=nfree, $
-                               DOF=dof, $
-                               COVAR=covar, $
-                               PERROR=perror, $
-                               MAXITER=maxIter, $
-                               NITER=itNum, $
-                               YFIT=yGaussFit, $
-                               /QUIET, $
-                               ERRMSG=errMsg, $
-                               _EXTRA=extra)
-
-        PRINT,"TIME SERIES: Kappa fitparams : "
-        PRINT_JV_FIT_PARAMS,A
-        PRINT,""
-        PRINT,"TIME SERIES: Gauss fitparams: "
-        PRINT_JV_FIT_PARAMS,AGauss
-        PRINT,""
-
-        kappas             = A[0]
-
-        R_Bs__K            = A[3]
-        R_Bs__M            = AGauss[3]
-
-        TmultFac__kappa    = [1]
-        TmultFac__Maxwell  = [1]
      END
      ELSE: BEGIN
 
@@ -249,15 +185,18 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ji_je_sym    = 's'
   ji_je_name   = 'J!Di!N over J!De!N'
 
+  ;; dataplot     = ERRORPLOT(jvplotdata.pot[useInds], $
+  ;;                          curDat[useInds], $
+  ;;                          curErr*1D-6, $
   dataplot     = PLOT(jvplotdata.pot[useInds], $
-                  curDat[useInds], $
-                  LINESTYLE=dataLStyle, $
-                  SYMBOL=dataSym, $
-                  XTITLE=xTitle, $
-                  YTITLE=yTitle, $
-                  NAME=dataName, $
-                  YLOG=yLog, $
-                  /CURRENT)
+                           curDat[useInds], $
+                           LINESTYLE=dataLStyle, $
+                           SYMBOL=dataSym, $
+                           XTITLE=xTitle, $
+                           YTITLE=yTitle, $
+                           NAME=dataName, $
+                           YLOG=yLog, $
+                           /CURRENT)
 
   FOR k=0,nR_Bs__M-1 DO BEGIN
      MaxwellPlots[k] = PLOT(jvplotdata.pot[useInds], $

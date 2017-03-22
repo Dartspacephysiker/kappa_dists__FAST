@@ -68,19 +68,31 @@ PRO KAPPA_FITTER__FSTRINGS, $
   dEFAngleStr         = '-allAngles'
   ;; CASE 1 OF
   ;; (N_ELEMENTS(electron_angleRange) EQ 2): BEGIN
-  IF (N_ELEMENTS(electron_angleRange) EQ 2) THEN BEGIN
-     fitAngleStr         = STRING(FORMAT='("-e_angle_",F0.1,"-",F0.1)', $
-                               electron_angleRange[0], $
-                               electron_angleRange[1])
-     IF ~dEFlux_allAngles THEN BEGIN
-        dEFAngleStr = fitAngleStr
-     ENDIF
+  CASE SIZE(electron_angleRange,/TYPE) OF
+     7: BEGIN
+        IF STRMATCH(STRUPCASE(electron_angleRange[0]),'*LC') THEN BEGIN
+           LCStr = 'LC'
+           IF STRLEN(electron_angleRange[0]) GT 2 THEN BEGIN
+              factor = FLOAT(STRSPLIT(STRUPCASE(electron_angleRange[0]),'LC',/EXTRACT))
+              LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
+           ENDIF
+           fitAngleStr = "-e_angle_" + LCStr.Replace('.','_')
+        ENDIF ELSE BEGIN
+           STOP
+        ENDELSE
+     END
+     ELSE: BEGIN
+        IF (N_ELEMENTS(electron_angleRange) EQ 2) THEN BEGIN
+           fitAngleStr         = STRING(FORMAT='("-e_angle_",F0.1,"-",F0.1)', $
+                                        electron_angleRange[0], $
+                                        electron_angleRange[1])
+        ENDIF
+     END
+  ENDCASE
+
+  IF ~dEFlux_allAngles THEN BEGIN
+     dEFAngleStr = fitAngleStr
   ENDIF
-     ;; END
-     ;; dEFlux_allAngles: BEGIN
-     ;;    angleStr      = '-allAngles'
-     ;; END
-  ;; ENDCASE
 
 
   defEFluxFile = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + $

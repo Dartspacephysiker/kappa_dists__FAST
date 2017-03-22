@@ -28,24 +28,52 @@
   fit2D__only_fit_peak_eRange   = 0
   fit2D__only_fit_aboveMin      = 1
   fit2D__only_fit_eAngles       = 1
-  fit2D__keep_wholeFit          = 1  
+  fit2D__keep_wholeFit          = 1
   fit2D__bulk_e_anisotropy      = 1
   fit2D__exclude_lca_from_densCalc = 1
   fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
   IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN BEGIN
-     fit2D__density_angleRange  = [-32,32]
+     ;; fit2D__density_angleRange  = [-32,32]
+     fit2D__density_angleRange  = 'lc'
   ENDIF
 
   IF KEYWORD_SET(upgoing) THEN BEGIN
-     fit2D__density_angleRange += 180
 
-     IF KEYWORD_SET(electron_angleRange) THEN BEGIN
-        electron_angleRange    += 180
-     ENDIF
-     IF KEYWORD_SET(electron_angleRange) THEN BEGIN
-        electron_lca           += 180
-     ENDIF
+     CASE SIZE(fit2D__density_angleRange,/TYPE) OF
+        7: BEGIN
+           ;; STOP
+        END
+        0:
+        ELSE: BEGIN
+           IF KEYWORD_SET(fit2D__density_angleRange) THEN BEGIN
+              fit2D__density_angleRange += 180
+           ENDIF
+        END
+     ENDCASE
+     CASE SIZE(electron_angleRange,/TYPE) OF
+        7: BEGIN
+           STOP
+        END
+        0:
+        ELSE: BEGIN
+           IF KEYWORD_SET(electron_angleRange) THEN BEGIN
+              electron_angleRange    += 180
+           ENDIF
+        END
+     ENDCASE
+
+     CASE SIZE(electron_lca,/TYPE) OF
+        7: BEGIN
+           STOP
+        END
+        0:
+        ELSE: BEGIN
+           IF KEYWORD_SET(electron_lca) THEN BEGIN
+              electron_lca    += 180
+           ENDIF
+        END
+     ENDCASE
      
      n_below_peak               = 2
      n_above_peak               = 15

@@ -228,12 +228,12 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                 (curPotList[euind].peakE GE 0.),     $
                                 nSafe)
 
-  IF nSafe LT 3 THEN STOP
+  ;; IF nSafe LT 3 THEN STOP
 
-  safe_i                = CGSETINTERSECTION(safe_i, $
-                                            WHERE((curpotlist[0].n/curpotlist[0].n1 GT 3) OR $
-                                                  (curpotlist[1].n/curpotlist[1].n1 GT 3) OR $
-                                                  (curpotlist[2].n/curpotlist[2].n1 GT 3)))
+  ;; safe_i                = CGSETINTERSECTION(safe_i, $
+  ;;                                           WHERE((curpotlist[0].n/curpotlist[0].n1 GT 3) OR $
+  ;;                                                 (curpotlist[1].n/curpotlist[1].n1 GT 3) OR $
+  ;;                                                 (curpotlist[2].n/curpotlist[2].n1 GT 3)))
 
   time_i                = WHERE(curPotList[edind].time GE t1 AND $
                                 curPotList[edind].time LE t2,nTime)
@@ -300,25 +300,25 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      ENDFOR
 
      ;; useInds               = negcur_i
-     useInds                  = loveKappa_i
+     useInds = loveKappa_i
 
   ENDIF
 
-  useInds                     = useInds[SORT(jvplotdata.pot[useInds])]
-  
-  fmtStr = '(A0," (min, max,stdDev) ",T35,": ",F0.2," (",F0.2,", ",F0.2,", ",F0.2,")")'
+  avgs_JVfit  = {useInds : useInds}
 
-  quantL = LIST(jvplotdata.Tdown[useInds],jvplotdata.Ndown[useInds])
-  navn   = ['T avg','N avg']
-  sNavn  = ['T','N']
+  useInds     = useInds[SORT(jvplotdata.pot[useInds])]
+  
+  fmtStr      = '(A0," (min, max,stdDev) ",T35,": ",F0.2," (",F0.2,", ",F0.2,", ",F0.2,")")'
+
+  quantL      = LIST(jvplotdata.Tdown[useInds],jvplotdata.Ndown[useInds])
+  navn        = ['T avg','N avg']
+  sNavn       = ['T','N']
   IF KEYWORD_SET(ji_je_ratio) THEN BEGIN
      quantL.Add,ji_je_ratio[useInds]
-     navn  = [navn,'Ji/Je avg']
-     sNavn = [sNavn,'JiJeRat']
+     navn     = [navn,'Ji/Je avg']
+     sNavn    = [sNavn,'JiJeRat']
   ENDIF
   
-  avgs_JVfit = {useInds : useInds}
-
   FOR k=0,N_ELEMENTS(quantL)-1 DO BEGIN
      tmpQuant = quantL[k]
      PRINT,FORMAT=fmtStr, $

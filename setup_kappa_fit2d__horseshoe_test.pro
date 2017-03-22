@@ -104,6 +104,6 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
          Bingham_style     : 1, $
          is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit), $
          units             : units, $
-         mass              : mass}
+         mass              : curDataStr.mass}
 
 END

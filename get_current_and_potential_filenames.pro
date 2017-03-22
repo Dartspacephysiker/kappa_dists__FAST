@@ -5,7 +5,7 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-   DATFILE=datFile, $
+   MASTERFILE=masterFile, $
    SAVECURPOTFILE=saveCurPotFile
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -30,8 +30,8 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
         END
      ENDCASE
 
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
+     IF KEYWORD_SET(masterFile) THEN BEGIN
+        ADD_FNAME_SUFF,masterFile,fSuff
      ENDIF
 
      IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
@@ -60,8 +60,8 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
            IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
 
               fSuff = STRING(FORMAT='("-aR_mom_iU_",I0,"-",I0)',aRange__moments_i_up[0],aRange__moments_i_up[1])
-              IF KEYWORD_SET(datFile) THEN BEGIN
-                 ADD_FNAME_SUFF,datFile,fSuff
+              IF KEYWORD_SET(masterFile) THEN BEGIN
+                 ADD_FNAME_SUFF,masterFile,fSuff
               ENDIF
 
               IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
@@ -80,8 +80,8 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
      ;; IF ~(MIN(aRange__moments_i_up) EQ 0.) AND (MAX(aRange__moments_i_up) EQ 360.) THEN BEGIN
 
      fSuff = '-sc_pot'
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
+     IF KEYWORD_SET(masterFile) THEN BEGIN
+        ADD_FNAME_SUFF,masterFile,fSuff
      ENDIF
 
      IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
@@ -93,11 +93,11 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
   ENDIF
 
   IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
-     ;;Whatever datFile is, tack one '-oneCount' before the prefix
+     ;;Whatever masterFile is, tack one '-oneCount' before the prefix
 
      fSuff = '-w_1Count'
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
+     IF KEYWORD_SET(masterFile) THEN BEGIN
+        ADD_FNAME_SUFF,masterFile,fSuff
      ENDIF
 
      IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
@@ -107,11 +107,11 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
   ENDIF
 
   IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
-     ;;Whatever datFile is, tack one '-oneCount' before the prefix
+     ;;Whatever masterFile is, tack one '-oneCount' before the prefix
 
      fSuff = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
+     IF KEYWORD_SET(masterFile) THEN BEGIN
+        ADD_FNAME_SUFF,masterFile,fSuff
      ENDIF
 
      IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
@@ -131,8 +131,8 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
         END
      ENDCASE
 
-     IF KEYWORD_SET(datFile) THEN BEGIN
-        ADD_FNAME_SUFF,datFile,fSuff
+     IF KEYWORD_SET(masterFile) THEN BEGIN
+        ADD_FNAME_SUFF,masterFile,fSuff
      ENDIF
 
      IF KEYWORD_SET(saveCurPotFile) THEN BEGIN

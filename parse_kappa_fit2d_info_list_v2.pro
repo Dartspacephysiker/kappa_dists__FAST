@@ -31,7 +31,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   ;; ENDIF
 
   IF ~KEYWORD_SET(lKappa_thresh) THEN BEGIN
-     lKappa_thresh = 1.5D       ;We want nothing to do with it if kappa GT 1.5
+     lKappa_thresh = 1.5D       ;We want nothing to do with it if kappa LT 1.5
   ENDIF
 
 
@@ -231,7 +231,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   IF KEYWORD_SET(in_good_i) THEN BEGIN
      nBef       = N_ELEMENTS(include_i)
-     include2_i = CGSETINTERSECTION(include_i,in_good_i,COUNT=nAft,INDICES_B=include_ii)
+     include2_i = CGSETINTERSECTION(include_i,in_good_i,COUNT=nAft,INDICES_A=include_ii)
      exclude2_i = CGSETDIFFERENCE(include_i,in_good_i,COUNT=nExclude2,POSITIONS=exclude_ii,NORESULT=-1)
 
      include_t = include_t[include_ii]
@@ -242,7 +242,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         exclude_i = exclude_i[SORT(exclude_i)]
         exclude_t = (SDTStr.time)[exclude_i]
 
-        PRINT,exclString + " an additional" + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
+        PRINT,exclString + " an additional " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
      ENDIF
 
      nKept = nAft

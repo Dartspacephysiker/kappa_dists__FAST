@@ -9,7 +9,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    TIMESLIST=timesList, $
    UNITS=units, $
    OUTDIR=outDir, $
-   DATFILE=datFile, $
+   MASTERFILE=masterFile, $
    REMAKE_MASTERFILE=remake_masterFile, $
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
@@ -45,7 +45,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    PEAK_ENERGY__START_AT_HIGHEARR=peak_energy__start_at_highEArr, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
-   ;; DENS_ERRORS=dens_errors, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
@@ -116,7 +115,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-     DATFILE=datFile, $
+     MASTERFILE=masterFile, $
      SAVECURPOTFILE=saveCurPotFile
 
   IF KEYWORD_SET(outDir) THEN BEGIN
@@ -126,9 +125,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MEGA
   nCalcLoop              = N_ELEMENTS(label)
-  preString = datFile + ' ...'
-  IF FILE_TEST(outDir+datFile) AND ~KEYWORD_SET(remake_masterFile) THEN BEGIN
-     RESTORE,outDir+datFile
+  preString = masterFile + ' ...'
+  IF FILE_TEST(outDir+masterFile) AND ~KEYWORD_SET(remake_masterFile) THEN BEGIN
+     RESTORE,outDir+masterFile
      afterString           = "Restored "
 
      also_oneCount         = ISA(n1_list) AND KEYWORD_SET(add_oneCount_stats)
@@ -198,7 +197,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         IF (STRUPCASE(eeb_or_ees) EQ 'EEB') OR (STRUPCASE(eeb_or_ees) EQ 'IEB') THEN BEGIN
            t1Str             = orbBurstTimes[0]
            t2Str             = orbBurstTimes[1]
-           spectra_avg_itvl  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : 4
+           spectra_avg_itvl  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : !NULL
         ENDIF ELSE BEGIN
            t1Str             = orbTimes[0]
            t2Str             = orbTimes[1]
@@ -666,7 +665,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oMoments_list, $
           aRange_oCharE_list, $
           aRange_oPeakEn_list, $
-          FILENAME=outDir+datFile
+          FILENAME=outDir+masterFile
 
   ENDELSE
   PRINT,preString + afterString

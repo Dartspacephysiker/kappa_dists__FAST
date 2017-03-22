@@ -23,18 +23,18 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
   ;; AMaxStep[2]     = 0.5
   AMaxStep        = DOUBLE([1.0, $
                             30., $
-                            0.5, $
-                            1000])
+                            0.1, $
+                            100])
 
   Alimited         = [[1,1], $
                       [1,1], $
                       [1,1], $
                       [1,1]]
   
-  Alimits         = [[1.501D   ,100.0   ] , $ ;kappa 
-                     [10      ,3.0e4 ] , $ ;Temp
-                     [1e-4    ,100   ] , $ ;N
-                     [1       ,1e4 ]]    ;R_B
+  Alimits         = [[1.501D  ,100.0   ] , $ ;kappa 
+                     [10      ,3.0e4   ] , $ ;Temp
+                     [1e-4    ,100     ] , $ ;N
+                     [1       ,1e4     ]]    ;R_B
 
   ;;Make 'em play nice
   ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN

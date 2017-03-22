@@ -106,6 +106,14 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
         custom_e_angleRange = KF__SDTData_opt.electron_angleRange
      END
   ENDCASE
+
+  CASE SIZE(KF__SDTData_opt.fit2D_dens_aRange,/TYPE) OF
+     7: BEGIN
+        IF ~STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*LC') THEN STOP
+        fit2D_DensPickMeUpToo = 1
+     END
+     ELSE:
+  ENDCASE
   
   GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
                               LOAD_DAT_FROM_FILE=loadFile, $
@@ -123,9 +131,19 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                               _EXTRA=e
 
+  flip = WHERE(e_angle GT 180,nFlip)
+  IF nFlip GT 0 THEN BEGIN
+     e_angle[flip] -= 360.
+  ENDIF
+
   IF KEYWORD_SET(pickMeUpLater) THEN BEGIN
      STR_ELEMENT,KF__SDTData_opt,'electron_angleRange',e_angle,/ADD_REPLACE
      electron_angleRange = e_angle
+  ENDIF
+
+  IF KEYWORD_SET(fit2D_DensPickMeUpToo) THEN BEGIN
+     STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
+     fit2D__density_angleRange = e_angle
   ENDIF
 
   orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)

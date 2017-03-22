@@ -91,16 +91,24 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
      PRINT,"     (i.e., not fitting angles outside the above range)"
      ;; PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
      ;;       kSDTData_opt.electron_lca
-     PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
-           kSDTData_opt.fit2D_dens_aRange
+     ;; PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
+     ;;       kSDTData_opt.fit2D_dens_aRange
   ENDIF
   
   IF N_ELEMENTS(fit2D__density_angleRange) GT 0 THEN BEGIN
-     kSDTData_opt.fit2D_dens_aRange    = fit2D__density_angleRange
-
-     ;; PRINT,FORMAT='("SDT density angle range",T45,":",T48,2(F0.2))', $
-     PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
-           kSDTData_opt.fit2D_dens_aRange
+     ;; kSDTData_opt.fit2D_dens_aRange      = fit2D__density_angleRange
+     STR_ELEMENT,kSDTData_opt,'fit2D_dens_aRange',fit2D__density_angleRange,/ADD_REPLACE
+     ;; PRINT,FORMAT='("SDT electron angle range",T45,":",T48,2(F0.2))', $
+     CASE SIZE(fit2D__density_angleRange,/TYPE) OF
+        7: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,A0)', $
+                 kSDTData_opt.fit2D_dens_aRange
+        END
+        ELSE: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
+                 kSDTData_opt.fit2D_dens_aRange
+        END
+     ENDCASE
   ENDIF
 
   PRINT,''
