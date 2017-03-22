@@ -203,7 +203,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                        ARANGE__MOMENTS=aRange__moments, $
                        ARANGE__CHARE=aRange__charE, $
                        SC_POT=sc_pot, $
-                       EEB_OR_EES=eeb_OR_ees, $
+                       EEB_OR_EES=eeb_or_ees, $
                        ERROR_ESTIMATES=error_estimates, $
                        /MAP_TO_100KM, $ 
                        ORBIT=orbit, $

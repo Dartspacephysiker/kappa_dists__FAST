@@ -267,13 +267,16 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      j_list                = LIST()
      je_list               = LIST()
+     cur_list              = LIST()
      chare_list            = LIST()
 
      jerr_list             = LIST()
      jeErr_list            = LIST()
+     curErr_list           = LIST()
      charEErr_list         = LIST()
 
      IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
+
         n1_list            = LIST()
         n1err_list         = LIST()
 
@@ -282,9 +285,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         j1_list            = LIST()
         je1_list           = LIST()
+        cur1_list          = LIST()
         chare1_list        = LIST()
+
         j1err_list         = LIST()
         je1Err_list        = LIST()
+        cur1Err_list       = LIST()
         charE1Err_list     = LIST()
 
      ENDIF
@@ -678,6 +684,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         OUT_ERR_J_=jErr, $
                         OUT_ERR_JE=jeErr, $
                         OUT_ERR_T=TErr, $
+                        OUT_ERR_CURRENT=curErr, $
                         OUT_ERR_CHARE=charEErr
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
@@ -704,6 +711,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_ERR_J_=j1Err, $
                            OUT_ERR_JE=je1Err, $
                            OUT_ERR_T=T1Err, $
+                           OUT_ERR_CURRENT=cur1Err, $
                            OUT_ERR_CHARE=charE1Err
 
         ENDIF
@@ -714,10 +722,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         T_list.Add,TEMPORARY(T)
         j_list.Add,TEMPORARY(j)
         je_list.Add,TEMPORARY(je)
+        cur_list.Add,TEMPORARY(cur)
         chare_list.Add,charE
         nerr_list.Add,TEMPORARY(nerr)
         jerr_list.Add,TEMPORARY(jerr)
         jeErr_list.Add,TEMPORARY(jeErr)
+        curErr_list.Add,TEMPORARY(curErr)
         charEErr_list.Add,TEMPORARY(charEErr)
         Terr_list.Add,TEMPORARY(Terr)
 
@@ -727,10 +737,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            T1_list.Add,TEMPORARY(T1)
            j1_list.Add,TEMPORARY(j1)
            je1_list.Add,TEMPORARY(je1)
+           cur1_list.Add,cur1
            chare1_list.Add,charE1
            n1err_list.Add,TEMPORARY(n1err)
            j1err_list.Add,TEMPORARY(j1err)
            je1Err_list.Add,TEMPORARY(je1Err)
+           cur1Err_list.Add,TEMPORARY(cur1Err)
            charE1Err_list.Add,TEMPORARY(charE1Err)
            T1err_list.Add,TEMPORARY(T1err)
         ENDIF
@@ -744,21 +756,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           n_list, $
           j_list, $
           je_list, $
+          cur_list, $
           chare_list, $
           T_list, $
           nerr_list, $
           jerr_list, $
           jeErr_list, $
+          curErr_list, $
           charEErr_list, $
           Terr_list, $
           n1_list, $
           j1_list, $
           je1_list, $
+          cur1_list, $
           chare1_list, $
           T1_list, $
           n1err_list, $
           j1err_list, $
           je1Err_list, $
+          cur1Err_list, $
           charE1Err_list, $
           T1err_list, $
           peak_ind_list, $
@@ -767,6 +783,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oCharE_list, $
           aRange_oPeakEn_list, $
           FILENAME=outDir+datFile
+
   ENDELSE
   PRINT,preString + afterString
 
@@ -809,6 +826,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlN          = !NULL
      itvlJ          = !NULL
      itvlJe         = !NULL
+     itvlCur        = !NULL
      itvlcharE      = !NULL
      itvlPeakE      = !NULL
      itvlT          = !NULL
@@ -836,10 +854,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlCur1Err    = !NULL
      itvlErrors1    = !NULL
 
-     ;; itvlErrors  = MAKE_BLANK_GERSHMAN_ERROR_STRUCT(2000, $
-     ;;                                                /PRESSURE_COVAR_CALC, $
-     ;;                                                HEATFLUX_COVAR_CALC=heatFlux_covar_calc)
-
      FOR realK=0,nSegs-1 DO BEGIN
 
         tmpT1               = tmpT[0,realK]
@@ -862,7 +876,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpN                = (N_list[k]).y[theseInds]
         tmpJ                = (j_list[k]).y[theseInds]
         tmpJe               = (je_list[k]).y[theseInds]
-        ;; tmpCharE         = CHAR_ENERGY(tmpJ,tmpJe)
+        tmpCur              = (cur_list[k])[theseInds]
         tmpCharE            = (chare_list[k])[theseInds]
         tmpPeakE            = (peak_energy_list[k])[theseInds]
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
@@ -873,6 +887,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            tmpN1            = (N1_list[k]).y[theseInds]
            tmpJ1            = (j1_list[k]).y[theseInds]
            tmpJe1           = (je1_list[k]).y[theseInds]
+           tmpCur1          = (cur1_list[k])[theseInds]
            tmpCharE1        = (chare1_list[k])[theseInds]
            tmpT1            = (T1_list[k]).y[*,theseInds]
 
@@ -884,6 +899,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            tmpNerr          = (nerr_list[k])[theseInds]
            tmpJerr          = (jerr_list[k])[theseInds]
            tmpJeErr         = (jeErr_list[k])[theseInds]
+           tmpCurErr        = (curErr_list[k])[theseInds]
            tmpcharEErr      = (charEErr_list[k])[theseInds]
            tmpTerr          = (Terr_list[k])[theseInds]
            ;; SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,tmpErrors
@@ -892,79 +908,49 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               tmpN1err      = (n1err_list[k])[theseInds]
               tmpJ1err      = (j1err_list[k])[theseInds]
               tmpJe1Err     = (je1Err_list[k])[theseInds]
+              tmpCur1Err    = (cur1Err_list[k])[theseInds]
               tmpcharE1Err  = (charE1Err_list[k])[theseInds]
               tmpT1err      = (T1err_list[k])[theseInds]
               ;; SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,tmpErrors1
            ENDIF
         ENDIF
 
-        ;; IF KEYWORD_SET(map_to_100km) THEN BEGIN
-        ;;    GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,orbit,tmpTimes, $
-        ;;                                     OUT_TSORTED_I=tSort_i, $
-        ;;                                     OUT_ALT=alt, $
-        ;;                                     OUT_MLT=mlt, $
-        ;;                                     OUT_ILAT=ilat, $
-        ;;                                     OUT_MAPRATIO=mapRatio, $
-        ;;                                     OUT_NEVENTS=nEvents, $
-        ;;                                     LOGLUN=logLun
-        ;;    IF N_ELEMENTS(tSort_i) GT 0 THEN STOP
-
-        ;;    tmpJ         *= mapRatio
-        ;;    tmpJe        *= mapRatio
-
-        ;;    IF KEYWORD_SET(also_oneCount) THEN BEGIN
-        ;;       tmpJ1     *= mapRatio
-        ;;       tmpJe1    *= mapRatio
-        ;;    ENDIF
-
-        ;;    ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
-        ;;    IF KEYWORD_SET(error_estimates) THEN BEGIN
-        ;;       tmpJerr   *= mapRatio
-
-        ;;       IF KEYWORD_SET(also_oneCount) THEN BEGIN
-        ;;          tmpJ1err *= mapRatio
-        ;;       ENDIF
-
-        ;;    ENDIF
-
-        ;; ENDIF
-
         ;;Get current (flip sign of current for electrons)
-        tmpCur            = tmpJ  * 1.6e-9 * (ions ? 1. : (-1.))
-        IF KEYWORD_SET(also_oneCount) THEN BEGIN
-           tmpCur1        = tmpJ1 * 1.6e-9 * (ions ? 1. : (-1.))
-        ENDIF
+        ;; tmpCur            = tmpJ  * 1.6e-9 * (ions ? 1. : (-1.))
+        ;; IF KEYWORD_SET(also_oneCount) THEN BEGIN
+        ;;    tmpCur1        = tmpJ1 * 1.6e-9 * (ions ? 1. : (-1.))
+        ;; ENDIF
         
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
-        IF KEYWORD_SET(error_estimates) THEN BEGIN
-           ;;Don't flip sign, children
-           tmpCurErr      = tmpJerr  * 1.6e-9 ;* (ions ? 1. : (-1.))
+        ;; IF KEYWORD_SET(error_estimates) THEN BEGIN
+        ;;    ;;Don't flip sign, children
+        ;;    tmpCurErr      = tmpJerr  * 1.6e-9 ;* (ions ? 1. : (-1.))
 
-           IF KEYWORD_SET(also_oneCount) THEN BEGIN
-              tmpCur1Err  = tmpJ1err * 1.6e-9 ;* (ions ? 1. : (-1.))
-           ENDIF
-        ENDIF
+        ;;    IF KEYWORD_SET(also_oneCount) THEN BEGIN
+        ;;       tmpCur1Err  = tmpJ1err * 1.6e-9 ;* (ions ? 1. : (-1.))
+        ;;    ENDIF
+        ;; ENDIF
 
         ;;Make outward current positive in both hemis
         ;; ;;(You know, field lines going in at the NH, going out at the SH, yadda yadda)
         ;;I take it all back, Elphic et al. [1998] make upward current (downgoing electrons) negative
 
         ;; CASE N_ELEMENTS(WHERE(tmpNS GT 0,/NULL)) OF
-        CASE N_ELEMENTS(WHERE(tmpNS LT 0,/NULL)) OF
-           N_ELEMENTS(tmpNS): BEGIN
-              tmpCur  *= (-1.)
+        ;; CASE N_ELEMENTS(WHERE(tmpNS LT 0,/NULL)) OF
+        ;;    N_ELEMENTS(tmpNS): BEGIN
+        ;;       tmpCur  *= (-1.)
 
-              IF KEYWORD_SET(also_oneCount) THEN BEGIN
-                 tmpCur1 *= (-1.)
-              ENDIF
+        ;;       IF KEYWORD_SET(also_oneCount) THEN BEGIN
+        ;;          tmpCur1 *= (-1.)
+        ;;       ENDIF
 
-           END
-           0: BEGIN
-           END
-           ELSE: BEGIN
-              STOP
-           END
-        ENDCASE
+        ;;    END
+        ;;    0: BEGIN
+        ;;    END
+        ;;    ELSE: BEGIN
+        ;;       STOP
+        ;;    END
+        ;; ENDCASE
 
         ;; tmpFile = 'TMP_'+label[k]+'-'+STRCOMPRESS(realK,/REMOVE_ALL)+'.sav'
         ;; PRINT,"Saving " + tmpFile
