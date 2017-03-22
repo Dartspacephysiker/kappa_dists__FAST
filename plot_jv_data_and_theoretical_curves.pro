@@ -14,7 +14,8 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                         SPNAME=spName, $
                                         AVGS_FOR_FITTING=avgs_JVfit, $
                                         FIT_TIME_SERIES=fit_time_series, $
-                                        FIT_TSERIES__A_IN=A_in
+                                        FIT_TSERIES__A_IN=A_in, $
+                                        _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 

@@ -4,7 +4,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                           A_IN=A_in, $
                                           ORIGINATING_ROUTINE=routName, $
                                           SAVEPLOT=savePlot, $
-                                          SPNAME=spName
+                                          SPNAME=spName, $
+                                          _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 

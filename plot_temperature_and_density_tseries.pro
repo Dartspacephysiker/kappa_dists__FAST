@@ -11,7 +11,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
    PLOTDIR=plotDir, $
    OUT_WINDOW=window1, $
    OVERPLOTALL=overplotAll, $
-   OVERPLOT_WINDOW=overplot_window
+   OVERPLOT_WINDOW=overplot_window, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 

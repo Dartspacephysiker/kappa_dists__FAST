@@ -6,7 +6,8 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
    SAVEPLOT=savePlot, $
    SPNAME=spName, $
    ORIGINATING_ROUTINE=routName, $
-   PLOTDIR=plotDir;; , $
+   PLOTDIR=plotDir, $
+   _EXTRA=e ;; , $
    ;; ERROR_BAR_FACTOR=errorBarFac
   
   COMPILE_OPT IDL2

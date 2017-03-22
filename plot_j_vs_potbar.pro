@@ -5,7 +5,8 @@ PRO PLOT_J_VS_POTBAR,jvPlotData, $
                      SPNAME=spName, $
                      INTERACTIVE_OVERPLOT=interactive_overplot, $
                      ORIGINATING_ROUTINE=routName, $
-                     PLOTDIR=plotDir
+                     PLOTDIR=plotDir, $
+                     _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
