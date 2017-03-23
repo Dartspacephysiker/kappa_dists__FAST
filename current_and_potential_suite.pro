@@ -127,6 +127,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         ORIGINAL_PLOTIDEE=orig_plotIdee, $
         SAVEPLOT=savePlot, $
         SPNAME=a_la_Elphic_spName, $
+        UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
         ORIGINATING_ROUTINE=routName, $
         PLOTDIR=plotDir, $
         _EXTRA=e

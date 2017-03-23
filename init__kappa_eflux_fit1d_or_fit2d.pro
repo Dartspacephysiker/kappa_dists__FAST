@@ -29,11 +29,13 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      FIT1D__SOURCECONE_ENERGY_SPECTRUM=fit1D__sourceCone_energy_spectrum, $
                      FIT1D__NFLUX=fit1D__nFlux, $
                      FIT1D__WEIGHTING=fit1D__weighting, $
+                     FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
                      FIT2D__TOLERANCE=fit2d_tol, $
                      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
                      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
                      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
                      FIT2D__WEIGHTING=fit2D__weighting, $
+                     FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
                      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
                      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $

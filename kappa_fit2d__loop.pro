@@ -176,10 +176,21 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
         ;;Vary bulk E [0], Temperature [1], kappa [2], and density [3] (but not angle)
-        kappa_fixA        = [0,0,0,0,1] 
+                                                                           ;Vary                                    
+        kappa_fixA        = [0, $                                          ;bulk E      [0]                              
+                             KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)                         
+                             0, $                                          ;kappa       [2]
+                             0, $                                          ;and density [3] (but not angle)
+                             1] 
         
-        ;;Vary bulk E [0], Temperature [1], and density [3] (but not kappa or angle)
-        gauss_fixA        = [0,0,1,0,1]
+        
+
+                                                                           ;Vary
+        gauss_fixA        = [0, $                                          ;bulk E [0]
+                             KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)
+                             1, $
+                             0, $                                          ;and density [3] (but not kappa or angle)
+                             1]
         ATmp              = DOUBLE([1e3,100.,3.0,0.01,0])
         kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,kappa_fixA)
 

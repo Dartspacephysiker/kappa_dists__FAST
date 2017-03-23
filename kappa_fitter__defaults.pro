@@ -82,9 +82,9 @@
 
   ENDIF ELSE BEGIN
 
-     n_below_peak               = 1
+     n_below_peak               = 2
      n_above_peak               = 15
-     n_below_peak2D             = 1
+     n_below_peak2D             = 2
      n_above_peak2D             = 15
 
   ENDELSE

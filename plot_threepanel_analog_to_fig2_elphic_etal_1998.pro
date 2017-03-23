@@ -1,4 +1,53 @@
 ;;2017/03/04
+FUNCTION THEORETISCH_CURVES,conductivities, $
+   UPGOING=upgoing, $
+   DOWNGOING=downgoing
+
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  nCond         = N_ELEMENTS(conductivities)
+
+  CASE 1 OF
+     KEYWORD_SET(downgoing): BEGIN
+
+        nCurs         = 100
+        curRange      = [0,50]
+
+        curs          = (INDGEN(nCurs)+1)/DOUBLE(nCurs) * (MAX(curRange)-MIN(curRange)) + MIN(curRange)
+        curs          = curs # TRANSPOSE(MAKE_ARRAY(nCond,/LONG,VALUE=1L))
+
+        j0            = [0.5,4.8] ;in microA/m^2
+
+        pots          = MAKE_ARRAY(nCurs,nCond,/FLOAT)
+
+        FOR k=0,nCond-1 DO BEGIN
+           pots[*,k]  = (j0[k]*1D-6/ conductivities[k]) * EXP(curs[*,k]/j0[k])
+        ENDFOR
+
+     END
+     KEYWORD_SET(upgoing): BEGIN
+
+        nPots         = 50
+
+        potRange      = [1,1D5]
+        pots          = 10.D^( (INDGEN(nPots)+1)/DOUBLE(nPots) * $
+                               (ALOG10(MAX(potRange))-ALOG10(MIN(potRange))) + ALOG10(MIN(potRange)))
+
+        pots          = pots # TRANSPOSE(MAKE_ARRAY(nCond,/LONG,VALUE=1L))
+
+        curs          = MAKE_ARRAY(nPots,nCond,/FLOAT)
+
+        FOR k=0,nCond-1 DO BEGIN
+           curs[*,k]  = conductivities[k]*pots[*,k]*(-1D6)     
+        ENDFOR
+
+     END
+  ENDCASE
+
+  RETURN,{pot:pots,cur:curs}
+
+END
+
 PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
    ;; T1=t1, $
    ;; T2=t2, $
@@ -6,12 +55,13 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
    SAVEPLOT=savePlot, $
    SPNAME=spName, $
    ORIGINATING_ROUTINE=routName, $
-   PLOT_THESE_UPCURRENT_CONDUCTIVITIES=plot_these_upCurrent_conductivities, $
+   UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
+   DOWNCURRENT_CONDUCTIVITIES=downCurrent_conductivities, $
    PLOTDIR=plotDir, $
    _EXTRA=e ;; , $
    ;; ERROR_BAR_FACTOR=errorBarFac
   
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Check out potBar
   
@@ -70,6 +120,8 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
   jvSymFilled      = 1
   jv_xTitle        = curTitle
   jv_yTitle        = potTitle
+
+  curCondLStyle    = '--'
 
   ;;These all pertain to grid creation
   xGridStyle       = ':'
@@ -385,28 +437,64 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
      END
   ENDCASE
 
-  IF KEYWORD_SET(plot_these_upCurrent_conductivities) THEN BEGIN
+  CASE 1 OF
+     N_ELEMENTS(upCurrent_conductivities) EQ 0: BEGIN  
+        upCurrent_conductivities = [3.D-10,1.2D-9]
+     END
+     N_ELEMENTS(upCurrent_conductivities) EQ 1: BEGIN  
+        IF (FIX(upCurrent_conductivities) - $
+            upCurrent_conductivities) EQ 0 $
+        THEN BEGIN 
+           upCurrent_conductivities = [3.D-10,1.2D-9]
+        ENDIF
+     END
+  ENDCASE
+  
+  IF KEYWORD_SET(upCurrent_conductivities) THEN BEGIN
 
-     nUpCurCond = N_ELEMENTS(plot_these_upCurrent_conductivities)
+     nCurCond          = N_ELEMENTS(upCurrent_conductivities)
+     plot_upCurCondArr = MAKE_ARRAY(nCurCond,/OBJ)
 
-     plot_upCurCondArr = MAKE_ARRAY(nUpCurCond,/OBJ)
-
-     upCurCondLStyle   = '--'
-
-     upCurPotRange     = [1,1D5]
-     upCurPots         = 10.D^( INDGEN(51)/50.D * $
-                         (ALOG10(MAX(upCurPotRange))-ALOG10(MIN(upCurPotRange))) + ALOG10(MIN(upCurPotRange)))
-     FOR k=0,nUpCurCond-1 DO BEGIN
-
-        upCurs            = plot_these_upCurrent_conductivities[k]*upCurPots*(-1D6)
-        plot_upCurCondArr = PLOT(upCurPots, $
-                                 upCurs, $
-                                 LINESTYLE=upCurCondLStyle, $
+     t_curPots         = THEORETISCH_CURVES(upCurrent_conductivities, $
+                                            /UPGOING)
+     
+     FOR k=0,nCurCond-1 DO BEGIN
+        plot_upCurCondArr = PLOT(t_curPots.cur[*,k], $
+                                 t_curPots.pot[*,k], $
+                                 LINESTYLE=curCondLStyle, $
                                  /OVERPLOT)
-
      ENDFOR
 
   ENDIF
+
+  IF (WHERE(jvPlotData.cur[inds] GT 0))[0] NE -1 THEN BEGIN
+     CASE 1 OF
+        N_ELEMENTS(upCurrent_conductivities) EQ 0: BEGIN  
+           upCurrent_conductivities = [3.D-10,1.2D-9]
+        END
+        N_ELEMENTS(upCurrent_conductivities) EQ 1: BEGIN  
+           IF (FIX(upCurrent_conductivities) - $
+               upCurrent_conductivities) EQ 0 $
+           THEN BEGIN 
+              upCurrent_conductivities = [3.D-10,1.2D-9]
+           ENDIF
+        END
+     ENDCASE
+
+     downCurrent_conductivities  = [1.6D-6,2.D-5]
+
+     t_curPots         = THEORETISCH_CURVES(downCurrent_conductivities, $
+                                            /DOWNGOING)
+     FOR k=0,nCurCond-1 DO BEGIN
+        plot_upCurCondArr = PLOT(t_curPots.cur[*,k], $
+                                 t_curPots.pot[*,k], $
+                                 LINESTYLE=curCondLStyle, $
+                                 /OVERPLOT)
+     ENDFOR
+
+  ENDIF
+  
+  
 
   ;;And a colorbar thing
   nTMarks     = 5
