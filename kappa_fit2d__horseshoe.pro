@@ -43,6 +43,12 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
      OUT_ERANGE_I=eRange_i
   
+  IF STRUPCASE(kFitParamStruct[1].parName) EQ 'T' THEN BEGIN
+     kFitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
+  ENDIF ELSE BEGIN
+     STOP
+  ENDELSE
+
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__bulk_e_anisotropy): BEGIN
         func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON'
@@ -281,6 +287,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
         tmpParams = tmpKeeper.fitParams
         tmpParams[3] = tmpKeeper.fitDens
+        print,kfitparamstruct[*].value
         PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged)
      ENDIF
 

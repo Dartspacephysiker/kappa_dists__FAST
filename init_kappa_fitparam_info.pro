@@ -24,7 +24,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[3]     = 0.5
-  AMaxStep        = DOUBLE([50.,30.,1.0,0.5,0.])
+  AMaxStep        = DOUBLE([50.,30.,0.05,0.1,0.])
 
   Alimited         = [[1,1], $
                       [1,1], $
@@ -55,8 +55,9 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   paramInfo = REPLICATE({value:0.D       , $
                        fixed:0         , $
                        parname:''      , $
-                       ;; relstep:0.D     , $
-                       ;; mpmaxstep:0.D   , $
+                         ;; step:0.D, $ ;step size for numerical derivatives
+                       relstep:0.D     , $
+                       mpmaxstep:0.D   , $ ;max step in going from one fit to another
                        limited:[0,0]   , $
                        limits:[0.D,0]} , $
                       ;; 7)
@@ -73,7 +74,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   paramInfo[*].parName = ["E_b","T","kappa","N","bulkAngle"]
 
   ;;Got it. What about anything like, you know, a max step size?
-  ;; paramInfo[*].mpmaxstep  = AMaxStep
+  paramInfo[*].mpmaxstep  = AMaxStep
 
   ;;So certain values can't be exceeded?
   paramInfo[*].limited[0] = Alimited[*,0]
@@ -82,6 +83,13 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   ;;What are the limits, then?
   paramInfo[*].limits[0] = Alimits[*,0]
   paramInfo[*].limits[1] = Alimits[*,1]
+
+  paramInfo[1].relstep   = 0.05D
+
+  ;;Modify some kappaness
+  ;; paramInfo[1].mpmaxstep = 50.D ;T
+  ;; paramInfo[2].mpmaxstep = 0.1D ;kappa
+  ;; paramInfo[3].mpmaxstep = 0.5D ;n
 
   RETURN,paramInfo
 

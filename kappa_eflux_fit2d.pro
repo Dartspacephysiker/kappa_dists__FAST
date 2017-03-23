@@ -39,6 +39,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT1D__NFLUX=fit1D__nFlux, $
    FIT1D__WEIGHTING=fit1D__weighting, $
    FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+   FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
    FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
    FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
    FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
@@ -52,6 +53,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__WEIGHTING=fit2D__weighting, $
    FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+   FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
    FIT2D__TOLERANCE=fit2d_tol, $
    FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
    FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
@@ -117,12 +119,14 @@ PRO KAPPA_EFLUX_FIT2D, $
      FIT1D__NFLUX=fit1D__nFlux, $
      FIT1D__WEIGHTING=fit1D__weighting, $
      FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+     FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
      FIT2D__TOLERANCE=fit2d_tol, $
      FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
      FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
      FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
      FIT2D__WEIGHTING=fit2D__weighting, $
      FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+     FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $

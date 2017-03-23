@@ -33,7 +33,7 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
 
   IF N_ELEMENTS(kappa_A) EQ 0 THEN BEGIN
      ;;        kappa, Temp,Dens, R_B
-     kappa_A = [  10,  300, 0.1, 1D3]
+     kappa_A = [  10,  300, 0.1, 5D3]
   ENDIF
 
   IF N_ELEMENTS(Gauss_A) EQ 0 THEN BEGIN

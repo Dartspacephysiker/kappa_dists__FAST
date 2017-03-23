@@ -1,4 +1,5 @@
 PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
+                    CLAMPED_TEMPERATURE=clamped_temperature, $
                     ;; TITLE=title, $
                     BOUNDS_I=bounds_i, $
                     XRANGE=xRange, $
@@ -51,7 +52,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ;;Need to know if OMNI2D is responsible for this, or something else
   pref                 = pPref + (KEYWORD_SET(using_sdt_data) ? '__SDT_data-' : '-')
 
-  plotSN               = STRING(FORMAT='(A0,A0,A0,"--",A0,A0,"--orb_",I0,"__",A0,A0)', $
+  plotSN               = STRING(FORMAT='(A0,A0,A0,"-",A0,A0,"-orb_",I0,"__",A0,A0,A0)', $
                                 strings.today, $
                                 pref, $
                                 strings.timeFNStrs[bounds_i], $
@@ -59,10 +60,11 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                 strings.avgStr, $
                                 strings.orbStr, $
                                 strings.orbDate[bounds_i], $
-                                strings.angleStr)
+                                strings.angleStr, $
+                                (KEYWORD_SET(clamped_temperature) ? '-clampT' : ''))
   IF N_ELEMENTS(add_angle_label) GT 0  THEN BEGIN
-     ;; plotSN           += STRING(FORMAT='("--angle_",F0.1)',kappaFit.A[6])
-     plotSN      += STRING(FORMAT='("--angle_",F0.1)',add_angle_label)
+     ;; plotSN           += STRING(FORMAT='("-angle_",F0.1)',kappaFit.A[6])
+     plotSN      += STRING(FORMAT='("-angle_",F0.1)',add_angle_label)
   ENDIF
   plotSN         += ( KEYWORD_SET(postscript) ? '.ps' : '.png' )
 

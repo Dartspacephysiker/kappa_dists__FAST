@@ -60,7 +60,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
         min_NDown         = 0.07
      END
      KEYWORD_SET(useInds__twoLumps): BEGIN
-        tRanges           = tRanges[*,0]
+        ;; tRanges           = tRanges[*,0]
      END
   ENDCASE
 

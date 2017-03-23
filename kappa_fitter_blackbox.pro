@@ -28,9 +28,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT1D__NFLUX=fit1D__nFlux, $
                           FIT1D__WEIGHTING=fit1D__weighting, $
                           FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+                          FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
                           FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                           FIT2D__WEIGHTING=fit2D__weighting, $
                           FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+                          FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
                           FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -77,7 +79,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
                           CURANDPOT_USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
                           CURANDPOT_USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
-                          CURANDPOT_ADD_UPGOING_ION_POT=cAP_add_iu_pot
+                          CURANDPOT_ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
+                          CURANDPOT_PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
+                          CURANDPOT_PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
+                          CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
+                          CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
+                          CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -107,6 +114,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
      OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
+     FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+     FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
+     FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+     FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
      FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
      FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
      MIN_PEAK_ENERGY=min_peak_energy, $
@@ -163,12 +174,15 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT1D__NFLUX=fit1D__nFlux, $
         FIT1D__WEIGHTING=fit1D__weighting, $
         FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+        FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
         FIT1D__SKIP_BAD_FITS=fit1D__skip_bad_fits, $
         FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
         FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
         FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
         FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
         FIT2D__WEIGHTING=fit2D__weighting, $
+        FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+        FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
@@ -214,30 +228,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         TXTOUTPUTDIR=txtOutputDir,$
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
-
-     PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
-                             A=a, $
-                             STRUCT_A=Astruct, $
-                             TIME=time, $
-                             NAMES_A=A_names, $
-                             CHI2=chi2, $
-                             PVAL=pVal, $
-                             FITSTATUS=fitStatus, $
-                             USE_MPFIT1D=use_mpFit1D
-
-     PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
-                             A=AGauss, $
-                             STRUCT_A=AStructGauss, $
-                             TIME=time, $
-                             NAMES_A=AGauss_names, $
-                             CHI2=chi2Gauss, $
-                             PVAL=pValGauss, $
-                             FITSTATUS=gaussfitStatus, $
-                             USE_MPFIT1D=use_mpFit1D
-
-
-     PRINT_KAPPA_LOOP_FIT_SUMMARY,fitStatus,gaussfitStatus
-
 
      IF KEYWORD_SET(saveData) THEN BEGIN
 
@@ -300,6 +290,29 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      PRINT,"DONE!"
 
   ENDELSE
+
+  PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
+                          A=a, $
+                          STRUCT_A=Astruct, $
+                          TIME=time, $
+                          NAMES_A=A_names, $
+                          CHI2=chi2, $
+                          PVAL=pVal, $
+                          FITSTATUS=fitStatus, $
+                          USE_MPFIT1D=use_mpFit1D
+
+  PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
+                          A=AGauss, $
+                          STRUCT_A=AStructGauss, $
+                          TIME=time, $
+                          NAMES_A=AGauss_names, $
+                          CHI2=chi2Gauss, $
+                          PVAL=pValGauss, $
+                          FITSTATUS=gaussfitStatus, $
+                          USE_MPFIT1D=use_mpFit1D
+
+  PRINT_KAPPA_LOOP_FIT_SUMMARY,fitStatus,gaussfitStatus
+
 
   IF ISA(KF2D__SDTData_opt) THEN BEGIN
      electron_angleRange = KF2D__SDTData_opt.electron_angleRange
@@ -394,6 +407,18 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         kappaFits = kappaFits[include_i]
         gaussFits = gaussFits[include_i]
 
+        AStruct      = {bulk_energy : AStruct.bulk_energy[include_i], $
+                        temperature : AStruct.temperature[include_i], $
+                        kappa       : AStruct.kappa[include_i], $
+                        N           : AStruct.N[include_i], $
+                        bulk_angle  : AStruct.bulk_angle[include_i]}
+
+        AStructGauss = {bulk_energy : AStructGauss.bulk_energy[include_i], $
+                        temperature : AStructGauss.temperature[include_i], $
+                        kappa       : AStructGauss.kappa[include_i], $
+                        N           : AStructGauss.N[include_i], $
+                        bulk_angle  : AStructGauss.bulk_angle[include_i]}
+        
      ENDIF
 
      DAT_EFLUX_TO_DIFF_EFLUX,fit2DK.SDT[*],kappa_eFlux, $
@@ -555,8 +580,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
 
      plot_times           = [t1Str,t2Str]
-     plot_j_v_and_theory  = 1
-     plot_j_v__fixed_t_and_n = 1
      
      IF KEYWORD_SET(cAP_tRanges) THEN BEGIN
         tRanges           = cAP_tRanges
@@ -582,11 +605,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         USEI__RELCHANGE=useInds__relChange, $
         USEI__TWOLUMPS=useInds__twoLumps, $
         FIT_TRANGES=tRanges, $
-        PLOT_J_V_POTBAR=plot_j_v_potBar, $
-        PLOT_JV_A_LA_ELPHIC=plot_jv_a_la_Elphic, $
-        PLOT_T_AND_N=plot_T_and_N, $
-        PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
-        PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+        PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
+        PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
+        PLOT_T_AND_N=cAP_plot_T_and_N, $
+        PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
+        PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
         OUT_CURPOTLIST=curPotList, $
         OUT_JVPLOTDATA=jvPlotData, $
@@ -617,13 +640,35 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
               datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],kTimes,/CONSTRAINED)
               datUseInds   = datUseInds[datUseIndsII]
               kFitUseInds  = LINDGEN(nKappa)
-              IF (WHERE(ABS(kTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
+              ;; IF (WHERE(ABS(kTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+              ;; checker = WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
+              ;;                COMPLEMENT=realKeep)
+
+              ;; IF nChecker GT 0 THEN BEGIN
+              ;;    kFitUseInds = kFitUseInds[realKeep]
+              ;;    datUseInds  = datUseInds[realKeep]
+              ;; ENDIF
+
            END
            (nDat LT nKappa): BEGIN
               kFitUseInds = VALUE_CLOSEST2(kTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
-              IF (WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
+              ;; IF (WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
            END
         ENDCASE
+
+        checker = WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
+                        COMPLEMENT=realKeep)
+
+        IF nChecker GT 0 THEN BEGIN
+           kFitUseInds = kFitUseInds[realKeep]
+           datUseInds  = datUseInds[realKeep]
+        ENDIF
+
+        nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
+        nKappa  = N_ELEMENTS(kTimes)
 
      ENDELSE
 
@@ -635,48 +680,68 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         CASE 1 OF
            (nDat GT nGauss): BEGIN
+
               datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],gTimes,/CONSTRAINED)
               datUseInds   = datUseInds[datUseIndsII]
               gFitUseinds  = LINDGEN(nGauss)
-              IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
+              ;; IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
            END
            (nDat LT nGauss): BEGIN
               gFitUseInds = VALUE_CLOSEST2(gTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
-              IF (WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
+              ;; IF (WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+
            END
         ENDCASE
 
+        checker = WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
+                        COMPLEMENT=realKeep)
+
+        IF nChecker GT 0 THEN BEGIN
+           gFitUseInds = gFitUseInds[realKeep]
+           datUseInds  = datUseInds[realKeep]
+        ENDIF
+
+        nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
+        nKappa  = N_ELEMENTS(kTimes)
+
      ENDELSE
 
-     fitUseII = WHERE(((kChi2[kFitUseInds] LE 1000) OR (gChi2[gFitUseInds] LE 1000)) AND $
-                      (ABS(jvPlotData.cur[datUseInds]) GE 0.5),nFitUseII)
+     jvPD_inds  = VALUE_CLOSEST2(jvPlotData.time,curPotList[0].time[datUseInds])
+
+
+     fitUseII   = WHERE(((kChi2[kFitUseInds] LE 1000) OR (gChi2[gFitUseInds] LE 1000)) AND $
+                      (ABS(jvPlotData.cur[jvPD_inds]) GE 0.5),nFitUseII)
      IF nFitUseII LE 1 THEN STOP
 
      kFitUseInds = kFitUseInds[fitUseII]
      gFitUseInds = gFitUseInds[fitUseII]
-     datUseInds  = datUseInds[fitUseII]
+     ;; datUseInds  = datUseInds[fitUseII]
+     jvPD_inds  = jvPD_inds[fitUseII]
 
      ion     = 0
-     pot     = jvPlotData.pot[datUseInds]
-     cur     = jvPlotData.cur[datUseInds]*(ion ? 1.D : -1.D)
-     potErr  = jvPlotData.potErr[datUseInds]
-     curErr  = jvPlotData.curErr[datUseInds]
-     T       = jvPlotData.TDown[datUseInds]
-     N       = jvPlotData.NDown[datUseInds]
+     pot     = jvPlotData.pot[jvPD_inds]
+     cur     = jvPlotData.cur[jvPD_inds]*(ion ? 1.D : -1.D)
+     potErr  = jvPlotData.potErr[jvPD_inds]
+     curErr  = jvPlotData.curErr[jvPD_inds]
+     T       = jvPlotData.TDown[jvPD_inds]
+     N       = jvPlotData.NDown[jvPD_inds]
 
      kappas     = AStruct.kappa[kFitUseInds]
 
-     kappa_fitT = AStruct.temperature[kFitUseInds]
-     gauss_fitT = AStructGauss.temperature[gFitUseInds]
+     ;; kappa_fitT = AStruct.temperature[kFitUseInds]
+     ;; gauss_fitT = AStructGauss.temperature[gFitUseInds]
      
-     kappa_fitN = AStruct.N[kFitUseInds]
-     gauss_fitN = AStructGauss.N[gFitUseInds]
+     ;; kappa_fitN = AStruct.N[kFitUseInds]
+     ;; gauss_fitN = AStructGauss.N[gFitUseInds]
      
-     ;; kappa_fitT = jvPlotData.TDown[datUseInds]
-     ;; gauss_fitT = jvPlotData.TDown[datUseInds]
+     kappa_fitT = jvPlotData.TDown[jvPD_inds]
+     gauss_fitT = jvPlotData.TDown[jvPD_inds]
      
-     ;; kappa_fitN = jvPlotData.NDown[datUseInds]
-     ;; gauss_fitN = jvPlotData.NDown[datUseInds]
+     kappa_fitN = jvPlotData.NDown[jvPD_inds]
+     gauss_fitN = jvPlotData.NDown[jvPD_inds]
      
      kappa_fixA = [0,1,1,0]
      Gauss_fixA = [1,1,1,0]

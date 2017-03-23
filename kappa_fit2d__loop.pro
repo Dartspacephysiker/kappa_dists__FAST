@@ -781,6 +781,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                         gaussFits[-1] : $
                         !NULL, $
                         oneCurve, $
+                        CLAMPED_TEMPERATURE=KF2D__Curvefit_opt.fit1D__clampTemperature, $
                         ;; TITLE=title, $
                         BOUNDS_I=iTime, $
                         XRANGE=xRange, $

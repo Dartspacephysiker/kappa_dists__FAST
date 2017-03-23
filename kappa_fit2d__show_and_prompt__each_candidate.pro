@@ -80,18 +80,19 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(only_data): BEGIN
-           tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"--",A0)', $
+           tempFN = STRING(FORMAT='("orb_",A0,A0,"-",A0,"-",A0)', $
                            KF2D__strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
                            'Data', $
                            KF2D__strings.timeFNStrs[iTime])
         END
         ELSE: BEGIN
-           tempFN = STRING(FORMAT='("orb_",A0,A0,"--",A0,"_fit--",A0)', $
+           tempFN = STRING(FORMAT='("orb_",A0,A0,"-",A0,"_fit-",A0,A0)', $
                            KF2D__strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
                            fitString, $
-                           KF2D__strings.timeFNStrs[iTime])
+                           KF2D__strings.timeFNStrs[iTime], $
+                           (KEYWORD_SET(KF2D__Curvefit_opt.fit2D__clampTemperature) ? '-clampT' : ''))
         END
      ENDCASE
 

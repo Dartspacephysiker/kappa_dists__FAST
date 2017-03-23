@@ -1,13 +1,10 @@
 ;2017/03/21
-;2017/03/17
 ;A      = vector of function params:
-
-; A[0]: E_b,       Plasma bulk energy (eV)
-; A[1]: T,         Plasma kinetic temperature (eV)
-; A[2]: kappa,     Kappa (of course!)--or more specifically 3D kappa index, so that kappa = kappa_0 + 3/2
-; A[3]: n,         Plasma density (cm^-3)
-; A[4]: bulkAngle, Angle between bulk velocity, u_b, and velocity in direction for which we're interested in the distribution
-
+;
+; A[0]:       Kappa (of course!)--or more specifically 3D kappa index, so that kappa = kappa_0 + 3/2
+; A[1]:       T,         Plasma kinetic temperature (eV)
+; A[2]:       n,         Plasma density (cm^-3)
+; A[3]:       R_B        Mag ratio
 FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
                                   ;; ERANGE_PEAK=eRange_peak
 
@@ -21,7 +18,7 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[2]     = 0.5
-  AMaxStep        = DOUBLE([1.0, $
+  AMaxStep        = DOUBLE([0.1, $
                             30., $
                             0.1, $
                             100])
@@ -32,9 +29,9 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
                       [1,1]]
   
   Alimits         = [[1.501D  ,100.0   ] , $ ;kappa 
-                     [10      ,3.0e4   ] , $ ;Temp
-                     [1e-4    ,100     ] , $ ;N
-                     [1       ,1e4     ]]    ;R_B
+                     [10      ,1.0e4   ] , $ ;Temp
+                     [1e-3    ,100     ] , $ ;N
+                     [1       ,5e3     ]]    ;R_B   
 
   ;;Make 'em play nice
   ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN
@@ -46,14 +43,15 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
   Alimits         = TRANSPOSE(Alimits)
 
   paramInfo = REPLICATE({value:0.D       , $
-                       fixed:0B        , $
-                       parname:''      , $
-                       ;; relstep:0.D     , $
-                       ;; mpmaxstep:0.D   , $
-                       limited:[0B,0]   , $
-                       limits:[0.D,0]} , $
-                      ;; 7)
-                      4)
+                         fixed:0B        , $
+                         parname:''      , $
+                         ;; relstep:0.D     , $
+                         ;; mpmaxstep:0.D   , $
+                         mpmaxstep:AMaxStep   , $
+                         limited:[0B,0]   , $
+                         limits:[0.D,0]} , $
+                        ;; 7)
+                        4)
 
   ;;Starting values
   paramInfo[*].value = A

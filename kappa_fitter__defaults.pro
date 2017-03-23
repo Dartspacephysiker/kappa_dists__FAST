@@ -123,8 +123,8 @@
   max_iter                      = 10000
   fit2D_max_iter                = 10000
 
-  fit_tol                       = 1D-3
-  fit2D_tol                     = 1D-5
+  fit_tol                       = 1D-4
+  fit2D_tol                     = 1D-6
 
   IF STRUPCASE(eeb_or_ees) EQ 'EEB' THEN BEGIN
      IF N_ELEMENTS(spectra_average_interval) EQ 0 THEN spectra_average_interval = 4

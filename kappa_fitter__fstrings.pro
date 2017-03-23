@@ -10,6 +10,10 @@ PRO KAPPA_FITTER__FSTRINGS, $
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
+   FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+   FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
+   FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+   FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
    FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
    FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
    MIN_PEAK_ENERGY=min_peak_energy, $
@@ -52,12 +56,44 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ;;    plotNamePref    += '-w_1Count'
   ;; ENDIF
 
-  IF KEYWORD_SET(fit2D__disable_bFunc) THEN BEGIN
-     plotNamePref    += '-No_bFunc'
+  clampStr  = ''
+  isClamped = 0B
+  IF KEYWORD_SET(fit1D__clampTemperature) THEN BEGIN
+     isClamped = 1B
+     clampStr += '1D'
   ENDIF
 
-  IF KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
-     plotNamePref    += '-exc_LCA'
+  IF KEYWORD_SET(fit2D__clampTemperature) THEN BEGIN
+     isClamped = 1B
+     clampStr += '2D'
+  ENDIF
+
+  IF isClamped THEN BEGIN
+     clampStr = '-' + clampStr + 'clampT'
+  ENDIF
+
+  clampStr  = ''
+  isClamped = 0B
+  IF KEYWORD_SET(fit1D__clampDensity) THEN BEGIN
+     isClamped = 1B
+     clampStr += '1D'
+  ENDIF
+
+  IF KEYWORD_SET(fit2D__clampDensity) THEN BEGIN
+     isClamped = 1B
+     clampStr += '2D'
+  ENDIF
+
+  IF isClamped THEN BEGIN
+     clampStr = '-' + clampStr + 'clampN'
+  ENDIF
+
+  IF ~KEYWORD_SET(fit2D__disable_bFunc) THEN BEGIN
+     plotNamePref    += '-has_bFunc'
+  ENDIF
+
+  IF ~KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
+     plotNamePref    += '-dens_w_LCA'
   ENDIF
 
   IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
@@ -65,7 +101,8 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ENDIF
 
   fitAngleStr         = ''
-  dEFAngleStr         = '-allAngles'
+  ;; dEFAngleStr         = '-allAngles'
+  dEFAngleStr         = ''
   ;; CASE 1 OF
   ;; (N_ELEMENTS(electron_angleRange) EQ 2): BEGIN
   CASE SIZE(electron_angleRange,/TYPE) OF

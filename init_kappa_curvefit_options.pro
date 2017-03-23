@@ -16,6 +16,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT1D__NFLUX=fit1D__nFlux, $
    FIT1D__WEIGHTING=fit1D__weighting, $
    FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
+   FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
    FIT2D__TOLERANCE=fit2D_tol, $
    FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
    FIT2D__ONLY_FIT_DENSANGLES=fit2D__only_fit_densAngles, $
@@ -29,6 +30,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__WEIGHTING=fit2D__weighting, $
    FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
+   FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
    FIT_EACH__1DFIT_TO_DENSITY_AT_EACH_ANGLE=fit1D_to_density_at_each_angle, $
    N_ENERGIES_BELOW_PEAK=n_below_peak, $
    N_ENERGIES_ABOVE_PEAK=n_above_peak, $
@@ -79,6 +81,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 fit2D__keep_wholeFit        : 0B, $
                                                 fit2D__weighting            : 1B, $
                                                 fit2D__clampTemperature     : 0B, $
+                                                fit2D__clampDensity         : 0B, $
                                                 max_iter                    : defMax_iter, $
                                                 fit2D_max_iter              : defFit2D_max_iter, $
                                                 fita                        : defKappaFitA, $
@@ -87,6 +90,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 fit1D__nFlux                : 0B, $
                                                 fit1D__weighting            : 1B, $
                                                 fit1D__clampTemperature     : 0B, $
+                                                fit1D__clampDensity         : 0B, $
                                                 n_below_peak                : defNEn_below_peak, $
                                                 n_above_peak                : defNEn_above_peak, $
                                                 n_below_peak2D              : defNEn_below_peak, $
@@ -271,6 +275,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
            kCurvefit_opt.fit1D__clampTemperature
   ENDIF
 
+  IF N_ELEMENTS(fit1D__clampDensity) GT 0 THEN BEGIN
+     kCurvefit_opt.fit1D__clampDensity = fit1D__clampDensity
+
+     PRINT,FORMAT='("kCurvefit_opt.fit1D__clampDensity",T45,":",T48,I0)', $
+           kCurvefit_opt.fit1D__clampDensity
+  ENDIF
+
   IF N_ELEMENTS(n_est) GT 0 THEN BEGIN
      kCurvefit_opt.fitA[3]                   = n_est
 
@@ -381,6 +392,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
      PRINT,FORMAT='("kCurvefit_opt.fit2D__clampTemperature",T45,":",T48,I0)', $
            kCurvefit_opt.fit2D__clampTemperature
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__clampDensity) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D__clampDensity = fit2D__clampDensity
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__clampDensity",T45,":",T48,I0)', $
+           kCurvefit_opt.fit2D__clampDensity
   ENDIF
 
   IF N_ELEMENTS(units) GT 0 THEN BEGIN
