@@ -6,6 +6,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
    SAVEPLOT=savePlot, $
    SPNAME=spName, $
    ORIGINATING_ROUTINE=routName, $
+   PLOT_THESE_UPCURRENT_CONDUCTIVITIES=plot_these_upCurrent_conductivities, $
    PLOTDIR=plotDir, $
    _EXTRA=e ;; , $
    ;; ERROR_BAR_FACTOR=errorBarFac
@@ -383,6 +384,29 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
      END
   ENDCASE
+
+  IF KEYWORD_SET(plot_these_upCurrent_conductivities) THEN BEGIN
+
+     nUpCurCond = N_ELEMENTS(plot_these_upCurrent_conductivities)
+
+     plot_upCurCondArr = MAKE_ARRAY(nUpCurCond,/OBJ)
+
+     upCurCondLStyle   = '--'
+
+     upCurPotRange     = [1,1D5]
+     upCurPots         = 10.D^( INDGEN(51)/50.D * $
+                         (ALOG10(MAX(upCurPotRange))-ALOG10(MIN(upCurPotRange))) + ALOG10(MIN(upCurPotRange)))
+     FOR k=0,nUpCurCond-1 DO BEGIN
+
+        upCurs            = plot_these_upCurrent_conductivities[k]*upCurPots*(-1D6)
+        plot_upCurCondArr = PLOT(upCurPots, $
+                                 upCurs, $
+                                 LINESTYLE=upCurCondLStyle, $
+                                 /OVERPLOT)
+
+     ENDFOR
+
+  ENDIF
 
   ;;And a colorbar thing
   nTMarks     = 5

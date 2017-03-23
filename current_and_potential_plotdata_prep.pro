@@ -142,7 +142,14 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
      ;;Now square all participating current errors for each time, sum them, and take the square root
      curErr = curErr[*,0:(curErr_i-1)]
-     curErr = SQRT(TOTAL(curErr^2.D,2,/DOUBLE))
+     CASE NDIMEN(curErr) OF
+        1: BEGIN
+
+        END
+        ELSE: BEGIN
+           curErr = SQRT(TOTAL(curErr^2.D,2,/DOUBLE))
+        END
+     ENDCASE
 
   ENDELSE
 

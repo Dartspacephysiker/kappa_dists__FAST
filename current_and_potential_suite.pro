@@ -12,6 +12,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    ERROR_BAR_FACTOR=errorBarFac, $
    USEI__RELCHANGE=useInds__relChange, $
    USEI__TWOLUMPS=useInds__twoLumps, $
+   JV_A_LA_ELPHIC__UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
    JV_THEOR__MINPOT=jv_theor__minPot, $
    JV_THEOR__MAXPOT=jv_theor__maxPot, $
    JV_THEOR__MINCUR=jv_theor__minCur, $
