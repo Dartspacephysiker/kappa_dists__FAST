@@ -35,6 +35,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    POT__ALL=pot__all, $
    POT__CHASTON_STYLE=pot__Chaston_style, $
    POT__FROM_FILE=pot__from_file, $
+   ;; POT__FNAME=pot__fName, $
    POT__SAVE_FILE=pot__save_file, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
@@ -225,6 +226,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;; FITFILE=fitFile, $
            LOADDIR=diffEfluxDir
 
+        pot__fName = diff_eflux_file.Replace('diff_eflux','sc_pot')
         preString = diff_eFlux_file + ' ...'
         gotIt = 0B
         IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(diffEfluxDir+diff_eFlux_file)) AND $
@@ -292,6 +294,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                             ALL=pot__all, $
                             /REPAIR, $
                             CHASTON_STYLE=pot__Chaston_style, $
+                            FILENAME=pot__fName, $
                             FROM_FILE=pot__from_file, $
                             ORBIT=orbit, $
                             SAVE_FILE=pot__save_file
