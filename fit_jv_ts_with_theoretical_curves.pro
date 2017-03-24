@@ -26,7 +26,7 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
   jvFitFunc   = 'JV_CURVE_FIT__MAXWELL_KAPPA'
   OKStatus    = [1,2,3,4]       ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
-  maxIter     = KEYWORD_SET(maxIter ) ? maxIter : 1000
+  maxIter     = KEYWORD_SET(maxIter ) ? maxIter : 5000
   fTol        = KEYWORD_SET(fTol    ) ? fTol    : 1D-15
   gTol        = KEYWORD_SET(gTol    ) ? gTol    : 1D-15
 

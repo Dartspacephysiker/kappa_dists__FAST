@@ -18,9 +18,9 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[2]     = 0.5
-  AMaxStep        = DOUBLE([0.1, $
-                            30., $
-                            0.1, $
+  AMaxStep        = DOUBLE([0.5, $
+                            50., $
+                            0.25, $
                             100])
 
   Alimited         = [[1,1], $
@@ -28,10 +28,10 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
                       [1,1], $
                       [1,1]]
   
-  Alimits         = [[1.501D  ,100.0   ] , $ ;kappa 
-                     [10      ,1.0e4   ] , $ ;Temp
-                     [1e-3    ,100     ] , $ ;N
-                     [1       ,5e3     ]]    ;R_B   
+  Alimits         = [[1.51D  ,100.0   ] , $ ;kappa 
+                     [10      ,1.0D4   ] , $ ;Temp
+                     [1D-3    ,100     ] , $ ;N
+                     [1       ,5D3     ]]    ;R_B   
 
   ;;Make 'em play nice
   ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN

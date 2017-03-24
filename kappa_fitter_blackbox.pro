@@ -56,6 +56,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__SAVE_PNG=kSum__save_png, $
                           KSUM__CONV_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
                           KSUM__ADD_CHI2_LINE=kSum__add_chi2_line, $
+                          KSUM__ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
+                          KSUM__GRL=kSum__GRL, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -84,7 +86,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
                           CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
                           CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
-                          CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n
+                          CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+                          TIMEBARS=timeBars
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -127,12 +130,19 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      FITFILE=fitFile, $
      LOADDIR=outDir
 
+  restored_fitFile = 0B
   IF KEYWORD_SET(restore_fitFile) THEN BEGIN
 
-     PRINT,'Restoring ' + fitFile + ' ...'
-     RESTORE,outDir+fitFile
-
-  ENDIF ELSE BEGIN
+     IF FILE_TEST(outDir+fitFile) THEN BEGIN
+        PRINT,'Restoring ' + fitFile + ' ...'
+        RESTORE,outDir+fitFile
+        restored_fitFile = 1B
+        just_diff_eFlux  = 1B
+     ENDIF ELSE BEGIN
+        PRINT,"Couldn't get file!"
+     ENDELSE
+     
+  ENDIF
 
      KAPPA_EFLUX_FIT2D, $
         T1=t1, $
@@ -229,7 +239,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
 
-     IF KEYWORD_SET(saveData) THEN BEGIN
+     IF KEYWORD_SET(saveData) AND ~restored_fitFile THEN BEGIN
 
         ;; SAVE,
 
@@ -289,7 +299,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      PRINT,"DONE!"
 
-  ENDELSE
+  ;; ENDELSE
 
   PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                           A=a, $
@@ -318,14 +328,72 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      electron_angleRange = KF2D__SDTData_opt.electron_angleRange
   ENDIF
 
+  ;;2017/03/21
+  ;;LOOK: All you've got to do is figure out a way to consistently get the ion contribution in here, and you're golden. Understand?
+  ;;THEN you can see what it's really like
+  IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
+
+     plot_times           = [t1Str,t2Str]
+     
+     IF KEYWORD_SET(cAP_tRanges) THEN BEGIN
+        tRanges           = cAP_tRanges
+        useInds__twoLumps = 1
+     ENDIF
+
+     CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
+        ORBIT=orbit, $
+        EEB_OR_EES=eeb_or_ees, $
+        ELECTRON_ANGLERANGE=electron_angleRange, $
+        ORIGINATING_ROUTINE=routName, $
+        REMAKE_MASTERFILE=cAP_remake_masterFile, $
+        MAP_TO_100KM=cAP_map_to_100km, $
+        USE_ALL_CURRENTS=cAP_use_all_currents, $
+        USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
+        USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
+        USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
+        USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
+        USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
+        ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
+        PLOT_TIMES=plot_times, $
+        IN_BONUSPREF=bonusPref, $
+        USEI__RELCHANGE=useInds__relChange, $
+        USEI__TWOLUMPS=useInds__twoLumps, $
+        FIT_TRANGES=tRanges, $
+        PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
+        PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
+        PLOT_T_AND_N=cAP_plot_T_and_N, $
+        PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
+        PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+        SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+        OUT_CURPOTLIST=curPotList, $
+        OUT_JVPLOTDATA=jvPlotData, $
+        OUT_AVGS_FOR_FITTING=avgs_JVfit, $
+        OUT_SC_POT=sc_pot
+
+  ENDIF
+
   ;;Can we do 2D action?
   canDo2D = ~KEYWORD_SET(only_1D_fits) AND $
             N_ELEMENTS(fit2DKappa_inf_list) GT 0
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
      canDo2D = canDo2D AND N_ELEMENTS(fit2DGauss_inf_list) GT 0
   ENDIF
-
   IF canDo2D THEN BEGIN
+
+     ;;Proof that it's better with Papa John's
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=As
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,GaussFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=GaussAs
+     ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2dkappa_inf_list,'fitdens',VALUE=fitDens
+     ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2dkappa_inf_list,'SDT',VALUE=sdt
+     ;; tid = SDT[*].time
+     ;; these = VALUE_CLOSEST2(jvPlotdata.time,tid)
+     ;; PRINT,jvplotdata.ndown[these]/fitDens
+     ;; PRINT,jvPlotData.nDown[these]/As[*,3]
+     betterDensK = As[*,3]
+     betterDensG = GaussAs[*,3]
+
+     kFitParam_struct = 1
+     gFitParam_struct = 1
 
      fit2DK = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DKappa_inf_list, $
                                              SOUTH=south, $
@@ -338,6 +406,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                              DENS_ANGLERANGE=KF2D__SDTData_opt.fit2D_dens_aRange, $
                                              OUT_GOOD_I=includeK_i, $
+                                             OUT_FITPARAM_STRUCT=kFitParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT)
 
      fit2DG = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DGauss_inf_list, $
@@ -352,8 +421,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              DENS_ANGLERANGE=KF2D__SDTData_opt.fit2D_dens_aRange, $
                                              IN_GOOD_I=includeK_i, $
                                              OUT_GOOD_I=includeG_i, $
+                                             OUT_FITPARAM_STRUCT=gFitParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
+     fit2DK.fitDens = betterDensK
+     fit2DG.fitDens = betterDensG
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
@@ -418,6 +490,18 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                         kappa       : AStructGauss.kappa[include_i], $
                         N           : AStructGauss.N[include_i], $
                         bulk_angle  : AStructGauss.bulk_angle[include_i]}
+
+        kFitParam_struct = {bulk_energy  : kFitParam_struct.bulk_energy[include_i], $
+                            temperature  : kFitParam_struct.temperature[include_i], $
+                            kappa        : kFitParam_struct.kappa      [include_i], $
+                            n            : kFitParam_struct.n          [include_i]}
+
+        gFitParam_struct = {bulk_energy  : gFitParam_struct.bulk_energy[include_i], $
+                            temperature  : gFitParam_struct.temperature[include_i], $
+                            kappa        : gFitParam_struct.kappa      [include_i], $
+                            n            : gFitParam_struct.n          [include_i]}
+
+
         
      ENDIF
 
@@ -530,6 +614,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            SAVE_PS=sway__save_ps, $
                            SAVE_PNG=sway__save_png, $
                            SAVEKAPPA_BONUSPREF=bonusPref, $
+                           ;; GRL=sway__GRL, $
                            PLOTDIR=plotDir
 
      ENDIF
@@ -552,8 +637,18 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              ADD_CHI2_LINE=kSum__add_chi2_line, $
                              FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
                              FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+                             KAPPA2D=fit2DK, $
+                             GAUSS2D=fit2DG, $
+                             KAPPA_FITPARAM_STRUCT=kFitParam_struct, $
+                             GAUSS_FITPARAM_STRUCT=gFitParam_struct, $
                              KAPPAFITS=kappaFits, $
                              GAUSSFITS=gaussFits, $
+                             DIFF_EFLUX=diff_eFlux, $
+                             CURPOTLIST=curPotList, $
+                             JVPLOTDATA=jvPlotData, $
+                             ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
+                             SC_POT=sc_pot, $
+                             ELECTRON_ANGLERANGE=electron_angleRange, $
                              CHI2_THRESHOLD=chi2_thresh, $
                              CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                              HIGHDENSITY_THRESHOLD=highDens_thresh, $
@@ -568,52 +663,55 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              SAVE_FOR_OFFLINE=save_for_offline, $
                              LOAD_FROM_OFFLINE=load_from_offline, $
                              KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
-                             KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops
+                             KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops, $
+                             GRL=kSum__GRL, $
+                             TIMEBARS=timeBars
+
 
      ENDIF
+
+     ;;W I P
+     ;; IF KEYWORD_SET(show_grl_summary) THEN BEGIN
+        
+     ;;    tPlt_vars = !NULL ;Clear 'em out
+
+     ;;    SINGLE_KAPPA_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
+     ;;                         TPLT_VARS=tPlt_vars, $
+     ;;                         EEB_OR_EES=eeb_or_ees, $
+     ;;                         ENERGY_ELECTRONS=energy_electrons, $
+     ;;                         TLIMIT_NORTH=tlimit_north, $
+     ;;                         TLIMIT_SOUTH=tlimit_south, $
+     ;;                         TLIMIT_ALL=tlimit_all, $
+     ;;                         /SCREEN_PLOT, $
+     ;;                         USE_FAC_V=use_fac_v, $
+     ;;                         USE_FAC_NOT_V=use_fac, $
+     ;;                         NO_BLANK_PANELS=no_blank_panels, $
+     ;;                         ADD_CHI2_LINE=kSum__add_chi2_line, $
+     ;;                         FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
+     ;;                         FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+     ;;                         KAPPAFITS=kappaFits, $
+     ;;                         GAUSSFITS=gaussFits, $
+     ;;                         CHI2_THRESHOLD=chi2_thresh, $
+     ;;                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
+     ;;                         HIGHDENSITY_THRESHOLD=highDens_thresh, $
+     ;;                         LOWDENSITY_THRESHOLD=lowDens_thresh, $
+     ;;                         DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
+     ;;                         N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+     ;;                         CONVERT_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
+     ;;                         SAVE_PS=kSum__save_ps, $
+     ;;                         SAVE_PNG=kSum__save_png, $
+     ;;                         SAVEKAPPA_BONUSPREF=bonusPref, $
+     ;;                         PLOTDIR=plotDir, $
+     ;;                         SAVE_FOR_OFFLINE=save_for_offline, $
+     ;;                         LOAD_FROM_OFFLINE=load_from_offline, $
+     ;;                         KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
+     ;;                         KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops
+
+     ;; ENDIF
 
   ENDIF
 
-  ;;2017/03/21
-  ;;LOOK: All you've got to do is figure out a way to consistently get the ion contribution in here, and you're golden. Understand?
-  ;;THEN you can see what it's really like
   IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
-
-     plot_times           = [t1Str,t2Str]
-     
-     IF KEYWORD_SET(cAP_tRanges) THEN BEGIN
-        tRanges           = cAP_tRanges
-        useInds__twoLumps = 1
-     ENDIF
-
-     CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
-        ORBIT=orbit, $
-        EEB_OR_EES=eeb_or_ees, $
-        ELECTRON_ANGLERANGE=electron_angleRange, $
-        ORIGINATING_ROUTINE=routName, $
-        REMAKE_MASTERFILE=cAP_remake_masterFile, $
-        MAP_TO_100KM=cAP_map_to_100km, $
-        USE_ALL_CURRENTS=cAP_use_all_currents, $
-        USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
-        USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
-        USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
-        USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
-        USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
-        ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
-        PLOT_TIMES=plot_times, $
-        IN_BONUSPREF=bonusPref, $
-        USEI__RELCHANGE=useInds__relChange, $
-        USEI__TWOLUMPS=useInds__twoLumps, $
-        FIT_TRANGES=tRanges, $
-        PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
-        PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
-        PLOT_T_AND_N=cAP_plot_T_and_N, $
-        PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
-        PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
-        SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-        OUT_CURPOTLIST=curPotList, $
-        OUT_JVPLOTDATA=jvPlotData, $
-        OUT_AVGS_FOR_FITTING=avgs_JVfit
 
      ;;See if the time series align
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time',VALUE=kTimes

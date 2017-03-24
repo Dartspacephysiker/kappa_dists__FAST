@@ -50,6 +50,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
+   OUT_SC_POT=out_sc_pot, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -298,6 +299,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                             FROM_FILE=pot__from_file, $
                             ORBIT=orbit, $
                             SAVE_FILE=pot__save_file
+           out_sc_pot = sc_pot
            sc_pot_list.Add,sc_pot
         ENDIF
 

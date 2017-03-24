@@ -24,7 +24,11 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[3]     = 0.5
-  AMaxStep        = DOUBLE([50.,30.,0.05,0.1,0.])
+  AMaxStep        = DOUBLE([50., $   ; A[0]: E_b,       
+                            50., $   ; A[1]: T,         
+                            0.5, $  ; A[2]: kappa,     
+                            0.30, $   ; A[3]: n,         
+                            0.])     ; A[4]: bulkAngle, 
 
   Alimited         = [[1,1], $
                       [1,1], $
@@ -34,10 +38,10 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                       ;; [0,0], $
                       [0,0]]
   
-  Alimits         = [[100.,3.5e4]    , $ ;E_b
-                     [10,3.5e4]     , $ ;Temp
-                     [1.5001D,100]  , $ ;kappa 
-                     [1e-6,100]     , $ ;N
+  Alimits         = [[100.,3.5D4]    , $ ;E_b
+                     [10,3.5D4]     , $ ;Temp
+                     [1.501D,100]  , $ ;kappa 
+                     [1D-6,100]     , $ ;N
                      [-180,180]]       ;Bulk Angle
                      ;; [1,0], $
                      ;; [0,0], $
@@ -52,16 +56,16 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   Alimited        = TRANSPOSE(Alimited)
   Alimits         = TRANSPOSE(Alimits)
 
-  paramInfo = REPLICATE({value:0.D       , $
-                       fixed:0         , $
-                       parname:''      , $
-                         ;; step:0.D, $ ;step size for numerical derivatives
-                       relstep:0.D     , $
-                       mpmaxstep:0.D   , $ ;max step in going from one fit to another
-                       limited:[0,0]   , $
-                       limits:[0.D,0]} , $
-                      ;; 7)
-                      5)
+  paramInfo = REPLICATE({value     :  0.D      , $
+                         fixed     :  0        , $
+                         parname   :  ''       , $
+                         ;; step   :  0.D      , $ ;step size for numerical derivatives
+                         relstep   :  0.D      , $
+                         mpmaxstep :  0.D      , $ ;max step in going from one fit to another
+                         limited   :  [0,0]    , $
+                         limits    :  [0.D,0]} , $
+                        ;; 7)
+                        5)
 
   ;;Starting values
   paramInfo[*].value = A
@@ -84,7 +88,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   paramInfo[*].limits[0] = Alimits[*,0]
   paramInfo[*].limits[1] = Alimits[*,1]
 
-  paramInfo[1].relstep   = 0.05D
+  ;; paramInfo[1].relstep   = 0.05D
 
   ;;Modify some kappaness
   ;; paramInfo[1].mpmaxstep = 50.D ;T

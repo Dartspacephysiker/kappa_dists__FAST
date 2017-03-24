@@ -36,6 +36,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
+   OUT_SC_POT=out_sc_pot, $
    _REF_EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -88,6 +89,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      MAP_TO_100KM=map_to_100km, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
+     OUT_SC_POT=out_sc_pot, $
      _EXTRA=e
 
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $

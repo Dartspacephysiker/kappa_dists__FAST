@@ -45,6 +45,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   
   IF STRUPCASE(kFitParamStruct[1].parName) EQ 'T' THEN BEGIN
      kFitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
+     kFitParamStruct[3].fixed = KF2D__curveFit_opt.fit2D__clampDensity
   ENDIF ELSE BEGIN
      STOP
   ENDELSE
