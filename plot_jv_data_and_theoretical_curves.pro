@@ -15,6 +15,10 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                         AVGS_FOR_FITTING=avgs_JVfit, $
                                         FIT_TIME_SERIES=fit_time_series, $
                                         FIT_TSERIES__A_IN=A_in, $
+                                        KAPPALIMS=kappaLims, $   
+                                        TEMPLIMS=TempLims, $    
+                                        DENSLIMS=DensLims, $    
+                                        MAGRATIOLIMS=magRatioLims, $
                                         _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -98,7 +102,11 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                           FTOL=fTol, $
                                           GTOL=gTol, $
                                           OUT_FITKAPPA_A=fitKappa_A, $
-                                          OUT_FITGAUSS_A=fitGauss_A
+                                          OUT_FITGAUSS_A=fitGauss_A, $
+                                          KAPPALIMS=kappaLims, $   
+                                          TEMPLIMS=TempLims, $    
+                                          DENSLIMS=DensLims, $    
+                                          MAGRATIOLIMS=magRatioLims
 
         kappas             = fitKappa_A[0]
         R_Bs__K            = fitKappa_A[3]

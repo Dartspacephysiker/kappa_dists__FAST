@@ -2,6 +2,10 @@
 PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                           ORBIT=orbit, $
                                           A_IN=A_in, $
+                                          KAPPALIMS=kappaLims, $   
+                                          TEMPLIMS=TempLims, $    
+                                          DENSLIMS=DensLims, $    
+                                          MAGRATIOLIMS=magRatioLims, $
                                           ORIGINATING_ROUTINE=routName, $
                                           SAVEPLOT=savePlot, $
                                           SPNAME=spName, $
@@ -14,7 +18,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
      orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  maxIter     = 150
+  maxIter     = 3000
   fit_tol     = 1D-15
   gTol        = 1D-15
 
@@ -33,8 +37,16 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   PRINT,"Gauss startGuess: "
   PRINT_JV_FIT_PARAMS,AGaussOrig
 
-  kappaParamStruct = INIT_JV_FITPARAM_INFO(           A,kappa_fixA)
-  gaussParamStruct = INIT_JV_FITPARAM_INFO(TEMPORARY(A),gauss_fixA)
+  kappaParamStruct = INIT_JV_FITPARAM_INFO(A,kappa_fixA, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims)
+  gaussParamStruct = INIT_JV_FITPARAM_INFO(TEMPORARY(A),gauss_fixA, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims)
 
   fa_kappa    = {no_mult_by_charge : 1B, $
                  is_Maxwellian_fit : 0B  }

@@ -20,6 +20,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__PLOT_J_RATIOS=plot_j_ratios, $
    JV_THEOR__PLOT_ION_ELEC_RATIOS=plot_ion_elec_ratios, $
    JV_THEOR__FIT_TIME_SERIES=JV_theor__fit_time_series, $
+   JV_THEOR__KAPPALIMS=kappaLims, $   
+   JV_THEOR__TEMPLIMS=TempLims, $    
+   JV_THEOR__DENSLIMS=DensLims, $    
+   JV_THEOR__MAGRATIOLIMS=magRatioLims, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
    TN_YLOG_NDOWN=TN_yLog_nDown, $
@@ -164,7 +168,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
   ENDIF
 
   ;;             kappa,            Temp,            Dens,  R_B
-  A_in         = [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D3]
+  A_in         = [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D2]
   IF KEYWORD_SET(plot_j_v_and_theory) THEN BEGIN
 
      PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
@@ -183,6 +187,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                          AVGS_FOR_FITTING=avgs_JVfit, $
                                          FIT_TIME_SERIES=JV_theor__fit_time_series, $
                                          FIT_TSERIES__A_IN=A_in, $
+                                         KAPPALIMS=kappaLims, $   
+                                         TEMPLIMS=TempLims, $    
+                                         DENSLIMS=DensLims, $    
+                                         MAGRATIOLIMS=magRatioLims, $
                                          _EXTRA=e
 
 
@@ -195,6 +203,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                            ORBIT=orbit, $
                                            A_IN=A_in, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims, $
                                            ORIGINATING_ROUTINE=routName, $
                                            SAVEPLOT=savePlot, $
                                            SPNAME=j_v__fixTandN__spName, $

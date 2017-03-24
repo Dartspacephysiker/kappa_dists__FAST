@@ -121,10 +121,15 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      nSuccess     = 1
 
   ENDIF ELSE BEGIN
+
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+
         PRINT,fitString + ' 2DFit failure ...'
+
      ENDIF
+
      nSuccess     = 0
+
   ENDELSE
 
   fit2DStr        = curFitStr
@@ -277,19 +282,25 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      fit2D_inf_list.ADD,tmpKeeper                             
 
      IF KEYWORD_SET(print_2DWinInfo) THEN BEGIN
+
         PRINT,''
         PRINT,'******************************'
         PRINT,FORMAT='("WINNER (",A0," #",I0,")")',fitString,iTime
         PRINT,''
         PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,bestNorm/(dof-nPegged)
         PRINT,'******************************'
+
      ENDIF
 
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
-        tmpParams = tmpKeeper.fitParams
+
+        tmpParams    = tmpKeeper.fitParams
         tmpParams[3] = tmpKeeper.fitDens
-        print,kfitparamstruct[*].value
+
+        ;; PRINT,kfitparamstruct[*].value ;Diagnostic kind
+
         PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged)
+
      ENDIF
 
      hadSuccess = 1

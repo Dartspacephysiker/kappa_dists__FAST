@@ -5,7 +5,11 @@
 ; A[1]:       T,         Plasma kinetic temperature (eV)
 ; A[2]:       n,         Plasma density (cm^-3)
 ; A[3]:       R_B        Mag ratio
-FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
+FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
+                               KAPPALIMS=kappaLims, $   
+                               TEMPLIMS=TempLims, $    
+                               DENSLIMS=DensLims, $    
+                               MAGRATIOLIMS=magRatioLims
                                   ;; ERANGE_PEAK=eRange_peak
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -18,20 +22,25 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA;; , $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[2]     = 0.5
-  AMaxStep        = DOUBLE([0.5, $
-                            50., $
-                            0.25, $
-                            100])
+  AMaxStep        = DOUBLE([1.0, $
+                            100., $
+                            0.5, $
+                            250])
 
   Alimited         = [[1,1], $
                       [1,1], $
                       [1,1], $
                       [1,1]]
   
-  Alimits         = [[1.51D  ,100.0   ] , $ ;kappa 
-                     [10      ,1.0D4   ] , $ ;Temp
-                     [1D-3    ,100     ] , $ ;N
-                     [1       ,5D3     ]]    ;R_B   
+  kappaLim        = KEYWORD_SET(kappaLims    ) ? kappaLims    : [1.501D  ,100.0   ]
+  TempLim         = KEYWORD_SET(TempLims     ) ? TempLims     : [10      ,1.0E4   ]
+  DensLim         = KEYWORD_SET(DensLims     ) ? DensLims     : [1E-3    ,100     ] 
+  magRatioLim     = KEYWORD_SET(magRatioLims ) ? magRatioLims : [1       ,1E4     ]
+
+  Alimits         = [[kappaLim] , $ ;kappa 
+                     [TempLim ] , $ ;Temp
+                     [DensLim ], $ ;N
+                     [magRatioLim]]    ;R_B   
 
   ;;Make 'em play nice
   ;; FOR k=0,N_ELEMENTS(A)-1 DO BEGIN

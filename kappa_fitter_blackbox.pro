@@ -57,7 +57,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__CONV_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
                           KSUM__ADD_CHI2_LINE=kSum__add_chi2_line, $
                           KSUM__ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
+                          KSUM__INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                           KSUM__GRL=kSum__GRL, $
+                          KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -664,7 +666,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              LOAD_FROM_OFFLINE=load_from_offline, $
                              KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
                              KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops, $
+                             INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                              GRL=kSum__GRL, $
+                             OPLOT_POT=kSum__oPlot_pot, $
                              TIMEBARS=timeBars
 
 

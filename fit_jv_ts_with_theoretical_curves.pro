@@ -19,7 +19,11 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
                                       OUT_FITKAPPA_A=fitKappa_A, $
                                       OUT_FITGAUSS_A=fitGauss_A, $
                                       OUT_FITKAPPA_CUR=fitKappa_cur, $
-                                      OUT_FITGAUSS_CUR=fitGauss_cur
+                                      OUT_FITGAUSS_CUR=fitGauss_cur, $
+                                      KAPPALIMS=kappaLims, $   
+                                      TEMPLIMS=TempLims, $    
+                                      DENSLIMS=DensLims, $    
+                                      MAGRATIOLIMS=magRatioLims
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -40,8 +44,16 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
      Gauss_A = kappa_A
   ENDIF
   
-  kappaParamStruct = INIT_JV_FITPARAM_INFO(     kappa_A,kappa_fixA)
-  gaussParamStruct = INIT_JV_FITPARAM_INFO(     Gauss_A,gauss_fixA)
+  kappaParamStruct = INIT_JV_FITPARAM_INFO(     kappa_A,kappa_fixA, $
+                                                KAPPALIMS=kappaLims, $   
+                                                TEMPLIMS=TempLims, $    
+                                                DENSLIMS=DensLims, $    
+                                                MAGRATIOLIMS=magRatioLims)
+  gaussParamStruct = INIT_JV_FITPARAM_INFO(     Gauss_A,gauss_fixA, $
+                                                KAPPALIMS=kappaLims, $   
+                                                TEMPLIMS=TempLims, $    
+                                                DENSLIMS=DensLims, $    
+                                                MAGRATIOLIMS=magRatioLims)
 
   fa_kappa    = {no_mult_by_charge : 1B, $
                  is_Maxwellian_fit : 0B}
