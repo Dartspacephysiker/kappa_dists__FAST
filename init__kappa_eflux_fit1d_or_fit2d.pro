@@ -13,6 +13,8 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
    FIT_EACH_ANGLE=fit_each_angle, $
+   LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+   IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
    _REF_EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -120,11 +122,13 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   ENDCASE
   
   GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
-                              LOAD_DAT_FROM_FILE=loadFile, $
+                              ;; IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+                              LOAD_DAT_FROM_FILE=KEYWORD_SET(load_diff_eFlux_file) ? diff_eFlux_file : !NULL, $
                               LOAD_DIR=loadDir, $
                               EEB_OR_EES=KF__SDTData_opt.eeb_or_ees, $
                               DIFF_EFLUX=diff_eFlux, $
                               SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                              SC_POT=sc_pot, $
                               OUT_ORB=orb, $
                               OUT_ANGLERANGE=e_angle, $
                               FIT_EACH_ANGLE=fit_each_angle, $
@@ -196,6 +200,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                    ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
                                    EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
                                    SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                                   SC_POT=sc_pot, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $
                                    ANGLE=e_angle, $

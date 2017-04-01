@@ -23,6 +23,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    PLOT_T_AND_N=plot_T_and_N, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+   LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+   SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
@@ -112,8 +114,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   masterFile              = bonusPref + 'blkBox-Fig2_ingredients.sav'
 
   saveCurPotFile          = bonusPref + 'blkBox-Fig2__meal.sav'
-  save_diff_eFlux_file    = 0
-  load_diff_eFlux_file    = 1
+  ;; save_diff_eFlux_file    = save_diff_eFlux_to_file
+  ;; load_diff_eFlux_file    = 1
   ;; restore_fitFile         = 0
 
   IF (STRUPCASE(eeb_or_ees) EQ 'EEB') OR (STRUPCASE(eeb_or_ees) EQ 'IEB') THEN BEGIN

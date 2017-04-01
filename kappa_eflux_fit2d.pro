@@ -5,11 +5,12 @@ PRO KAPPA_EFLUX_FIT2D, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
    ENERGY_ELECTRONS=energy_electrons, $
-   LOAD_DAT_FROM_FILE=loadFile, $
    SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
    JUST_DIFF_EFLUX=just_diff_eFlux, $
    DIFF_EFLUX=diff_eFlux, $
    DEF_ONECOUNT=dEF_oneCount, $
+   LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+   IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
    LOAD_DIR=loadDir, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -101,7 +102,8 @@ PRO KAPPA_EFLUX_FIT2D, $
   INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
      T1=t1, $
      T2=t2, $
-     LOAD_DAT_FROM_FILE=loadFile, $
+     LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+     IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
      LOAD_DIR=loadDir, $
      SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
      KF__CURVEFIT_OPT=KF2D__curveFit_opt, $

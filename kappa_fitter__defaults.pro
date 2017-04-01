@@ -25,7 +25,7 @@
 
   do_all_times                  = 1
   add_full_fits                 = 1
-  fit2D__only_fit_peak_eRange   = 0
+  fit2D__only_fit_peak_eRange   = 1
   fit2D__only_fit_aboveMin      = 1
   fit2D__only_fit_eAngles       = 1
   fit2D__keep_wholeFit          = 1
