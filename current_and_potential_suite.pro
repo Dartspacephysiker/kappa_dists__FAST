@@ -20,6 +20,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__PLOT_J_RATIOS=plot_j_ratios, $
    JV_THEOR__PLOT_ION_ELEC_RATIOS=plot_ion_elec_ratios, $
    JV_THEOR__FIT_TIME_SERIES=JV_theor__fit_time_series, $
+   JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
+   JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
    JV_THEOR__KAPPALIMS=kappaLims, $   
    JV_THEOR__TEMPLIMS=TempLims, $    
    JV_THEOR__DENSLIMS=DensLims, $    
@@ -74,7 +76,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
-     ENERGYARR=energyArr, $
+     MOMENT_ENERGYARR=moment_energyArr, $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
      POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
      POT__CHASTON_STYLE=pot__Chaston_style, $
@@ -167,8 +169,12 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         _EXTRA=e
   ENDIF
 
-  ;;             kappa,            Temp,            Dens,  R_B
-  A_in         = [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D2]
+  kappa_init = KEYWORD_SET(jv_theor__kappa_init) ? jv_theor__kappa_init : 10
+  R_B_init   = KEYWORD_SET(jv_theor__R_B_init  ) ? jv_theor__R_B_init   : 1D3
+  A_in       = KEYWORD_SET(A_in) ? A_in : [kappa_init, $     ;kappa
+                                           avgs_JVfit.T.avg, $ ;Temp
+                                           avgs_JVfit.N.avg, $ ;Dens
+                                           R_B_init]           ;R_B
   IF KEYWORD_SET(plot_j_v_and_theory) THEN BEGIN
 
      PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
@@ -198,7 +204,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   IF KEYWORD_SET(plot_j_v__fixed_t_and_n) THEN BEGIN
 
-     avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
+     avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[avgs_JVfit.useInds])]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                            ORBIT=orbit, $
@@ -212,7 +218,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            SPNAME=j_v__fixTandN__spName, $
                                            _EXTRA=e
 
-     avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
+     ;; avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
+
   ENDIF
 
   nUsers       = N_ELEMENTS(useInds)

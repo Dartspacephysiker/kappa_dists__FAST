@@ -28,7 +28,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ARANGE__CHARE_I_UP=aRange__charE_i_up, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
-   ENERGYARR=energyArr, $
+   MOMENT_ENERGYARR=moment_energyArr, $
    USE_PEAKE_BOUNDS_FOR_MOMENT_CALC=use_peakE_bounds_for_moments, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
@@ -72,10 +72,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      label__which_eeb        = [0,0,1]
      label__which_times      = [0,0,0]
-     ;; energyArr               = [[3e1,3.0e4],[3e1,3.0e4],[1e2,2.4e4]]
-     ;; energyArr               = [[4,3.0e4],[4,3.0e4],[4,2.4e4]]
-     IF ~KEYWORD_SET(energyArr) THEN BEGIN
-        energyArr            = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
+     ;; moment_energyArr               = [[3e1,3.0e4],[3e1,3.0e4],[1e2,2.4e4]]
+     ;; moment_energyArr               = [[4,3.0e4],[4,3.0e4],[4,2.4e4]]
+     IF ~KEYWORD_SET(moment_energyArr) THEN BEGIN
+        moment_energyArr            = [[50,3.0e4],[50,3.0e4],[4,2.4e4]]
      ENDIF
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
@@ -102,8 +102,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
-     min_peak_energyArr      = [4,4,4]
-     max_peak_energyArr      = [3e4,3e4,2.4e4]
+     min_peak_energyArr      = KEYWORD_SET(min_peak_energyArr) ? min_peak_energyArr : [4,4,4]
+     max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3e4,3e4,2.4e4]
 
      ;;If doing upgoing electrons
      peak_energy__start_at_highEArr  = [0,1,1]
@@ -323,9 +323,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         eeb_or_ees                   = eeb_or_eesArr[eeb_k]
 
-        ;; energy                       = energyArr[*,k]
+        ;; energy                       = moment_energyArr[*,k]
         energy                       = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
-                                                                          ENERGY=energyArr[*,k], $
+                                                                          ENERGY=moment_energyArr[*,k], $
                                                                           SC_POT=sc_pot, $
                                                                           EEB_OR_EES=eeb_or_ees)
 
@@ -932,7 +932,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
            bonus          = {peakE    : TEMPORARY(itvlPeakE)               , $
                              peakErr  : TEMPORARY(itvlPeakdE)              , $
-                             energy   : energyArr[*,k]                     , $
+                             energy   : moment_energyArr[*,k]              , $
                              angles   : {charE   : aRange_oCharE_list[k]   , $
                                          moments : aRange_oMoments_list[k] , $
                                          peakEn  : aRange_oPeakEn_list[k]} $
@@ -963,7 +963,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
            bonus          = {peakE    : TEMPORARY(itvlPeakE)               , $
                              peakErr  : TEMPORARY(itvlPeakdE)              , $
-                             energy   : energyArr[*,k]                     , $
+                             energy   : moment_energyArr[*,k]              , $
                              angles   : {charE   : aRange_oCharE_list[k]   , $
                                          moments : aRange_oMoments_list[k] , $
                                          peakEn  : aRange_oPeakEn_list[k]} $

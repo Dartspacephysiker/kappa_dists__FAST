@@ -20,10 +20,11 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ;; PLOT_SAVENAME=plotSN, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
-                    POSTSCRIPT=postscript, $
                     OUT_WINDOWARR=windowArr, $
                     BUFFER=buffer, $
-                    UNITS=units
+                    UNITS=units, $
+                    POSTSCRIPT=postscript, $
+                    EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -66,7 +67,19 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      ;; plotSN           += STRING(FORMAT='("-angle_",F0.1)',kappaFit.A[6])
      plotSN      += STRING(FORMAT='("-angle_",F0.1)',add_angle_label)
   ENDIF
-  plotSN         += ( KEYWORD_SET(postscript) ? '.ps' : '.png' )
+
+  CASE 1 OF
+     KEYWORD_SET(eps): BEGIN
+        fExt = '.eps'
+     END
+     KEYWORD_SET(postscript): BEGIN
+        fExt = '.ps'
+     END
+     ELSE: BEGIN
+        fExt = '.png'
+     END
+  ENDCASE
+  plotSN         += fExt
 
   title           = STRING(FORMAT='(A0,", (Orbit ",I0,", ",A0,")")', $
                            unitTitle, $
@@ -331,9 +344,11 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ENDIF
 
   IF KEYWORD_SET(save_fitplots) THEN BEGIN
+
      IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
         SET_PLOT_DIR,plotDir,/FOR_SDT,/ADD_TODAY,/VERBOSE
      ENDIF
+
      PRINT,'Saving plot to ' + plotSN + '...'
      window.Save,plotDir+plotSN
      window.Close

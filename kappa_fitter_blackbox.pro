@@ -75,6 +75,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ORIGINATING_ROUTINE=routName, $
                           CURANDPOT_ANALYSIS=curAndPot_analysis, $
                           CURANDPOT_TRANGES=cAP_tRanges, $
+                          CURANDPOT_MOMENT_ENERGYARR=cAP_moment_energyArr, $
                           CURANDPOT_REMAKE_MASTERFILE=cAP_remake_masterFile, $
                           CURANDPOT_MAP_TO_100KM=cAP_map_to_100km, $
                           CURANDPOT_USE_ALL_CURRENTS=cAP_use_all_currents, $
@@ -89,7 +90,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
                           CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
                           CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
-                          TIMEBARS=timeBars
+                          TIMEBARS=timeBars, $
+                          EPS=eps
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -139,12 +141,17 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PRINT,'Restoring ' + fitFile + ' ...'
         RESTORE,outDir+fitFile
         restored_fitFile = 1B
-        just_diff_eFlux  = 1B
+        ;; just_diff_eFlux  = 1B
+
+        ;;And diff eFlux
+        RESTORE,outDir+diff_eFlux_file
+
      ENDIF ELSE BEGIN
         PRINT,"Couldn't get file!"
+        STOP
      ENDELSE
      
-  ENDIF
+  ENDIF ELSE BEGIN
 
      KAPPA_EFLUX_FIT2D, $
         T1=t1, $
@@ -239,7 +246,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_STRINGS=strings, $
         TXTOUTPUTDIR=txtOutputDir,$
         DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
-        DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
+        DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
+        EPS=eps
 
      IF KEYWORD_SET(saveData) AND ~restored_fitFile THEN BEGIN
 
@@ -301,7 +309,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      PRINT,"DONE!"
 
-  ;; ENDELSE
+  ENDELSE
 
   PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
                           A=a, $
@@ -346,6 +354,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ORBIT=orbit, $
         EEB_OR_EES=eeb_or_ees, $
         ELECTRON_ANGLERANGE=electron_angleRange, $
+        MOMENT_ENERGYARR=cAP_moment_energyArr, $
         ORIGINATING_ROUTINE=routName, $
         REMAKE_MASTERFILE=cAP_remake_masterFile, $
         MAP_TO_100KM=cAP_map_to_100km, $
@@ -428,6 +437,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      
      fit2DK.fitDens = betterDensK
      fit2DG.fitDens = betterDensG
+     kFitParam_struct.N = betterDensK
+     gFitParam_struct.N = betterDensG
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
@@ -615,6 +626,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                            SAVE_PS=sway__save_ps, $
                            SAVE_PNG=sway__save_png, $
+                           EPS=eps, $
                            SAVEKAPPA_BONUSPREF=bonusPref, $
                            ;; GRL=sway__GRL, $
                            PLOTDIR=plotDir
@@ -660,6 +672,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              CONVERT_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
                              SAVE_PS=kSum__save_ps, $
                              SAVE_PNG=kSum__save_png, $
+                             EPS=eps, $
                              SAVEKAPPA_BONUSPREF=bonusPref, $
                              PLOTDIR=plotDir, $
                              SAVE_FOR_OFFLINE=save_for_offline, $
@@ -833,17 +846,17 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      kappas     = AStruct.kappa[kFitUseInds]
 
-     ;; kappa_fitT = AStruct.temperature[kFitUseInds]
-     ;; gauss_fitT = AStructGauss.temperature[gFitUseInds]
+     kappa_fitT = AStruct.temperature[kFitUseInds]
+     gauss_fitT = AStructGauss.temperature[gFitUseInds]
      
-     ;; kappa_fitN = AStruct.N[kFitUseInds]
-     ;; gauss_fitN = AStructGauss.N[gFitUseInds]
+     kappa_fitN = AStruct.N[kFitUseInds]
+     gauss_fitN = AStructGauss.N[gFitUseInds]
      
-     kappa_fitT = jvPlotData.TDown[jvPD_inds]
-     gauss_fitT = jvPlotData.TDown[jvPD_inds]
+     ;; kappa_fitT = jvPlotData.TDown[jvPD_inds]
+     ;; gauss_fitT = jvPlotData.TDown[jvPD_inds]
      
-     kappa_fitN = jvPlotData.NDown[jvPD_inds]
-     gauss_fitN = jvPlotData.NDown[jvPD_inds]
+     ;; kappa_fitN = jvPlotData.NDown[jvPD_inds]
+     ;; gauss_fitN = jvPlotData.NDown[jvPD_inds]
      
      kappa_fixA = [0,1,1,0]
      Gauss_fixA = [1,1,1,0]

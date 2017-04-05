@@ -9,7 +9,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
    PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
    KAPPA_FIT__SHOW__QUIT=show__quit, $
-   FIT2D__PA_ZRANGE=fit2D__PA_zRange
+   FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
+   EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -99,7 +100,9 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
      POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
            XSIZE=xSize, $
            YSIZE=ySize, $
-           LAND=land
+           LAND=land, $
+           ENCAPSULATED=eps
+     
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
         ONLY_DATA=only_data, $ 
         FOR_HORSESHOE_FIT=for_horseshoe_fit, $
@@ -107,6 +110,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         ADD_FITPARAMS_TEXT=KF2D__Plot_opt.add_fitParams_text, $
         ;; KF2D__SDTDATA_OPT=KF2D__SDTData_opt, $
         FITSTRING=fitString
+
      PCLOSE
 
      RETURN
@@ -141,26 +145,33 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            STOP
         END
         "e": BEGIN
+
            cont = 0
            WINDOW,0,XSIZE=xWinSize,YSIZE=yWinSize
            SPEC2D,curDataStr,ANGLE=angleRange, $
                   /LABEL,LIMITS=spec2DLims,/MSEC
+
         END
         "fe": BEGIN
+
            cont = 0
            WINDOW,0,XSIZE=xWinSize,YSIZE=yWinSize
            SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,LIMITS=spec2DLims,/MS
+
         END
         "be": BEGIN
+
            cont = 0
            WINDOW,0,XSIZE=xWinSize,YSIZE=yWinSize
            SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DLims
            SPEC2D,curDataStr,OVERPLOT=showFit,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DDatLims
+
         END
         "se": BEGIN
+
            cont   = 0
            tempFN = STRING(FORMAT='("spec2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
                            KF2D__strings.orbStr, $
@@ -169,13 +180,17 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
-                 LAND=land
+                 LAND=land, $
+                 ENCAPSULATED=eps
+
            SPEC2D,fit2DStruct.bestFitStr,ANGLE=angleRange, $
                   /LABEL,/MS,LIMITS=spec2DLims
            SPEC2D,curDataStr,ANGLE=angleRange, $
                   OVERPLOT=showFit, $
                   /LABEL,/MS,LIMITS=spec2DDatLims
+
            PCLOSE
+
         END
         "a": BEGIN
            cont = 0
@@ -230,13 +245,17 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
-                 LAND=land
+                 LAND=land, $
+                 ENCAPSULATED=eps
+
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               FOR_HORSESHOE_FIT=for_horseshoe_fit, $
               LIMITS=cont2DLims, $
               ADD_FITPARAMS_TEXT=KF2D__Plot_opt.add_fitParams_text, $
               FITSTRING=fitString
+
            PCLOSE
+
         END
         "f": BEGIN
            cont = 1
@@ -248,12 +267,16 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
-                 LAND=land
+                 LAND=land, $
+                 ENCAPSULATED=eps
+
            CONTOUR2D,fit2DStruct.bestFitStr,/POLAR, $
                      /FILL,/LABEL,/MS,LIMITS=cont2DLims
            CONTOUR2D,curDataStr,/POLAR, $
                      OVERPLOT=showFit,/LABEL,/MS,LIMITS=cont2DLims
+
            PCLOSE
+
         END
         "q": BEGIN
            PRINT,"Returning ..."

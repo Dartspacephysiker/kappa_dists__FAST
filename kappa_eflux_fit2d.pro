@@ -92,7 +92,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    OUT_STRINGS=strings, $
    TXTOUTPUTDIR=txtOutputDir,$
    DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
-   DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
+   DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
+   EPS=eps
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -199,7 +200,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     OUT_PARAMSTR=out_paramStr, $
                     TXTOUTPUTDIR=txtOutputDir,$
                     DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
-                    DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
+                    DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
+                    EPS=eps
 
   PRINT,'DONE!'
 

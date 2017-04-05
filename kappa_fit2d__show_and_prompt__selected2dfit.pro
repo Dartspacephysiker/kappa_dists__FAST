@@ -6,7 +6,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DStruct, $
    PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
    PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
-   KAPPA_FIT__SHOW__QUIT=show__quit
+   KAPPA_FIT__SHOW__QUIT=show__quit, $
+   EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -53,10 +54,13 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DStruct, $
                      fitString, $
                      KF2D__strings.timeFNStrs[iTime])
 
-     POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN
+     POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN, $
+           ENCAPSULATED=eps
+
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
         LIMITS=cont2DLims, $
         ADD_FITPARAMS_TEXT=KF2D__plot_opt.add_fitParams_text
+
      PCLOSE
 
      ;; kapFName = KF2D__plot_opt.plotDir + STRING(FORMAT='("kappa_fit--orb_",A0,"--",A0)', $
@@ -112,58 +116,84 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DStruct, $
            STOP
         END
         "e": BEGIN
+
            cont = 0
            SPEC2D,curDataStr,/LABEL,LIMITS=spec2DLims,/MSEC
+
         END
         "fe": BEGIN
+
            cont = 0
            SPEC2D,fit2DStruct.bestFitStr,/LABEL,LIMITS=spec2DLims,/MS
+
         END
         "be": BEGIN
+
            cont = 0
            SPEC2D,fit2DStruct.bestFitStr,/LABEL,/MS,LIMITS=spec2DLims
            SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
+
         END
         "se": BEGIN
+
            cont = 0
            tempFN = STRING(FORMAT='("spec2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
                            KF2D__strings.orbStr,fitString,KF2D__strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN
+
+           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN, $
+                 ENCAPSULATED=eps
+
            SPEC2D,fit2DStruct.bestFitStr,/LABEL,/MS,LIMITS=spec2DLims
            SPEC2D,curDataStr,OVERPLOT=showFit,/LABEL,/MS,LIMITS=spec2DDatLims
+
            PCLOSE
+
         END
         "p": BEGIN
+
            cont = 0
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
               KF2D__SDTDATA_OPT=KF2D__SDTData_opt, $
               ADD_FITPARAMS_TEXT=KF2D__plot_opt.add_fitParams_text
+
         END
         "s": BEGIN
+
            cont = 0
            ;; tempFN = STRING(FORMAT='("contour2d--orb_",A0,"--data_and_",A0,"_fit--",A0)', $
            ;;                 strings.orbStr,fitString,strings.timeFNStrs[iTime])
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,KF2D__strings.orbStr,KF2D__strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN
+
+           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN, $
+                 ENCAPSULATED=eps
+
            PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
               LIMITS=cont2DLims, $
               KF2D__SDTDATA_OPT=KF2D__SDTData_opt, $
               ADD_FITPARAMS_TEXT=KF2D__plot_opt.add_fitParams_text
+
            PCLOSE
+
         END
         "f": BEGIN
+
            cont = 1
            finish_and_save_all = 1
            ;; tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
            ;;                 fitString,strings.orbStr,strings.timeFNStrs[iTime])
            tempFN = STRING(FORMAT='("contour2d--data_and_",A0,"_fit--orb_",A0,"--",A0)', $
                            fitString,KF2D__strings.orbStr,KF2D__strings.timeFNStrs[iTime])
-           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN
+
+           POPEN,(KEYWORD_SET(KF2D__plot_opt.plotDir) ? KF2D__plot_opt.plotDir : './') + tempFN, $
+                 ENCAPSULATED=eps
+
            CONTOUR2D,fit2DStruct.bestFitStr,/POLAR,/FILL,/LABEL,/MS,LIMITS=cont2DLims
            CONTOUR2D,curDataStr,/POLAR,OVERPLOT=showFit,/LABEL,/MS,LIMITS=cont2DLims
+
            PCLOSE
+
         END
         "q": BEGIN
            PRINT,"Returning ..."

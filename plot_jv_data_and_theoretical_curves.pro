@@ -53,8 +53,8 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
 
   ENDIF
 
-  curDat                      = jvplotdata.cur*(-1D-6) / (KEYWORD_SET(plot_j_ratios) ? jvplotdata.cur*(-1D-6) : 1.D)
-  divDat                      = jvplotdata.cur*(-1D-6)
+  curDat                      = jvplotdata.cur*(-1.D) / (KEYWORD_SET(plot_j_ratios) ? jvplotdata.cur*(-1.D) : 1.D)
+  divDat                      = jvplotdata.cur*(-1.D)
 
   ;; SAVE,KnightRelat30,KnightRelat300,KnightRelat3000,jvplotdata,FILENAME=
   ;; RESTORE,'
@@ -65,8 +65,10 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         fTol        = 1D-15
         gTol        = 1D-15
 
-        ;;            kappa,            Temp,            Dens,  R_B
-        kappa_A     = KEYWORD_SET(A_in) ? A_in : [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D3]
+        kappa_A     = KEYWORD_SET(A_in) ? A_in : [10, $               ;kappa
+                                                  avgs_JVfit.T.avg, $ ;Temp
+                                                  avgs_JVfit.N.avg, $ ;Dens
+                                                  1D3]                ;R_B
 
         ;;Keep the original guesses
         Aorig       = kappa_A
@@ -151,11 +153,13 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                                         jvplotdata.ndown[useInds], $
                                                         jvplotdata.pot[useInds], $
                                                         R_Bs__M[k], $
-                                                        /NO_MULT_BY_CHARGE)
+                                                        /NO_MULT_BY_CHARGE)*1D6
 
-     MaxwellNames[k] = 'R!DB!N = ' + STRING(FORMAT='(G0.4)',R_Bs__M[k])
-     MaxwellNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," (T*=",I0,")")', $
-                            R_Bs__M[k],TmultFac__Maxwell[k])
+     ;; MaxwellNames[k] = 'R!DB!N = ' + STRING(FORMAT='(G0.4)',R_Bs__M[k])
+     ;; MaxwellNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," (T*=",I0,")")', $
+                            ;; R_Bs__M[k],TmultFac__Maxwell[k])
+     MaxwellNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," (Maxwellian)")', $
+                            R_Bs__M[k])
 
      IF KEYWORD_SET(plot_j_ratios) THEN BEGIN
         maxwellJVs[k,*] /= divDat[useInds]
@@ -167,10 +171,12 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                                        jvplotdata.ndown[useInds], $
                                                        jvplotdata.pot[useInds], $
                                                        R_Bs__K[k], $
-                                                       /NO_MULT_BY_CHARGE)
+                                                       /NO_MULT_BY_CHARGE)*1D6
 
-     kappaNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," ($\kappa$=",F0.2,",T*=",I0,")")', $
-                            R_Bs__K[k],kappas[k],TmultFac__kappa[k])
+     ;; kappaNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," ($\kappa$=",F0.2,",T*=",I0,")")', $
+                            ;; R_Bs__K[k],kappas[k],TmultFac__kappa[k])
+     kappaNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," ($\kappa$=",F0.3,")")', $
+                            R_Bs__K[k],kappas[k])
 
      IF KEYWORD_SET(plot_j_ratios) THEN BEGIN
         kappaJVs[k,*] /= divDat[useInds]
@@ -229,8 +235,8 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ENDFOR
 
   legArr = [dataplot, $
-            MaxwellPlots, $
-            kappaPlots]
+            kappaPlots, $
+            MaxwellPlots]
 
   IF KEYWORD_SET(ji_je_ratio) THEN BEGIN
 

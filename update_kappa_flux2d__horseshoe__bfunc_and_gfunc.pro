@@ -13,7 +13,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
    PLOT_FLUX_PEAKS=plot_flux_peaks, $
    PLOTDIR=plotDir, $
    ORBIT=orbit, $
-   SAVE_PLOTS=save_plots
+   SAVE_PLOTS=save_plots, $
+   EPS=eps
    
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -46,7 +47,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           OUT_ANGLES=peak_angle, $
           OUT_ANGLE_I=peak_angle_i, $
           OUT_FITANGLE_II=fitAngle_ii, $
-          PRINT=print)
+          PRINT=print, $
+          EPS=eps)
 
   K_EA__bFunc   = peak_en   / peak_en[fitAngle_ii]
   K_EA__gFunc   = peak_flux / peak_flux[fitAngle_ii]

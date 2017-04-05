@@ -19,7 +19,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            FIT2D__SHOW__FITSTRING=fitString, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
                            PRINT_2DWININFO=print_2DWinInfo, $
-                           UNITS=units
+                           UNITS=units, $
+                           EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -212,7 +213,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                  PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
                  FINISH_AND_SAVE_ALL=finish_and_save_all, $
                  KAPPA_FIT__SHOW__QUIT=show__quit, $
-                 FIT2D__PA_ZRANGE=fit2D__PA_zRange
+                 FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
+                 EPS=eps
 
 
         END
@@ -235,7 +237,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                  PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
                  FINISH_AND_SAVE_ALL=finish_and_save_all, $
                  KAPPA_FIT__SHOW__QUIT=show__quit, $
-                 FIT2D__PA_ZRANGE=fit2D__PA_zRange
+                 FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
+                 EPS=eps
 
            ENDIF
         END

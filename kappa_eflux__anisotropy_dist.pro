@@ -23,7 +23,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    OUT_ANGLES=peak_angle, $
    OUT_ANGLE_I=peak_angle_i, $
    OUT_FITANGLE_II=fitAngle_ii, $
-   PRINT=print
+   PRINT=print, $
+   EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -42,7 +43,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   IF KEYWORD_SET(save_plots) THEN BEGIN
      IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
 
-     pSuff              = '.png'
+     fExt               = KEYWORD_SET(eps) ? '.eps' : '.png'
 
      orbStr             = KEYWORD_SET(orbit)  ? STRING(FORMAT='("--",I0)',orbit) : ''
      IF KEYWORD_SET(time) THEN BEGIN
@@ -59,9 +60,9 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
      minEnStr           = KEYWORD_SET(minEn)  ? STRING(FORMAT='("--minEn_",I0)',minEn)  : ''
 
-     bFuncSPName        = 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+pSuff
-     bFuncPolarSPName   = 'kappa_anisotropy--bFunc_polar'+orbStr+timeStr+minEnStr+pSuff
-     gFuncSPName        = 'kappa_anisotropy--gFunc'      +orbStr+timeStr+minEnStr+pSuff
+     bFuncSPName        = 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+fExt
+     bFuncPolarSPName   = 'kappa_anisotropy--bFunc_polar'+orbStr+timeStr+minEnStr+fExt
+     gFuncSPName        = 'kappa_anisotropy--gFunc'      +orbStr+timeStr+minEnStr+fExt
 
   ENDIF
 

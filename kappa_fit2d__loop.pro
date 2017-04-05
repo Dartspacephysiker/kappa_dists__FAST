@@ -50,7 +50,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       OUT_PARAMSTR=out_paramStr, $
                       TXTOUTPUTDIR=txtOutputDir, $
                       DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
-                      DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time
+                      DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
+                      EPS=eps
   
   COMPILE_OPT idl2,STRICTARRSUBS
 
@@ -654,7 +655,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            ;; /PLOT_FLUX_PEAKS, $
            PLOTDIR=KF2D__Plot_opt.plotDir, $
            ORBIT=orbit, $
-           SAVE_PLOTS=save_plots
+           SAVE_PLOTS=save_plots, $
+           EPS=eps
         ;; /SAVE_PLOTS
 
         ;; ENDIF
@@ -693,7 +695,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               FIT2D__SHOW__FITSTRING='Kappa', $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
-              UNITS=units
+              UNITS=units, $
+              EPS=eps
 
            totSuccessesK += successesK
 
@@ -730,7 +733,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               FIT2D__SHOW__FITSTRING='Maxwell', $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
-              UNITS=units
+              UNITS=units, $
+              EPS=eps
            
            totSuccessesG += successesG
 
@@ -776,6 +780,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      IF KEYWORD_SET(fit1D__save_plotSlices) AND $
         N_ELEMENTS(kappaFits) GT 0 AND $
         hadSuccessK THEN BEGIN
+
         PLOT_KAPPA_FITS,orig,kappaFits[-1], $
                         KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
                         gaussFits[-1] : $
@@ -805,10 +810,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                         ;; PLOT_SAVENAME=plotSN, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
-                        /POSTSCRIPT, $
+                        POSTSCRIPT=~KEYWORD_SET(eps), $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER, $
-                        UNITS=units
+                        UNITS=units, $
+                        EPS=eps
+
      ENDIF
 
      IF 0 THEN BEGIN
@@ -820,9 +827,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
            PROMPT__CONT_TO_NEXT_FIT=Kprompt__cont_to_next_fit, $
            PROMPT__CONT_UNTIL_FIT_EQ=Kprompt__cont_until_fit_eq, $
            FINISH_AND_SAVE_ALL=Kfinish_and_save_all, $
-           KAPPA_FIT__SHOW__QUIT=Kshow__quit
+           KAPPA_FIT__SHOW__QUIT=Kshow__quit, $
+           EPS=eps
         
         IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+
            KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DGauss_inf_list[-1], $
               totSuccessesG, $
               iTime, $
@@ -830,7 +839,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               PROMPT__CONT_TO_NEXT_FIT=Gprompt__cont_to_next_fit, $
               PROMPT__CONT_UNTIL_FIT_EQ=Gprompt__cont_until_fit_eq, $
               FINISH_AND_SAVE_ALL=Gfinish_and_save_all, $
-              KAPPA_FIT__SHOW__QUIT=Gshow__quit
+              KAPPA_FIT__SHOW__QUIT=Gshow__quit, $
+              EPS=eps
+
         ENDIF
      ENDIF
 

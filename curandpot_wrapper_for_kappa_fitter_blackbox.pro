@@ -3,6 +3,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    ORBIT=orbit, $
    EEB_OR_EES=eeb_or_ees, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
+   MOMENT_ENERGYARR=moment_energyArr, $
    ORIGINATING_ROUTINE=routName, $
    REMAKE_MASTERFILE=remake_masterFile, $
    MAP_TO_100KM=map_to_100km, $
@@ -27,7 +28,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-   OUT_SC_POT=out_sc_pot
+   OUT_SC_POT=out_sc_pot, $
+   EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -152,7 +154,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   pot__save_file          = 0
   pot__all                = 0
   pot__from_fa_potential  = 1
-  energyArr               = [[100,3.0e4],[100,3.0e4],[100,2.4e4]]
+  moment_energyArr        = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.0e4],[100,3.0e4],[100,2.4e4]]
 
   min_peak_energyArr      = [300,100,100]
   max_peak_energyArr      = [3e4,3e4,2.4e4]
@@ -188,7 +190,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
-     ENERGYARR=energyArr, $
+     MOMENT_ENERGYARR=moment_energyArr, $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
      POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
      POT__CHASTON_STYLE=pot__Chaston_style, $
@@ -257,6 +259,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      OUT_JVPLOTDATA=jvPlotData, $
      OUT_AVGS_FOR_FITTING=avgs_JVfit, $
      OUT_SC_POT=out_sc_pot, $
+     EPS=eps, $
      _REF_EXTRA=e
 
 END
