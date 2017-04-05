@@ -144,6 +144,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      err_list              = LIST()
      err1_list             = LIST()
 
+     time_list             = LIST()
+     time1_list            = LIST()
+
      n_list                = LIST()
      nerr_list             = LIST()
 
@@ -229,6 +232,24 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         pot__fName = diff_eflux_file.Replace('diff_eflux','sc_pot')
         preString = diff_eFlux_file + ' ...'
+
+        ;;Can we get pot?
+        IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
+           ;; GET_SC_POTENTIAL,T1=diff_eFlux.time[0],T2=diff_eFlux.time[-1], $
+           GET_SC_POTENTIAL,T1=t1,T2=t2, $
+                            DATA=sc_pot, $
+                            FROM_FA_POTENTIAL=pot__from_fa_potential, $
+                            ALL=pot__all, $
+                            /REPAIR, $
+                            CHASTON_STYLE=pot__Chaston_style, $
+                            FILENAME=pot__fName, $
+                            FROM_FILE=pot__from_file, $
+                            ORBIT=orbit, $
+                            SAVE_FILE=pot__save_file
+           out_sc_pot = sc_pot
+           sc_pot_list.Add,sc_pot
+        ENDIF
+
         gotIt = 0B
         IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(diffEfluxDir+diff_eFlux_file)) AND $
            KEYWORD_SET(load_diff_eFlux_file) $
@@ -251,6 +272,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           UNITS=eSpecUnits, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
+                          SC_POT=sc_pot, $
                           OUT_DIFF_EFLUX=diff_eflux, $
                           SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                           LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
@@ -266,6 +288,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
                                          EEB_OR_EES=eeb_or_ees, $
                                          SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                                         SC_POT=sc_pot, $
                                          IN_PROTOSTRUCT=diff_eFlux, $
                                          SDT_NAME=dEF_oneCount_name, $
                                          ANGLE=e_angle, $
@@ -287,21 +310,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
         
         dEF_list.Add,TEMPORARY(diff_eFlux)
-
-        IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
-           GET_SC_POTENTIAL,T1=dEF_list[0].time[0],T2=dEF_list[0].time[-1], $
-                            DATA=sc_pot, $
-                            FROM_FA_POTENTIAL=pot__from_fa_potential, $
-                            ALL=pot__all, $
-                            /REPAIR, $
-                            CHASTON_STYLE=pot__Chaston_style, $
-                            FILENAME=pot__fName, $
-                            FROM_FILE=pot__from_file, $
-                            ORBIT=orbit, $
-                            SAVE_FILE=pot__save_file
-           out_sc_pot = sc_pot
-           sc_pot_list.Add,sc_pot
-        ENDIF
 
      ENDFOR
 
@@ -338,9 +346,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         @kappa_fitter__defaults.pro
 
         tmpTimes                     = LIST_TO_1DARRAY(timesList[t_k])
-        GET_FA_ORBIT,tmpTimes,/TIME_ARRAY
-        GET_DATA,'ILAT',DATA=ilat
-        north_southArr               = ABS(ilat.y)/ilat.y
+        GET_FA_ORBIT,tmpTimes,/TIME_ARRAY,/NO_STORE,STRUC=struc
+        ;; GET_DATA,'ILAT',DATA=ilat
+        ;; north_southArr               = ABS(ilat.y)/ilat.y
+        north_southArr               = ABS(struc.ilat)/struc.ilat
 
         north_southArr_list.Add,TEMPORARY(north_southArr)
 
@@ -559,7 +568,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         ERROR_ESTIMATES=error_estimates, $
                         MAP_TO_100KM=map_to_100km, $ 
                         ORBIT=orbit, $
+                        ;; /NEW_MOMENT_ROUTINE, $
                         QUIET=quiet, $
+                        OUTTIME=time, $
                         OUT_N=n, $
                         OUT_J_=j, $
                         OUT_JE=je, $
@@ -586,7 +597,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ERROR_ESTIMATES=error_estimates, $
                            MAP_TO_100KM=map_to_100km, $ 
                            ORBIT=orbit, $
+                           ;; /NEW_MOMENT_ROUTINE, $
                            QUIET=quiet, $
+                           OUTTIME=time1, $
                            OUT_N=n1, $
                            OUT_J_=j1, $
                            OUT_JE=je1, $
@@ -606,6 +619,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;;Update lists
         err_list.Add,TEMPORARY(errors)
+        time_list.Add,TEMPORARY(time)
         n_list.Add,TEMPORARY(n)
         T_list.Add,TEMPORARY(T)
         j_list.Add,TEMPORARY(j)
@@ -621,6 +635,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            err1_list.Add,TEMPORARY(errors1)
+           time1_list.Add,TEMPORARY(time1)
            n1_list.Add,TEMPORARY(n1)
            T1_list.Add,TEMPORARY(T1)
            j1_list.Add,TEMPORARY(j1)
@@ -641,6 +656,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      SAVE,north_southArr_list, $
           err_list, $
           err1_list, $
+          time_list, $
           n_list, $
           j_list, $
           je_list, $
@@ -653,6 +669,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           curErr_list, $
           charEErr_list, $
           Terr_list, $
+          time1_list, $
           n1_list, $
           j1_list, $
           je1_list, $
@@ -694,21 +711,21 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      tmpNS = north_southArr_list[t_k]
      nSegs = N_ELEMENTS(tmpT[0,*])
 
-     IF (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS((j_list[k]).y      )) OR $
-        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS((je_list[k]).y     )) OR $
-        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS(peak_ind_list[k]   )) OR $
-        (N_ELEMENTS((n_list[k]).y) NE N_ELEMENTS(peak_energy_list[k]))    $
+     IF (N_ELEMENTS((n_list[k])) NE N_ELEMENTS((j_list[k])        )) OR $
+        (N_ELEMENTS((n_list[k])) NE N_ELEMENTS((je_list[k])       )) OR $
+        (N_ELEMENTS((n_list[k])) NE N_ELEMENTS(peak_ind_list[k]   )) OR $
+        (N_ELEMENTS((n_list[k])) NE N_ELEMENTS(peak_energy_list[k]))    $
      THEN BEGIN
         PRINT,"It's unequal everywhere"
         STOP
      ENDIF
 
-     IF ~ARRAY_EQUAL((n_list[k]).x,(j_list[k]).x      ) OR $
-        ~ARRAY_EQUAL((n_list[k]).x,(je_list[k]).x     )    $
-     THEN BEGIN
-        PRINT,"It's unequal everywhere"
-        STOP
-     ENDIF
+     ;; IF ~ARRAY_EQUAL((n_list[k]).x,(j_list[k]).x      ) OR $
+     ;;    ~ARRAY_EQUAL((n_list[k]).x,(je_list[k]).x     )    $
+     ;; THEN BEGIN
+     ;;    PRINT,"It's unequal everywhere"
+     ;;    STOP
+     ;; ENDIF
 
      itvlTime       = !NULL
      itvlN          = !NULL
@@ -747,37 +764,59 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpT1               = tmpT[0,realK]
         tmpT2               = tmpT[1,realK]
 
-        theseInds           = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
-                               ( (j_list[k]).x LE tmpT2 ), $
+        ;; theseInds           = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
+        ;;                        ( (j_list[k]).x LE tmpT2 ), $
+        ;;                        nThese)
+        theseInds           = WHERE( ( time_list[k] GE tmpT1 ) AND $
+                               ( time_list[k] LE tmpT2 ), $
                                nThese)
 
         IF nThese EQ 0 THEN STOP
 
-        theseInds           = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
-        CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET
+        ;; theseInds           = CGSETINTERSECTION(theseInds,UNIQ((j_list[k].x),SORT((j_list[k].x))),COUNT=nThese)
+        theseInds           = CGSETINTERSECTION(theseInds,UNIQ((time_list[k]),SORT((time_list[k]))),COUNT=nThese)
+        ;; CHECK_SORTED,(j_list[k].x)[theseInds],is_sorted,/QUIET
+        CHECK_SORTED,(time_list[k])[theseInds],is_sorted,/QUIET
         IF ~is_sorted THEN STOP
         IF nThese EQ 0 THEN STOP
 
-        tmpTimes            = (j_list[k]).x[theseInds]
+        ;; tmpTimes            = (j_list[k]).x[theseInds]
+        tmpTimes            = (time_list[k])[theseInds]
 
         ;;Pick up temps
-        tmpN                = (N_list[k]).y[theseInds]
-        tmpJ                = (j_list[k]).y[theseInds]
-        tmpJe               = (je_list[k]).y[theseInds]
+        ;; tmpN                = (N_list[k]).y[theseInds]
+        ;; tmpJ                = (j_list[k]).y[theseInds]
+        ;; tmpJe               = (je_list[k]).y[theseInds]
+        ;; tmpCur              = (cur_list[k])[theseInds]
+        ;; tmpCharE            = (chare_list[k])[theseInds]
+        ;; tmpPeakE            = (peak_energy_list[k])[theseInds]
+        ;; tmpPeakdE           = (peak_dE_list[k])[theseInds]
+        ;; tmpT                = (T_list[k]).y[*,theseInds]
+        tmpN                = (N_list[k])[theseInds]
+        tmpJ                = (j_list[k])[theseInds]
+        tmpJe               = (je_list[k])[theseInds]
         tmpCur              = (cur_list[k])[theseInds]
         tmpCharE            = (chare_list[k])[theseInds]
         tmpPeakE            = (peak_energy_list[k])[theseInds]
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
-        tmpT                = (T_list[k]).y[*,theseInds]
+        tmpT                = (T_list[k])[*,theseInds]
+
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
-           tmpN1            = (N1_list[k]).y[theseInds]
-           tmpJ1            = (j1_list[k]).y[theseInds]
-           tmpJe1           = (je1_list[k]).y[theseInds]
+           ;; tmpN1            = (N1_list[k]).y[theseInds]
+           ;; tmpJ1            = (j1_list[k]).y[theseInds]
+           ;; tmpJe1           = (je1_list[k]).y[theseInds]
+           ;; tmpCur1          = (cur1_list[k])[theseInds]
+           ;; tmpCharE1        = (chare1_list[k])[theseInds]
+           ;; tmpT1            = (T1_list[k]).y[*,theseInds]
+           tmpTime1         = (time1_list[k])[theseInds]
+           tmpN1            = (N1_list[k])[theseInds]
+           tmpJ1            = (j1_list[k])[theseInds]
+           tmpJe1           = (je1_list[k])[theseInds]
            tmpCur1          = (cur1_list[k])[theseInds]
            tmpCharE1        = (chare1_list[k])[theseInds]
-           tmpT1            = (T1_list[k]).y[*,theseInds]
+           tmpT1            = (T1_list[k])[*,theseInds]
 
         ENDIF
 

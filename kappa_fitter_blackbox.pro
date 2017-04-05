@@ -162,7 +162,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JUST_DIFF_EFLUX=just_diff_eFlux, $
         DIFF_EFLUX=diff_eFlux, $
         DEF_ONECOUNT=dEF_oneCount, $
-        LOAD_DAT_FROM_FILE=diff_eFlux_file, $
+        LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+        IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
         LOAD_DIR=outDir, $
         SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
         EEB_OR_EES=eeb_or_ees, $
@@ -249,7 +250,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
         EPS=eps
 
-     IF KEYWORD_SET(saveData) AND ~restored_fitFile THEN BEGIN
+     IF KEYWORD_SET(saveData) THEN BEGIN
 
         ;; SAVE,
 
@@ -375,6 +376,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PLOT_T_AND_N=cAP_plot_T_and_N, $
         PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
         PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+        LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+        SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
         OUT_CURPOTLIST=curPotList, $
         OUT_JVPLOTDATA=jvPlotData, $
