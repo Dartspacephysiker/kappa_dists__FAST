@@ -191,6 +191,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   dataLStyle   = ''
   dataSym      = 'o'
   dataName     = 'Data'
+  title        = KEYWORD_SET(fit_time_series) ? '$\kappa$ and R!DB!N are fit parameters!CT, n for each data point set by observations' : ''
   xTitle       = 'Potential (V)'
   yTitle       = KEYWORD_SET(plot_j_ratios) ? "J!D||,obs!N / J!D||,theor!N" : $
                  'Current density ($\mu$A/m!U2!N), mapped to 100km'
@@ -203,14 +204,15 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ;;                          curDat[useInds], $
   ;;                          curErr*1D-6, $
   dataplot     = PLOT(jvplotdata.pot[useInds], $
-                           curDat[useInds], $
-                           LINESTYLE=dataLStyle, $
-                           SYMBOL=dataSym, $
-                           XTITLE=xTitle, $
-                           YTITLE=yTitle, $
-                           NAME=dataName, $
-                           YLOG=yLog, $
-                           /CURRENT)
+                      curDat[useInds], $
+                      LINESTYLE=dataLStyle, $
+                      SYMBOL=dataSym, $
+                      TITLE=title, $
+                      XTITLE=xTitle, $
+                      YTITLE=yTitle, $
+                      NAME=dataName, $
+                      YLOG=yLog, $
+                      /CURRENT)
 
   FOR k=0,nR_Bs__M-1 DO BEGIN
      MaxwellPlots[k] = PLOT(jvplotdata.pot[useInds], $

@@ -201,6 +201,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
      END
   ENDCASE
 
+  ;;xRange (energy range)
+  defXRange = [0,(STRMATCH(KF2D__SDTData_opt.eeb_or_ees,'i*',/FOLD_CASE) ? 2.7D4 : 3.3D4)]
+
   ;;We won't want to use this anymore. We're outrightly fitting 2D, you know
   ;; INIT_KAPPA_FIT2DPARAMS_INFO,kFit2DParamStruct
 
@@ -430,7 +433,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
         ENDELSE
         
 
-        xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
+        ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
+        xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),defXRange[1]]
         yRange                                      = [yMin,MAX(data)]
         energy_inds                                 = [minEInd,maxEInd]
         CASE 1 OF
