@@ -37,15 +37,15 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   CASE STRUPCASE(units) OF
      'EFLUX': BEGIN
         pPref          = '-eFlux_fit'
-        unitTitle      = "e!U-!N energy flux"
-        yTitle         = "Differential Energy Flux!C(eV/cm!U2!N-sr-s)"
+        unitTitle      = "e!E-!N energy flux"
+        yTitle         = "Differential Energy Flux (eV/cm$^2$-sr-s)"
         lowerBound     = 1.0e5
         upperBound     = 1.0e10
      END
      'FLUX':BEGIN
         pPref          = '-nFlux_fit'
-        unitTitle      = "e!U-!N # flux"
-        yTitle         = "Differential Number Flux!C(#/cm!U2!N-sr-s)"        
+        unitTitle      = "e!E-!N # flux"
+        yTitle         = "Differential Number Flux (#/cm$^2$-sr-s)"        
         lowerBound     = 1.0e1
         upperBound     = 1.0e7
      END
@@ -107,8 +107,9 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   windowArr       = N_ELEMENTS(windowArr) GT 0 ? [windowArr,window] : window
 
   plotArr         = MAKE_ARRAY(nPlots,/OBJ) 
+  targArr         = !NULL
 
-  colorList       = LIST('RED','BLACK','BLUE','GRAY')
+  colorList       = LIST('BLACK','BLUE','RED','GRAY')
 
   ;;Silly string stuff
   xTitle          = "Energy (eV)"
@@ -121,6 +122,27 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                      MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
 
   iPlot           = 0
+
+  ;;OneCount curve
+  IF N_ELEMENTS(oneCurve) GT 0 THEN BEGIN
+     plotArr[iPlot]    = PLOT(oneCurve.x, $
+                              oneCurve.y, $
+                              NAME=oneCurve.name, $
+                              TITLE=title, $
+                              XTITLE=xTitle, $
+                              YTITLE=yTitle, $
+                              XRANGE=xRange, $
+                              YRANGE=yRange, $
+                              THICK=2.2, $
+                              LINESTYLE=lineStyle[3], $
+                              COLOR=colorList[3], $
+                              ;; /OVERPLOT, $
+                              CURRENT=window) 
+     ;; targArr           = [targArr,plotArr[iPlot]]
+     iPlot++
+  ENDIF
+  
+
   ;;Data
   errInd          = -3
   STR_ELEMENT,orig,'yError',INDEX=errInd
@@ -143,7 +165,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                  SYMBOL=KEYWORD_SET(psymData) ? 1 : !NULL, $
                                  SYM_COLOR=KEYWORD_SET(psymData) ? colorList[0] : !NULL, $
                                  COLOR=colorList[0], $
-                                 ;; OVERPLOT=i GT 0, $
+                                 OVERPLOT=iPlot GT 0, $
                                  CURRENT=window) 
 
      ;; plotArr[iPlot].errorBar_thick   = 1.0
@@ -170,6 +192,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                             ;; OVERPLOT=i GT 0, $
                             CURRENT=window) 
   ENDELSE  
+  targArr                 = [targArr,plotArr[iPlot]]
   iPlot++
 
   ;;Kappa fit
@@ -192,6 +215,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                  COLOR=colorList[1], $
                                  /OVERPLOT, $
                                  CURRENT=window) 
+        targArr           = [targArr,plotArr[iPlot]]
         iPlot++
      ENDIF
   ENDIF
@@ -216,25 +240,12 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                  COLOR=colorList[2], $
                                  /OVERPLOT, $
                                  CURRENT=window) 
+        targArr        = [targArr,plotArr[iPlot]]
         iPlot++
      ENDIF
   ENDIF
 
-  ;;OneCount curve
-  IF N_ELEMENTS(oneCurve) GT 0 THEN BEGIN
-     plotArr[iPlot]    = PLOT(oneCurve.x, $
-                              oneCurve.y, $
-                              NAME=oneCurve.name, $
-                              THICK=2.2, $
-                              LINESTYLE=lineStyle[3], $
-                              COLOR=colorList[3], $
-                              /OVERPLOT, $
-                              CURRENT=window) 
-     iPlot++
-  ENDIF
-
-  
-  legend               = LEGEND(TARGET=plotArr[*],POSITION=[0.55,0.85],/NORMAL)
+  legend               = LEGEND(TARGET=targArr[*],POSITION=[0.55,0.85],/NORMAL)
 
   IF KEYWORD_SET(vertical_lines) THEN BEGIN
      minX              = MIN(kappaFit.x)*0.96
@@ -299,11 +310,12 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : '') + $
-                              STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : ''), $; + $
+                              ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $
-                              /NORMAL)
+                              /NORMAL, $
+                              FONT_COLOR=colorList[1])
 
      IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
         fitTitle       = ["Bulk energy (eV)","Plasma temp. (eV)","Kappa","Density (cm^-3)"]
@@ -333,8 +345,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : '') + $
-                              STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : ''), $; + $
+                              ;; STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $
                               /NORMAL, $
