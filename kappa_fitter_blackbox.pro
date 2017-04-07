@@ -90,6 +90,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
                           CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
                           CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+                          CURANDPOT_JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
+                          CURANDPOT_JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
+                          CURANDPOT_JV_THEOR__KAPPALIMS=kappaLims, $   
+                          CURANDPOT_JV_THEOR__TEMPLIMS=TempLims, $    
+                          CURANDPOT_JV_THEOR__DENSLIMS=DensLims, $    
+                          CURANDPOT_JV_THEOR__MAGRATIOLIMS=magRatioLims, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -376,6 +382,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PLOT_T_AND_N=cAP_plot_T_and_N, $
         PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
         PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+        JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
+        JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
+        JV_THEOR__KAPPALIMS=kappaLims, $   
+        JV_THEOR__TEMPLIMS=TempLims, $    
+        JV_THEOR__DENSLIMS=DensLims, $    
+        JV_THEOR__MAGRATIOLIMS=magRatioLims, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
