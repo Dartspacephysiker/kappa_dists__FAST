@@ -9,6 +9,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    JUST_DIFF_EFLUX=just_diff_eFlux, $
    DIFF_EFLUX=diff_eFlux, $
    DEF_ONECOUNT=dEF_oneCount, $
+   UPGOING=upgoing, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
    LOAD_DIR=loadDir, $
@@ -113,6 +114,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      KF__STRINGS=KF2D__strings, $
      DIFF_EFLUX=diff_eFlux, $
      DEF_ONECOUNT=dEF_oneCount, $
+     UPGOING=upgoing, $
      TIMES=times, $
      SDT_TIME_INDS=bounds, $
      ONLY_1D_FITS=only_1D_fits, $

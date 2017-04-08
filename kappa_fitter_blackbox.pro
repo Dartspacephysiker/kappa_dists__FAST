@@ -82,6 +82,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
                           CURANDPOT_USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
                           CURANDPOT_USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
+                          CURANDPOT_USE_MAGNETOMETER_CURRENT=cAP_use_mag_current, $
                           CURANDPOT_USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
                           CURANDPOT_USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
                           CURANDPOT_ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
@@ -168,6 +169,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JUST_DIFF_EFLUX=just_diff_eFlux, $
         DIFF_EFLUX=diff_eFlux, $
         DEF_ONECOUNT=dEF_oneCount, $
+        UPGOING=upgoing, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
         LOAD_DIR=outDir, $
@@ -369,6 +371,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
         USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
         USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
+        USE_MAGNETOMETER_CURRENT=cAP_use_mag_current, $
         USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
         USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
         ADD_UPGOING_ION_POT=cAP_add_iu_pot, $

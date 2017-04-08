@@ -53,7 +53,7 @@
      ENDCASE
      CASE SIZE(electron_angleRange,/TYPE) OF
         7: BEGIN
-           STOP
+           ;; STOP
         END
         0:
         ELSE: BEGIN

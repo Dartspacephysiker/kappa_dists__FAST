@@ -11,6 +11,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
    USE_UPGOING_ION_CURRENT=use_iu_current, $
    USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
+   USE_MAGNETOMETER_CURRENT=use_mag_current, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
    ADD_UPGOING_ION_POT=add_iu_pot, $
@@ -93,6 +94,10 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; plot_j_v_and_theory     = 1B
   ;; plot_j_v__fixed_t_and_n = 1B
 
+  IF KEYWORD_SET(use_mag_current) THEN BEGIN
+     savePSuff           += '-magC'
+  ENDIF
+
   a_la_Elphic_spName      = bonusPref + '.png'
   jvpotBar_spName         = bonusPref + 'j_vs_potBar__downgoing_e' + savePSuff + '.png'
   TN_spName               = bonusPref + 'T_and_N__downgoing_e' + savePSuff + '.png'
@@ -137,13 +142,33 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   label                   = ['downgoing_e','upgoing_e','upgoing_i']
 
   ;;OPTIONS! OPTIONS! OPTIONS!
-  ;; aRange__moments_e_down  = [315.,45.]
-  aRange__moments_e_down  = KEYWORD_SET(electron_angleRange) ? electron_angleRange : 'lc'
-  ;; aRange__moments_i_up    = [0.,360.]
+  all_pitchAngles = 0
+  IF KEYWORD_SET(all_pitchAngles) THEN BEGIN
 
-  aRange__moments_i_up    = 'lc'
-  aRange__peakEn_i_up     = 'lc'
-  aRange__charE_i_up      = 'lc'
+     aRange__moments_e_down  = [0.,360.]
+     aRange__moments_i_up = [0.,360.]
+     aRange__peakEn_i_up  = 'lc'
+     aRange__charE_i_up   = 'lc'
+
+     moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[20,3.0e4],[100,3.0e4],[20,2.4e4]]
+
+     min_peak_energyArr   = [300,100,100]
+     max_peak_energyArr   = [3e4,3e4,2.4e4]
+
+  ENDIF ELSE BEGIN
+
+     aRange__moments_e_down  = KEYWORD_SET(electron_angleRange) ? electron_angleRange : 'lc'
+
+     aRange__moments_i_up = 'lc'
+     aRange__peakEn_i_up  = 'lc'
+     aRange__charE_i_up   = 'lc'
+
+     moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.0e4],[100,3.0e4],[100,2.4e4]]
+
+     min_peak_energyArr   = [300,100,100]
+     max_peak_energyArr   = [3e4,3e4,2.4e4]
+
+  ENDELSE
 
   ;; blankers                = !NULL
   blankers                = 'lc'
@@ -162,10 +187,6 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   pot__save_file          = 0
   pot__all                = 0
   pot__from_fa_potential  = 1
-  moment_energyArr        = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.0e4],[100,3.0e4],[100,2.4e4]]
-
-  min_peak_energyArr      = [300,100,100]
-  max_peak_energyArr      = [3e4,3e4,2.4e4]
 
   CURRENT_AND_POTENTIAL_SUITE, $
      ORBIT=orbit, $
@@ -220,6 +241,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
      USE_UPGOING_ION_CURRENT=use_iu_current, $
      USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
+     USE_MAGNETOMETER_CURRENT=use_mag_current, $
      USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
      USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
      ADD_UPGOING_ION_POT=add_iu_pot, $

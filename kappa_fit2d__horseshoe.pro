@@ -141,7 +141,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         ;;Not currently clear why the shift is necessary, but it makes things come out right
         fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,SHIFT(curFitStr.theta,0,-1), $
                                                                            fit2DParams, $
-                                                                           UNITS=units)
+                                                                           UNITS=units, $
+                                                                           MASS=curDataStr.mass)
      END
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
         oldfit2DStr = fit2DStr

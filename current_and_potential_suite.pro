@@ -6,6 +6,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
    USE_UPGOING_ION_CURRENT=use_iu_current, $
    USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
+   USE_MAGNETOMETER_CURRENT=use_mag_current, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
    ADD_UPGOING_ION_POT=add_iu_pot, $
@@ -34,6 +35,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    PLOT_T_AND_N=plot_T_and_N, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+   PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
    A_LA_ELPHIC_SPNAME=a_la_Elphic_spName, $
    JVPOTBAR_SPNAME=jvpotBar_spName, $
    TN_SPNAME=TN_spName, $
@@ -95,6 +97,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      MAP_TO_100KM=map_to_100km, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
+     OUT_MAGCURRENT=magCurrent, $
      OUT_SC_POT=out_sc_pot, $
      _EXTRA=e
 
@@ -105,6 +108,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
                                       USE_UPGOING_ION_CURRENT=use_iu_current, $
                                       USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
+                                      USE_MAGNETOMETER_CURRENT=use_mag_current, $
                                       USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
@@ -126,6 +130,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       MAXCUR=maxCur, $
                                       USEINDS=useInds, $
                                       PLOT_J_RATIOS=plot_j_ratios, $
+                                      IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
 
@@ -222,12 +227,53 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
+  plot_magCurrent_vs_current = 1
+  IF KEYWORD_SET(plot_magCurrent_vs_current) THEN BEGIN
+
+     ;; tmpCur = 0.D * curPotList[0].cur
+     ;; ;; IF KEYWORD_SET(use_ed_current) THEN BEGIN
+     ;; tmpCur += curPotList[0].cur
+     ;; ;; ENDIF
+     ;; ;; IF KEYWORD_SET(use_eu_current) THEN BEGIN
+     ;; ;;    tmpCur += curPotList[1]
+     ;; ;; ENDIF
+     ;; ;; IF KEYWORD_SET(use_iu_current) THEN BEGIN
+     ;; tmpCur += curPotList[2].cur
+     ;; ENDIF
+     ;; tmpCur = curPotList.cur[0] + curPotList.cur[1] + curPotList.cur[2]
+
+     plot     = PLOT(jvPlotData.cur[avgs_JVfit.useInds], $
+                     jvPlotData.magCur[avgs_JVfit.useInds], $
+                     LINESTYLE='', $
+                     SYMBOL='*', $
+                     XTITLE='j$_{ESA}$', $
+                     YTITLE='j$_{Mag}$')
+
+     plot2_1  = PLOT(jvPlotData.time-jvPlotData.time[0], $
+                     jvPlotData.magCur, $
+                     NAME='Mag', $
+                     LINESTYLE='', $
+                     SYMBOL='*', $
+                     XTITLE='t since ' + TIME_TO_STR(jvPlotData.time[0],/MS), $
+                     YTITLE='j$_{||}$')
+
+     plot2_2  = PLOT(jvPlotData.time-jvPlotData.time[0], $
+                     jvPlotData.cur, $
+                     NAME='ESA', $
+                     LINESTYLE='', $
+                     SYMBOL='*', $
+                     COLOR='red', $
+                     /OVERPLOT)
+
+  ENDIF
+
   nUsers       = N_ELEMENTS(useInds)
   useInds      = useInds[SORT(jvplotdata.time[useInds])]
 
   PRINT,FORMAT='(A0,T5,A0,T35,A0,T45,A0,T55,A0,T65,A0,T75,A0,T85,A0,T95,A0)', $
         'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
   FOR k=0,nUsers-1 DO BEGIN
+
      PRINT,FORMAT='(I0,T5,A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,F-8.3,T75,F-8.3,T85,F-8.3,T95,F-8.3)', $
            k, $
            TIME_TO_STR(JVPlotData.time[useInds[k]]), $

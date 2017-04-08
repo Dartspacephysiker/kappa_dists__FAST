@@ -50,6 +50,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
+   OUT_MAGCURRENT=magCurrent, $
    OUT_SC_POT=out_sc_pot, $
    _EXTRA=e
 
@@ -603,7 +604,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_N=n1, $
                            OUT_J_=j1, $
                            OUT_JE=je1, $
-                           OUT_T=T1, $
+                           OUT_T=T1Count, $
                            OUT_CHARE=charE1, $
                            OUT_CURRENT=cur1, $
                            OUT_JJE_COVAR=jje1_coVar, $
@@ -613,7 +614,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_ERR_JE=je1Err, $
                            OUT_ERR_T=T1Err, $
                            OUT_ERR_CURRENT=cur1Err, $
-                           OUT_ERR_CHARE=charE1Err
+                           OUT_ERR_CHARE=charE1Err, $
+                           OUT_MAPRATIO=mapRatio
 
         ENDIF
 
@@ -637,7 +639,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            err1_list.Add,TEMPORARY(errors1)
            time1_list.Add,TEMPORARY(time1)
            n1_list.Add,TEMPORARY(n1)
-           T1_list.Add,TEMPORARY(T1)
+           T1_list.Add,TEMPORARY(T1Count)
            j1_list.Add,TEMPORARY(j1)
            je1_list.Add,TEMPORARY(je1)
            cur1_list.Add,cur1
@@ -653,7 +655,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ENDFOR
 
      afterString = "Made "
-     SAVE,north_southArr_list, $
+     SAVE,t1,t2, $
+          north_southArr_list, $
           err_list, $
           err1_list, $
           time_list, $
@@ -768,8 +771,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;                        ( (j_list[k]).x LE tmpT2 ), $
         ;;                        nThese)
         theseInds           = WHERE( ( time_list[k] GE tmpT1 ) AND $
-                               ( time_list[k] LE tmpT2 ), $
-                               nThese)
+                                     ( time_list[k] LE tmpT2 ), $
+                                     nThese)
 
         IF nThese EQ 0 THEN STOP
 
@@ -1017,8 +1020,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDFOR
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+     
+     magCurrent = GET_CURRENT_FROM_FLUXMAG(t1,t2, $
+                                           magStr,velocityStr, $
+                                           /USE_DESPUN, $
+                                           SDTNAME__JMAG=jMagName, $
+                                           INFERRED_E_NUMFLUX=inferred_e_numFlux, $
+                                           SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
+                                           QUIET=quiet)
+
+     magCurrent = DATA_CUT(magCurrent,curPotList[0].time)*mapRatio
      PRINT,"Saving it all to " + saveCurPotFile
-     SAVE,curPotList,FILENAME=outDir+saveCurPotFile
+     SAVE,curPotList,magCurrent,FILENAME=outDir+saveCurPotFile
   ENDIF
 
 END

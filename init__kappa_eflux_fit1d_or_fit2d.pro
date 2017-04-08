@@ -6,6 +6,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    KF__STRINGS=KF__strings, $
    DIFF_EFLUX=diff_eFlux, $
    DEF_ONECOUNT=dEF_oneCount, $
+   UPGOING=upgoing, $
    TIMES=times, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
@@ -127,6 +128,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               LOAD_DIR=loadDir, $
                               EEB_OR_EES=KF__SDTData_opt.eeb_or_ees, $
                               DIFF_EFLUX=diff_eFlux, $
+                              UPGOING=upgoing, $
                               SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
                               SC_POT=sc_pot, $
                               OUT_ORB=orb, $

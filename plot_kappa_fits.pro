@@ -300,6 +300,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2)]
         fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x-4)))]
+        chiInd     = 4 + KEYWORD_SET(add_angle_label)
      ENDIF
 
      fitParamsText     = TEXT(0.2,0.25, $
@@ -310,7 +311,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : ''), $; + $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[chiInd],fitInfoStr[chiInd]) + '!C' : ''), $; + $
                               ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $
@@ -335,6 +336,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
            fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',gaussFit.chi2/(N_ELEMENTS(gaussFit.x-3)))]
+           chiInd     = 4 + KEYWORD_SET(add_angle_label)
         ENDIF
 
         fitParamsText  = TEXT(0.52,0.25, $
@@ -345,7 +347,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               (KEYWORD_SET(add_angle_label) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[5],fitInfoStr[5]) + '!C' : ''), $; + $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[chiInd],fitInfoStr[chiInd]) + '!C' : ''), $; + $
                               ;; STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $
                               FONT_SIZE=10, $
                               FONT_NAME='Courier', $

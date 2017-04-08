@@ -24,6 +24,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_DOWNGOING_ELECTRON_CURRENT=use_ed_current, $
                                         USE_UPGOING_ION_CURRENT=use_iu_current, $
                                         USE_UPGOING_ELECTRON_CURRENT=use_eu_current, $
+                                        USE_MAGNETOMETER_CURRENT=use_mag_current, $
                                         USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
@@ -48,6 +49,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         MAXCUR=maxCur, $
                                         USEINDS=useInds, $
                                         PLOT_J_RATIOS=plot_j_ratios, $
+                                        IN_MAGCURRENT=magCurrent, $
                                         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                         _EXTRA=e
                                    
@@ -109,7 +111,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   ;;Current for plotting
   IF ~(KEYWORD_SET(use_all_currents) OR KEYWORD_SET(use_ed_current) OR $
-       KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_iu_current))     $
+       KEYWORD_SET(use_eu_current  ) OR KEYWORD_SET(use_iu_current) OR $
+       KEYWORD_SET(use_mag_current )) $
   THEN BEGIN
      use_all_currents = 1B
   ENDIF
@@ -125,23 +128,34 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      curErr   = MAKE_ARRAY(nHere,nListMem,/DOUBLE,VALUE=0.D) ;You'll see why
      curErr_i = 0
 
-     IF KEYWORD_SET(use_ed_current) THEN BEGIN
-        cur  += curPotList[edind].cur
-        curErr[*,curErr_i++] = curPotList[edind].curErr
-     ENDIF
+     CASE 1 OF
+        KEYWORD_SET(use_mag_current): BEGIN
+           ;; cur += (TEMPORARY(magCurrent)).y
+           cur += magCurrent
+        END
+        ELSE: BEGIN
 
-     IF KEYWORD_SET(use_eu_current) THEN BEGIN
-        cur  += curPotList[euind].cur
-        curErr[*,curErr_i++] = curPotList[euind].curErr
-     ENDIF
+           IF KEYWORD_SET(use_ed_current) THEN BEGIN
+              cur  += curPotList[edind].cur
+              curErr[*,curErr_i++] = curPotList[edind].curErr
+           ENDIF
 
-     IF KEYWORD_SET(use_iu_current) THEN BEGIN
-        cur  += curPotList[iuind].cur
-        curErr[*,curErr_i++] = curPotList[iuind].curErr
-     ENDIF
+           IF KEYWORD_SET(use_eu_current) THEN BEGIN
+              cur  += curPotList[euind].cur
+              curErr[*,curErr_i++] = curPotList[euind].curErr
+           ENDIF
 
-     ;;Now square all participating current errors for each time, sum them, and take the square root
-     curErr = curErr[*,0:(curErr_i-1)]
+           IF KEYWORD_SET(use_iu_current) THEN BEGIN
+              cur  += curPotList[iuind].cur
+              curErr[*,curErr_i++] = curPotList[iuind].curErr
+           ENDIF
+
+           ;;Now square all participating current errors for each time, sum them, and take the square root
+           curErr = curErr[*,0:(curErr_i-1)]
+
+        END
+     ENDCASE
+
      CASE NDIMEN(curErr) OF
         1: BEGIN
 
@@ -155,8 +169,6 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   ;;Errors
   ;; curErr      = ABS(curPotList[edind].curErr) * errorBarFac
-
-
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Et potential
@@ -232,7 +244,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;                               nSafe)
   safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
                                 (curPotList[euind].peakE GE 0.) AND  $
-                                (curPotList[euind].peakE GE 0.),     $
+                                (curPotList[euind].peakE GE 0.) AND  $
+                                ABS(curErr/cur) LE 5,     $
                                 nSafe)
 
   ;; IF nSafe LT 3 THEN STOP
@@ -254,6 +267,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            pot        : pot       [safe_i] , $
                            curErr     : curErr    [safe_i] , $
                            potErr     : potErr    [safe_i] , $
+                           magCur     : magCurrent[safe_i] , $
                            tMag       : tMag      [safe_i] , $
                            tDiff      : tDiff     [safe_i] , $
                            phiBar     : phiBar    [safe_i] , $
