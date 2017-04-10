@@ -51,7 +51,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
    FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
    FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-   FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+   FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__WEIGHTING=fit2D__weighting, $
    FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
@@ -176,7 +176,7 @@ PRO KAPPA_EFLUX_FIT2D, $
 
   IF KEYWORD_SET(just_diff_eFlux) THEN RETURN
 
-  KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
+  KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                     BOUNDS=bounds, $
                     ESTFACS=estFacs, $
                     FIT1D__AVERAGE_OVER_ANGLERANGE=fit1d__average_over_angleRange, $
@@ -187,7 +187,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                     FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                     FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-                    FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+                    FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                     FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                     DONT_PRINT_ESTIMATES=dont_print_estimates, $
                     DONT_PRINT_FITINFO=dont_print_fitInfo, $

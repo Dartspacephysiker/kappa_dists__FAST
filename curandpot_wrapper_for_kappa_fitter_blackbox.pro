@@ -25,6 +25,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    PLOT_T_AND_N=plot_T_and_N, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+   PLOT_EN_SPECS=plot_en_specs, $
+   EN_SPECS__MOVIE=en_specs__movie, $
    JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
    JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
    JV_THEOR__KAPPALIMS=kappaLims, $   
@@ -84,7 +86,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   interactive_overplot    = 0
   
-  savePlot                = 0
+  savePlot                = 1
   savePSuff               = ''
 
   ;;Which plots?
@@ -98,11 +100,13 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      savePSuff           += '-magC'
   ENDIF
 
-  a_la_Elphic_spName      = bonusPref + '.png'
-  jvpotBar_spName         = bonusPref + 'j_vs_potBar__downgoing_e' + savePSuff + '.png'
-  TN_spName               = bonusPref + 'T_and_N__downgoing_e' + savePSuff + '.png'
-  JV_theor_spName         = bonusPref + 'j_v_data_n_theory__' + savePSuff + '.png'
-  j_v__fixTandN__spName   = bonusPref + 'j_v_fixTandN__' + savePSuff + '.png'
+  fExt                    = KEYWORD_SET(eps) ? '.eps' : '.png'
+  a_la_Elphic_spName      = bonusPref + fExt
+  jvpotBar_spName         = bonusPref + '_j_vs_potBar__downgoing_e' + savePSuff + fExt
+  TN_spName               = bonusPref + '_T_and_N__downgoing_e' + savePSuff + fExt
+  JV_theor_spName         = bonusPref + '_j_v_data_n_theory__' + savePSuff + fExt
+  j_v__fixTandN__spName   = bonusPref + '_j_v_fixTandN__' + savePSuff + fExt
+  en_spec__spName         = bonusPref + '_en_specs__' + savePSuff + fExt
 
   ;;Options for j_v_potBar plot
   jvpotBar__j_on_yAxis    = 1
@@ -188,6 +192,13 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   pot__all                = 0
   pot__from_fa_potential  = 1
 
+  ;;If doing energy spectra
+  en_spec__names          = ['SC_e','ALL_e','LC_i','ALL_i']
+  en_spec__eeb_or_ees     = ['ee','ee','ie','ie']
+  en_spec__angle_ranges   = ['lc','all','lc','all']
+  en_spec__energy_ranges  = [[4,3D4],[4,3D4],[3,2.4D4],[3,2.4D4]]
+  en_spec__upgoing        = [0,0,1,0]
+
   CURRENT_AND_POTENTIAL_SUITE, $
      ORBIT=orbit, $
      ORBTIMES=orbTimes, $
@@ -261,6 +272,11 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      MAXPOT=maxPot, $
      MINCUR=minCur, $
      MAXCUR=maxCur, $
+     EN_SPEC__NAMES=en_spec__names, $
+     EN_SPEC__EEB_OR_EES=en_spec__eeb_or_ees, $
+     EN_SPEC__ANGLE_RANGES=en_spec__angle_ranges, $
+     EN_SPEC__ENERGY_RANGES=en_spec__energy_ranges, $
+     EN_SPEC__UPGOING=en_spec__upgoing, $
      JV_THEOR__MINPOT=jv_theor__minPot, $
      JV_THEOR__MAXPOT=jv_theor__maxPot, $
      JV_THEOR__MINCUR=jv_theor__minCur, $
@@ -282,11 +298,14 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      PLOT_T_AND_N=plot_T_and_N, $
      PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
      PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+     PLOT_EN_SPECS=plot_en_specs, $
+     EN_SPECS__MOVIE=en_specs__movie, $
      A_LA_ELPHIC_SPNAME=a_la_Elphic_spName, $
      JVPOTBAR_SPNAME=jvpotBar_spName, $
      TN_SPNAME=TN_spName, $
      JV_THEOR_SPNAME=JV_theor_spName, $
      J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
+     EN_SPEC__SPNAME=en_spec__spName, $
      ORIGINAL_PLOTIDEE=orig_plotIdee, $
      ORIGINATING_ROUTINE=routName, $
      SAVEPLOT=savePlot, $

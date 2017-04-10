@@ -52,6 +52,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    OUT_CURPOTLIST=curPotList, $
    OUT_MAGCURRENT=magCurrent, $
    OUT_SC_POT=out_sc_pot, $
+   OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
+   OUT_SOURCECONE=out_sourcecone, $
+   OUT_LOSSCONE=out_losscone, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -188,6 +191,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         sc_pot_list        = LIST()
      ENDIF
 
+     diff_eFlux_files      = !NULL
+
      peak_ind_list         = LIST()
      peak_energy_list      = LIST()
      peak_dE_list          = LIST()
@@ -311,6 +316,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
         
         dEF_list.Add,TEMPORARY(diff_eFlux)
+
+        diff_eFlux_files = [diff_eFlux_files,diffEfluxDir+diff_eFlux_file]
 
      ENDFOR
 
@@ -585,7 +592,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         OUT_ERR_JE=jeErr, $
                         OUT_ERR_T=TErr, $
                         OUT_ERR_CURRENT=curErr, $
-                        OUT_ERR_CHARE=charEErr
+                        OUT_ERR_CHARE=charEErr, $
+                        OUT_MAPRATIO=mapRatio
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
@@ -657,6 +665,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      afterString = "Made "
      SAVE,t1,t2, $
           north_southArr_list, $
+          lc_angleRange, $
+          mapRatio, $
           err_list, $
           err1_list, $
           time_list, $
@@ -690,11 +700,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oMoments_list, $
           aRange_oCharE_list, $
           aRange_oPeakEn_list, $
+          diff_eFlux_files, $
           FILENAME=outDir+masterFile
 
   ENDELSE
   PRINT,preString + afterString
 
+  out_sourcecone = lc_angleRange
+  out_losscone   = (360.*((lc_angleRange-180)/360.-FLOOR((lc_angleRange-180)/360.)))
 
   ;;Now the calculations
   PRINT,"Now whittling to selected times"

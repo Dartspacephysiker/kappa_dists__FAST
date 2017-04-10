@@ -13,6 +13,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    ERROR_BAR_FACTOR=errorBarFac, $
    USEI__RELCHANGE=useInds__relChange, $
    USEI__TWOLUMPS=useInds__twoLumps, $
+   EN_SPEC__NAMES=en_spec__names, $
+   EN_SPEC__EEB_OR_EES=en_spec__eeb_or_ees, $
+   EN_SPEC__ANGLE_RANGES=en_spec__angle_ranges, $
+   EN_SPEC__ENERGY_RANGES=en_spec__energy_ranges, $
+   EN_SPEC__UPGOING=en_spec__upgoing, $
    JV_A_LA_ELPHIC__UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
    JV_THEOR__MINPOT=jv_theor__minPot, $
    JV_THEOR__MAXPOT=jv_theor__maxPot, $
@@ -36,15 +41,19 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
    PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
+   PLOT_EN_SPECS=plot_en_specs, $
+   EN_SPECS__MOVIE=en_specs__movie, $
    A_LA_ELPHIC_SPNAME=a_la_Elphic_spName, $
    JVPOTBAR_SPNAME=jvpotBar_spName, $
    TN_SPNAME=TN_spName, $
    JV_THEOR_SPNAME=JV_theor_spName, $
    J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
+   EN_SPEC__SPNAME=en_spec__spName, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
    OUT_SC_POT=out_sc_pot, $
+   PLOTDIR=plotDir, $
    _REF_EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -99,6 +108,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_CURPOTLIST=curPotList, $
      OUT_MAGCURRENT=magCurrent, $
      OUT_SC_POT=out_sc_pot, $
+     OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
+     OUT_SOURCECONE=out_sourcecone, $
+     OUT_LOSSCONE=out_losscone, $
      _EXTRA=e
 
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
@@ -227,7 +239,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
-  plot_magCurrent_vs_current = 1
+  plot_magCurrent_vs_current = 0
   IF KEYWORD_SET(plot_magCurrent_vs_current) THEN BEGIN
 
      ;; tmpCur = 0.D * curPotList[0].cur
@@ -264,6 +276,32 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                      SYMBOL='*', $
                      COLOR='red', $
                      /OVERPLOT)
+
+  ENDIF
+
+  IF KEYWORD_SET(plot_en_specs) THEN BEGIN
+
+     plotDir = '~/Desktop/test/'
+
+     PLOT_EN_SPECS__DIFF_EFLUX,diff_eFlux_files, $
+                               PLOT_T1=plot_t1, $
+                               PLOT_T2=plot_t2, $
+                               NAMES=en_spec__names, $
+                               EEB_OR_EES=en_spec__eeb_or_ees, $
+                               ANGLE_RANGES=en_spec__angle_ranges, $
+                               ENERGY_RANGES=en_spec__energy_ranges, $
+                               UNITS=units, $
+                               SAVEPLOT=savePlot, $
+                               SPNAME=en_spec__spName, $
+                               MOVIE=en_specs__movie, $
+                               PLOTDIR=plotDir, $
+                               UPGOING=en_spec__upgoing, $
+                               IN_SOURCECONE=out_sourcecone, $
+                               IN_LOSSCONE=out_losscone, $
+                               _EXTRA=e
+                               
+
+                               
 
   ENDIF
 

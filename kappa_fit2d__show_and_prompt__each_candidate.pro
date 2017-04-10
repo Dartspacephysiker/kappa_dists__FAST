@@ -24,15 +24,23 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   yWinSize    = 700
 
   ;;Some stuff in case we decide to write a few of these chocolatiers
-  upLim       = MAX(curDataStr.data) > (KEYWORD_SET(only_data) ? MAX(curDataStr.data) : MAX(fit2DStruct.bestFitStr.data))
-  ;; cont2DLims  = {zrange:[10^(6.6),10^9]}
-  ;; spec2DLims = {yrange:[1e6,1e10]}
-  cont2DLims  = {zrange:[10^(6.6),upLim]}
-  spec2DLims = {yrange:[1e6,upLim]}
-  IF KEYWORD_SET(fit2D__PA_zRange) THEN BEGIN
+  cont2DLims  = {zrange:[10^(6.6),10^9]}
+  spec2DLims = {yrange:[1e6,1e10]}
+
+  ;; upLim       = MAX(curDataStr.data) > (KEYWORD_SET(only_data) ? MAX(curDataStr.data) : MAX(fit2DStruct.bestFitStr.data))
+  ;; cont2DLims  = {zrange:[10^(6.6),upLim]}
+  ;; spec2DLims = {yrange:[1e6,upLim]}
+
+  IF curDataStr.mass GT 5.7D-06 THEN BEGIN
+     fit2D__PA_zRange = 10.D^([5.5,8.5])
+  ENDIF ELSE BEGIN
+     fit2D__PA_zRange = 10.D^([6.5,9.5])
+  ENDELSE
+  
+  ;; IF KEYWORD_SET(fit2D__PA_zRange) THEN BEGIN
      cont2DLims.zRange = fit2D__PA_zRange
      spec2DLims.yRange = fit2D__PA_zRange
-  ENDIF
+  ;; ENDIF
 
   spec2DDatLims = CREATE_STRUCT(spec2DLims,'PSYM',1)
 
@@ -76,14 +84,13 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
      PAPlotDir = './'
   ENDIF
 
-
-
   IF KEYWORD_SET(finish_and_save_all) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(only_data): BEGIN
-           tempFN = STRING(FORMAT='("orb_",A0,A0,"-",A0,"-",A0)', $
+           tempFN = STRING(FORMAT='("orb_",A0,"-",A0,A0,"-",A0,"-",A0)', $
                            KF2D__strings.orbStr, $
-                           KF2D__Plot_opt.plotNamePref, $
+                           KF2D__strings.eeb_or_ees, $
+                           KF2D__Plot_opt.plotNamePref EQ '' ? '' : '-' + KF2D__Plot_opt.plotNamePref, $
                            'Data', $
                            KF2D__strings.timeFNStrs[iTime])
         END

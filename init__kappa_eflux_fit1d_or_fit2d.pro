@@ -219,9 +219,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   ENDIF
 
   ;;Times and strings
-  times                              = diff_eFlux.time
   KF__strings                        = INIT_KAPPA_STRING_STRUCT(diff_eFlux, $
-                                                                  times, $
                                                                   orbStr, $
                                                                   angleStr, $
                                                                   KF__SDTData_opt)

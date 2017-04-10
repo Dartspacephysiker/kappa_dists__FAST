@@ -36,7 +36,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__SHOW_EACH_CANDIDATE=fit2D__show_each_candidate, $
                           FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-                          FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+                          FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                           FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                           ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
@@ -91,6 +91,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
                           CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
                           CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+                          CURANDPOT_PLOT_EN_SPECS=cAP_plot_en_specs, $
+                          CURANDPOT_EN_SPECS__MOVIE=cAP_en_specs__movie, $
                           CURANDPOT_JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
                           CURANDPOT_JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
                           CURANDPOT_JV_THEOR__KAPPALIMS=kappaLims, $   
@@ -216,7 +218,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
         FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
         FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-        FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+        FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
         FIT2D__PRINT_FITINFO=print_2DFitInfo, $
         FIT2D__TOLERANCE=fit2D_tol, $
         FIT2D__MAX_ITERATIONS=fit2D_max_iter, $
@@ -385,6 +387,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PLOT_T_AND_N=cAP_plot_T_and_N, $
         PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
         PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+        PLOT_EN_SPECS=cAP_plot_en_specs, $
+        EN_SPECS__MOVIE=cAP_en_specs__movie, $
         JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
         JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
         JV_THEOR__KAPPALIMS=kappaLims, $   
@@ -397,7 +401,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_CURPOTLIST=curPotList, $
         OUT_JVPLOTDATA=jvPlotData, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-        OUT_SC_POT=sc_pot
+        OUT_SC_POT=sc_pot, $
+        EPS=eps
 
   ENDIF
 

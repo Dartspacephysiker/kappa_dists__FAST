@@ -22,7 +22,7 @@
 ; MODIFICATION HISTORY: 2016/07 Born somewhere in here
 ;
 ;-
-PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
+PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       BOUNDS=bounds, $
                       ESTFACS=estFacs, $
                       FIT1D__AVERAGE_OVER_ANGLERANGE=fit1D__average_over_angleRange, $
@@ -33,7 +33,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
                       FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                       FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                       FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-                      FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+                      FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                       FIT2D__PRINT_FITINFO=print_2DFitInfo, $
                       DONT_PRINT_ESTIMATES=dont_print_estimates, $
                       DONT_PRINT_FITINFO=dont_print_fitInfo, $
@@ -64,6 +64,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
   ;; RESOLVE_ROUTINE,'mpfit2dfun',/IS_FUNCTION
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
+  times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
   energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])
   data                              = TRANSPOSE(diff_eFlux.data,[1,0,2])
   ddata                             = TRANSPOSE(diff_eFlux.ddata,[1,0,2])
@@ -622,6 +623,25 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
 
      ENDFOR
 
+     IF KEYWORD_SET(fit2D__show_only_data) AND KEYWORD_SET(fit2D__save_all_plots) THEN BEGIN
+
+        KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE, $
+           MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime), $
+           tmp2DInfoStruct, $
+           1, $
+           iTime, $
+           /FOR_HORSESHOE_FIT, $
+           /ONLY_DATA, $
+           IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
+           PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
+           PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+           /FINISH_AND_SAVE_ALL, $
+           KAPPA_FIT__SHOW__QUIT=show__quit, $
+           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
+           EPS=eps
+
+     END
+
      IF ~gotEm THEN BEGIN
         PRINT,"Couldn't muster good fits for iTime = " + STRCOMPRESS(iTime,/REMOVE_ALL) + '!!!'
         PRINT,'SKIPPING'
@@ -694,7 +714,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
               FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
               FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-              FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+              FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
               FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
               FIT2D__SHOW__FITSTRING='Kappa', $
               PRINT_2DFITINFO=print_2DFitInfo, $
@@ -732,7 +752,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,times,dEF_oneCount, $
               FIT2D_INF_LIST=fit2DGauss_inf_list, $
               FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=KEYWORD_SET(fit2d__show_each_candidate) AND ~KEYWORD_SET(fit2D__show_only_data), $
               FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-              FIT2D__SAVE_ALL_CANDIDATE_PLOTS=fit2D__save_all_candidate_plots, $
+              FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
               /FIT2D__SHOW__IS_MAXWELLIAN_FIT, $
               FIT2D__SHOW__FITSTRING='Maxwell', $
               PRINT_2DFITINFO=print_2DFitInfo, $
