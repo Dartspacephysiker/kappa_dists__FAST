@@ -38,6 +38,12 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   lStyles   = ['-','--','-:',':','__','-']
   colors    = ['black','purple','blue','dark green','orange','red']
 
+  distFName = 'Maxwellian'
+  ;; FOR k=0,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)','$/kappa$ = ',kappas[k])]
+  muLetter = '!4l!X'
+  FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)',muLetter+' = ',kappas[k])]
+
+
   ;;Get datas first
   curArr   = !NULL
   distFArr = !NULL
@@ -70,7 +76,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   ENDFOR
 
 
-  window          = WINDOW(DIMENSIONS=[1280,720],BUFFER=KEYWORD_SET(save_eps))
+  window          = WINDOW(DIMENSIONS=[1000,750],BUFFER=KEYWORD_SET(save_eps))
 
   nCol            = 2
   nRow            = 1
@@ -82,6 +88,9 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   distFInd        = prem
   theorLayout     = [nCol,nRow,theorieInd]
   distFLayout     = [nCol,nRow,distFInd]
+
+  distFPosition   = [0.09,0.08,0.485,0.92]
+  theorPosition   = [0.595,0.08,0.99,0.92]
 
   distFPeakVal    = MAX(distFArr)
   distFRange      = [10.D^(ALOG10(distFPeakVal)-7D),10.D^(ALOG10(distFPeakVal)+0.2D)]
@@ -132,6 +141,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
                                YRANGE=curRange, $
                                XSTYLE=1, $
                                XTICKFORMAT='exponentlabel', $
+                               YTICKFORMAT='exponentlabel', $
                                XTICKLEN=1, $
                                XSUBTICKLEN=0.01, $
                                ;; XGRIDSTYLE=':', $
@@ -143,8 +153,9 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
                                FONT_SIZE=font_size, $
-                               LAYOUT=theorLayout, $
+                               ;; LAYOUT=theorLayout, $
                                OVERPLOT=k NE 0, $
+                               POSITION=theorPosition, $
                                /CURRENT)
 
         END
@@ -153,7 +164,8 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
            theorPArr[k] = PLOT(potBar,TRANSPOSE(curArr[k,*])*1D6, $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
-                               LAYOUT=theorLayout, $
+                               ;; LAYOUT=theorLayout, $
+                               POSITION=theorPosition, $
                                /OVERPLOT, $
                                /CURRENT)
 
@@ -172,16 +184,20 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
            ;;energy style
            distFPArr[k] = PLOT(pot,TRANSPOSE(distFArr[k,*]), $
+                               NAME=distFName[k], $
                                XTITLE='Energy (eV)', $
                                YTITLE=fluxTitle, $
                                XLOG=energyLog, $
                                YLOG=distFLog, $
                                XRANGE=energyRange, $
                                YRANGE=distFRange, $
+                               XTICKFORMAT='exponentlabel', $
+                               YTICKFORMAT='exponentlabel', $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
                                FONT_SIZE=font_size, $
-                               LAYOUT=distFLayout, $
+;                               ;; LAYOUT=distFLayout, $
+                               POSITION=distFPosition, $
                                OVERPLOT=k NE 0, $
                                /CURRENT)
 
@@ -192,7 +208,8 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
            distFPArr[k] = PLOT(pot,TRANSPOSE(distFArr[k,*]), $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
-                               LAYOUT=distFLayout, $
+                               ;; LAYOUT=distFLayout, $
+                               POSITION=distFPosition, $
                                /OVERPLOT, $
                                /CURRENT)
 
@@ -202,6 +219,10 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
 
   ENDFOR
+
+  legend = LEGEND(TARGET=distFPArr, $
+                  POSITION=[0.01,0.8], $
+                  /NORMAL)
 
   IF KEYWORD_SET(save_eps) THEN BEGIN
 
