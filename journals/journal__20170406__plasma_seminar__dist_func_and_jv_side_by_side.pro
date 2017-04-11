@@ -1,18 +1,24 @@
 ;2017/04/06
-PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
+PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
+   TRUNCATE_AT=truncate_at, $
+   SAVE_EPS=save_eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Curve params
   N        = 0.1               ;cm^-3
   T        = 500                ;eV
-  R_B      = 1000
   E_b      = 1D3                ;Bulk energy
+
+  ;; R_B      = 15
+  ;; RBSuff   = " (src ~1-2 R!D E!N)"
+  R_B      = 1000
+  RBSuff   = " (src ~13-15 R!D E!N)"
 
   kappas   = [0,5,2.5,2.0,1.8,1.6]
   nKappa   = N_ELEMENTS(kappas)
 
-  potBarTop = 2D3
+  potBarTop = 2D4
   increm    = 1.1D
   nPot      = FIX(ALOG10(potBarTop*T)/ALOG10(increm))
   pot       = increm^(INDGEN(nPot)) ;in energy units ( charge*potential )
@@ -29,20 +35,19 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   IF N_ELEMENTS(R_B) EQ 1 THEN R_B = REPLICATE(R_B,nKappa)
 
   ;;Plot opts, things
-  outPlotPref = 'kappa_seminar__' + GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '_'
+  outPlotPref = 'kappa_seminar__dist_JV_'
   SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
-  save_eps  = 0
+  IF N_ELEMENTS(save_eps) EQ 0 THEN save_eps = 0
   theorPArr = MAKE_ARRAY(nKappa,/OBJ)
   distFPArr = MAKE_ARRAY(nKappa,/OBJ)
 
   lStyles   = ['-','--','-:',':','__','-']
   colors    = ['black','purple','blue','dark green','orange','red']
+  thick     = REPLICATE(2.0,nKappa)
 
-  distFName = 'Maxwellian'
-  ;; FOR k=0,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)','$/kappa$ = ',kappas[k])]
-  muLetter = '!4l!X'
-  FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)',muLetter+' = ',kappas[k])]
-
+  ;; muLetter = '!4l!X'
+  ;; muLetter = 'kappa!Z(03BA)!3'
+  ;; FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)',muLetter+' = ',kappas[k])]
 
   ;;Get datas first
   curArr   = !NULL
@@ -75,9 +80,6 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
   ENDFOR
 
-
-  window          = WINDOW(DIMENSIONS=[1000,750],BUFFER=KEYWORD_SET(save_eps))
-
   nCol            = 2
   nRow            = 1
 
@@ -86,6 +88,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   
   theorieInd      = deux
   distFInd        = prem
+
   theorLayout     = [nCol,nRow,theorieInd]
   distFLayout     = [nCol,nRow,distFInd]
 
@@ -99,7 +102,8 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   energyRange     = [1,4D4]
 
   potBarRange     = [0.1,MAX(potBar)]
-  curRange        = MINMAX(curArr)*1D6
+  curRange        = MINMAX(curArr[*,WHERE(potBar GE potBarRange[0])])*1D6
+  curRange[1]    *= 1.1
 
   potLog          = 1
   energyLog       = 1
@@ -108,6 +112,14 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
   font_size       = 16
   
+  truncate_at     = KEYWORD_SET(truncate_at) ? truncate_at : 6
+
+  junk            = MIN(ABS(potBar-10),kbTeq10Ind)
+  prosjent        = (curArr[*,kbTeq10Ind]-curArr[0,kbTeq10Ind])/curArr[0,kbTeq10Ind]
+
+  distFName = 'Maxw(+0%)'
+  FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.1," (+",I0,"%)")','$\kappa$=',kappas[k],100.*prosjent[k])]
+
   CASE STRUPCASE(distUnits) OF
      'EFLUX': BEGIN
         pPref          = '-eFlux_fit'
@@ -125,14 +137,22 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
      END
   ENDCASE
 
+  ;;Winder
+  titleString     = STRING(FORMAT='("N = ",F0.2," cm!U-3!N, T = ",I0," eV, R!DB!N = ",F0.1,A0)', $
+                           N[0],T[0],R_B[0],RBSuff)
+  window          = WINDOW(DIMENSIONS=[1000,750],BUFFER=KEYWORD_SET(save_eps), $
+                           TITLE=titleString, $
+                           FONT_SIZE=font_size*1.4)
+
   ;;j-v curves
-  FOR k=0,nKappa-1 DO BEGIN
+  FOR k=0,(nKappa < truncate_at)-1 DO BEGIN
 
 
      CASE k OF
         0: BEGIN
 
            theorPArr[k] = PLOT(potBar,TRANSPOSE(curArr[k,*])*1D6, $
+                               NAME=distFName[k], $
                                XTITLE='e $\phi$ / k!DB!NT', $
                                YTITLE='Current Density ($\mu$A/m!U2!N)', $
                                XLOG=potLog, $
@@ -152,6 +172,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
                                YGRIDSTYLE=[3,'ED6E'X], $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
+                               THICK=thick[k], $
                                FONT_SIZE=font_size, $
                                ;; LAYOUT=theorLayout, $
                                OVERPLOT=k NE 0, $
@@ -162,8 +183,10 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
         ELSE: BEGIN
 
            theorPArr[k] = PLOT(potBar,TRANSPOSE(curArr[k,*])*1D6, $
+                               NAME=distFName[k], $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
+                               THICK=thick[k], $
                                ;; LAYOUT=theorLayout, $
                                POSITION=theorPosition, $
                                /OVERPLOT, $
@@ -176,7 +199,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
   ENDFOR
 
   ;;distF curves
-  FOR k=0,nKappa-1 DO BEGIN
+  FOR k=0,(nKappa < truncate_at)-1 DO BEGIN
 
 
      CASE k OF
@@ -195,6 +218,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
                                YTICKFORMAT='exponentlabel', $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
+                               THICK=thick[k], $
                                FONT_SIZE=font_size, $
 ;                               ;; LAYOUT=distFLayout, $
                                POSITION=distFPosition, $
@@ -206,8 +230,10 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
            ;;energy style
            distFPArr[k] = PLOT(pot,TRANSPOSE(distFArr[k,*]), $
+                               NAME=distFName[k], $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
+                               THICK=thick[k], $
                                ;; LAYOUT=distFLayout, $
                                POSITION=distFPosition, $
                                /OVERPLOT, $
@@ -220,14 +246,22 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE
 
   ENDFOR
 
-  legend = LEGEND(TARGET=distFPArr, $
-                  POSITION=[0.01,0.8], $
+  ;; legend = LEGEND(TARGET=distFPArr[0:(truncate_at-1)], $
+  legend = LEGEND(TARGET=theorPArr[0:(truncate_at-1)], $
+                  POSITION=[0.41,0.355], $
+                  FONT_SIZE=font_size*0.9, $
                   /NORMAL)
 
   IF KEYWORD_SET(save_eps) THEN BEGIN
 
-  ENDIF
+     filNavn = outPlotPref + STRING(FORMAT='(I02,"_RB",I0)',truncate_at,R_B[0]) + '.eps'
+     
+     PRINT,"Saving " + filNavn + ' ...'
+     
+     window.Save,plotDir+filNavn
+     window.Close
+     window = !NULL
 
-  STOP
+  ENDIF
 
 END

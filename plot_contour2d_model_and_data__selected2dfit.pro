@@ -109,14 +109,14 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
            ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(fit2DStruct.bestFit1DParams.fitStatus EQ 0 ? 'Y' : 'N')), $
 
            IF N_ELEMENTS(fitString) GT 0 THEN BEGIN
-              XYOUTS,0.12,0.27,fitString, $
+              XYOUTS,0.19,0.27,fitString, $
                      CHARSIZE=1.0, $
                      FONT=0, $
                      /NORMAL, $
                      /NOCLIP
            ENDIF
 
-           XYOUTS,0.12,0.25,'!11' + theString + '!X', $ ;+ $
+           XYOUTS,0.19,0.25,'!11' + theString + '!X', $ ;+ $
                   ;; XYOUTS,0.12,0.28,theString, $ ;+ $
                   CHARSIZE=1.0, $
                   FONT=0, $
