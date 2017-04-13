@@ -266,7 +266,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         saveStr  = 'SAVE,'
 
-        saveStr += 'KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt'
+        saveStr += 'KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,'
         
         IF N_ELEMENTS(je) GT 0 THEN BEGIN
            saveStr += 'je,'

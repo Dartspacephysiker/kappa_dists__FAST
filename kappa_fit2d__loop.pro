@@ -22,6 +22,100 @@
 ; MODIFICATION HISTORY: 2016/07 Born somewhere in here
 ;
 ;-
+PRO KAPPA_LOOP__GET_ANGLES,AorigArr, $
+                           YorigArr, $
+                           useTheseAnglesIndex, $
+                           tempSCRange, $
+                           alleyOop, $
+                           nReqSCAngles, $
+                           FIT1D__AVERAGE_OVER_ANGLERANGE=fit1D__average_over_angleRange, $
+                           FIT1D__USING_SC_SPEC=fit1D__using_sc_spec, $
+                           OUT_ANGLEBIN_I=angleBin_i, $
+                           OUT_TMPUSEANGLES=tmpUseAngles
+
+        tmpUseAngles    = AorigArr[*,useTheseAnglesIndex]
+
+        CASE alleyOop OF
+           0: BEGIN
+              angleBins  = tmpUseAngles GE tempSCRange[0] AND tmpUseAngles LE tempSCRange[1]
+           END
+           1: BEGIN
+              angleBins  = tmpUseAngles GE tempSCRange[0] OR tmpUseAngles LE tempSCRange[1]
+           END
+           
+        ENDCASE
+
+        ;;NOTE: AOrigArr[angleBin_i,usetheseanglesindex]-tempallangles[angleBin_i] = 0 EVERYWHERE
+        ;;This is good; you can use angleBin_i with AOrigArr
+        angleBin_i       = WHERE(angleBins,nAngles)
+
+        ;;2016/09/02 What on earth am I doing here?
+        ;;Oh yeah, making sure that we have enough angles to do stuff
+        CASE 1 OF
+           nAngles LT nReqSCAngles: BEGIN
+
+              WHILE nAngles LT nReqSCAngles DO BEGIN
+                 ;;Sort the angles, get indices for unsorting them, find out which angle to include next
+                 sort_i   = SORT(tmpUseAngles)
+                 tAngles  = tmpUseAngles[sort_i]
+                 unsort_i = VALUE_LOCATE(tAngles,tmpUseAngles)
+                 minAngle = MIN(tmpUseAngles[angleBin_i])
+                 maxAngle = MAX(tmpUseAngles[angleBin_i])
+                 IF ~ARRAY_EQUAL(tAngles[unsort_i],tmpUseAngles) THEN STOP
+
+                 ;;Get the next angles on either side
+                 curMinMax_i = VALUE_LOCATE(tAngles, $
+                                            [minAngle, $
+                                             maxAngle])
+                 IF curMinMax_i[0] EQ 0                       THEN curMinMax_i[0] += 1 ELSE curMinMax_i[0] -= 1
+                 IF curMinMax_i[1] GE (N_ELEMENTS(tAngles)-1) THEN curMinMax_i[1] -= 1 ELSE curMinMax_i[1] += 1
+                 this = MIN(ABS([tAngles[curMinMax_i[0]]-minAngle,$
+                                 tAngles[curMinMax_i[1]]-maxAngle]),bin_i)
+
+                 angleBin_i = [unsort_i[curMinMax_i[bin_i]],angleBin_i]
+
+
+                 nAngles++
+
+              ENDWHILE
+
+           END
+           nAngles GT nReqSCAngles: BEGIN
+
+              ;; sort_i   = SORT(tmpUseAngles)
+              ;; tAngles  = tmpUseAngles[sort_i]
+              ;; unsort_i = VALUE_LOCATE(tAngles,tmpUseAngles)
+              ;; minAngle = MIN(tmpUseAngles[angleBin_i])
+
+              this = GET_N_MAXIMA_IN_ARRAY(ABS(tmpUseAngles[angleBin_i]), $
+                                           /DO_MINIMA, $
+                                           N=nReqSCAngles, $
+                                           OUT_I=angleBin_ii)
+
+              this        *= ABS(tmpUseAngles[angleBin_i[angleBin_ii]])/tmpUseAngles[angleBin_i[angleBin_ii]] 
+              ;; tmpUseAngles = TEMPORARY(this)
+              angleBin_i   = angleBin_i[angleBin_ii]
+
+           END
+           ELSE:
+        ENDCASE
+
+
+        ;; IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN STOP
+        IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN PRINT,'WHOA!'
+
+        IF KEYWORD_SET(fit1D__average_over_angleRange) AND ~KEYWORD_SET(fit1D__using_sc_spec) THEN BEGIN
+           tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
+           FOR iAngle=0,nAngles-1 DO BEGIN
+              YorigArr[angleBin_i[iAngle],*]  = tempY
+           ENDFOR
+        ENDIF
+
+        ;;Make angles start from field aligned, go back and forth
+        ;;Doesn't change which angles we use, but it does change the order
+        angleBin_i = angleBin_i[SORT(ABS(tmpUseAngles[angleBin_i]))]
+
+END
 PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       BOUNDS=bounds, $
                       ESTFACS=estFacs, $
@@ -117,6 +211,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ENDELSE
   
   ;;Init source-cone angles
+  ;;Init angles we want to hang around
+  INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I, $
+     tempSCRange,alleyOop,nEnergies, $
+     ANGLERANGE=KF2D__SDTData_opt.electron_angleRange, $
+     AORIGARR=angles[*,*,0], $
+     OUT_NREQ_ANGLES=nReqSCAngles, $
+     OUT_USEANGLES__ENERGYIND=useAngles__energyInd
+
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
 
@@ -129,11 +231,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                 OUT_AVGFACTORARR=avgFactorArr, $
                 OUT_NORMARR=normArr)
 
-        tempAllAngles    = [0.]
-        tempAngle        = 0.
-        ;; junk             = MIN(ABS(AorigArr[*,*]),useTheseAnglesIndex)
-        junk             = MIN(ABS(angles[*,*,0]),useTheseAnglesIndex)
-        angleBin_i       = [0]
+        ;; tmpUseAngles     = [0.]
+        ;; tempAngle        = 0.
+        ;; junk             = MIN(ABS(AorigArr[*,*]),useAngles__energyInd)
+        ;; junk             = MIN(ABS(angles[*,*,0]),useAngles__energyInd)
+        ;; angleBin_i       = [0]
         nAngles          = 1
         nReqSCAngles     = 1
 
@@ -143,34 +245,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                             /RETRACE, $
                             ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                             UNITS=units)
-           ;; oneCountArr   = oneCount_data[*,*,iTime]
         END
 
-        ;;Need to peel one ind off end to junk retrace
-        ;; IF KEYWORD_SET(synthPackage) THEN BEGIN
-
-        ;;    IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
-        ;;       synthGauss                  = diff_eFlux
-        ;;       synthGauss.data[*]          = 0.0
-        ;;    ENDIF
-        ;; ENDIF
 
      END
      ELSE: BEGIN
-        INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I, $
-           tempSCRange,alleyOop,nEnergies, $
-           ANGLERANGE=KF2D__SDTData_opt.electron_angleRange, $
-           AORIGARR=angles[*,*,0], $
-           OUT_NREQ_ANGLES=nReqSCAngles, $
-           OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
 
-        ;;Init loss-cone angles
-        ;; INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I, $
-        ;;    tempLCRange,alleyOop,nEnergies, $
-        ;;    ANGLERANGE=KF2D__SDTData_opt.electron_lca, $
-        ;;    AORIGARR=angles[*,*,0], $
-        ;;    OUT_NREQ_ANGLES=nReqSCAngles, $
-        ;;    OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
      END
   ENDCASE
 
@@ -178,17 +258,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
         ;;Vary bulk E [0], Temperature [1], kappa [2], and density [3] (but not angle)
-                                                                           ;Vary                                    
-        kappa_fixA        = [0, $                                          ;bulk E      [0]                              
+        kappa_fixA        = [0, $                                          ;Vary bulk E [0]                              
                              KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)                         
                              0, $                                          ;kappa       [2]
                              KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not angle)
                              1] 
         
-        
-
-                                                                           ;Vary
-        gauss_fixA        = [0, $                                          ;bulk E [0]
+        gauss_fixA        = [0, $                                          ;Vary bulk E [0]
                              KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)
                              1, $
                              KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not kappa or angle)
@@ -261,66 +337,20 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Decide—energy spectrum or angle stuff?
-     IF ~KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+     ;; IF ~KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) THEN BEGIN
 
-        tempAllAngles    = AorigArr[*,useTheseAnglesIndex]
+        KAPPA_LOOP__GET_ANGLES,AorigArr, $
+                               YorigArr, $
+                               useAngles__energyInd, $
+                               tempSCRange, $
+                               alleyOop, $
+                               nReqSCAngles, $
+                               FIT1D__AVERAGE_OVER_ANGLERANGE=fit1D__average_over_angleRange, $
+                               FIT1D__USING_SC_SPEC=KF2D__Curvefit_opt.fit1D__sc_eSpec, $
+                               OUT_ANGLEBIN_I=angleBin_i, $
+                               OUT_TMPUSEANGLES=tmpUseAngles
 
-        CASE alleyOop OF
-           0: BEGIN
-              angleBins  = tempAllAngles GE tempSCRange[0] AND tempAllAngles LE tempSCRange[1]
-           END
-           1: BEGIN
-              angleBins  = tempAllAngles GE tempSCRange[0] OR tempAllAngles LE tempSCRange[1]
-           END
-           
-        ENDCASE
-
-        ;;NOTE: AOrigArr[angleBin_i,usetheseanglesindex]-tempallangles[angleBin_i] = 0 EVERYWHERE
-        ;;This is good; you can use angleBin_i with AOrigArr
-        angleBin_i       = WHERE(angleBins,nAngles)
-
-        ;;2016/09/02 What on earth am I doing here?
-        ;;Oh yeah, making sure that we have enough angles to do stuff
-        WHILE nAngles LT nReqSCAngles DO BEGIN
-           ;;Sort the angles, get indices for unsorting them, find out which angle to include next
-           sort_i   = SORT(tempAllAngles)
-           tAngles  = tempAllAngles[sort_i]
-           unsort_i = VALUE_LOCATE(tAngles,tempAllAngles)
-           minAngle = MIN(tempAllAngles[angleBin_i])
-           maxAngle = MAX(tempAllAngles[angleBin_i])
-           IF ~ARRAY_EQUAL(tAngles[unsort_i],tempAllAngles) THEN STOP
-
-           ;;Get the next angles on either side
-           curMinMax_i = VALUE_LOCATE(tAngles, $
-                                      [minAngle, $
-                                       maxAngle])
-           IF curMinMax_i[0] EQ 0                       THEN curMinMax_i[0] += 1 ELSE curMinMax_i[0] -= 1
-           IF curMinMax_i[1] GE (N_ELEMENTS(tAngles)-1) THEN curMinMax_i[1] -= 1 ELSE curMinMax_i[1] += 1
-           this = MIN(ABS([tAngles[curMinMax_i[0]]-minAngle,$
-                           tAngles[curMinMax_i[1]]-maxAngle]),bin_i)
-
-           angleBin_i = [unsort_i[curMinMax_i[bin_i]],angleBin_i]
-
-
-           nAngles++
-
-        ENDWHILE
-
-        ;; IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN STOP
-        IF N_ELEMENTS(UNIQ(angleBin_i)) LT nReqSCAngles THEN PRINT,'WHOA!'
-
-        IF KEYWORD_SET(fit1D__average_over_angleRange) THEN BEGIN
-           tempY                              = TOTAL(YorigArr[angleBin_i,*],1)/DOUBLE(nAngles)
-           FOR iAngle=0,nAngles-1 DO BEGIN
-              YorigArr[angleBin_i[iAngle],*]  = tempY
-           ENDFOR
-        ENDIF
-
-        ;;Make angles start from field aligned, go back and forth
-        ;;Doesn't change which angles we use, but it does change the order
-        angleBin_i = angleBin_i[SORT(ABS(tempAllAngles[angleBin_i]))]
-
-     ENDIF
+     ;; ENDIF
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
      dat                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
@@ -340,6 +370,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      FOR iiAngle=0,nAngles-1 DO BEGIN
 
         iAngle             = angleBin_i[iiAngle]
+        tempAngle          = tmpUseAngles[iAngle]
 
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
@@ -364,7 +395,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               worig              = REFORM(worigArr[iAngle,*])
               Aorig              = REFORM(AorigArr[iAngle,*])
 
-              tempAngle          = tempAllAngles[iAngle]
               tempAngleEstRange  = [tempAngle-1.0,tempAngle+1.0]
 
               IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
@@ -570,7 +600,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               good_kappaFits_i                   = [good_kappaFits_i,N_ELEMENTS(kappaFits)-1]
 
               gotKappa                           = 1
-              PRINT,"Got kappa 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
+              PRINT,FORMAT='("Got kappa 1D fit at angle ",F0.2)',tempAngle
            ENDIF
 
            IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
@@ -595,7 +625,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
                  gotGauss                           = 1
               
-                 PRINT,"Got Gauss 1D fit at angle " + STRCOMPRESS(tempAngle,/REMOVE_ALL)
+                 PRINT,FORMAT='("Got Gauss 1D fit at angle ",F0.2)',tempAngle
               ENDIF
            ENDIF
         ENDIF
@@ -640,7 +670,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
            EPS=eps
 
-     END
+     ENDIF 
 
      IF ~gotEm THEN BEGIN
         PRINT,"Couldn't muster good fits for iTime = " + STRCOMPRESS(iTime,/REMOVE_ALL) + '!!!'
@@ -665,6 +695,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            ;; angleBin_i, $
            !NULL, $
            good_angleBinK_i[0], $
+           ;; ESTIMATE_LOSSCONE=estimate_lossCone, $
+           /ESTIMATE_LOSSCONE, $
            /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
            PEAK_ENERGY=peak_energy, $
            ITIME=iTime, $
@@ -679,13 +711,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            ;; /PLOT_FLUX_PEAKS, $
            PLOTDIR=KF2D__Plot_opt.plotDir, $
            ORBIT=orbit, $
+           OUT_ESTIMATED_LC=estimated_lc, $
            SAVE_PLOTS=save_plots, $
            EPS=eps
         ;; /SAVE_PLOTS
 
-        ;; ENDIF
-
-        ;; IF ~(ABS(t-sm1) LT 0.1) AND ~(ABS(t-sm2) LT 0.1) THEN CONTINUE
+        KF2D__SDTData_opt.fit2D_dens_aRange = estimated_lc
 
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate): BEGIN

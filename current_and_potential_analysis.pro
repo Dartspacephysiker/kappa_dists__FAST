@@ -405,7 +405,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            CASE 1 OF
               STRMATCH(STRUPCASE(aRange__dens[0]),'SOURCE'): BEGIN
 
-                 scw = 85
+                 scw = 150
 
                  IF north_south[0] EQ -1 THEN BEGIN
                     aRange__dens = [180.-scw,180+scw]

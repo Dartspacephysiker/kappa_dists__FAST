@@ -361,7 +361,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
         window.Close
         window = !NULL
      ENDIF ELSE BEGIN
-        STOP
+        ;; STOP
      ENDELSE
   ENDIF
 

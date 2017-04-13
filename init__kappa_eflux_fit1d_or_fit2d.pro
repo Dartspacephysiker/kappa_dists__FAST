@@ -133,6 +133,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               SC_POT=sc_pot, $
                               OUT_ORB=orb, $
                               OUT_ANGLERANGE=e_angle, $
+                              OUT_NORTHSOUTH=north_south, $
                               FIT_EACH_ANGLE=fit_each_angle, $
                               CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
                               ANGLESTR=angleStr, $
@@ -146,15 +147,26 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
      e_angle[flip] -= 360.
   ENDIF
 
+  ;;Handle other angles
   IF KEYWORD_SET(pickMeUpLater) THEN BEGIN
      STR_ELEMENT,KF__SDTData_opt,'electron_angleRange',e_angle,/ADD_REPLACE
      electron_angleRange = e_angle
-  ENDIF
+  ENDIF ELSE BEGIN
+     flip = WHERE(KF__SDTData_opt.electron_angleRange GT 180,nFlip)
+     IF nFlip GT 0 THEN BEGIN
+        KF__SDTData_opt.electron_angleRange[flip] -= 360.
+     ENDIF
+  ENDELSE
 
   IF KEYWORD_SET(fit2D_DensPickMeUpToo) THEN BEGIN
      STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
      fit2D__density_angleRange = e_angle
-  ENDIF
+  ENDIF ELSE BEGIN
+     flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
+     IF nFlip GT 0 THEN BEGIN
+        KF__SDTData_opt.fit2D_dens_aRange[flip] -= 360.
+     ENDIF
+  ENDELSE
 
   orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
   ;; ENDIF ELSE BEGIN

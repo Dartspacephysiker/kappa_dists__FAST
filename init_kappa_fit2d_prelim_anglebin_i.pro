@@ -2,7 +2,7 @@ PRO INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
                                        ANGLERANGE=angleRange, $
                                        AORIGARR=AorigArr, $
                                        OUT_NREQ_ANGLES=nReqAngles, $
-                                       OUT_USETHESEANGLESINDEX=useTheseAnglesIndex
+                                       OUT_USEANGLES__ENERGYIND=useAngles__energyInd
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -39,8 +39,8 @@ PRO INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I,tempRange,alleyOop,nEnergies, $
      nAnglesPerEnergy[k]  = N_ELEMENTS(WHERE((AorigArr[*,k] GE tempRange[0]) AND $
                                              (AorigArr[*,k] GE tempRange[1])))
   ENDFOR
-  junk                    = MAX(nAnglesPerEnergy,useTheseAnglesIndex)
-  tempAllAngles           = AorigArr[*,useTheseAnglesIndex]
+  junk                    = MAX(nAnglesPerEnergy,useAngles__energyInd)
+  tempAllAngles           = AorigArr[*,useAngles__energyInd]
 
      CASE alleyOop OF
         0: BEGIN
