@@ -624,7 +624,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         ERROR_ESTIMATES=error_estimates, $
                         MAP_TO_100KM=map_to_100km, $ 
                         ORBIT=orbit, $
-                        ;; /NEW_MOMENT_ROUTINE, $
+                        /NEW_MOMENT_ROUTINE, $
                         QUIET=quiet, $
                         OUTTIME=time, $
                         OUT_N=n, $
@@ -656,7 +656,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ERROR_ESTIMATES=error_estimates, $
                            MAP_TO_100KM=map_to_100km, $ 
                            ORBIT=orbit, $
-                           ;; /NEW_MOMENT_ROUTINE, $
+                           /NEW_MOMENT_ROUTINE, $
                            QUIET=quiet, $
                            OUTTIME=time1, $
                            OUT_N=n1, $
