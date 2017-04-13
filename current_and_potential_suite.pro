@@ -80,8 +80,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
-     ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
-     USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+     ;; ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+     ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -130,6 +130,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
+                                      ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
                                       ERROR_BAR_FACTOR=errorBarFac, $
                                       USEI__RELCHANGE=useInds__relChange, $
                                       FRACCHANGE_NDOWN=fracChange_NDown, $
@@ -405,7 +406,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         MEAN(JVPlotData.pot[useInds]), $
         MEAN(JVPlotData.cur[useInds])
 
-  suppress_magRat_sum = 0
+  suppress_magRat_sum = 1
   IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
 
      junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time[useInds],/TIME_ARRAY)

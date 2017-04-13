@@ -157,7 +157,10 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
 
      ENDELSE
 
-     estimated_lc = [min_negAngle,min_posAngle]
+     ;; estimated_lc = [min_negAngle,min_posAngle]
+
+     pickAngle    = ABS(min_negAngle) > min_posAngle
+     estimated_lc = [-1.D,1.D]*pickAngle
 
   ENDIF
 

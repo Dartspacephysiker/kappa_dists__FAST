@@ -716,7 +716,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            EPS=eps
         ;; /SAVE_PLOTS
 
-        KF2D__SDTData_opt.fit2D_dens_aRange = estimated_lc
+        ;; KF2D__SDTData_opt.fit2D_dens_aRange = estimated_lc
 
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate): BEGIN
@@ -750,6 +750,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               FIT2D__SHOW__FITSTRING='Kappa', $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
+              IN_ESTIMATED_LC=estimated_lc, $
               UNITS=units, $
               EPS=eps
 
@@ -788,6 +789,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               FIT2D__SHOW__FITSTRING='Maxwell', $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
+              IN_ESTIMATED_LC=estimated_lc, $
               UNITS=units, $
               EPS=eps
            

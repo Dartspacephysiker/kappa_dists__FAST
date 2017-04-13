@@ -45,7 +45,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
                      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
                      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-                     FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
+                     ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
                      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
                      N_ENERGIES_BELOW_PEAK=n_below_peak, $
                      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
@@ -74,7 +74,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      DO_ALL_TIMES=do_all_times, $
                      ENERGY_ELECTRONS=energy_electrons, $
                      ELECTRON_ANGLERANGE=electron_angleRange, $
-                     ELECTRON_LOSSCONE_ANGLE=electron_lca, $
+                     ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                      _EXTRA=e)
 

@@ -3,7 +3,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     DO_ALL_TIMES=do_all_times, $
                                     ENERGY_ELECTRONS=energy_electrons, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
-                                    ELECTRON_LOSSCONE_ANGLE=electron_lca, $
+                                    ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                                     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                                     _EXTRA=e
 
@@ -23,7 +23,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    energy_electrons    :[4,3.5e4], $
                    routine             :'get_fa_' + defEEB_or_EES, $
                    electron_anglerange :defElectron_angleRange, $
-                   electron_lca        :[-180.,180.], $
+                   ;; electron_lca        :[-180.,180.], $
                    fit2D_dens_aRange   :defFit2D_dens_angleRange, $
                    densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
@@ -73,27 +73,27 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
   ;; kSDTData_opt.fit2D_dens_aRange           = kSDTData_opt.electron_angleRange
   
-  IF N_ELEMENTS(electron_lca) GT 0 THEN BEGIN
-     CASE N_ELEMENTS(electron_lca) OF
-        1: BEGIN
-           kSDTData_opt.electron_lca       = [ABS(electron_lca),-ABS(electron_lca)]
-        END
-        2: BEGIN
-           kSDTData_opt.electron_lca       = electron_lca
-          END
-        ELSE: BEGIN
-           PRINT,'Bogus lca provided! Has to be one or two elements.'
-           STOP
-        END
-     ENDCASE
-     PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,2(F0.2,:,", "))', $
-           kSDTData_opt.electron_lca
-     PRINT,"     (i.e., not fitting angles outside the above range)"
-     ;; PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
-     ;;       kSDTData_opt.electron_lca
-     ;; PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
-     ;;       kSDTData_opt.fit2D_dens_aRange
-  ENDIF
+  ;; IF N_ELEMENTS(electron_lca) GT 0 THEN BEGIN
+  ;;    CASE N_ELEMENTS(electron_lca) OF
+  ;;       1: BEGIN
+  ;;          kSDTData_opt.electron_lca       = [ABS(electron_lca),-ABS(electron_lca)]
+  ;;       END
+  ;;       2: BEGIN
+  ;;          kSDTData_opt.electron_lca       = electron_lca
+  ;;         END
+  ;;       ELSE: BEGIN
+  ;;          PRINT,'Bogus lca provided! Has to be one or two elements.'
+  ;;          STOP
+  ;;       END
+  ;;    ENDCASE
+  ;;    PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,2(F0.2,:,", "))', $
+  ;;          kSDTData_opt.electron_lca
+  ;;    PRINT,"     (i.e., not fitting angles outside the above range)"
+  ;;    ;; PRINT,FORMAT='("kSDTData_opt.electron_lca",T45,":",T48,F0.2)', $
+  ;;    ;;       kSDTData_opt.electron_lca
+  ;;    ;; PRINT,FORMAT='("kSDTData_opt.fit2D_dens_aRange",T45,":",T48,2(F0.2,:,", "))', $
+  ;;    ;;       kSDTData_opt.fit2D_dens_aRange
+  ;; ENDIF
   
   IF N_ELEMENTS(fit2D__density_angleRange) GT 0 THEN BEGIN
      ;; kSDTData_opt.fit2D_dens_aRange      = fit2D__density_angleRange

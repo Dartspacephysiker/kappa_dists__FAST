@@ -10,7 +10,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                                         DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                                         N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
-                                        DENS_ANGLERANGE=dens_angleRange, $
+                                        ATM_LC_ANGLERANGE=atm_lc_angleRange, $
                                         DONT_SHRINK_PARSED_STRUCT=dont_shrink, $
                                         DESTROY_INFO_LIST=destroy, $
                                         IN_GOOD_I=in_good_i, $
@@ -45,9 +45,10 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   SDTStr              = REPLICATE(fit2D_inf_list[0].SDT,nFits)
   fitParams           = MAKE_ARRAY(nFitParams,nFits,             VALUE=0.0,/FLOAT    )
-  fitDens             = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  obsTemp             = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  obsFAConduct        = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  obs_scDens          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  estimated_sc        = MAKE_ARRAY(2,nFits,                      VALUE=0.0,/FLOAT    )
+  obs_scTemp          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  obs_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
   fitFAConduct        = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
   errMsg              = MAKE_ARRAY(nFits,                                  /STRING   )
   chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/FLOAT   )
@@ -75,7 +76,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      tmpKappa         = fit2D_inf_list[k].fitParams[2]
 
      IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].fitDens GT highDens_thresh THEN BEGIN
+        IF fit2D_inf_list[k].obs_scDens GT highDens_thresh THEN BEGIN
            nExcluded_highDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
@@ -84,7 +85,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      ENDIF
 
      IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].fitDens LT lowDens_thresh THEN BEGIN
+        IF fit2D_inf_list[k].obs_scDens LT lowDens_thresh THEN BEGIN
            nExcluded_lowDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
@@ -132,15 +133,16 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         ;;First get all the bins nearest to bulk energy
         junk = MIN(ABS(fit2D_inf_list[k].SDT.energy[*,0]-fit2D_inf_list[k].fitParams[0]),bulk_e__ind)
         tmpDat = fit2D_inf_list[k].SDT.data[bulk_e__ind,*]
-        IF KEYWORD_SET(dens_angleRange) THEN BEGIN
+        
+        IF KEYWORD_SET(atm_lc_angleRange) THEN BEGIN
            CASE 1 OF
               KEYWORD_SET(south): BEGIN
-                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) OR $
-                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE atm_lc_angleRange[0]) OR $
+                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE atm_lc_angleRange[1]),nAnKeep)
               END
               ELSE: BEGIN
-                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE dens_angleRange[0]) AND $
-                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE dens_angleRange[1]),nAnKeep)
+                 angle_i = WHERE((fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] GE atm_lc_angleRange[0]) AND $
+                                 (fit2D_inf_list[k].SDT.theta[bulk_e__ind,*] LE atm_lc_angleRange[1]),nAnKeep)
               END
            ENDCASE
            IF nAnKeep LT 2 THEN STOP
@@ -156,9 +158,10 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   SDTStr[k]         = fit2D_inf_list[k].SDT
   fitParams[*,k]    = fit2D_inf_list[k].fitParams
-  fitDens[k]        = fit2D_inf_list[k].fitDens
-  obsTemp[k]        = fit2D_inf_list[k].obsTemp
-  obsFAConduct[k]   = fit2D_inf_list[k].obsFAConduct
+  obs_scDens[k]        = fit2D_inf_list[k].obs_scDens
+  estimated_sc[*,k] = fit2D_inf_list[k].estimated_sc
+  obs_scTemp[k]        = fit2D_inf_list[k].obs_scTemp
+  obs_scFAConduct[k]   = fit2D_inf_list[k].obs_scFAConduct
   fitFAConduct[k]   = fit2D_inf_list[k].fitFAConduct
   errMsg[k]         = fit2D_inf_list[k].errMsg
   chi2[k]           = fit2D_inf_list[k].chi2
@@ -263,9 +266,10 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   fit2D             = {SDT          : SDTStr     [keep_i], $
                        fitParams    : fitParams[*,keep_i], $
-                       fitDens      : fitDens    [keep_i], $
-                       obsTemp      : obsTemp    [keep_i], $
-                       obsFAConduct : obsFAConduct[keep_i], $
+                       estimated_sc : estimated_sc[*,keep_i], $
+                       obs_scDens   : obs_scDens    [keep_i], $
+                       obs_scTemp   : obs_scTemp    [keep_i], $
+                       obs_scFAConduct : obs_scFAConduct[keep_i], $
                        fitFAConduct : fitFAConduct[keep_i], $
                        chi2         : chi2       [keep_i], $
                        errMsg       : errMsg     [keep_i], $

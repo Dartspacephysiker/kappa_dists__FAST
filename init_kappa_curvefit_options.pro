@@ -25,7 +25,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
    FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
    FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
-   FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
+   ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__WEIGHTING=fit2D__weighting, $
@@ -352,12 +352,12 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
            kCurvefit_opt.fit2D__bulk_e_anis_factor
   ENDIF
 
-  IF N_ELEMENTS(fit2D__exclude_lca_from_densCalc) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2D__exclude_lca_from_densCalc = fit2D__exclude_lca_from_densCalc
+  ;; IF N_ELEMENTS(fit2D__exclude_lca_from_densCalc) GT 0 THEN BEGIN
+  ;;    kCurvefit_opt.fit2D__exclude_lca_from_densCalc = fit2D__exclude_lca_from_densCalc
 
-     PRINT,FORMAT='("kCurvefit_opt.fit2D__exclude_lca_from_densCalc",T45,":",T48,I0)', $
-     kCurvefit_opt.fit2D__exclude_lca_from_densCalc
-  ENDIF
+  ;;    PRINT,FORMAT='("kCurvefit_opt.fit2D__exclude_lca_from_densCalc",T45,":",T48,I0)', $
+  ;;    kCurvefit_opt.fit2D__exclude_lca_from_densCalc
+  ;; ENDIF
 
   IF N_ELEMENTS(fit2D__disable_bFunc) GT 0 THEN BEGIN
      kCurvefit_opt.fit2D__disable_bFunc = fit2D__disable_bFunc

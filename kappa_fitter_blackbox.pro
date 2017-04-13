@@ -1,7 +1,7 @@
 ;;10/08/16
 PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ELECTRON_SOURCECONEANGLE=electron_angleRange, $
-                          ELECTRON_LOSSCONEANGLE=electron_lca, $
+                          ;; ELECTRON_LOSSCONEANGLE=electron_lca, $
                           ENERGY_ELECTRONS=energy_electrons, $
                           JUST_DIFF_EFLUX=just_diff_eFlux, $
                           DIFF_EFLUX=diff_eFlux, $
@@ -138,7 +138,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
      MIN_PEAK_ENERGY=min_peak_energy, $
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
-     FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+     ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      FITFILE=fitFile, $
      LOADDIR=outDir
@@ -227,7 +227,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
         FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
         FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
-        FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
+        ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
         FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
         USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
@@ -238,7 +238,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ADD_ANGLE_LABEL=add_angle_label, $
         FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
         ELECTRON_ANGLERANGE=electron_angleRange, $
-        ELECTRON_LOSSCONE_ANGLE=electron_lca, $
+        ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
         NO_PLOTS=no_plots, $
         SAVE_FITPLOTS=save_fitplots, $
         PLOT_FULL_FIT=plot_full_fit, $
@@ -458,8 +458,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFitParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
-     fit2DK.fitDens = betterDensK
-     fit2DG.fitDens = betterDensG
+     fit2DK.obs_scDens = betterDensK
+     fit2DG.obs_scDens = betterDensG
      kFitParam_struct.N = betterDensK
      gFitParam_struct.N = betterDensG
 

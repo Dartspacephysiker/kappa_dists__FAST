@@ -177,6 +177,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; blankers                = !NULL
   blankers                = 'lc'
 
+  also_msph_sourcecone    = [1,0,0]
+
   label__which_eeb        = [0,0,1]
   label__which_times      = [0,1,0]
   aRange__moments_list    = LIST(aRange__moments_e_down,blankers,aRange__moments_i_up)
@@ -219,6 +221,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
+     ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $

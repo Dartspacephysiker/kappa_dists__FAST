@@ -18,7 +18,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    LABEL=label, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
-   USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+   ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
    ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
    ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -85,7 +85,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ENDIF
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
-     aRange__dens_e_down     = KEYWORD_SET(aRange__dens_e_down) ? aRange__dens_e_down : [0.,360.]
+     ;; aRange__dens_e_down     = KEYWORD_SET(aRange__dens_e_down) ? aRange__dens_e_down : [0.,360.]
 
      aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
      aRange__moments_i_up    = KEYWORD_SET(aRange__moments_i_up  ) ? aRange__moments_i_up   : [0.,360.]
@@ -161,6 +161,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      T_list                = LIST()
      Terr_list             = LIST()
 
+     source_list           = LIST()
+
      j_list                = LIST()
      je_list               = LIST()
      cur_list              = LIST()
@@ -235,7 +237,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            FIT2D__ONLY_FIT_PEAK_ERANGE=fit2D__only_fit_peak_eRange ,$
            FIT2D__ONLY_FIT_ABOVEMIN=fit2D__only_fit_aboveMin ,$
            FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
-           FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+           ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
            SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
            ;; FITFILE=fitFile, $
            LOADDIR=diffEfluxDir
@@ -393,8 +395,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDCASE
 
         aRange__dens = !NULL
-        IF N_ELEMENTS(use_msph_sourcecone_for_dens) GT 0 THEN BEGIN
-           aRange__dens = use_msph_sourcecone_for_dens[k] ? 'source' : !NULL
+        IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
+           aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
         ENDIF
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
@@ -639,7 +641,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         OUT_ERR_T=TErr, $
                         OUT_ERR_CURRENT=curErr, $
                         OUT_ERR_CHARE=charEErr, $
-                        OUT_MAPRATIO=mapRatio
+                        OUT_MAPRATIO=mapRatio, $
+                        OUT_STRUCT=momStruct
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
@@ -670,7 +673,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_ERR_T=T1Err, $
                            OUT_ERR_CURRENT=cur1Err, $
                            OUT_ERR_CHARE=charE1Err, $
-                           OUT_MAPRATIO=mapRatio
+                           OUT_MAPRATIO=mapRatio;; , $
+                           ;; OUT_STRUCT=oneStruct
 
         ENDIF
 
@@ -689,6 +693,17 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         curErr_list.Add,TEMPORARY(curErr)
         charEErr_list.Add,TEMPORARY(charEErr)
         Terr_list.Add,TEMPORARY(Terr)
+
+        sourceStruct = !NULL
+        STR_ELEMENT,momStruct,'source',sourceStruct
+        IF SIZE(sourceStruct,/TYPE) EQ 8 THEN BEGIN
+           ;;If k isn't 0, this isn't curPotList[edind]
+           IF k NE 0 THEN STOP ELSE BEGIN
+              source_list.Add,TEMPORARY(sourceStruct)
+              source_ind = k
+           ENDELSE
+
+        ENDIF
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            err1_list.Add,TEMPORARY(errors1)
@@ -728,6 +743,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           jeErr_list, $
           curErr_list, $
           charEErr_list, $
+          source_list, $
+          source_ind, $
           Terr_list, $
           time1_list, $
           n1_list, $
@@ -821,6 +838,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlT1err      = !NULL
      itvlCur1Err    = !NULL
      itvlErrors1    = !NULL
+     itvlInds       = !NULL
 
      FOR realK=0,nSegs-1 DO BEGIN
 
@@ -864,7 +882,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
         tmpT                = (T_list[k])[*,theseInds]
 
-
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
            ;; tmpN1            = (N1_list[k]).y[theseInds]
@@ -883,6 +900,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ENDIF
 
+        IF N_ELEMENTS(source_ind) GT 0 THEN BEGIN
+           IF realK EQ source_ind THEN BEGIN
+              itvlInds = [itvlInds,theseInds]
+           ENDIF
+        ENDIF
+        
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
 
@@ -1042,6 +1065,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
            tmpStruct      = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(bonus))
            
+           IF N_ELEMENTS(source_ind) GT 0 THEN BEGIN
+              IF k EQ source_ind THEN BEGIN
+                 source_struct = {source : source_list[0], $
+                                  inds   : TEMPORARY(itvlInds)}
+
+                 tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(source_struct))
+              ENDIF
+           ENDIF
+
         END
         ELSE: BEGIN
            tmpStruct      = {label    : label[k],$
@@ -1076,7 +1108,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         END
      ENDCASE
 
-     curPotList.Add,tmpStruct
+     curPotList.Add,TEMPORARY(tmpStruct)
   ENDFOR
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
