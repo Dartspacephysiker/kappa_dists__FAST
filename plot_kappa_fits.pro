@@ -320,7 +320,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2)]
-        fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x-4)))]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x)-4))]
         chiInd     = 4 + KEYWORD_SET(add_angle_label)
      ENDIF
 
@@ -358,7 +358,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
            fitTitle   = [fitTitle,'chi^2']
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
-           fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',gaussFit.chi2/(N_ELEMENTS(gaussFit.x-3)))]
+           fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',gaussFit.chi2/(N_ELEMENTS(gaussFit.x)-3))]
            chiInd     = 4 + KEYWORD_SET(add_angle_label)
         ENDIF
 

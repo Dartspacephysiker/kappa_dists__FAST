@@ -32,10 +32,10 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
                       [1,1], $
                       [1,1]]
   
-  kappaLim        = KEYWORD_SET(kappaLims    ) ? kappaLims    : [1.501D  ,100.0   ]
+  kappaLim        = KEYWORD_SET(kappaLims    ) ? kappaLims    : [1.505D   ,100.0   ]
   TempLim         = KEYWORD_SET(TempLims     ) ? TempLims     : [10      ,1.0E4   ]
   DensLim         = KEYWORD_SET(DensLims     ) ? DensLims     : [1E-3    ,100     ] 
-  magRatioLim     = KEYWORD_SET(magRatioLims ) ? magRatioLims : [1       ,1E5     ]
+  magRatioLim     = KEYWORD_SET(magRatioLims ) ? magRatioLims : [1       ,1D3     ]
 
   Alimits         = [[kappaLim] , $ ;kappa 
                      [TempLim ] , $ ;Temp

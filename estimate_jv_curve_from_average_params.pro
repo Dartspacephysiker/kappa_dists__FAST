@@ -1,27 +1,26 @@
 ;2017/03/18
 PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                          ORBIT=orbit, $
                                           A_IN=A_in, $
                                           KAPPALIMS=kappaLims, $   
                                           TEMPLIMS=TempLims, $    
                                           DENSLIMS=DensLims, $    
                                           MAGRATIOLIMS=magRatioLims, $
+                                          MULTI_MAGRATIO_MODE=multi_magRatio_mode, $
+                                          MAP__MULTI_MAGRATIO_ARRAY=multi_magRatio_array, $
+                                          MAP__MULTI_KAPPA_ARRAY=multi_kappa_array, $
+                                          MAP__2D=map__2D, $
                                           ORIGINATING_ROUTINE=routName, $
-                                          SAVEPLOT=savePlot, $
-                                          SPNAME=spName, $
+                                          OUT_KAPPA_A=A, $
+                                          OUT_GAUSS_A=AGauss, $
+                                          OUT_PLOTDATA=pData, $
+                                          OUT_MULTI_MAGRATIO=mMagDat, $
                                           _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  orbPref     = ''
-  IF KEYWORD_SET(orbit) THEN BEGIN
-     orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
-  ENDIF
-
   maxIter     = 3000
   fit_tol     = 1D-15
   gTol        = 1D-15
-
                              ;;            kappa,            Temp,            Dens,  R_B
   A           = KEYWORD_SET(A_in) ? A_in : [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D4]
 
@@ -63,119 +62,194 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   YError      = jvPlotData.curErr[avgs_JVfit.useInds]
   weights     = 1./ABS(jvPlotData.curErr[avgs_JVfit.useInds])^2
 
-  A           = MPFITFUN(jvFitFunc, $
-                         X,Y, $
-                         /NAN, $
-                         WEIGHTS=weights, $
-                         FUNCTARGS=fa_kappa, $
-                         BESTNORM=bestNorm, $
-                         NFEV=nfev, $
-                         FTOL=fit_tol, $
-                         GTOL=gTol, $
-                         STATUS=status, $
-                         BEST_RESID=best_resid, $
-                         PFREE_INDEX=ifree, $
-                         CALC_FJAC=calc_fjac, $
-                         BEST_FJAC=best_fjac, $
-                         PARINFO=kappaParamStruct, $
-                         QUERY=query, $
-                         NPEGGED=npegged, $
-                         NFREE=nfree, $
-                         DOF=dof, $
-                         COVAR=covar, $
-                         PERROR=perror, $
-                         MAXITER=maxIter, $
-                         NITER=itNum, $
-                         YFIT=yFit, $
-                         /QUIET, $
-                         ERRMSG=errMsg, $
-                         _EXTRA=extra)
+  CASE 1 OF
+     KEYWORD_SET(multi_magRatio_mode): BEGIN
 
-  AGauss      = MPFITFUN(jvFitFunc, $
-                         X,Y, $
-                         /NAN, $
-                         WEIGHTS=weights, $
-                         FUNCTARGS=fa_Gauss, $
-                         BESTNORM=bestNorm, $
-                         NFEV=nfev, $
-                         FTOL=fit_tol, $
-                         GTOL=gTol, $
-                         STATUS=gaussStatus, $
-                         BEST_RESID=best_resid, $
-                         PFREE_INDEX=ifree, $
-                         CALC_FJAC=calc_fjac, $
-                         BEST_FJAC=best_fjac, $
-                         PARINFO=gaussParamStruct, $
-                         QUERY=query, $
-                         NPEGGED=npegged, $
-                         NFREE=nfree, $
-                         DOF=dof, $
-                         COVAR=covar, $
-                         PERROR=perror, $
-                         MAXITER=maxIter, $
-                         NITER=itNum, $
-                         YFIT=yGaussFit, $
-                         /QUIET, $
-                         ERRMSG=errMsg, $
-                         _EXTRA=extra)
-
-  PRINT,"Kappa fitparams: "
-  PRINT_JV_FIT_PARAMS,A
-  PRINT,""
-  PRINT,"Gauss fitparams: "
-  PRINT_JV_FIT_PARAMS,AGauss
-  PRINT,""
-
-  titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-                            orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
-  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
-  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
-
-  window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
-
-  ;; that             = ERRORPLOT(X,Y,XError,YError, $
-  that             = ERRORPLOT(X,Y,YError, $
-                               SYMBOL='*', $
-                               LINESTYLE='', $
-                               NAME='Data', $
-                               TITLE=titleStr, $
-                               XTITLE='$\Phi$ (V)', $
-                               YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
-                               /CURRENT)
-  
-  ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
-  this             = PLOT(X,YFit, $
-                          NAME=kappaName, $
-                          COLOR='BLUE', $
-                          /OVERPLOT)
-  those            = PLOT(X,yGaussFit, $
-                          NAME=gaussName, $
-                          COLOR='Brown', $
-                          /OVERPLOT)
-
-  ;; legPos__data  = [(MAX(X)-MIN(X))*0.2+MIN(X),(MAX(Y)-MIN(Y))*0.95+MIN(Y)]
-  ;; legPos           = [0.5,0.85]
-  legPos           = [0.5,0.5]
-  ;; leg           = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
-  leg              = LEGEND(TARGET=[that,this,those], $
-                            POSITION=legPos)
+        CASE 1 OF
+           KEYWORD_SET(map__2D): BEGIN
 
 
-  IF KEYWORD_SET(savePlot) THEN BEGIN
+              dof = N_ELEMENTS(X); - 4
 
-     IF ~KEYWORD_SET(sPName) THEN BEGIN
-        sPName     = routName + '-JV_fixedTandN.png'
-     ENDIF
+              ;;Fix kappa [0] and magratio [3]
+              kappaParamStruct[0].fixed = 1B
+              kappaParamStruct[3].fixed = 1B
 
-     IF ~KEYWORD_SET(plotDir) THEN BEGIN
-        pDirSuff   = '/cur_and_pot_analysis'
-        SET_PLOT_DIR,plotDir,/FOR_SDT,ADD_SUFF=pDirSuff
-     ENDIF
+              nMagRatio = N_ELEMENTS(multi_magRatio_array)
+              nKappa    = N_ELEMENTS(multi_kappa_array)
+              ;; m2D_multi_kappa_array     = multi_kappa_array              # MAKE_ARRAY(nMagRatio,/FLOAT,VALUE=1.0)
+              ;; m2D_multi_magRatio_array  = MAKE_ARRAY(nKappa,/FLOAT,VALUE=1.0) # multi_magRatio_array
 
-     PRINT,"Saving to " + sPName + ' ...'
+              kappaArr  = multi_kappa_array                   # MAKE_ARRAY(nMagRatio,/FLOAT,VALUE=1.0)
+              magRatArr = MAKE_ARRAY(nKappa,/FLOAT,VALUE=1.0) # multi_magRatio_array
 
-     window1.Save,plotDir+sPName
+              chi2Arr   = MAKE_ARRAY(nKappa,nMagRatio,/FLOAT)
 
-  ENDIF
+              ;;Reclaim
+              A         = kappaParamStruct[*].value
+
+              FOR j=0,nKappa-1 DO BEGIN
+
+                 FOR k=0,nMagRatio-1 DO BEGIN
+
+                    ;; kappaParamStruct[3].value     = magRatArr[j,k]
+                    ;; kappaParamStruct[0].value     = kappaArr[j,k]
+
+                    yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
+                                                             A[1], $
+                                                             A[2], $
+                                                             X, $
+                                                             magRatArr[j,k], $
+                                                             IN_POTBAR=in_potBar, $
+                                                             OUT_POTBAR=potBar, $
+                                                             /NO_MULT_BY_CHARGE)*1D6
+                    
+                    ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
+                    ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                    chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dof
+                    chi2Arr[j,k]  = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                    ;; kappaArr[j,k] = A[0]
+
+                 ENDFOR
+
+              ENDFOR
+
+           END
+           ELSE: BEGIN
+
+              kappaParamStruct[3].fixed = 1B
+
+              nMagRatio = N_ELEMENTS(multi_magRatio_array)
+
+              magRatArr = multi_magRatio_array
+              kappaArr  = MAKE_ARRAY(nMagRatio,/FLOAT)
+              chi2Arr   = MAKE_ARRAY(nMagRatio,/FLOAT)
+
+              FOR k=0,nMagRatio-1 DO BEGIN
+
+                 kappaParamStruct[3].value     = multi_magRatio_array[k]
+                 kappaParamStruct[3].limits[1] = multi_magRatio_array[k]+.1
+
+                 A      = MPFITFUN(jvFitFunc, $
+                                   X,Y, $
+                                   /NAN, $
+                                   WEIGHTS=weights, $
+                                   FUNCTARGS=fa_kappa, $
+                                   BESTNORM=bestNorm, $
+                                   NFEV=nfev, $
+                                   FTOL=fit_tol, $
+                                   GTOL=gTol, $
+                                   STATUS=status, $
+                                   BEST_RESID=best_resid, $
+                                   PFREE_INDEX=ifree, $
+                                   CALC_FJAC=calc_fjac, $
+                                   BEST_FJAC=best_fjac, $
+                                   PARINFO=kappaParamStruct, $
+                                   QUERY=query, $
+                                   NPEGGED=npegged, $
+                                   NFREE=nfree, $
+                                   DOF=dof, $
+                                   COVAR=covar, $
+                                   PERROR=perror, $
+                                   MAXITER=maxIter, $
+                                   NITER=itNum, $
+                                   YFIT=yFit, $
+                                   /QUIET, $
+                                   ERRMSG=errMsg, $
+                                   _EXTRA=extra)
+                 
+                 ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
+                 ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                 chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dof
+                 chi2Arr[k]  = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                 kappaArr[k] = A[0]
+
+              ENDFOR
+
+
+           END
+        ENDCASE
+
+        mMagDat = {kappa  : TEMPORARY(kappaArr), $
+                   T      : avgs_JVfit.T.avg, $
+                   N      : avgs_JVfit.N.avg, $
+                   magRat : magRatArr, $
+                   chi2   : TEMPORARY(chi2Arr)}
+     END
+     ELSE: BEGIN
+
+
+        A           = MPFITFUN(jvFitFunc, $
+                               X,Y, $
+                               /NAN, $
+                               WEIGHTS=weights, $
+                               FUNCTARGS=fa_kappa, $
+                               BESTNORM=bestNorm, $
+                               NFEV=nfev, $
+                               FTOL=fit_tol, $
+                               GTOL=gTol, $
+                               STATUS=status, $
+                               BEST_RESID=best_resid, $
+                               PFREE_INDEX=ifree, $
+                               CALC_FJAC=calc_fjac, $
+                               BEST_FJAC=best_fjac, $
+                               PARINFO=kappaParamStruct, $
+                               QUERY=query, $
+                               NPEGGED=npegged, $
+                               NFREE=nfree, $
+                               DOF=dof, $
+                               COVAR=covar, $
+                               PERROR=perror, $
+                               MAXITER=maxIter, $
+                               NITER=itNum, $
+                               YFIT=yFit, $
+                               /QUIET, $
+                               ERRMSG=errMsg, $
+                               _EXTRA=extra)
+
+        AGauss      = MPFITFUN(jvFitFunc, $
+                               X,Y, $
+                               /NAN, $
+                               WEIGHTS=weights, $
+                               FUNCTARGS=fa_Gauss, $
+                               BESTNORM=bestNorm, $
+                               NFEV=nfev, $
+                               FTOL=fit_tol, $
+                               GTOL=gTol, $
+                               STATUS=gaussStatus, $
+                               BEST_RESID=best_resid, $
+                               PFREE_INDEX=ifree, $
+                               CALC_FJAC=calc_fjac, $
+                               BEST_FJAC=best_fjac, $
+                               PARINFO=gaussParamStruct, $
+                               QUERY=query, $
+                               NPEGGED=npegged, $
+                               NFREE=nfree, $
+                               DOF=dof, $
+                               COVAR=covar, $
+                               PERROR=perror, $
+                               MAXITER=maxIter, $
+                               NITER=itNum, $
+                               YFIT=yGaussFit, $
+                               /QUIET, $
+                               ERRMSG=errMsg, $
+                               _EXTRA=extra)
+
+        PRINT,"Kappa fitparams: "
+        PRINT_JV_FIT_PARAMS,A
+        PRINT,""
+        PRINT,"Gauss fitparams: "
+        PRINT_JV_FIT_PARAMS,AGauss
+        PRINT,""
+
+        pData = {X         : X      , $
+                 Y         : Y      , $
+                 Yerror    : Yerror , $
+                 YFit      : Yfit   , $
+                 YGaussFit : YGaussFit}
+
+
+     END
+  ENDCASE
 
 END

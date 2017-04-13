@@ -33,10 +33,15 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         ERROR_BAR_FACTOR=errorBarFac, $
                                         USEI__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
                                         USEI__RELCHANGE=useInds__relChange, $
-                                        FRACCHANGE_TDOWN=fracChange_TDown, $
                                         FRACCHANGE_NDOWN=fracChange_NDown, $
-                                        FRACERROR_TDOWN=fracError_TDown, $
+                                        FRACCHANGE_JDOWN=fracChange_JDown, $
+                                        FRACCHANGE_TDOWN=fracChange_TDown, $
                                         FRACERROR_NDOWN=fracError_NDown, $
+                                        FRACERROR_JDOWN=fracError_JDown, $
+                                        FRACERROR_TDOWN=fracError_TDown, $
+                                        USE_FRACERROR_NDOWN=use_fracError_NDown, $
+                                        USE_FRACERROR_JDOWN=use_fracError_JDown, $
+                                        USE_FRACERROR_TDOWN=use_fracError_TDown, $
                                         USEI__TWOLUMPS=useInds__twoLumps, $
                                         MAX_TDOWN=max_TDown, $
                                         MIN_TDOWN=min_TDown, $
@@ -283,18 +288,23 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
 
   useInds = GET_INDS_FOR_PLOT_THEORIE(JVPlotData, $
-                                     USEINDS__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
-                                     USEINDS__RELCHANGE=useInds__relChange, $
-                                     FRACCHANGE_TDOWN=fracChange_TDown, $
-                                     FRACCHANGE_NDOWN=fracChange_NDown, $
-                                     FRACERROR_TDOWN=fracError_TDown, $
-                                     FRACERROR_NDOWN=fracError_NDown, $
-                                     USEINDS__TWOLUMPS=useInds__twoLumps, $
-                                     MAX_TDOWN=max_TDown, $
-                                     MIN_TDOWN=min_TDown, $
-                                     MAX_NDOWN=max_NDown, $
-                                     MIN_NDOWN=min_NDown, $
-                                     TRANGES=tRanges)
+                                      USEINDS__INCLUDE_POSCURRENT=useInds__include_posCurrent, $
+                                      USEINDS__RELCHANGE=useInds__relChange, $
+                                      FRACCHANGE_NDOWN=fracChange_NDown, $
+                                      FRACCHANGE_JDOWN=fracChange_JDown, $
+                                      FRACCHANGE_TDOWN=fracChange_TDown, $
+                                      FRACERROR_NDOWN=fracError_NDown, $
+                                      FRACERROR_JDOWN=fracError_JDown, $
+                                      FRACERROR_TDOWN=fracError_TDown, $
+                                      USE_FRACERROR_NDOWN=use_fracError_NDown, $
+                                      USE_FRACERROR_JDOWN=use_fracError_JDown, $
+                                      USE_FRACERROR_TDOWN=use_fracError_TDown, $
+                                      USEINDS__TWOLUMPS=useInds__twoLumps, $
+                                      MAX_TDOWN=max_TDown, $
+                                      MIN_TDOWN=min_TDown, $
+                                      MAX_NDOWN=max_NDown, $
+                                      MIN_NDOWN=min_NDown, $
+                                      TRANGES=tRanges)
 
   negcur_i                    = WHERE(jvplotdata.cur LE 0)
   negcur_i                    = negcur_i[SORT(jvplotdata.pot[negcur_i])]

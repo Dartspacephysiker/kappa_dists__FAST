@@ -34,12 +34,16 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__MAGRATIOLIMS=magRatioLims, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
+   MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+   MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+   MAP__2D=map__2D, $
    TN_YLOG_NDOWN=TN_yLog_nDown, $
    PLOT_J_V_POTBAR=plot_j_v_potBar, $
    PLOT_JV_A_LA_ELPHIC=plot_jv_a_la_Elphic, $
    PLOT_T_AND_N=plot_T_and_N, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+   PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
    PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
    PLOT_EN_SPECS=plot_en_specs, $
    EN_SPECS__MOVIE=en_specs__movie, $
@@ -126,10 +130,15 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
                                       ERROR_BAR_FACTOR=errorBarFac, $
                                       USEI__RELCHANGE=useInds__relChange, $
-                                      FRACCHANGE_TDOWN=fracChange_TDown, $
                                       FRACCHANGE_NDOWN=fracChange_NDown, $
-                                      FRACERROR_TDOWN=fracError_TDown, $
+                                      FRACCHANGE_JDOWN=fracChange_JDown, $
+                                      FRACCHANGE_TDOWN=fracChange_TDown, $
                                       FRACERROR_NDOWN=fracError_NDown, $
+                                      FRACERROR_JDOWN=fracError_JDown, $
+                                      FRACERROR_TDOWN=fracError_TDown, $
+                                      USE_FRACERROR_NDOWN=use_fracError_NDown, $
+                                      USE_FRACERROR_JDOWN=use_fracError_JDown, $
+                                      USE_FRACERROR_TDOWN=use_fracError_TDown, $
                                       USEI__TWOLUMPS=useInds__twoLumps, $
                                       MAX_TDOWN=max_TDown, $
                                       MIN_TDOWN=min_TDown, $
@@ -224,19 +233,82 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[avgs_JVfit.useInds])]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                           ORBIT=orbit, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
                                            TEMPLIMS=TempLims, $    
                                            DENSLIMS=DensLims, $    
                                            MAGRATIOLIMS=magRatioLims, $
                                            ORIGINATING_ROUTINE=routName, $
-                                           SAVEPLOT=savePlot, $
-                                           SPNAME=j_v__fixTandN__spName, $
+                                           OUT_KAPPA_A=A, $
+                                           OUT_GAUSS_A=AGauss, $
+                                           OUT_PLOTDATA=pData, $
                                            _EXTRA=e
+
+     PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
+                                  KAPPA_A=A, $
+                                  GAUSS_A=AGauss, $
+                                  ORIGINATING_ROUTINE=routName, $
+                                  ORBIT=orbit, $
+                                  SAVEPLOT=savePlot, $
+                                  SPNAME=j_v__fixTandN__spName, $
+                                  _EXTRA=e
+
+
 
      ;; avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[useInds])]
 
+  ENDIF
+
+  IF KEYWORD_SET(plot_j_v_map__r_b_and_kappa__fixed_t_and_n) THEN BEGIN
+
+     ;;Options for R_B map
+     minR_B  = 5
+     maxR_B  = 5D3
+     map__2D = 1B
+     dR_B    = KEYWORD_SET(map__2D) ? 5 : 1
+     nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
+
+     map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
+     ;; map__multi_kappa_array    = [1.501,1.55,1.6,1.65,1.7,1.75,1.8,1.85,1.9,1.95,2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.25,3.50,3.75,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]
+     ;; map__multi_kappa_array    = [1.501,1.51,1.52,1.53,1.54,1.55,1.56,1.57,1.58,1.59, $
+     map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
+                                  1.6,1.625,1.65,1.675, $
+                                  1.7,1.725,1.75,1.775, $
+                                  1.8,1.825,1.85,1.875, $
+                                  1.9,1.95, $
+                                  2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9, $
+                                  3.0,3.25,3.50,3.75, $
+                                  4.0,4.25,4.5,4.75, $
+                                  5.0,5.25,5.5,5.75, $
+                                  6.0,6.25,6.5,6.75, $
+                                  7.0,7.5, $
+                                  8.0]
+
+     ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                           A_IN=A_in, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims, $
+                                           /MULTI_MAGRATIO_MODE, $
+                                           MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+                                           MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+                                           MAP__2D=map__2D, $
+                                           ORIGINATING_ROUTINE=routName, $
+                                           OUT_KAPPA_A=A, $
+                                           OUT_GAUSS_A=AGauss, $
+                                           ;; OUT_PLOTDATA=pData, $
+                                           OUT_MULTI_MAGRATIO=mMagDat, $
+                                           _EXTRA=e
+
+
+     PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
+        MAP__2D=map__2D, $
+        ORBIT=orbit, $
+        SAVEPLOT=savePlot
+
+     STOP
+     
   ENDIF
 
   plot_magCurrent_vs_current = 0
