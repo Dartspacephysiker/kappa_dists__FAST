@@ -1,5 +1,6 @@
 ;2017/04/12
 PRO PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
+                                 USE_SOURCE_AVGS=use_source_avgs, $
                                  KAPPA_A=A, $
                                  GAUSS_A=AGauss, $
                                  ORBIT=orbit, $
@@ -15,8 +16,16 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
      orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
+  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+     Temperature = avgs_JVfit.T_SC.avg
+     Density     = avgs_JVfit.N_SC.avg
+  ENDIF ELSE BEGIN
+     Temperature = avgs_JVfit.T.avg
+     Density     = avgs_JVfit.N.avg
+  ENDELSE
+
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-                            orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
+                            orbPref,Temperature,Density)
   kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
   gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
 

@@ -181,9 +181,12 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                       _EXTRA=e
   ENDIF
 
+  use_source_avgs = 1
+  
   IF KEYWORD_SET(plot_T_and_N) THEN BEGIN
      PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         jvPlotData, $
+        USE_SOURCE_AVGS=use_source_avgs, $
         ORIGINAL_PLOTIDEE=orig_plotIdee, $
         YLOG_NDOWN=TN_yLog_nDown, $
         USEI__TWOLUMPS=useInds__twoLumps, $
@@ -198,11 +201,20 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         _EXTRA=e
   ENDIF
 
+  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+     Temperature = avgs_JVfit.T_SC.avg
+     Density     = avgs_JVfit.N_SC.avg
+  ENDIF ELSE BEGIN
+     Temperature = avgs_JVfit.T.avg
+     Density     = avgs_JVfit.N.avg
+  ENDELSE
+                             ;;            kappa,       Temp,   Dens, R_B
+
   kappa_init = KEYWORD_SET(jv_theor__kappa_init) ? jv_theor__kappa_init : 10
   R_B_init   = KEYWORD_SET(jv_theor__R_B_init  ) ? jv_theor__R_B_init   : 1D3
   A_in       = KEYWORD_SET(A_in) ? A_in : [kappa_init, $     ;kappa
-                                           avgs_JVfit.T.avg, $ ;Temp
-                                           avgs_JVfit.N.avg, $ ;Dens
+                                           Temperature, $ ;Temp
+                                           Density, $ ;Dens
                                            R_B_init]           ;R_B
   IF KEYWORD_SET(plot_j_v_and_theory) THEN BEGIN
 
@@ -236,6 +248,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[avgs_JVfit.useInds])]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                           USE_SOURCE_AVGS=use_source_avgs, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
                                            TEMPLIMS=TempLims, $    
@@ -248,6 +261,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            _EXTRA=e
 
      PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
+                                  USE_SOURCE_AVGS=use_source_avgs, $
                                   KAPPA_A=A, $
                                   GAUSS_A=AGauss, $
                                   ORIGINATING_ROUTINE=routName, $
@@ -288,6 +302,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   8.0]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                           USE_SOURCE_AVGS=use_source_avgs, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
                                            TEMPLIMS=TempLims, $    
@@ -306,6 +321,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
 
      PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
+        USE_SOURCE_AVGS=use_source_avgs, $
         MAP__2D=map__2D, $
         ORBIT=orbit, $
         SAVEPLOT=savePlot

@@ -1,6 +1,7 @@
 ;2017/03/17
 PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
    jvPlotData, $
+   USE_SOURCE_AVGS=use_source_avgs, $
    ORIGINAL_PLOTIDEE=orig_plotIdee, $
    YLOG_NDOWN=yLog_nDown, $
    USEI__TWOLUMPS=useInds__twoLumps, $
@@ -61,14 +62,22 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
 
   timeTitle        = 'Seconds since ' + TIME_TO_STR(jvPlotData.time[0],/MS)
 
-  tDownRange       = MINMAX(jvPlotData.tDown)
+  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+     temperature   = jvPlotData.source.TDown
+     density       = jvPlotData.source.NDown
+  ENDIF ELSE BEGIN
+     temperature   = jvPlotData.TDown
+     density       = jvPlotData.NDown
+  ENDELSE
+
+  tDownRange       = MINMAX(temperature)
 
   IF KEYWORD_SET(orig_plotIdee) THEN BEGIN
      window        = WINDOW(DIMENSIONS=winDim, $
                         BUFFER=savePlot)
 
-     sPlot         = SCATTERPLOT(jvPlotData.tDown, $
-                             jvPlotData.nDown, $
+     sPlot         = SCATTERPLOT(temperature, $
+                             density, $
                              XRANGE=tDownRange, $
                              YRANGE=nDownRange, $
                              /YLOG, $
@@ -127,7 +136,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;;First plot
 
         ;; plot_1            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-        ;;                               jvPlotData.tDown[inds], $
+        ;;                               temperature[inds], $
         ;;                               tmpErr, $
         ;;                               XRANGE=tRange, $
         ;;                               ;; YRANGE=TDownRange, $
@@ -141,7 +150,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;;Second plot
 
         plot_2            = SCATTERPLOT(jvPlotData.tDiff, $
-                                        jvPlotData.nDown, $
+                                        density, $
                                         ;; XTITLE='Seconds since ' + TIME_TO_STR(curPotList[0].time[safe_i[0]]), $
                                         YTITLE=nDownTitle, $
                                         RGB_TABLE=hammerCT, $
@@ -156,7 +165,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;;Third plot
         ;; plot_3      = SCATTERPLOT(jvPlotData.cur, $
-        ;;                           jvPlotData.nDown, $
+        ;;                           density, $
         ;;                           XRANGE=TDownRange, $
         ;;                           YRANGE=nDownRange, $
         ;;                           /YLOG, $
@@ -188,7 +197,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         tmpTDownErr         = jvPlotData.tDownErr[inds]
 
         plot_1            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.tDown[inds], $
+                                      temperature[inds], $
                                       tmpTDownErr, $
                                       XRANGE=tRange, $
                                       ;; YRANGE=TDownRange, $
@@ -222,7 +231,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
            tmpTDownErr      = jvPlotData.tDownErr[inds]
 
            plot_1         = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.tDown[inds], $
+                                      temperature[inds], $
                                       tmpTDownErr, $
                                       ;; RGB_TABLE=hammerCT, $
                                       VERT_COLORS=hammerCT[*,CTInds[inds]], $
@@ -267,9 +276,9 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         inds              = [0,1]
         tmpNDownErr         = jvPlotData.nDownErr[inds]
 
-        errNDownRange       = MINMAX(jvPlotData.nDown)
+        errNDownRange       = MINMAX(density)
         plot_2            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.nDown[inds], $
+                                      density[inds], $
                                       tmpNDownErr, $
                                       XRANGE=tRange, $
                                       YLOG=yLog_nDown, $
@@ -302,7 +311,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
            tmpNDownErr      = jvPlotData.nDownErr[inds]
 
            plot_2         = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.nDown[inds], $
+                                      density[inds], $
                                       tmpNDownErr, $
                                       YLOG=yLog_nDown, $
                                       VERT_COLORS=hammerCT[*,CTInds[inds]], $
@@ -325,8 +334,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;; tmpTDownErr         = jvPlotData.tDownErr[inds]
         ;; tmpNDownErr         = jvPlotData.nDownErr[inds]
 
-        ;; plot_3      = ERRORPLOT(jvPlotData.tDown[inds], $
-        ;;                         jvPlotData.nDown[inds], $
+        ;; plot_3      = ERRORPLOT(temperature[inds], $
+        ;;                         density[inds], $
         ;;                         tmpTDownErr, $
         ;;                         tmpNDownErr, $
         ;;                         XRANGE=TDownRange, $
@@ -359,8 +368,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;;    tmpTDownErr      = jvPlotData.tDownErr[inds]
         ;;    tmpNDownErr      = jvPlotData.nDownErr[inds]
 
-        ;;    plot_3         = ERRORPLOT((jvPlotData.tDown[inds]), $
-        ;;                               jvPlotData.nDown[inds], $
+        ;;    plot_3         = ERRORPLOT((temperature[inds]), $
+        ;;                               density[inds], $
         ;;                               tmpTDownErr, $
         ;;                               tmpNDownErr, $
         ;;                               ;; RGB_TABLE=hammerCT, $

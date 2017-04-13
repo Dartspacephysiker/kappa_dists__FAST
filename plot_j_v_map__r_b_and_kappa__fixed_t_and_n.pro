@@ -1,5 +1,6 @@
 ;2017/04/12
 PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
+   USE_SOURCE_AVGS=use_source_avgs, $
    MAP__2D=map__2D, $
    ORBIT=orbit, $
    SAVEPLOT=savePlot
@@ -48,8 +49,17 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
   IF KEYWORD_SET(orbit) THEN BEGIN
      orbPref       = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
+
+  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+     Temperature = avgs_JVfit.T_SC.avg
+     Density     = avgs_JVfit.N_SC.avg
+  ENDIF ELSE BEGIN
+     Temperature = avgs_JVfit.T.avg
+     Density     = avgs_JVfit.N.avg
+  ENDELSE
+
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-                            orbPref,avgs_JVfit.T.avg,avgs_JVfit.N.avg)
+                            orbPref,Temperature,Density)
   CASE 1 OF
      KEYWORD_SET(map__2D): BEGIN
 

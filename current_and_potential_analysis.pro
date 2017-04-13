@@ -679,20 +679,35 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
         ;;Update lists
-        err_list.Add,TEMPORARY(errors)
-        time_list.Add,TEMPORARY(time)
-        n_list.Add,TEMPORARY(n)
-        T_list.Add,TEMPORARY(T)
-        j_list.Add,TEMPORARY(j)
-        je_list.Add,TEMPORARY(je)
-        cur_list.Add,TEMPORARY(cur)
-        chare_list.Add,charE
-        nerr_list.Add,TEMPORARY(nerr)
-        jerr_list.Add,TEMPORARY(jerr)
-        jeErr_list.Add,TEMPORARY(jeErr)
-        curErr_list.Add,TEMPORARY(curErr)
-        charEErr_list.Add,TEMPORARY(charEErr)
-        Terr_list.Add,TEMPORARY(Terr)
+        ;; err_list.Add,TEMPORARY(errors)
+        ;; time_list.Add,TEMPORARY(time)
+        ;; n_list.Add,TEMPORARY(n)
+        ;; T_list.Add,TEMPORARY(T)
+        ;; j_list.Add,TEMPORARY(j)
+        ;; je_list.Add,TEMPORARY(je)
+        ;; cur_list.Add,TEMPORARY(cur)
+        ;; chare_list.Add,charE
+        ;; nerr_list.Add,TEMPORARY(nerr)
+        ;; jerr_list.Add,TEMPORARY(jerr)
+        ;; jeErr_list.Add,TEMPORARY(jeErr)
+        ;; curErr_list.Add,TEMPORARY(curErr)
+        ;; charEErr_list.Add,TEMPORARY(charEErr)
+        ;; Terr_list.Add,TEMPORARY(Terr)
+
+        err_list.Add,momStruct.errors
+        time_list.Add,momStruct.time
+        n_list.Add,momStruct.n
+        T_list.Add,momStruct.T
+        j_list.Add,momStruct.j
+        je_list.Add,momStruct.je
+        cur_list.Add,momStruct.cur
+        chare_list.Add,momStruct.charE
+        nerr_list.Add,momStruct.nerr
+        jerr_list.Add,momStruct.jerr
+        jeErr_list.Add,momStruct.jeErr
+        curErr_list.Add,momStruct.curErr
+        charEErr_list.Add,momStruct.charEErr
+        Terr_list.Add,momStruct.Terr
 
         sourceStruct = !NULL
         STR_ELEMENT,momStruct,'source',sourceStruct

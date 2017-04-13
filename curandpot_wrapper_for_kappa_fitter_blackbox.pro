@@ -86,7 +86,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   interactive_overplot    = 0
   
-  savePlot                = 1
+  savePlot                = 0
   savePSuff               = ''
 
   ;;Which plots?

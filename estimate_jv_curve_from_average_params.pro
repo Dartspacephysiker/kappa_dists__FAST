@@ -1,5 +1,6 @@
 ;2017/03/18
 PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                          USE_SOURCE_AVGS=use_source_avgs, $
                                           A_IN=A_in, $
                                           KAPPALIMS=kappaLims, $   
                                           TEMPLIMS=TempLims, $    
@@ -21,8 +22,16 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   maxIter     = 3000
   fit_tol     = 1D-15
   gTol        = 1D-15
-                             ;;            kappa,            Temp,            Dens,  R_B
-  A           = KEYWORD_SET(A_in) ? A_in : [  10,avgs_JVfit.T.avg,avgs_JVfit.N.avg, 1D4]
+
+  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+     Temperature = avgs_JVfit.T_SC.avg
+     Density     = avgs_JVfit.N_SC.avg
+  ENDIF ELSE BEGIN
+     Temperature = avgs_JVfit.T.avg
+     Density     = avgs_JVfit.N.avg
+  ENDELSE
+                             ;;            kappa,       Temp,   Dens, R_B
+  A           = KEYWORD_SET(A_in) ? A_in : [  10,Temperature,Density, 1D4]
 
   ;;Keep the original guesses
   Aorig       = A
@@ -171,8 +180,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         ENDCASE
 
         mMagDat = {kappa  : TEMPORARY(kappaArr), $
-                   T      : avgs_JVfit.T.avg, $
-                   N      : avgs_JVfit.N.avg, $
+                   T      : Temperature, $
+                   N      : Density, $
                    magRat : magRatArr, $
                    chi2   : TEMPORARY(chi2Arr)}
      END

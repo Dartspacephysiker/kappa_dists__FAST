@@ -374,7 +374,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ENDIF
   
   IF use_sourceCone THEN BEGIN
-     quantL.Add,jvPlotData.source.Tdown[useInds],jvPlotData.source.Ndown[useInds]
+     quantL.Add,jvPlotData.source.Tdown[useInds]
+     quantL.Add,jvPlotData.source.Ndown[useInds]
      navn  = [navn,'T_SC avg','N_SC avg']
      sNavn = [sNavn,'T_SC'   ,'N_SC'    ]
   ENDIF
