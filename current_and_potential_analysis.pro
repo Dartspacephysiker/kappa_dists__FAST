@@ -17,6 +17,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORDER=order, $
    LABEL=label, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
+   ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+   USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
    ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
    ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -83,6 +85,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ENDIF
 
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
+     aRange__dens_e_down     = KEYWORD_SET(aRange__dens_e_down) ? aRange__dens_e_down : [0.,360.]
+
      aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
      aRange__moments_i_up    = KEYWORD_SET(aRange__moments_i_up  ) ? aRange__moments_i_up   : [0.,360.]
      aRange__moments_e_up    = KEYWORD_SET(aRange__moments_e_up  ) ? aRange__moments_e_up   : !NULL
@@ -388,71 +392,109 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            END
         ENDCASE
 
+        aRange__dens = !NULL
+        IF N_ELEMENTS(use_msph_sourcecone_for_dens) GT 0 THEN BEGIN
+           aRange__dens = use_msph_sourcecone_for_dens[k] ? 'source' : !NULL
+        ENDIF
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange
 
-        IF SIZE(aRange__moments[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRMATCH(STRUPCASE(aRange__moments[0]),'*LC') THEN BEGIN
-              IF STRLEN(aRange__moments[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'LC',/EXTRACT))
+        IF SIZE(aRange__dens,/TYPE) EQ 7 THEN BEGIN
+
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__dens[0]),'SOURCE'): BEGIN
+
+                 scw = 85
+
                  IF north_south[0] EQ -1 THEN BEGIN
-                    aRange__moments = [180.-factor*lcw,180+factor*lcw]
+                    aRange__dens = [180.-scw,180+scw]
                  ENDIF ELSE BEGIN
-                    aRange__moments = [360.-factor*lcw,factor*lcw]
+                    aRange__dens = [360.-scw,scw]
                  ENDELSE
-              ENDIF ELSE BEGIN
-                 aRange__moments = lc_angleRange
-              ENDELSE
 
-              IF upgoing THEN aRange__moments = (360.*((aRange__moments-180)/360.-FLOOR((aRange__moments-180)/360.)))
+              END
+              ELSE: STOP
+           ENDCASE
 
-           ENDIF ELSE BEGIN
-              PRINT,"Huh?"
-              STOP
-           ENDELSE
+        ENDIF
+        
+        IF SIZE(aRange__moments[0],/TYPE) EQ 7 THEN BEGIN
+
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__moments[0]),'*LC'): BEGIN
+
+                 IF STRLEN(aRange__moments[0]) GT 2 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'LC',/EXTRACT))
+                    IF north_south[0] EQ -1 THEN BEGIN
+                       aRange__moments = [180.-factor*lcw,180+factor*lcw]
+                    ENDIF ELSE BEGIN
+                       aRange__moments = [360.-factor*lcw,factor*lcw]
+                    ENDELSE
+                 ENDIF ELSE BEGIN
+                    aRange__moments = lc_angleRange
+                 ENDELSE
+
+                 IF upgoing THEN aRange__moments = (360.*((aRange__moments-180)/360.-FLOOR((aRange__moments-180)/360.)))
+
+              END
+              ELSE: BEGIN
+                 PRINT,"Huh?"
+                 STOP
+              END
+           ENDCASE
+
         ENDIF
 
         IF SIZE(aRange__peakEn[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRMATCH(STRUPCASE(aRange__peakEn[0]),'*LC') THEN BEGIN
-              IF STRLEN(aRange__peakEn[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__peakEn[0]),'LC',/EXTRACT))
-                 IF north_south[0] EQ -1 THEN BEGIN
-                    aRange__peakEn = [180.-factor*lcw,180+factor*lcw]
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__peakEn[0]),'*LC'): BEGIN
+                 IF STRLEN(aRange__peakEn[0]) GT 2 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__peakEn[0]),'LC',/EXTRACT))
+                    IF north_south[0] EQ -1 THEN BEGIN
+                       aRange__peakEn = [180.-factor*lcw,180+factor*lcw]
+                    ENDIF ELSE BEGIN
+                       aRange__peakEn = [360.-factor*lcw,factor*lcw]
+                    ENDELSE
                  ENDIF ELSE BEGIN
-                    aRange__peakEn = [360.-factor*lcw,factor*lcw]
+                    aRange__peakEn  = lc_angleRange
                  ENDELSE
-              ENDIF ELSE BEGIN
-                 aRange__peakEn  = lc_angleRange
-              ENDELSE
 
-              IF upgoing THEN aRange__peakEn = (360.*((aRange__peakEn-180)/360.-FLOOR((aRange__peakEn-180)/360.)))
+                 IF upgoing THEN aRange__peakEn = (360.*((aRange__peakEn-180)/360.-FLOOR((aRange__peakEn-180)/360.)))
 
-           ENDIF ELSE BEGIN
-              PRINT,"Huh?"
-              STOP
-           ENDELSE
+              END
+              ELSE: BEGIN
+                 PRINT,"Huh?"
+                 STOP
+              END
+           ENDCASE
+
         ENDIF
 
         IF SIZE(aRange__charE[0],/TYPE) EQ 7 THEN BEGIN
-           IF STRMATCH(STRUPCASE(aRange__charE[0]),'*LC') THEN BEGIN
-              IF STRLEN(aRange__charE[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__charE[0]),'LC',/EXTRACT))
-                 IF north_south[0] EQ -1 THEN BEGIN
-                    aRange__charE = [180.-factor*lcw,180+factor*lcw]
+
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__charE[0]),'*LC'): BEGIN
+                 IF STRLEN(aRange__charE[0]) GT 2 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__charE[0]),'LC',/EXTRACT))
+                    IF north_south[0] EQ -1 THEN BEGIN
+                       aRange__charE = [180.-factor*lcw,180+factor*lcw]
+                    ENDIF ELSE BEGIN
+                       aRange__charE = [360.-factor*lcw,factor*lcw]
+                    ENDELSE
                  ENDIF ELSE BEGIN
-                    aRange__charE = [360.-factor*lcw,factor*lcw]
+                    aRange__charE   = lc_angleRange
                  ENDELSE
-              ENDIF ELSE BEGIN
-                 aRange__charE   = lc_angleRange
-              ENDELSE
 
-              IF upgoing THEN aRange__charE = (360.*((aRange__charE-180)/360.-FLOOR((aRange__charE-180)/360.)))
+                 IF upgoing THEN aRange__charE = (360.*((aRange__charE-180)/360.-FLOOR((aRange__charE-180)/360.)))
 
-           ENDIF ELSE BEGIN
-              PRINT,"Huh?"
-              STOP
-           ENDELSE
+              END
+              ELSE: BEGIN
+                 PRINT,"Huh?"
+                 STOP
+              END
+           ENDCASE
+
         ENDIF
 
         aRange_oMoments_list.Add,aRange__moments
@@ -461,6 +503,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;;Summary kind
         PRINT,FORMAT='("*****",A0,"*****")',STRUPCASE(label[k])
+        IF KEYWORD_SET(aRange__dens) THEN BEGIN
+           PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__dens",aRange__dens
+        ENDIF
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__moments",aRange__moments
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__peakEn",aRange__peakEn
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__charE",aRange__charE
@@ -569,6 +614,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         MOMENT_SUITE_2D,diff_eFlux, $
                         ENERGY=energy, $
+                        ARANGE__DENS=aRange__dens, $
                         ARANGE__MOMENTS=aRange__moments, $
                         ARANGE__CHARE=aRange__charE, $
                         SC_POT=sc_pot, $
@@ -599,6 +645,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
            MOMENT_SUITE_2D,dEF_oneCount, $
                            ENERGY=energy, $
+                           ARANGE__DENS=aRange__dens, $
                            ARANGE__MOMENTS=aRange__moments, $
                            ARANGE__CHARE=aRange__charE, $
                            SC_POT=sc_pot, $

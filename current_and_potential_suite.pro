@@ -80,6 +80,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
+     ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+     USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -402,5 +404,12 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         MEAN(JVPlotData.NDown[useInds]), $
         MEAN(JVPlotData.pot[useInds]), $
         MEAN(JVPlotData.cur[useInds])
+
+  suppress_magRat_sum = 0
+  IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
+
+     junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time[useInds],/TIME_ARRAY)
+
+  ENDIF
 
 END
