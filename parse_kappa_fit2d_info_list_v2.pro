@@ -38,20 +38,30 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   nFits               = N_ELEMENTS(fit2D_inf_list)
   IF nFits EQ 0 THEN RETURN,-1
 
+  momTmplt            = {scDens : 0. , $
+                         scTemp : 0. , $
+                         scFAConduct : 0.D}
+
+  momInfoTmplt        = {estimated_sc : [0L,0L], $
+                         obs_eRange   : [0.,0.]}
+
   nFitParams          = N_ELEMENTS(fit2D_inf_list[0].fitParams)
   nPFree_index        = N_ELEMENTS(fit2D_inf_list[0].pFree_index)
   nFitPoints          = N_ELEMENTS(fit2D_inf_list[0].best_fJac[*,0])
 
-
   SDTStr              = REPLICATE(fit2D_inf_list[0].SDT,nFits)
   fitParams           = MAKE_ARRAY(nFitParams,nFits,             VALUE=0.0,/FLOAT    )
-  obs_scDens          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  obs_scTemp          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  obs_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  estimated_sc        = MAKE_ARRAY(2,nFits,                      VALUE=0.0,/FLOAT    )
-  fit_scDens          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  fit_scTemp          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
-  fit_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+
+  fitMoms             = REPLICATE(momTmplt,nFits)
+  obsMoms             = REPLICATE(momTmplt,nFits)
+  moment_info         = REPLICATE(momInfoTmplt,nFits)
+  ;; obs_scDens          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; obs_scTemp          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; obs_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; fit_scDens          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; fit_scTemp          = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; fit_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
+  ;; estimated_sc        = MAKE_ARRAY(2,nFits,                      VALUE=0.0,/FLOAT    )
   errMsg              = MAKE_ARRAY(nFits,                                  /STRING   )
   chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/FLOAT   )
   status              = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
@@ -78,7 +88,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      tmpKappa         = fit2D_inf_list[k].fitParams[2]
 
      IF KEYWORD_SET(highDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].obs_scDens GT highDens_thresh THEN BEGIN
+        IF fit2D_inf_list[k].obsMoms.scDens GT highDens_thresh THEN BEGIN
            nExcluded_highDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
@@ -87,7 +97,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      ENDIF
 
      IF KEYWORD_SET(lowDens_thresh) AND ~excluded THEN BEGIN
-        IF fit2D_inf_list[k].obs_scDens LT lowDens_thresh THEN BEGIN
+        IF fit2D_inf_list[k].obsMoms.scDens LT lowDens_thresh THEN BEGIN
            nExcluded_lowDens++
            exclude_i   = [exclude_i,k]
            excluded    = 1
@@ -160,13 +170,16 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   SDTStr[k]         = fit2D_inf_list[k].SDT
   fitParams[*,k]    = fit2D_inf_list[k].fitParams
-  obs_scDens[k]     = fit2D_inf_list[k].obs_scDens
-  obs_scTemp[k]     = fit2D_inf_list[k].obs_scTemp
-  obs_scFAConduct[k]= fit2D_inf_list[k].obs_scFAConduct
-  fit_scDens[k]     = fit2D_inf_list[k].fit_scDens
-  fit_scTemp[k]     = fit2D_inf_list[k].fit_scTemp
-  fit_scFAConduct[k]= fit2D_inf_list[k].fit_scFAConduct
-  estimated_sc[*,k] = fit2D_inf_list[k].estimated_sc
+  ;; obs_scDens[k]     = fit2D_inf_list[k].obsMoms.scDens
+  ;; obs_scTemp[k]     = fit2D_inf_list[k].obsMoms.scTemp
+  ;; obs_scFAConduct[k]= fit2D_inf_list[k].obsMoms.scFAConduct
+  obsMoms[k]        = fit2D_inf_list[k].obsMoms
+  fitMoms[k]        = fit2D_inf_list[k].fitMoms
+  moment_info[k]    = fit2D_inf_list[k].moment_info
+  ;; fit_scDens[k]     = fit2D_inf_list[k].fitMoms.scDens
+  ;; fit_scTemp[k]     = fit2D_inf_list[k].fitMoms.scTemp
+  ;; fit_scFAConduct[k]= fit2D_inf_list[k].fitMoms.scFAConduct
+  ;; estimated_sc[*,k] = fit2D_inf_list[k].estimated_sc
   errMsg[k]         = fit2D_inf_list[k].errMsg
   chi2[k]           = fit2D_inf_list[k].chi2
   status[k]         = fit2D_inf_list[k].status
@@ -270,13 +283,15 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   fit2D             = {SDT          : SDTStr     [keep_i], $
                        fitParams    : fitParams[*,keep_i], $
-                       obs_scDens   : obs_scDens    [keep_i], $
-                       obs_scTemp   : obs_scTemp    [keep_i], $
-                       obs_scFAConduct : obs_scFAConduct[keep_i], $
-                       fit_scDens   : fit_scDens    [keep_i], $
-                       fit_scTemp   : fit_scTemp    [keep_i], $
-                       fit_scFAConduct : fit_scFAConduct[keep_i], $
-                       estimated_sc : estimated_sc[*,keep_i], $
+                       ;; obs_scDens   : obs_scDens    [keep_i], $
+                       ;; obs_scTemp   : obs_scTemp    [keep_i], $
+                       ;; obs_scFAConduct : obs_scFAConduct[keep_i], $
+                       ;; fit_scDens   : fit_scDens    [keep_i], $
+                       ;; fit_scTemp   : fit_scTemp    [keep_i], $
+                       ;; fit_scFAConduct : fit_scFAConduct[keep_i], $
+                       obsMoms      : obsMoms[keep_i], $
+                       fitMoms      : fitMoms[keep_i], $
+                       moment_info  : moment_info[keep_i], $
                        chi2         : chi2       [keep_i], $
                        errMsg       : errMsg     [keep_i], $
                        status       : status     [keep_i], $

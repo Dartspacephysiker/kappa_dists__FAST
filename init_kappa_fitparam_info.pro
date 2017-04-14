@@ -39,7 +39,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                       [0,0]]
   
   Alimits         = [[100.,3.0D4]    , $ ;E_b
-                     [10,4D3]     , $ ;Temp
+                     [10,2D4]     , $ ;Temp
                      [1.501D,100]  , $ ;kappa 
                      [1D-4,100]     , $ ;N
                      [-180,180]]       ;Bulk Angle

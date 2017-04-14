@@ -1,5 +1,5 @@
 PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
-   out_eRange_peak, $
+   eRange_peak, $
    nEnergies, $
    nTotAngles, $
    curFitStr,curDataStr, $
@@ -10,14 +10,11 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
    UNITS=units, $
    ;; MASS=mass, $
    IN_ESTIMATED_LC=estimated_lc, $
-   OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
-   OUT_ERANGE_I=eRange_i
+   OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
-
-  eRange_peak        = out_eRange_peak[*,-1]
 
   ;;Uhh, use data for fit weighting. Not fit data.
   wts                = curDataStr.ddata

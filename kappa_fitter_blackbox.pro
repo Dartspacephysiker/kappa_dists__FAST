@@ -481,9 +481,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         include_i = CGSETINTERSECTION(includeK_i,includeG_i)
 
-        fit2DK            = {SDT          : fit2dK.SDT         [include_i], $
+        fit2DK            = {SDT          : fit2DK.SDT         [include_i], $
                              fitParams    : fit2DK.fitParams   [*,include_i], $
-                             fitDens      : fit2DK.fitDens     [include_i], $
+                             obsMoms      : fit2DK.obsMoms     [include_i], $
+                             fitMoms      : fit2DK.fitMoms     [include_i], $
+                             moment_info  : fit2DK.moment_info [include_i], $
+                             ;; fitDens      : fit2DK.fitDens     [include_i], $
                              chi2         : fit2DK.chi2        [include_i], $
                              errMsg       : fit2DK.errMsg      [include_i], $
                              status       : fit2DK.status      [include_i], $
@@ -500,7 +503,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         
         fit2DG            = {SDT          : fit2DG.SDT         [include_i], $
                              fitParams    : fit2DG.fitParams   [*,include_i], $
-                             fitDens      : fit2DG.fitDens     [include_i], $
+                             obsMoms      : fit2DG.obsMoms     [include_i], $
+                             fitMoms      : fit2DG.fitMoms     [include_i], $
+                             moment_info  : fit2DG.moment_info [include_i], $
                              chi2         : fit2DG.chi2        [include_i], $
                              errMsg       : fit2DG.errMsg      [include_i], $
                              status       : fit2DG.status      [include_i], $

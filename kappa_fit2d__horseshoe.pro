@@ -32,8 +32,10 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   OKStatus     = [1,2,3,4]      ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
+  eRange_peak  = out_eRange_peak[*,-1]
+
   SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
-     out_eRange_peak, $
+     eRange_peak, $
      nEnergies, $
      nTotAngles, $
      curFitStr,curDataStr, $
@@ -43,8 +45,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      ITIME=iTime, $
      UNITS=units, $
      IN_ESTIMATED_LC=estimated_lc, $
-     OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
-     OUT_ERANGE_I=eRange_i
+     OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
   
   IF STRUPCASE(kFitParamStruct[1].parName) EQ 'T' THEN BEGIN
      kFitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
@@ -173,7 +174,6 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   ;; tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
   ;;                      MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
 
-
   fit_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
                                  ;; ENERGY=out_eRange_peak, $
@@ -186,32 +186,32 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   obs_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,curDataStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                                 ENERGY=out_eRange_peak, $
+                                 ENERGY=eRange_peak, $
                                  ANGLE=tmpSourceConeRange)
 
   obs_scTemp         = (T_2D(curDataStr, $
                             ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                            ENERGY=out_eRange_peak, $
+                            ENERGY=eRange_peak, $
                             ANGLE=tmpSourceConeRange))[3]
 
   ;;field-aligned conductances
   fFAConduct        = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                       fit2DStr, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                      ENERGY=out_eRange_peak, $
+                      ;; ENERGY=eRange_peak, $
                       ANGLE=tmpSourceConeRange)
 
   oFAConduct        = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                       curDataStr, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                      ENERGY=out_eRange_peak, $
+                      ENERGY=eRange_peak, $
                       ANGLE=tmpSourceConeRange)
   ;; IF iTime GE 14 THEN BEGIN
 
 
   ;; ENDIF
 
-  IF KEYWORD_SET(show_and_prompt) THEN BEGIN
+  IF KEYWORD_SET(show_and_prompt) AND ~KEYWORD_SET(fit2D__show_only_data) THEN BEGIN
      ;; densEst        = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
      ;;                                ENERGY=KF2D__SDTData_opt.energy_electrons, $
      ;;                                ANGLE=tmpSourceConeRange)
@@ -223,7 +223,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
         ;;       ;;                    fitAngle_i      :fitAngle_i   , $
         ;;       ;;                    bestDens        :obs_scDens    , $
         ;;       ;;                    bestChi2        :bestNorm/(dof-nPegged), $
-        ;;       ;;                    eRange_peak     :out_eRange_peak[*,-1]}
+        ;;       ;;                    eRange_peak     :eRange_peak[*,-1]}
 
         ;;       KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
         ;;          tmp2DInfoStruct, $
@@ -246,9 +246,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
               tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
                                  bestFit1DParams :fit2DParams  , $
                                  fitAngle_i      :fitAngle_i   , $
-                                 bestDens        :obs_scDens    , $
+                                 bestDens        :fit_scDens    , $
                                  bestChi2        :bestNorm/(dof-nPegged), $
-                                 eRange_peak     :out_eRange_peak[*,-1]}
+                                 eRange_peak     :eRange_peak[*,-1]}
 
               KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
                  tmp2DInfoStruct, $
@@ -286,13 +286,12 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
      tmpKeeper       = {SDT          : fit2DStr   , $
                         fitParams    : fit2DParams, $
-                        obs_scDens   : TEMPORARY(obs_scDens), $
-                        obs_scTemp   : TEMPORARY(obs_scTemp), $
-                        obs_scFAConduct : oFAConduct , $
-                        fit_scDens   : TEMPORARY(fit_scDens), $
-                        fit_scTemp   : TEMPORARY(fit_scTemp), $
-                        fit_SCFAConduct : fFAConduct , $
-                        estimated_sc : tmpSourceConeRange, $
+                        obsMoms      : {scDens   : TEMPORARY(obs_scDens), $
+                                        scTemp   : TEMPORARY(obs_scTemp), $
+                                        scFAConduct : oFAConduct}, $
+                        fitMoms      : {scDens   : TEMPORARY(fit_scDens), $
+                                        scTemp   : TEMPORARY(fit_scTemp), $
+                                        SCFAConduct : fFAConduct}, $
                         chi2         : bestNorm   , $
                         errMsg       : errMsg     , $
                         status       : status     , $
@@ -305,7 +304,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                         dof          : dof        , $
                         covar        : covar      , $
                         pError       : pError     , $
-                        nIter        : nIter      }
+                        nIter        : nIter      , $
+                        moment_info  : {estimated_sc : tmpSourceConeRange, $
+                                        obs_eRange   : eRange_peak}}
 
 
      fit2D_inf_list.ADD,tmpKeeper                             
@@ -324,11 +325,12 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
 
         tmpParams    = tmpKeeper.fitParams
-        tmpParams[3] = tmpKeeper.obs_scDens
+        tmpParams[3] = tmpKeeper.obsMoms.scDens
 
         ;; PRINT,kfitparamstruct[*].value ;Diagnostic kind
 
-        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged)
+        PRINT_KAPPA_FLUX_FIT_PARAMS,tmpParams,bestNorm/(dof-nPegged), $
+                                    IS_MAXWELLIAN_FIT=is_Maxwellian_fit
 
      ENDIF
 

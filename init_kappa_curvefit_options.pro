@@ -49,7 +49,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    TEMPERATURE_EST=T, $
    KAPPA_EST=kappa, $
    BULK_OFFSET=bulk_offset, $
-   UNITS=units, $
+   ;; UNITS=units, $
    _EXTRA=e
 
 
@@ -103,8 +103,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                                 add_gaussian_estimate       : defAdd_gaussian_estimate, $
                                                 use_SDT_Gaussian_fit        :  0B, $
                                                 use_mpFit1D                 :  0B, $
-                                                bulk_offset                 :  0.0, $
-                                                units                       : 'eFlux'}
+                                                bulk_offset                 :  0.0};; , $
+                                                ;; units                       : 'eFlux'}
 
 
   IF N_ELEMENTS(only_1D_fits) GT 0 THEN BEGIN
@@ -246,7 +246,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
   IF N_ELEMENTS(fit1D__nFlux) GT 0 THEN BEGIN
      kCurvefit_opt.fit1D__nFlux               = fit1D__nFlux
      IF KEYWORD_SET(fit1D__nFlux) THEN BEGIN
-        kCurvefit_opt.units                   = 'flux'
+        ;; kCurvefit_opt.units                   = 'flux'
      ENDIF
 
      PRINT,FORMAT='("kCurvefit_opt.fit1D__nFlux",T45,":",T48,I0)', $
@@ -401,12 +401,12 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
            kCurvefit_opt.fit2D__clampDensity
   ENDIF
 
-  IF N_ELEMENTS(units) GT 0 THEN BEGIN
-     kCurvefit_opt.units = units
+  ;; IF N_ELEMENTS(units) GT 0 THEN BEGIN
+  ;;    kCurvefit_opt.units = units
 
-     PRINT,FORMAT='("kCurvefit_opt.units",T45,":",T48,I0)', $
-     kCurvefit_opt.units
-  ENDIF
+  ;;    PRINT,FORMAT='("kCurvefit_opt.units",T45,":",T48,I0)', $
+  ;;    kCurvefit_opt.units
+  ;; ENDIF
 
   PRINT,''
 

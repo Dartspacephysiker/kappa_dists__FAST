@@ -63,7 +63,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      DENSITY_EST=n_est, $
                      TEMPERATURE_EST=T, $
                      KAPPA_EST=kappa, $
-                     UNITS=units, $
+                     ;; UNITS=units, $
                      _EXTRA=e)  ;, $
   ;; BULK_OFFSET=bulk_offset)
 
@@ -138,7 +138,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               FIT_EACH_ANGLE=fit_each_angle, $
                               CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
                               ANGLESTR=angleStr, $
-                              ESPECUNITS=KF__Curvefit_opt.units, $
+                              ;; ESPECUNITS=KF__Curvefit_opt.units, $
                               ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
                               SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                               _EXTRA=e
@@ -219,7 +219,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $
                                    ANGLE=e_angle, $
-                                   ESPECUNITS=KF__Curvefit_opt.units, $
+                                   ;; ESPECUNITS=KF__Curvefit_opt.units, $
                                    ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                    /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
                                    OUT_ONEDAT=out_oneDat, $

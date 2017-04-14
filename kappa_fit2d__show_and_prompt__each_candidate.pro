@@ -48,11 +48,17 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
      angleRange = KF2D__SDTData_opt.fit2D_dens_aRange
   ENDIF
 
-  IF KEYWORD_SET(is_maxwellian_fit) THEN BEGIN
-     fitString  = 'Maxwell'
-  ENDIF ELSE BEGIN
-     fitString  = 'Kappa'
-  ENDELSE
+  CASE 1 OF
+     KEYWORD_SET(is_maxwellian_fit): BEGIN
+        fitString  = 'Maxwell'
+     END
+     KEYWORD_SET(only_data): BEGIN
+        fitString  = 'data'
+     END
+     ELSE: BEGIN
+        fitString  = 'Kappa'
+     END
+  ENDCASE
 
   CASE 1 OF
      KEYWORD_SET(prompt__cont_until_fit_eq): BEGIN

@@ -186,12 +186,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.fit1D__nFlux): BEGIN
-        units = 'flux'
+        units1D = 'flux'
      END
      ELSE: BEGIN
-        units = 'eFlux'
+        units1D = 'eFlux'
      END
   ENDCASE
+
+  units2D = 'eFlux'
 
   ;;In order to get back to how things were, just 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
@@ -227,7 +229,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                 diff_eFlux, $
                 /RETRACE, $
                 ANGLE=KF2D__SDTData_opt.electron_angleRange, $
-                UNITS=units, $
+                UNITS=units1D, $
                 OUT_AVGFACTORARR=avgFactorArr, $
                 OUT_NORMARR=normArr)
 
@@ -244,7 +246,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                             dEF_oneCount, $
                             /RETRACE, $
                             ANGLE=KF2D__SDTData_opt.electron_angleRange, $
-                            UNITS=units)
+                            UNITS=units1D)
         END
 
 
@@ -353,7 +355,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ;; ENDIF
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
-     dat                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+     dat                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime);; , $
+                                                                ;; UNITS=units2D)
 
      nGoodFits_tempK       = 0
      nGoodFits_tempG       = 0
@@ -457,7 +460,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   AGAUSS_OUT=AGauss, $
                                   DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                   /TEST_NOREV, $
-                                  UNITS=units
+                                  UNITS=units1D
 
         ENDIF ELSE BEGIN
            A                                        = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
@@ -509,7 +512,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        OUT_PARAMSTR=out_paramStr, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
-                                       UNITS=units, $
+                                       UNITS=units1D, $
                                        MASS=dat.mass, $
                                        AVGFACTORARR=avgFactorArr
 
@@ -543,7 +546,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                               ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                               DONT_PRINT_FITINFO=dont_print_fitInfo, $
                               FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
-                              UNITS=units
+                              UNITS=units1D
 
            END
         ENDCASE
@@ -751,7 +754,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
               IN_ESTIMATED_LC=estimated_lc, $
-              UNITS=units, $
+              UNITS=units2D, $
               EPS=eps
 
            totSuccessesK += successesK
@@ -790,7 +793,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
               IN_ESTIMATED_LC=estimated_lc, $
-              UNITS=units, $
+              UNITS=units2D, $
               EPS=eps
            
            totSuccessesG += successesG

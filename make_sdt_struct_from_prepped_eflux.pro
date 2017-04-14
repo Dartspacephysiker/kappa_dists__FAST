@@ -1,6 +1,7 @@
 ;2016/07/14 Now get the thing back
 FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX,data3d,ind, $
-   HAS_SC_POT=has_sc_pot
+   HAS_SC_POT=has_sc_pot, $
+   UNITS=units
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -69,6 +70,8 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX,data3d,ind, $
   ENDCASE
 
   IF KEYWORD_SET(has_sc_pot) THEN STR_ELEMENT,struct,'sc_pot',data3d.sc_pot[ind],/ADD_REPLACE
+
+  IF KEYWORD_SET(units) THEN CALL_PROCEDURE,data3d.units_procedure,UNITS=units
 
   RETURN,struct
 END

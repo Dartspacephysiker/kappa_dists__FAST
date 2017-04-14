@@ -281,7 +281,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           EEB_OR_EES=eeb_or_ees, $
                           NAME__DIFF_EFLUX=name__diff_eFlux, $
                           /CALC_GEOM_FACTORS, $
-                          UNITS=eSpecUnits, $
+                          ;; UNITS=eSpecUnits, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
                           SC_POT=sc_pot, $
@@ -304,7 +304,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                          IN_PROTOSTRUCT=diff_eFlux, $
                                          SDT_NAME=dEF_oneCount_name, $
                                          ANGLE=e_angle, $
-                                         ESPECUNITS=units, $
+                                         ;; ESPECUNITS=units, $
                                          ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                          FIT_EACH_ANGLE=fit_each_angle, $ ;Perma-set because we do all angles for 2D fitting
                                          OUT_ONEDAT=out_oneDat, $
