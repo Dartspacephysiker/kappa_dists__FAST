@@ -6,6 +6,8 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                         MINCUR=minCur, $
                                         MAXCUR=maxCur, $
                                         USEINDS=useInds, $
+                                        FIT_JE=fit_je, $
+                                        FIT_BOTH=fit_both, $
                                         PLOT_J_RATIOS=plot_j_ratios, $
                                         PLOT_ION_ELEC_RATIOS=plot_ion_elec_ratios, $
                                         ORIGINATING_ROUTINE=routName, $
@@ -49,14 +51,19 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         ind++
      ENDWHILE
 
-     ji_je_ratio           = curPotList[iuind].cur/curPotList[edind].cur
+     ji_je_ratio    = curPotList[iuind].cur/curPotList[edind].cur
 
   ENDIF
 
-  curDat                      = jvplotdata.cur*(-1.D) / (KEYWORD_SET(plot_j_ratios) ? jvplotdata.cur*(-1.D) : 1.D)
-  divDat                      = jvplotdata.cur*(-1.D)
-
-  ;; SAVE,KnightRelat30,KnightRelat300,KnightRelat3000,jvplotdata,FILENAME=
+  ;; IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
+  ;;    curDat         = jvPlotData.source.cur*(-1.D) / (KEYWORD_SET(plot_j_ratios) ? jvPlotData.source.cur*(-1.D) : 1.D)
+  ;;    divDat         = jvPlotData.source.cur*(-1.D)
+  ;; ENDIF ELSE BEGIN
+     curDat         = jvPlotData.cur*(-1.D) / (KEYWORD_SET(plot_j_ratios) ? jvPlotData.cur*(-1.D) : 1.D)
+     divDat         = jvPlotData.cur*(-1.D)
+  ;; ENDELSE
+  
+  ;; SAVE,KnightRelat30,KnightRelat300,KnightRelat3000,jvPlotData,FILENAME=
   ;; RESTORE,'
   CASE 1 OF
      KEYWORD_SET(fit_time_series): BEGIN
@@ -65,10 +72,18 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         fTol        = 1D-15
         gTol        = 1D-15
 
-        kappa_A     = KEYWORD_SET(A_in) ? A_in : [10, $               ;kappa
-                                                  avgs_JVfit.T.avg, $ ;Temp
-                                                  avgs_JVfit.N.avg, $ ;Dens
-                                                  1D3]                ;R_B
+        IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
+           Temperature = avgs_JVfit.T_SC.avg
+           Density     = avgs_JVfit.N_SC.avg
+        ENDIF ELSE BEGIN
+           Temperature = avgs_JVfit.T.avg
+           Density     = avgs_JVfit.N.avg
+        ENDELSE
+
+        kappa_A     = KEYWORD_SET(A_in) ? A_in : [10, $          ;kappa
+                                                  Temperature, $ ;Temp
+                                                  Density, $     ;Dens
+                                                  1D3]           ;R_B
 
         ;;Keep the original guesses
         Aorig       = kappa_A
@@ -89,8 +104,16 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         cur     = jvPlotData.cur[avgs_JVfit.useInds]*(-1.D)
         potErr  = jvPlotData.potErr[avgs_JVfit.useInds]
         curErr  = jvPlotData.curErr[avgs_JVfit.useInds]
-        T       = jvPlotData.TDown[avgs_JVfit.useInds]
-        N       = jvPlotData.NDown[avgs_JVfit.useInds]
+        CASE 1 OF
+           KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
+              T       = jvPlotData.source.TDown[avgs_JVfit.useInds]
+              N       = jvPlotData.source.NDown[avgs_JVfit.useInds]
+           END
+           ELSE: BEGIN
+              T       = jvPlotData.TDown[avgs_JVfit.useInds]
+              N       = jvPlotData.NDown[avgs_JVfit.useInds]
+           END
+        ENDCASE
 
         FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
                                           potErr,curErr, $
@@ -149,11 +172,23 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   kappaNames                  = MAKE_ARRAY(nR_Bs__K,/STRING)
 
   FOR k=0,nR_Bs__M-1 DO BEGIN
-     maxwellJVs[k,*] = KNIGHT_RELATION__DORS_KLETZING_4(jvplotdata.tdown[useInds], $
-                                                        jvplotdata.ndown[useInds], $
-                                                        jvplotdata.pot[useInds], $
-                                                        R_Bs__M[k], $
-                                                        /NO_MULT_BY_CHARGE)*1D6
+     CASE 1 OF
+        KEYWORD_SET(fit_je): BEGIN
+           maxwellJVs[k,*] = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL(T, $
+                                                                          N, $
+                                                                          pot, $
+                                                                          R_Bs__M[k], $
+                                                                          MASS=mass)
+        END
+        ELSE: BEGIN
+           maxwellJVs[k,*] = KNIGHT_RELATION__DORS_KLETZING_4(T, $
+                                                              N, $
+                                                              pot, $
+                                                              R_Bs__M[k], $
+                                                              /NO_MULT_BY_CHARGE)*1D6
+        END
+     ENDCASE
+
 
      ;; MaxwellNames[k] = 'R!DB!N = ' + STRING(FORMAT='(G0.4)',R_Bs__M[k])
      ;; MaxwellNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," (T*=",I0,")")', $
@@ -167,12 +202,26 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ENDFOR
 
   FOR k=0,nR_Bs__K-1 DO BEGIN
-     kappaJVs[k,*] = KNIGHT_RELATION__DORS_KLETZING_11(kappas[k],jvplotdata.tdown[useInds], $
-                                                       jvplotdata.ndown[useInds], $
-                                                       jvplotdata.pot[useInds], $
-                                                       R_Bs__K[k], $
-                                                       /NO_MULT_BY_CHARGE)*1D6
-
+     CASE 1 OF
+        KEYWORD_SET(fit_je): BEGIN
+           kappaJVs[k,*] = KAPPA_1__DORS_KLETZING_EQ_15__EFLUX(kappas[k], $
+                                                               T, $
+                                                               N, $
+                                                               pot, $
+                                                               R_Bs__K[k], $
+                                                               MASS=mass)
+        END
+        ELSE: BEGIN
+           kappaJVs[k,*] = KNIGHT_RELATION__DORS_KLETZING_11(kappas[k], $
+                                                             T, $
+                                                             N, $
+                                                             pot, $
+                                                             R_Bs__K[k], $
+                                                             /NO_MULT_BY_CHARGE, $
+                                                             MASS=mass)*1D6
+        END
+     ENDCASE
+     
      ;; kappaNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," ($\kappa$=",F0.2,",T*=",I0,")")', $
                             ;; R_Bs__K[k],kappas[k],TmultFac__kappa[k])
      kappaNames[k] = STRING(FORMAT='("R!DB!N = ",G0.4," ($\kappa$=",F0.3,")")', $
@@ -181,6 +230,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
      IF KEYWORD_SET(plot_j_ratios) THEN BEGIN
         kappaJVs[k,*] /= divDat[useInds]
      ENDIF
+
   ENDFOR
 
   MaxwellPlots = MAKE_ARRAY(nR_Bs__M,/OBJ)
@@ -200,10 +250,10 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ji_je_sym    = 's'
   ji_je_name   = 'J!Di!N over J!De!N'
 
-  ;; dataplot     = ERRORPLOT(jvplotdata.pot[useInds], $
+  ;; dataplot     = ERRORPLOT(pot, $
   ;;                          curDat[useInds], $
   ;;                          curErr*1D-6, $
-  dataplot     = PLOT(jvplotdata.pot[useInds], $
+  dataplot     = PLOT(pot, $
                       curDat[useInds], $
                       LINESTYLE=dataLStyle, $
                       SYMBOL=dataSym, $
@@ -215,7 +265,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                       /CURRENT)
 
   FOR k=0,nR_Bs__M-1 DO BEGIN
-     MaxwellPlots[k] = PLOT(jvplotdata.pot[useInds], $
+     MaxwellPlots[k] = PLOT(pot, $
                             MaxwellJVs[k,*], $
                             TRANSPARENCY=MaxwellTransp, $
                             LINESTYLE=MaxwellLinestyle, $
@@ -226,7 +276,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
   ENDFOR
 
   FOR k=0,nR_Bs__K-1 DO BEGIN
-     kappaPlots[k] = PLOT(jvplotdata.pot[useInds], $
+     kappaPlots[k] = PLOT(pot, $
                         kappaJVs[k,*], $
                         TRANSPARENCY=kappaTransp, $
                         LINESTYLE='', $
@@ -242,7 +292,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
 
   IF KEYWORD_SET(ji_je_ratio) THEN BEGIN
 
-     ji_je_plot = PLOT(jvplotdata.pot[useInds], $
+     ji_je_plot = PLOT(pot[useInds], $
                        ji_je_ratio[useInds], $
                        LINESTYLE=ji_je_lStyle, $
                        SYMBOL=ji_je_sym, $

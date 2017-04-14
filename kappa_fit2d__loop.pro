@@ -695,8 +695,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            ;; angleBin_i, $
            !NULL, $
            good_angleBinK_i[0], $
-           ;; ESTIMATE_LOSSCONE=estimate_lossCone, $
-           /ESTIMATE_LOSSCONE, $
+           ESTIMATE_LOSSCONE=KF2D__SDTData_opt.estimate_sourceCone_from_dist, $
+           ;; /ESTIMATE_LOSSCONE, $
            /NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
            PEAK_ENERGY=peak_energy, $
            ITIME=iTime, $

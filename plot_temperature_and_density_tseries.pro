@@ -1,7 +1,7 @@
 ;2017/03/17
 PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
    jvPlotData, $
-   USE_SOURCE_AVGS=use_source_avgs, $
+   ;; USE_SOURCE_AVGS=use_source_avgs, $
    ORIGINAL_PLOTIDEE=orig_plotIdee, $
    YLOG_NDOWN=yLog_nDown, $
    USEI__TWOLUMPS=useInds__twoLumps, $
@@ -29,7 +29,6 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
   tDownTitle         = 'T, downgoing e!U-!N (eV)'
 
   ;; nDownRange       = MINMAX(jvPlotData.nDown)
-  nDownRange       = [1e-3,1e0]
   nDownTitle       = 'N (cm!U-3!N)'
 
   errSym           = '.'
@@ -62,12 +61,20 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
 
   timeTitle        = 'Seconds since ' + TIME_TO_STR(jvPlotData.time[0],/MS)
 
-  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
-     temperature   = jvPlotData.source.TDown
-     density       = jvPlotData.source.NDown
+  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
+     temperature    = jvPlotData.source.TDown
+     temperatureErr = jvPlotData.source.TDownErr
+     density        = jvPlotData.source.NDown
+     densityErr     = jvPlotData.source.NDownErr
+
+     nDownRange     = [1e-2,1e1]
   ENDIF ELSE BEGIN
-     temperature   = jvPlotData.TDown
-     density       = jvPlotData.NDown
+     temperature    = jvPlotData.TDown
+     temperatureErr = jvPlotData.TDownErr
+     density        = jvPlotData.NDown
+     densityErr     = jvPlotData.NDownErr
+
+     nDownRange     = [5e-3,1e0]
   ENDELSE
 
   tDownRange       = MINMAX(temperature)
@@ -194,7 +201,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
 
         ;;Initialize things
         inds              = [0,1]
-        tmpTDownErr         = jvPlotData.tDownErr[inds]
+        tmpTDownErr         = temperatureErr[inds]
 
         plot_1            = ERRORPLOT((jvPlotData.tDiff[inds]), $
                                       temperature[inds], $
@@ -228,7 +235,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
 
            inds           = [k,((k+1) < (nPoints-1))]
            ;; tmpTDownErr      = tDownErr[*,inds]
-           tmpTDownErr      = jvPlotData.tDownErr[inds]
+           tmpTDownErr      = temperatureErr[inds]
 
            plot_1         = ERRORPLOT((jvPlotData.tDiff[inds]), $
                                       temperature[inds], $
@@ -274,7 +281,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;;Second plot
 
         inds              = [0,1]
-        tmpNDownErr         = jvPlotData.nDownErr[inds]
+        tmpNDownErr         = densityErr[inds]
 
         errNDownRange       = MINMAX(density)
         plot_2            = ERRORPLOT((jvPlotData.tDiff[inds]), $
@@ -308,7 +315,7 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         FOR k=2,nPoints-1,2 DO BEGIN
 
            inds           = [k,((k+1) < (nPoints-1))]
-           tmpNDownErr      = jvPlotData.nDownErr[inds]
+           tmpNDownErr      = densityErr[inds]
 
            plot_2         = ERRORPLOT((jvPlotData.tDiff[inds]), $
                                       density[inds], $
@@ -331,8 +338,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;; inds              = [0,1]
         ;; ;; tmpTDownErr         = tDownErr[*,inds]
         ;; ;; tmpNDownErr         = nDownErr[*,inds]
-        ;; tmpTDownErr         = jvPlotData.tDownErr[inds]
-        ;; tmpNDownErr         = jvPlotData.nDownErr[inds]
+        ;; tmpTDownErr         = temperatureErr[inds]
+        ;; tmpNDownErr         = densityErr[inds]
 
         ;; plot_3      = ERRORPLOT(temperature[inds], $
         ;;                         density[inds], $
@@ -365,8 +372,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         ;; FOR k=2,nPoints-1,2 DO BEGIN
 
         ;;    inds           = [k,k+1]
-        ;;    tmpTDownErr      = jvPlotData.tDownErr[inds]
-        ;;    tmpNDownErr      = jvPlotData.nDownErr[inds]
+        ;;    tmpTDownErr      = temperatureErr[inds]
+        ;;    tmpNDownErr      = densityErr[inds]
 
         ;;    plot_3         = ERRORPLOT((temperature[inds]), $
         ;;                               density[inds], $

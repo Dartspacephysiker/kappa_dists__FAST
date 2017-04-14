@@ -739,7 +739,46 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      ENDFOR
 
+
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     ;;The following loop ONLY exists so that times can be gotten for hacking at the mag current
+     itvlTime         = !NULL
+     tmpT             = timesList[t_k]
+     nSegs            = N_ELEMENTS(tmpT[0,*])
+     FOR segIter=0,nSegs-1 DO BEGIN
+
+        tmpT1         = tmpT[0,segIter]
+        tmpT2         = tmpT[1,segIter]
+
+        theseInds     = WHERE( ( time_list[k] GE tmpT1 ) AND $
+                               ( time_list[k] LE tmpT2 ), $
+                               nThese)
+
+        IF nThese EQ 0 THEN STOP
+
+        theseInds     = CGSETINTERSECTION(theseInds,UNIQ((time_list[k]),SORT((time_list[k]))),COUNT=nThese)
+        CHECK_SORTED,(time_list[k])[theseInds],is_sorted,/QUIET
+        IF ~is_sorted THEN STOP
+        IF nThese EQ 0 THEN STOP
+
+        itvlTime      = [itvlTime,(time_list[k])[theseInds]]
+
+     ENDFOR
+
+     ;; ENDIF
+
+     magCurrent = GET_CURRENT_FROM_FLUXMAG(t1,t2, $
+                                           magStr,velocityStr, $
+                                           /USE_DESPUN, $
+                                           SDTNAME__JMAG=jMagName, $
+                                           INFERRED_E_NUMFLUX=inferred_e_numFlux, $
+                                           SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
+                                           QUIET=quiet)
+
+     magCurrent = DATA_CUT(magCurrent,itvlTime)*mapRatio
+
      afterString = "Made "
+
      SAVE,t1,t2, $
           north_southArr_list, $
           lc_angleRange, $
@@ -780,6 +819,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oCharE_list, $
           aRange_oPeakEn_list, $
           diff_eFlux_files, $
+          magCurrent, $
           FILENAME=outDir+masterFile
 
   ENDELSE
@@ -801,9 +841,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      ;;electrons or ions?
      ions  = STRMATCH(STRUPCASE(eeb_or_eesArr[eeb_k]),'IE*')
+
+     ;;North or south?
+     tmpNS = north_southArr_list[t_k]
+
      ;;Get times
      tmpT  = timesList[t_k]
-     tmpNS = north_southArr_list[t_k]
      nSegs = N_ELEMENTS(tmpT[0,*])
 
      IF (N_ELEMENTS((n_list[k])) NE N_ELEMENTS((j_list[k])        )) OR $
@@ -855,10 +898,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlErrors1    = !NULL
      itvlInds       = !NULL
 
-     FOR realK=0,nSegs-1 DO BEGIN
+     FOR segIter=0,nSegs-1 DO BEGIN
 
-        tmpT1               = tmpT[0,realK]
-        tmpT2               = tmpT[1,realK]
+        tmpT1               = tmpT[0,segIter]
+        tmpT2               = tmpT[1,segIter]
 
         ;; theseInds           = WHERE( ( (j_list[k]).x GE tmpT1 ) AND $
         ;;                        ( (j_list[k]).x LE tmpT2 ), $
@@ -916,7 +959,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
         IF N_ELEMENTS(source_ind) GT 0 THEN BEGIN
-           IF realK EQ source_ind THEN BEGIN
+           IF k EQ source_ind THEN BEGIN
               itvlInds = [itvlInds,theseInds]
            ENDIF
         ENDIF
@@ -980,7 +1023,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;    END
         ;; ENDCASE
 
-        ;; tmpFile = 'TMP_'+label[k]+'-'+STRCOMPRESS(realK,/REMOVE_ALL)+'.sav'
+        ;; tmpFile = 'TMP_'+label[k]+'-'+STRCOMPRESS(segIter,/REMOVE_ALL)+'.sav'
         ;; PRINT,"Saving " + tmpFile
         ;; SAVE,tmpJ,tmpJe,tmpCharE,tmpPeakE,tmpCur,FILENAME=outDir+tmpFile
 
@@ -1128,15 +1171,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
      
-     magCurrent = GET_CURRENT_FROM_FLUXMAG(t1,t2, $
-                                           magStr,velocityStr, $
-                                           /USE_DESPUN, $
-                                           SDTNAME__JMAG=jMagName, $
-                                           INFERRED_E_NUMFLUX=inferred_e_numFlux, $
-                                           SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
-                                           QUIET=quiet)
-
-     magCurrent = DATA_CUT(magCurrent,curPotList[0].time)*mapRatio
      PRINT,"Saving it all to " + saveCurPotFile
      SAVE,curPotList,magCurrent,FILENAME=outDir+saveCurPotFile
   ENDIF

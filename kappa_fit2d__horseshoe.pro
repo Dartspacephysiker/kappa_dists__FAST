@@ -163,10 +163,28 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      END
   ENDCASE
 
-  tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
-                       MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
+  IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN
+     tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
+                          MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
+  ENDIF ELSE BEGIN
+     tmpSourceConeRange= KF2D__SDTData_opt.fit2D_dens_aRange
+  ENDELSE
 
-  obs_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
+  ;; tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
+  ;;                      MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
+
+
+  fit_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
+                                 ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                                 ;; ENERGY=out_eRange_peak, $
+                                 ANGLE=tmpSourceConeRange)
+
+  fit_scTemp         = (T_2D(fit2DStr, $
+                            ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                            ;; ENERGY=out_eRange_peak, $
+                            ANGLE=tmpSourceConeRange))[3]
+
+  obs_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,curDataStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
                                  ENERGY=out_eRange_peak, $
                                  ANGLE=tmpSourceConeRange)
@@ -268,11 +286,13 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
      tmpKeeper       = {SDT          : fit2DStr   , $
                         fitParams    : fit2DParams, $
-                        obs_scDens      : obs_scDens  , $
-                        estimated_sc : tmpSourceConeRange, $
-                        obs_scTemp      : obs_scTemp    , $
+                        obs_scDens   : TEMPORARY(obs_scDens), $
+                        obs_scTemp   : TEMPORARY(obs_scTemp), $
                         obs_scFAConduct : oFAConduct , $
-                        fitFAConduct : fFAConduct , $
+                        fit_scDens   : TEMPORARY(fit_scDens), $
+                        fit_scTemp   : TEMPORARY(fit_scTemp), $
+                        fit_SCFAConduct : fFAConduct , $
+                        estimated_sc : tmpSourceConeRange, $
                         chi2         : bestNorm   , $
                         errMsg       : errMsg     , $
                         status       : status     , $

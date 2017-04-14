@@ -1,6 +1,6 @@
 ;2017/04/12
 PRO PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
-                                 USE_SOURCE_AVGS=use_source_avgs, $
+                                 ;; USE_SOURCE_AVGS=use_source_avgs, $
                                  KAPPA_A=A, $
                                  GAUSS_A=AGauss, $
                                  ORBIT=orbit, $
@@ -16,7 +16,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
      orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+  IF KEYWORD_SET(avgs_JVfit.use_source_avgs) THEN BEGIN
      Temperature = avgs_JVfit.T_SC.avg
      Density     = avgs_JVfit.N_SC.avg
   ENDIF ELSE BEGIN

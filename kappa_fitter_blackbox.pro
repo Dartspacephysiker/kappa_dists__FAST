@@ -38,6 +38,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                           FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                           FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+                          FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
                           ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                           SAVE_KAPPA_PLOTS=save_kappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
@@ -99,6 +100,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__TEMPLIMS=TempLims, $    
                           CURANDPOT_JV_THEOR__DENSLIMS=DensLims, $    
                           CURANDPOT_JV_THEOR__MAGRATIOLIMS=magRatioLims, $
+                          CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
+                          CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
+                          CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -227,6 +231,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
         FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
         FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+        FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
         ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
         FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
@@ -395,6 +400,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__TEMPLIMS=TempLims, $    
         JV_THEOR__DENSLIMS=DensLims, $    
         JV_THEOR__MAGRATIOLIMS=magRatioLims, $
+        JV_THEOR__FIT_JE=jv_theor__fit_je, $
+        JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
+        JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -456,8 +464,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFitParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
-     fit2DK.obs_scDens = betterDensK
-     fit2DG.obs_scDens = betterDensG
+     ;; fit2DK.obs_scDens = betterDensK
+     ;; fit2DG.obs_scDens = betterDensG
      kFitParam_struct.N = betterDensK
      gFitParam_struct.N = betterDensG
 

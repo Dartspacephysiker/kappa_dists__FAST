@@ -5,6 +5,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                                     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+                                    FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
                                     _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -25,6 +26,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    electron_anglerange :defElectron_angleRange, $
                    ;; electron_lca        :[-180.,180.], $
                    fit2D_dens_aRange   :defFit2D_dens_angleRange, $
+                   estimate_sourceCone_from_dist : 0B, $
                    densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
 
@@ -110,6 +112,13 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
         END
      ENDCASE
   ENDIF
+
+  IF N_ELEMENTS(fit2D__estimate_sourceCone_from_dist) GT 0 THEN BEGIN
+     kSDTData_opt.estimate_sourceCone_from_dist  = fit2D__estimate_sourceCone_from_dist
+
+  ENDIF
+
+
 
   PRINT,''
 

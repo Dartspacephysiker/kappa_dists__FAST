@@ -32,6 +32,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__TEMPLIMS=TempLims, $    
    JV_THEOR__DENSLIMS=DensLims, $    
    JV_THEOR__MAGRATIOLIMS=magRatioLims, $
+   JV_THEOR__FIT_JE=jv_theor__fit_je, $
+   JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
+   JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
@@ -131,6 +134,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
                                       ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+                                      USE_MSPH_SOURCE=jv_theor__use_msph_source, $
                                       ERROR_BAR_FACTOR=errorBarFac, $
                                       USEI__RELCHANGE=useInds__relChange, $
                                       FRACCHANGE_NDOWN=fracChange_NDown, $
@@ -181,12 +185,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                       _EXTRA=e
   ENDIF
 
-  use_source_avgs = 1
-  
   IF KEYWORD_SET(plot_T_and_N) THEN BEGIN
      PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
         jvPlotData, $
-        USE_SOURCE_AVGS=use_source_avgs, $
         ORIGINAL_PLOTIDEE=orig_plotIdee, $
         YLOG_NDOWN=TN_yLog_nDown, $
         USEI__TWOLUMPS=useInds__twoLumps, $
@@ -201,7 +202,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         _EXTRA=e
   ENDIF
 
-  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
      Temperature = avgs_JVfit.T_SC.avg
      Density     = avgs_JVfit.N_SC.avg
   ENDIF ELSE BEGIN
@@ -225,6 +226,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                          MINCUR=jv_theor__minCur, $
                                          MAXCUR=jv_theor__maxCur, $
                                          USEINDS=useInds, $
+                                         FIT_JE=jv_theor__fit_je, $
+                                         FIT_BOTH=jv_theor__fit_both, $
                                          PLOT_J_RATIOS=plot_j_ratios, $
                                          PLOT_ION_ELEC_RATIOS=plot_ion_elec_ratios, $
                                          ORIGINATING_ROUTINE=routName, $
@@ -248,7 +251,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      avgs_JVfit.useInds = avgs_JVfit.useInds[SORT(jvplotdata.pot[avgs_JVfit.useInds])]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                           USE_SOURCE_AVGS=use_source_avgs, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
                                            TEMPLIMS=TempLims, $    
@@ -261,7 +263,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            _EXTRA=e
 
      PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
-                                  USE_SOURCE_AVGS=use_source_avgs, $
                                   KAPPA_A=A, $
                                   GAUSS_A=AGauss, $
                                   ORIGINATING_ROUTINE=routName, $
@@ -302,7 +303,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   8.0]
 
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                           USE_SOURCE_AVGS=use_source_avgs, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
                                            TEMPLIMS=TempLims, $    
@@ -321,7 +321,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
 
      PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
-        USE_SOURCE_AVGS=use_source_avgs, $
         MAP__2D=map__2D, $
         ORBIT=orbit, $
         SAVEPLOT=savePlot

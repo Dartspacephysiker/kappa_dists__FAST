@@ -3,6 +3,7 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
                                       potErr,curErr, $
                                       T,N, $
                                       ;; USEINDS=useInds, $
+                                      FIT_JE=fit_je, $
                                       FLIP_CURRENT_SIGN=flip_current_sign, $
                                       KAPPA_FIXA=kappa_fixA, $
                                       GAUSS_FIXA=gauss_fixA, $
@@ -27,13 +28,12 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  jvFitFunc   = 'JV_CURVE_FIT__MAXWELL_KAPPA'
+  jvFitFunc   = KEYWORD_SET(fit_je) ? 'JE_V_CURVE_FIT__MAXWELL_KAPPA' : 'JV_CURVE_FIT__MAXWELL_KAPPA'
   OKStatus    = [1,2,3,4]       ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
 
   maxIter     = KEYWORD_SET(maxIter ) ? maxIter : 5000
   fTol        = KEYWORD_SET(fTol    ) ? fTol    : 1D-15
   gTol        = KEYWORD_SET(gTol    ) ? gTol    : 1D-15
-
 
   IF N_ELEMENTS(kappa_A) EQ 0 THEN BEGIN
      ;;        kappa, Temp,Dens, R_B
@@ -44,16 +44,16 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
      Gauss_A = kappa_A
   ENDIF
   
-  kappaParamStruct = INIT_JV_FITPARAM_INFO(     kappa_A,kappa_fixA, $
-                                                KAPPALIMS=kappaLims, $   
-                                                TEMPLIMS=TempLims, $    
-                                                DENSLIMS=DensLims, $    
-                                                MAGRATIOLIMS=magRatioLims)
-  gaussParamStruct = INIT_JV_FITPARAM_INFO(     Gauss_A,gauss_fixA, $
-                                                KAPPALIMS=kappaLims, $   
-                                                TEMPLIMS=TempLims, $    
-                                                DENSLIMS=DensLims, $    
-                                                MAGRATIOLIMS=magRatioLims)
+  kappaParamStruct = INIT_JV_FITPARAM_INFO(kappa_A,kappa_fixA, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims)
+  gaussParamStruct = INIT_JV_FITPARAM_INFO(Gauss_A,gauss_fixA, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims)
 
   fa_kappa    = {no_mult_by_charge : 1B, $
                  is_Maxwellian_fit : 0B}

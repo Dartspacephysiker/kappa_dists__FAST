@@ -1,6 +1,6 @@
 ;2017/03/18
 PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                          USE_SOURCE_AVGS=use_source_avgs, $
+                                          ;; USE_SOURCE_AVGS=use_source_avgs, $
                                           A_IN=A_in, $
                                           KAPPALIMS=kappaLims, $   
                                           TEMPLIMS=TempLims, $    
@@ -23,7 +23,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   fit_tol     = 1D-15
   gTol        = 1D-15
 
-  IF KEYWORD_SET(use_source_avgs) THEN BEGIN
+  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
      Temperature = avgs_JVfit.T_SC.avg
      Density     = avgs_JVfit.N_SC.avg
   ENDIF ELSE BEGIN

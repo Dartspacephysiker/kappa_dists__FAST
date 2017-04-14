@@ -76,6 +76,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      ELECTRON_ANGLERANGE=electron_angleRange, $
                      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+                     FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
                      _EXTRA=e)
 
   ;;Plot options

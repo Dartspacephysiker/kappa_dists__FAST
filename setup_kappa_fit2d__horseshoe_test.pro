@@ -102,7 +102,14 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
 
 
   ;; fa  = {mu_0              : COS(KF2D__SDTData_opt.electron_lca/180.*!PI), $
-  fa  = {mu_0              : COS(MAX([ABS(estimated_lc),ABS(KF2D__SDTData_opt.fit2D_dens_aRange)])/180.*!PI), $
+  ;; fa  = {mu_0              : COS(MAX([ABS(estimated_lc),ABS(KF2D__SDTData_opt.fit2D_dens_aRange)])/180.*!PI), $
+  IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN
+     angler = MAX([ABS(estimated_lc),ABS(KF2D__SDTData_opt.fit2D_dens_aRange)])
+  ENDIF ELSE BEGIN
+     angler = KF2D__SDTData_opt.fit2D_dens_aRange
+  ENDELSE
+  
+  fa  = {mu_0              : COS(angler/180.*!PI), $
          Bingham_style     : 1, $
          is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit), $
          units             : units, $

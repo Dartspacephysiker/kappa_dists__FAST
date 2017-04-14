@@ -29,6 +29,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
                                         ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+                                        USE_MSPH_SOURCE=use_msph_source, $
                                         SPNAME=spName, $
                                         OUT_SPNAME=out_spName, $
                                         ERROR_BAR_FACTOR=errorBarFac, $
@@ -69,10 +70,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ind             = 0
 
   ;;Use source cone stuff?
-  use_sourceCone = 0
+  have_sourceCone = 0
   IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
      IF (WHERE(also_msph_sourcecone))[0] NE -1 THEN BEGIN
-        use_sourceCone = 1
+        have_sourceCone = 1
      ENDIF
   ENDIF
 
@@ -136,36 +137,53 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      cur      = curPotList[edind].cur+curPotList[euind].cur+curPotList[iuind].cur
      curErr   = [[curPotList[edind].curErr],[curPotList[euind].curErr],[curPotList[iuind].curErr]]
 
+     je       = curPotList[edind].je+curPotList[euind].je+curPotList[iuind].je
+     jeErr    = [[curPotList[edind].jeErr],[curPotList[euind].jeErr],[curPotList[iuind].jeErr]]
+
   ENDIF ELSE BEGIN
 
      cur      = MAKE_ARRAY(nHere,/DOUBLE,VALUE=0.D)
      curErr   = MAKE_ARRAY(nHere,nListMem,/DOUBLE,VALUE=0.D) ;You'll see why
      curErr_i = 0
 
+     je       = MAKE_ARRAY(nHere,/DOUBLE,VALUE=0.D)
+     jeErr    = MAKE_ARRAY(nHere,nListMem,/DOUBLE,VALUE=0.D) ;You'll see why
+     jeErr_i  = 0
+
      CASE 1 OF
         KEYWORD_SET(use_mag_current): BEGIN
-           ;; cur += (TEMPORARY(magCurrent)).y
-           cur += magCurrent
+           ;; cur                  += (TEMPORARY(magCurrent)).y
+           cur                     += magCurrent
         END
         ELSE: BEGIN
 
            IF KEYWORD_SET(use_ed_current) THEN BEGIN
-              cur  += curPotList[edind].cur
-              curErr[*,curErr_i++] = curPotList[edind].curErr
+              cur                  += curPotList[edind].cur
+              curErr[*,curErr_i++]  = curPotList[edind].curErr
+
+              je                   += curPotList[edind].je
+              jeErr[*,jeErr_i++]    = curPotList[edind].jeErr
            ENDIF
 
            IF KEYWORD_SET(use_eu_current) THEN BEGIN
-              cur  += curPotList[euind].cur
-              curErr[*,curErr_i++] = curPotList[euind].curErr
+              cur                  += curPotList[euind].cur
+              curErr[*,curErr_i++]  = curPotList[euind].curErr
+
+              je                   += curPotList[euind].je
+              jeErr[*,jeErr_i++]    = curPotList[euind].jeErr
            ENDIF
 
            IF KEYWORD_SET(use_iu_current) THEN BEGIN
-              cur  += curPotList[iuind].cur
-              curErr[*,curErr_i++] = curPotList[iuind].curErr
+              cur                  += curPotList[iuind].cur
+              curErr[*,curErr_i++]  = curPotList[iuind].curErr
+
+              je                   += curPotList[iuind].je
+              jeErr[*,jeErr_i++]    = curPotList[iuind].jeErr
            ENDIF
 
-           ;;Now square all participating current errors for each time, sum them, and take the square root
+           ;;Now square all participating jerent errors for each time, sum them, and take the square root
            curErr = curErr[*,0:(curErr_i-1)]
+           jeErr  = jeErr[*,0:(jeErr_i-1)]
 
         END
      ENDCASE
@@ -176,6 +194,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
         END
         ELSE: BEGIN
            curErr = SQRT(TOTAL(curErr^2.D,2,/DOUBLE))
+           jeErr  = SQRT(TOTAL(jeErr^2.D ,2,/DOUBLE))
         END
      ENDCASE
 
@@ -278,8 +297,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   jvPlotData            = {time       : time      [safe_i] , $
                            cur        : cur       [safe_i] , $
+                           je         : je        [safe_i] , $
                            pot        : pot       [safe_i] , $
                            curErr     : curErr    [safe_i] , $
+                           jeErr      : jeErr     [safe_i] , $
                            potErr     : potErr    [safe_i] , $
                            magCur     : magCurrent[safe_i] , $
                            tMag       : tMag      [safe_i] , $
@@ -293,19 +314,30 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            NDown      : curPotList[edind].N[safe_i], $
                            NDownErr   : curPotList[edind].Nerr[safe_i], $
                            TDown      : REFORM(curPotList[edind].T[3,safe_i]), $
-                           TDownErr   : curPotList[edind].Terr[safe_i]}
+                           TDownErr   : curPotList[edind].Terr[safe_i], $
+                           info       : {cur          : {ed  : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
+                                                         eu  : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
+                                                         iu  : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $
+                                                         mag : KEYWORD_SET(use_mag_current)}, $
+                                         pot          : {chare : KEYWORD_SET(use_charE_for_downPot), $
+                                                         peak_en : KEYWORD_SET(use_peakE_for_downPot), $
+                                                         add_iu_pot : KEYWORD_SET(add_iu_pot)}}, $
+                           use_source_avgs : KEYWORD_SET(use_msph_source) AND have_sourceCone}
 
-  IF use_sourceCone THEN BEGIN
+  IF have_sourceCone THEN BEGIN
 
-     source            = {cur        : curPotList[edind].source.cur[safe_i] , $
-                          curErr     : curPotList[edind].source.curErr[safe_i] , $
-                          NDown      : curPotList[edind].source.N[safe_i], $
-                          NDownErr   : curPotList[edind].source.Nerr[safe_i], $
+     source            = {cur        : curPotList[edind].source.cur    [safe_i] , $
+                          curErr     : curPotList[edind].source.curErr [safe_i] , $
+                          je         : curPotList[edind].source.je     [safe_i] , $
+                          jeErr      : curPotList[edind].source.jeErr  [safe_i] , $
+                          NDown      : curPotList[edind].source.N      [safe_i], $
+                          NDownErr   : curPotList[edind].source.Nerr   [safe_i], $
                           TDown      : REFORM(curPotList[edind].source.T[3,safe_i]), $
-                          TDownErr   : curPotList[edind].source.Terr[safe_i]}
+                          TDownErr   : curPotList[edind].source.Terr   [safe_i]}
 
      STR_ELEMENT,jvPlotData,'source',TEMPORARY(source),/ADD_REPLACE
 
+     ;; jvPlotData.use_source_avgs = 1B
 
   ENDIF
 
@@ -373,7 +405,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      sNavn    = [sNavn,'JiJeRat']
   ENDIF
   
-  IF use_sourceCone THEN BEGIN
+  IF have_sourceCone THEN BEGIN
      quantL.Add,jvPlotData.source.Tdown[useInds]
      quantL.Add,jvPlotData.source.Ndown[useInds]
      navn  = [navn,'T_SC avg','N_SC avg']
@@ -401,6 +433,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      ENDELSE
 
      IF ~EXECUTE(exec2Str) THEN STOP
+
+     STR_ELEMENT,avgs_JVfit,'use_source_avgs',jvPlotData.use_source_avgs,/ADD_REPLACE
 
   ENDFOR
 
