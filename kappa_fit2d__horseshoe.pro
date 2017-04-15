@@ -4,7 +4,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            nEnergies, $
                            nTotAngles, $
                            successes, $
-                           curFitStr,fits,curDataStr, $
+                           ;; curFitStr,fits,curDataStr, $
+                           fit2DStr,fits,curDataStr, $
                            fitAngle_i, $
                            hadSuccess, $
                            ;; IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
@@ -20,6 +21,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
                            PRINT_2DWININFO=print_2DWinInfo, $
                            IN_ESTIMATED_LC=estimated_lc, $
+                           EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                            UNITS=units, $
                            EPS=eps
 
@@ -31,6 +33,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   IF KEYWORD_SET(fit2D__save_all_plots) THEN finish_and_save_all = 1
 
   OKStatus     = [1,2,3,4]      ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+  shiftTheta   = -1             ;Not currently clear why the shift is necessary, but it makes things come out right
 
   eRange_peak  = out_eRange_peak[*,-1]
 
@@ -38,7 +41,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      eRange_peak, $
      nEnergies, $
      nTotAngles, $
-     curFitStr,curDataStr, $
+     ;; curFitStr,curDataStr, $
+     fit2DStr,curDataStr, $
      wtsForFit,X2D,Y2D,dataToFit, $
      fa, $
      IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
@@ -136,32 +140,55 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   ENDELSE
 
-  fit2DStr        = curFitStr
+  ;; fit2DStr        = curFitStr
+
+  IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+     
+     ;; energyStep = fit2DStr.energy[0,*]/fit2DStr.energy[1,*]
+
+     ;; tmpEnergy = [[fit2DStr.energy[0,*]]*energyStep^3,[fit2DStr.energy[0,*]]*energyStep^2,[fit2DStr.energy[0,*]]*energyStep,fit2DStr.energy]
+     ;; tmpdEnergy = [[tmpEnergy[0,*]]*0.0,tmpEnergy[0:-2,*]-tmpEnergy[1:-1,*]]
+
+     ;; tmpEff = [0,0,0,fit2DStr.eff]
+     ;; tmpTheta  = [[fit2DStr.theta[0,*]],[fit2DStr.theta[0,*]],[fit2DStr.theta[0,*]],fit2DStr.theta]
+     ;; tmpGeom  = [[fit2DStr.geom[0,*]],[fit2DStr.geom[0,*]],[fit2DStr.geom[0,*]],fit2DStr.geom]
+
+     ;; STR_ELEMENT,fit2DStr,'data',tmpEnergy*0.0,/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'ddata',tmpEnergy*0.0,/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'energy',TEMPORARY(tmpEnergy),/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'denergy',TEMPORARY(tmpDEnergy),/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'theta',TEMPORARY(tmpTheta),/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'geom',TEMPORARY(tmpGeom),/ADD_REPLACE
+     ;; STR_ELEMENT,fit2DStr,'eff',TEMPORARY(tmpEff),/ADD_REPLACE
+
+     ;; fit2DStr.nEnergy = 51
+     
+  ENDIF
 
   CASE 1 OF
      KEYWORD_SET(kF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
-        ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,curFitStr.theta,fit2DParams)
-        ;;Not currently clear why the shift is necessary, but it makes things come out right
-        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(curFitStr.energy,SHIFT(curFitStr.theta,0,-1), $
+        ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(fit2DStr.energy,fit2DStr.theta,fit2DParams)
+        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(fit2DStr.energy, $
+                                                                           SHIFT(fit2DStr.theta,0,shiftTheta), $
                                                                            fit2DParams, $
                                                                            UNITS=units, $
                                                                            MASS=curDataStr.mass)
      END
-     KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
-        oldfit2DStr = fit2DStr
-        FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
-           fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
-        ENDFOR
-     END
-     KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
-        ;; oldfit2DStr = fit2DStr
-        FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
-           fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
-        ENDFOR
-     END
-     ELSE: BEGIN
-        fit2DStr.data[*,fit2D_dens_angleInfo.angle_i]  = yFit
-     END
+     ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
+     ;;    oldfit2DStr = fit2DStr
+     ;;    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+     ;;       fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
+     ;;    ENDFOR
+     ;; END
+     ;; KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
+     ;;    ;; oldfit2DStr = fit2DStr
+     ;;    FOR m=0,N_ELEMENTS(yFit[*,0])-1 DO BEGIN
+     ;;       fit2DStr.data[eRange_i[m],fit2D_dens_angleInfo.angle_i] = yFit[m,*]
+     ;;    ENDFOR
+     ;; END
+     ;; ELSE: BEGIN
+     ;;    fit2DStr.data[*,fit2D_dens_angleInfo.angle_i]  = yFit
+     ;; END
   ENDCASE
 
   IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN

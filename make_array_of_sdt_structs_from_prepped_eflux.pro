@@ -4,7 +4,8 @@ FUNCTION MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX,data3d, $
    RECALCULATE_DDATA=recalculate_ddata, $
    PREPEND_DATA_NAME=prepend_data_name, $
    APPEND_DATA_NAME=append_data_name, $
-   REPLACE_DATA_NAME=replace_data_name
+   REPLACE_DATA_NAME=replace_data_name, $
+   HAS_SC_POT=has_sc_pot
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -19,7 +20,9 @@ FUNCTION MAKE_ARRAY_OF_SDT_STRUCTS_FROM_PREPPED_EFLUX,data3d, $
   structArr = !NULL
 
   FOR i=0,nStructs-1 DO BEGIN
-     structArr = [structArr,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(data3d,keep_i[i])]
+     structArr = [structArr,MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(data3d, $
+                                                               keep_i[i], $
+                                                               HAS_SC_POT=has_sc_pot)]
   ENDFOR
 
   CASE 1 OF

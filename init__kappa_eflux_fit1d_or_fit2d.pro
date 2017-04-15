@@ -211,20 +211,20 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
 
   ;;Onecount curve?
   IF KEYWORD_SET(KF__Plot_opt.add_oneCount_curve) THEN BEGIN
-     GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
-                                   ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
-                                   EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
-                                   SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
-                                   SC_POT=sc_pot, $
-                                   IN_PROTOSTRUCT=diff_eFlux, $
-                                   SDT_NAME=dEF_oneCount_name, $
-                                   ANGLE=e_angle, $
-                                   ;; ESPECUNITS=KF__Curvefit_opt.units, $
-                                   ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                                   /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
-                                   OUT_ONEDAT=out_oneDat, $
-                                   DEF_ONECOUNT=dEF_oneCount, $
-                                   QUIET=quiet
+     GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
+                             ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
+                             EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
+                             SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                             SC_POT=sc_pot, $
+                             IN_PROTOSTRUCT=diff_eFlux, $
+                             SDT_NAME=dEF_oneCount_name, $
+                             ANGLE=e_angle, $
+                             ;; ESPECUNITS=KF__Curvefit_opt.units, $
+                             ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+                             /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
+                             OUT_ONEDAT=out_oneDat, $
+                             DEF_ONECOUNT=dEF_oneCount, $
+                             QUIET=quiet
 
      IF KEYWORD_SET(old_mode) THEN BEGIN
         GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount

@@ -31,7 +31,7 @@
   fit2D__keep_wholeFit          = 1
   fit2D__bulk_e_anisotropy      = 1
   fit2D__exclude_lca_from_densCalc = 1
-  fit2D__disable_bFunc          = 0
+  fit2D__disable_bFunc          = 1
   ;; fit2D__bulk_e_anis_factor  = 0.3
   IF N_ELEMENTS(fit2D__density_angleRange) EQ 0 THEN BEGIN
      ;; fit2D__density_angleRange  = [-32,32]

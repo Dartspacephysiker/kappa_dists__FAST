@@ -133,6 +133,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       DONT_PRINT_FITINFO=dont_print_fitInfo, $
                       ;; E_ANGLE=e_angle, $
                       CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
+                      EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                       OUT_FITTED_PARAMS=out_kappaParams, $
                       OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                       OUT_KAPPA_FIT_STRUCTS=kappaFits, $
@@ -156,6 +157,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   @common__kappa_fit2d_structs.pro
 
   ;; RESOLVE_ROUTINE,'mpfit2dfun',/IS_FUNCTION
+
+  extend_fitStruct_eRange = 1
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
   times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
@@ -195,14 +198,49 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
   units2D = 'eFlux'
 
+  fit1Denergies = diff_eFlux.energy[*,0,0]
+
   ;;In order to get back to how things were, just 
   IF KEYWORD_SET(synthPackage) THEN BEGIN
      synthKappa                     = diff_eFlux
      synthKappa.data[*]             = 0.0
-     IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
-        synthGauss                  = diff_eFlux
-        synthGauss.data[*]          = 0.0
+
+     IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+        ;; energyStep = synthKappa.energy[0,*,*]/synthKappa.energy[1,*,*]
+        energyStep = diff_eflux.energy[0,0,0]/diff_eflux.energy[1,0,0]
+        
+        new1Denergies = diff_eFlux.energy[0,0,0]*REVERSE(energyStep^(INDGEN(3)+1))
+        fit1Denergies = [new1Denergies,fit1Denergies]
+        ;; IF KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+        ;;    ;; new1Denergies = [new1Denergies,diff_eFlux.energy[0,0,0]]
+        ;;    ;; fit1Denergies = [new1Denergies,diff_eFlux.energy[0,0,0]]
+        ;; ENDIF
+
+        tmpEnergy = [[synthKappa.energy[0,*,*]]*energyStep^3,[synthKappa.energy[0,*,*]]*energyStep^2,[synthKappa.energy[0,*,*]]*energyStep,synthKappa.energy]
+        tmpdEnergy = [[tmpEnergy[0,*,*]]*0.0,tmpEnergy[0:-2,*,*]-tmpEnergy[1:-1,*,*]]
+
+        tmpEff = [[[synthKappa.eff[0,*]],[synthKappa.eff[0,*]],[synthKappa.eff[0,*]],synthKappa.eff]]
+        tmpTheta  = [[synthKappa.theta[0,*,*]],[synthKappa.theta[0,*,*]],[synthKappa.theta[0,*,*]],synthKappa.theta]
+        tmpGeom  = [[synthKappa.geom[0,*,*]],[synthKappa.geom[0,*,*]],[synthKappa.geom[0,*,*]],synthKappa.geom]
+
+        STR_ELEMENT,synthKappa,'data',tmpEnergy*0.0,/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'ddata',tmpEnergy*0.0,/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'energy',TEMPORARY(tmpEnergy),/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'denergy',TEMPORARY(tmpDEnergy),/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'theta',TEMPORARY(tmpTheta),/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'geom',TEMPORARY(tmpGeom),/ADD_REPLACE
+        STR_ELEMENT,synthKappa,'eff',TEMPORARY(tmpEff),/ADD_REPLACE
+
+        synthKappa.nEnergy = 51
+
      ENDIF
+
+     IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
+        ;; synthGauss                  = diff_eFlux
+        ;; synthGauss.data[*]          = 0.0
+        synthGauss = synthKappa
+     ENDIF
+
   ENDIF
 
   IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
@@ -285,6 +323,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
   ;;We won't want to use this anymore. We're outrightly fitting 2D, you know
   ;; INIT_KAPPA_FIT2DPARAMS_INFO,kFit2DParamStruct
+
+  ;;Some plot things
+  ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
+  ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),defXRange[1]]
+  xRange                                      = [MIN(energies[WHERE(energies GT 0)]),MAX(fit1Denergies)*1.05]
+  yRange                                      = [yMin,MAX(data)]
 
   keepK_iTime          = !NULL ;Keep track of which fits get to come home with us
   keepG_iTime          = !NULL ;Keep track of which fits get to come home with us
@@ -466,10 +510,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            A                                        = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
         ENDELSE
         
-
-        ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
-        xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),defXRange[1]]
-        yRange                                      = [yMin,MAX(data)]
         energy_inds                                 = [minEInd,maxEInd]
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
@@ -506,7 +546,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                                        ;; OUT_KAPPA_FIT_STRUCTS=kappaFits, $
                                        ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
-                                       /ADD_FULL_FITS, $
+                                       ADD_FULL_FITS=fit1Denergies, $
+                                       ;; EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                                        ADD_ANGLESTR=angleStr, $
                                        OUT_ERANGE_PEAK=out_eRange_peak, $
                                        OUT_PARAMSTR=out_paramStr, $
@@ -590,8 +631,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            IF ~skipKappa AND ~gotKappa THEN BEGIN
               CASE 1 OF
                  KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
-                    synthKappa.data[*,iAngle,iTime]    = [0,kappaFit.yFull]
-                    synthKappa.energy[*,iAngle,iTime]  = [MAX(XorigArr[iAngle,*]),kappaFit.xFull]
+                    ;; synthKappa.data[*,iAngle,iTime]    = [0,kappaFit.yFull]
+                    ;; synthKappa.energy[*,iAngle,iTime]  = [MAX(XorigArr[iAngle,*]),kappaFit.xFull]
+                    synthKappa.data[*,iAngle,iTime]    = kappaFit.yFull
+                    synthKappa.energy[*,iAngle,iTime]  = kappaFit.xFull
                  END
                  ELSE: BEGIN
                     synthKappa.data[*,iAngle,iTime]    = kappaFit.yFull
@@ -612,8 +655,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               IF ~skipGauss AND ~gotGauss THEN BEGIN
                  CASE 1 OF
                     KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
-                       synthGauss.data[*,iAngle,iTime]    = [0,gaussFit.yFull]
-                       synthGauss.energy[*,iAngle,iTime]  = [MAX(XorigArr[iAngle,*]),gaussFit.xFull]
+                       ;; synthGauss.data[*,iAngle,iTime]    = [0,gaussFit.yFull]
+                       ;; synthGauss.energy[*,iAngle,iTime]  = [MAX(XorigArr[iAngle,*]),gaussFit.xFull]
+                       synthGauss.data[*,iAngle,iTime]    = gaussFit.yFull
+                       synthGauss.energy[*,iAngle,iTime]  = gaussFit.xFull
                     END
                     ELSE: BEGIN
                        synthGauss.data[*,iAngle,iTime]    = gaussFit.yFull
@@ -754,6 +799,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
               IN_ESTIMATED_LC=estimated_lc, $
+              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
               UNITS=units2D, $
               EPS=eps
 
@@ -793,6 +839,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               PRINT_2DFITINFO=print_2DFitInfo, $
               PRINT_2DWININFO=print_2DWinInfo, $
               IN_ESTIMATED_LC=estimated_lc, $
+              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
               UNITS=units2D, $
               EPS=eps
            
@@ -873,7 +920,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                         POSTSCRIPT=~KEYWORD_SET(eps), $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER, $
-                        UNITS=units, $
+                        UNITS=units1D, $
                         EPS=eps
 
      ENDIF

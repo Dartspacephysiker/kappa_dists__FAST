@@ -297,23 +297,23 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            
            PRINT,"Getting oneCount curve ..."
            save_dEF_oneCount_to_file = KEYWORD_SET(save_diff_eFlux_to_file)
-           GET_ONECOUNT_DIFF_EFLUX_CURVE,t1,t2, $
-                                         EEB_OR_EES=eeb_or_ees, $
-                                         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                                         SC_POT=sc_pot, $
-                                         IN_PROTOSTRUCT=diff_eFlux, $
-                                         SDT_NAME=dEF_oneCount_name, $
-                                         ANGLE=e_angle, $
-                                         ;; ESPECUNITS=units, $
-                                         ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                                         FIT_EACH_ANGLE=fit_each_angle, $ ;Perma-set because we do all angles for 2D fitting
-                                         OUT_ONEDAT=out_oneDat, $
-                                         DEF_ONECOUNT=dEF_oneCount, $
-                                         SAVE_DEF_ONECOUNT_TO_FILE=save_dEF_oneCount_to_file, $
-                                         LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
-                                         DIFF_EFLUX_FILE=diff_eFlux_file, $
-                                         LOAD_DIR=diffEfluxDir, $
-                                         QUIET=quiet
+           GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
+                                   EEB_OR_EES=eeb_or_ees, $
+                                   SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                                   SC_POT=sc_pot, $
+                                   IN_PROTOSTRUCT=diff_eFlux, $
+                                   SDT_NAME=dEF_oneCount_name, $
+                                   ANGLE=e_angle, $
+                                   ;; ESPECUNITS=units, $
+                                   ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+                                   FIT_EACH_ANGLE=fit_each_angle, $ ;Perma-set because we do all angles for 2D fitting
+                                   OUT_ONEDAT=out_oneDat, $
+                                   DEF_ONECOUNT=dEF_oneCount, $
+                                   SAVE_DEF_ONECOUNT_TO_FILE=save_dEF_oneCount_to_file, $
+                                   LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
+                                   DIFF_EFLUX_FILE=diff_eFlux_file, $
+                                   LOAD_DIR=diffEfluxDir, $
+                                   QUIET=quiet
 
            also_oneCount = N_ELEMENTS(dEF_oneCount) GT 0
 

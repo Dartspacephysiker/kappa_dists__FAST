@@ -23,6 +23,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              ;; OUT_KAPPA_FIT_STRUCTS=kappaFits, $
                              ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                              ADD_FULL_FITS=add_full_fits, $
+                             EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                              ADD_ANGLESTR=add_angleStr, $
                              OUT_ERANGE_PEAK=out_eRange_peak, $
                              OUT_PARAMSTR=out_paramStr, $
@@ -279,10 +280,23 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                     A_SDT:Aorig}
 
      IF KEYWORD_SET(add_full_fits) THEN BEGIN
-        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,A, $
+        ;; xFull = add_full_fits
+        ;; xFull = Xorig
+        ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+        ;;    xFull = [extend_fitStruct_eRange,xFull]
+        ;; ENDIF
+        ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+        ;;    energyStep = Xorig[0]/Xorig[1]
+        ;;    xFull = [REVERSE(Xorig[0]*energyStep^(INDGEN(3)+1)), $
+        ;;             Xorig]
+        ;; ENDIF ELSE BEGIN
+        ;;    xFull = Xorig
+        ;; ENDELSE
+        
+        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
                                                                        UNITS=units, $
                                                                        MASS=mass)
-        kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",Xorig,"yFull",yFull)
+        kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
      ENDIF
 
      IF KEYWORD_SET(add_angleStr) THEN BEGIN
@@ -424,12 +438,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                  ;; yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss, $
                  ;;                                                                     UNITS=units, $
                  ;;                                                                     MASS=mass)
-                 yGaussFull = MAXWELL_FLUX__FUNC(Xorig,AGauss, $
+                 yGaussFull = MAXWELL_FLUX__FUNC(add_full_fits,AGauss, $
                                                   UNITS=units, $
                                                   MASS=mass)
               END
            ENDCASE
-           gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",Xorig,"yFull",yGaussFull)
+           gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",add_full_fits,"yFull",yGaussFull)
 
         ENDIF
 
