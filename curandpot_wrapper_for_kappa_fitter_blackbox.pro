@@ -36,6 +36,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -299,6 +300,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__FIT_JE=jv_theor__fit_je, $
      JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
      JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+     JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
      JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
      JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
      TN_YLOG_NDOWN=TN_yLog_nDown, $

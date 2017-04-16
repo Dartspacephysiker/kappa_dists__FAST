@@ -30,11 +30,12 @@ PRO PLOT_J_VS_POTBAR,jvPlotData, $
   curDataErr      = jvPlotData.curErr
   potDataErr      = jvPlotData.phiBarErr
 
-  NDown           = jvPlotData.NDown
-  NDownErr        = jvPlotData.NDownErr
-
-  TDown           = jvPlotData.TDown
-  TDownErr        = jvPlotData.TDownErr
+  CURANDPOT__SELECT_T_AND_N,jvPlotData, $ ;avgs_JVfit, $
+                            TEMPERATURE=TDown, $
+                            DENSITY=NDown, $
+                            TEMPERATURE_ERROR=TDownErr, $
+                            DENSITY_ERROR=NDownErr, $
+                            ARRAYS=arrays
 
   only_neg_current = 1
   IF KEYWORD_SET(only_neg_current) THEN BEGIN

@@ -319,7 +319,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
      fitParam_struct = {bulk_energy : REFORM(fit2D.fitParams[0,*]), $
                         temperature : REFORM(fit2D.fitParams[1,*]), $
                         kappa       : REFORM(fit2D.fitParams[2,*]), $
-                        N           : REFORM(fit2D.fitParams[3,*])}
+                        N           : REFORM(fit2D.fitMoms[*].scDens)};; , $
+                        ;; N           : REFORM(fit2D.fitParams[3,*])}
   ENDIF
 
   RETURN,fit2D

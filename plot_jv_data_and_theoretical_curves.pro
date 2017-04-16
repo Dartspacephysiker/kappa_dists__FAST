@@ -72,13 +72,9 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         fTol        = 1D-15
         gTol        = 1D-15
 
-        IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
-           Temperature = avgs_JVfit.T_SC.avg
-           Density     = avgs_JVfit.N_SC.avg
-        ENDIF ELSE BEGIN
-           Temperature = avgs_JVfit.T.avg
-           Density     = avgs_JVfit.N.avg
-        ENDELSE
+        CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                                  TEMPERATURE=temperature, $
+                                  DENSITY=density
 
         kappa_A     = KEYWORD_SET(A_in) ? A_in : [10, $          ;kappa
                                                   Temperature, $ ;Temp
@@ -104,16 +100,10 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         cur     = jvPlotData.cur[avgs_JVfit.useInds]*(-1.D)
         potErr  = jvPlotData.potErr[avgs_JVfit.useInds]
         curErr  = jvPlotData.curErr[avgs_JVfit.useInds]
-        CASE 1 OF
-           KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
-              T       = jvPlotData.source.TDown[avgs_JVfit.useInds]
-              N       = jvPlotData.source.NDown[avgs_JVfit.useInds]
-           END
-           ELSE: BEGIN
-              T       = jvPlotData.TDown[avgs_JVfit.useInds]
-              N       = jvPlotData.NDown[avgs_JVfit.useInds]
-           END
-        ENDCASE
+        CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                                  TEMPERATURE=T, $
+                                  DENSITY=N, $
+                                  /ARRAYS
 
         FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
                                           potErr,curErr, $

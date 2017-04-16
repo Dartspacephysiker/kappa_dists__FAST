@@ -1,5 +1,5 @@
 ;2017/04/12
-PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
+PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    ;; USE_SOURCE_AVGS=use_source_avgs, $
    MAP__2D=map__2D, $
    ORBIT=orbit, $
@@ -50,13 +50,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
      orbPref       = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  IF KEYWORD_SET(avgs_JVfit.use_source_avgs) THEN BEGIN
-     Temperature = avgs_JVfit.T_SC.avg
-     Density     = avgs_JVfit.N_SC.avg
-  ENDIF ELSE BEGIN
-     Temperature = avgs_JVfit.T.avg
-     Density     = avgs_JVfit.N.avg
-  ENDELSE
+  CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                            TEMPERATURE=Temperature, $
+                            DENSITY=Density ;, $
 
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
                             orbPref,Temperature,Density)

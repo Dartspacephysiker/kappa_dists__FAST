@@ -103,6 +103,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
                           CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
                           CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                          CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -403,6 +404,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__FIT_JE=jv_theor__fit_je, $
         JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
         JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+        JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -466,8 +468,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      
      ;; fit2DK.obs_scDens = betterDensK
      ;; fit2DG.obs_scDens = betterDensG
-     kFitParam_struct.N = betterDensK
-     gFitParam_struct.N = betterDensG
+     ;; kFitParam_struct.N = betterDensK
+     ;; gFitParam_struct.N = betterDensG
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $

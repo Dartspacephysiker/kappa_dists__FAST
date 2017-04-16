@@ -1,4 +1,51 @@
 ;2017/03/22
+PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
+
+  nUsers       = N_ELEMENTS(useInds)
+  useInds      = useInds[SORT(jvplotdata.time[useInds])]
+
+  CASE 1 OF
+     KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
+
+        Temperature    = JVPlotData.source.TDown
+        Density        = JVPlotData.source.NDown
+        TemperatureErr = JVPlotData.source.TDownErr
+        DensityErr     = JVPlotData.source.NDownErr
+
+     END
+     ELSE: BEGIN
+
+        Temperature    = JVPlotData.TDown
+        Density        = JVPlotData.NDown
+        TemperatureErr = JVPlotData.TDownErr
+        DensityErr     = JVPlotData.NDownErr
+
+     END
+  ENDCASE
+
+  PRINT,FORMAT='(A0,T5,A0,T30,A0,T40,A0,T50,A0,T60,A0,T70,A0,T80,A0,T90,A0)', $
+        'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
+  FOR k=0,nUsers-1 DO BEGIN
+
+     PRINT,FORMAT='(I0,T5,A0,T30,F-8.1,T40,F-8.3,T50,F-8.1,T60,F-8.3,T70,F-8.1,T80,F-8.3,T90,F-8.3)', $
+           k, $
+           TIME_TO_STR(JVPlotData.time[useInds[k]]), $
+           Temperature[useInds[k]], $
+           Density[useInds[k]], $
+           JVPlotData.pot[useInds[k]], $
+           JVPlotData.cur[useInds[k]], $
+           TemperatureErr[useInds[k]]/Temperature[useInds[k]], $
+           DensityErr[useInds[k]]/Density[useInds[k]], $
+           ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]])
+     
+  ENDFOR
+  PRINT,FORMAT='(A0,T30,F-8.3,T40,F-8.3,T50,F-8.3,T60,G-8.3)', $
+        "Avg", $
+        MEAN(Temperature[useInds]), $
+        MEAN(Density[useInds]), $
+        MEAN(JVPlotData.pot[useInds]), $
+        MEAN(JVPlotData.cur[useInds])
+END
 PRO CURRENT_AND_POTENTIAL_SUITE, $
    PLOT_T1=plot_t1, $
    PLOT_T2=plot_t2, $
@@ -35,6 +82,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
@@ -162,6 +210,21 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
 
+  suppress_magRat_sum = 0
+  to_polar            = 0
+  to_RE               = 3
+  IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
+
+     junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
+                                     /TIME_ARRAY, $
+                                     TO_EQUATOR=to_equator, $
+                                     TO_POLAR_SATELLITE=to_polar, $
+                                     TO_THIS_RE=to_RE, $
+                                     TO_THIS_KM=to_km)
+
+     STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
+
+  ENDIF
 
   IF KEYWORD_SET(plot_jv_a_la_Elphic) THEN BEGIN
      PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
@@ -202,13 +265,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         _EXTRA=e
   ENDIF
 
-  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
-     Temperature = avgs_JVfit.T_SC.avg
-     Density     = avgs_JVfit.N_SC.avg
-  ENDIF ELSE BEGIN
-     Temperature = avgs_JVfit.T.avg
-     Density     = avgs_JVfit.N.avg
-  ENDELSE
+  CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                            TEMPERATURE=Temperature, $
+                            DENSITY=Density ;, $
+                            ;;ARRAYS=arrays
+
                              ;;            kappa,       Temp,   Dens, R_B
 
   kappa_init = KEYWORD_SET(jv_theor__kappa_init) ? jv_theor__kappa_init : 10
@@ -262,7 +323,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            OUT_PLOTDATA=pData, $
                                            _EXTRA=e
 
-     PLOT_J_VS_POT__FIXED_T_AND_N,avgs_JVfit,pData, $
+     PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                   KAPPA_A=A, $
                                   GAUSS_A=AGauss, $
                                   ORIGINATING_ROUTINE=routName, $
@@ -277,11 +338,38 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
+  IF KEYWORD_SET(jv_theor__iterative_game) THEN BEGIN
+
+     ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                           A_IN=A_in, $
+                                           KAPPALIMS=kappaLims, $   
+                                           TEMPLIMS=TempLims, $    
+                                           DENSLIMS=DensLims, $    
+                                           MAGRATIOLIMS=magRatioLims, $
+                                           /ITERATIVE_GAME_MODE, $
+                                           ORIGINATING_ROUTINE=routName, $
+                                           OUT_KAPPA_A=A, $
+                                           OUT_GAUSS_A=AGauss, $
+                                           OUT_PLOTDATA=pData, $
+                                           _EXTRA=e
+
+     PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+                                  KAPPA_A=A, $
+                                  GAUSS_A=AGauss, $
+                                  ORIGINATING_ROUTINE=routName, $
+                                  ORBIT=orbit, $
+                                  SAVEPLOT=savePlot, $
+                                  SPNAME=j_v__fixTandN__spName, $
+                                  _EXTRA=e
+
+
+  ENDIF
+
   IF KEYWORD_SET(plot_j_v_map__r_b_and_kappa__fixed_t_and_n) THEN BEGIN
 
      ;;Options for R_B map
      minR_B  = 5
-     maxR_B  = 5D3
+     maxR_B  = 1D3
      map__2D = 1B
      dR_B    = KEYWORD_SET(map__2D) ? 5 : 1
      nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
@@ -395,37 +483,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
-  nUsers       = N_ELEMENTS(useInds)
-  useInds      = useInds[SORT(jvplotdata.time[useInds])]
-
-  PRINT,FORMAT='(A0,T5,A0,T35,A0,T45,A0,T55,A0,T65,A0,T75,A0,T85,A0,T95,A0)', $
-        'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
-  FOR k=0,nUsers-1 DO BEGIN
-
-     PRINT,FORMAT='(I0,T5,A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,F-8.3,T75,F-8.3,T85,F-8.3,T95,F-8.3)', $
-           k, $
-           TIME_TO_STR(JVPlotData.time[useInds[k]]), $
-           JVPlotData.TDown[useInds[k]], $
-           JVPlotData.NDown[useInds[k]], $
-           JVPlotData.pot[useInds[k]], $
-           JVPlotData.cur[useInds[k]], $
-           JVPlotData.TDownErr[useInds[k]]/JVPlotData.TDown[useInds[k]], $
-           JVPlotData.NDownErr[useInds[k]]/JVPlotData.NDown[useInds[k]], $
-           ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]])
-     
-  ENDFOR
-  PRINT,FORMAT='(A0,T35,F-8.3,T45,F-8.3,T55,F-8.3,T65,G-8.3)', $
-        "Avg", $
-        MEAN(JVPlotData.TDown[useInds]), $
-        MEAN(JVPlotData.NDown[useInds]), $
-        MEAN(JVPlotData.pot[useInds]), $
-        MEAN(JVPlotData.cur[useInds])
-
-  suppress_magRat_sum = 1
-  IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
-
-     junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time[useInds],/TIME_ARRAY)
-
-  ENDIF
+  PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
 
 END

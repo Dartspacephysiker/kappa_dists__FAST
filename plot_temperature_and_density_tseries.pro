@@ -61,18 +61,25 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
 
   timeTitle        = 'Seconds since ' + TIME_TO_STR(jvPlotData.time[0],/MS)
 
-  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
-     temperature    = jvPlotData.source.TDown
-     temperatureErr = jvPlotData.source.TDownErr
-     density        = jvPlotData.source.NDown
-     densityErr     = jvPlotData.source.NDownErr
+  CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                            TEMPERATURE=Temperature, $
+                            DENSITY=Density, $
+                            TEMPERATURE_ERROR=TemperatureErr, $
+                            DENSITY_ERROR=DensityErr, $
+                            /ARRAYS
 
-     nDownRange     = [1e-2,1e1]
+  IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN
+     ;; temperature    = jvPlotData.source.TDown
+     ;; temperatureErr = jvPlotData.source.TDownErr
+     ;; density        = jvPlotData.source.NDown
+     ;; densityErr     = jvPlotData.source.NDownErr
+
+     nDownRange     = [1e-2,1e0]
   ENDIF ELSE BEGIN
-     temperature    = jvPlotData.TDown
-     temperatureErr = jvPlotData.TDownErr
-     density        = jvPlotData.NDown
-     densityErr     = jvPlotData.NDownErr
+     ;; temperature    = jvPlotData.TDown
+     ;; temperatureErr = jvPlotData.TDownErr
+     ;; density        = jvPlotData.NDown
+     ;; densityErr     = jvPlotData.NDownErr
 
      nDownRange     = [5e-3,1e0]
   ENDELSE
