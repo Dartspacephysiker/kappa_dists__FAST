@@ -64,8 +64,8 @@ PRO PLOT_TEMPERATURE_AND_DENSITY_TSERIES, $
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=Temperature, $
                             DENSITY=Density, $
-                            TEMPERATURE_ERROR=TemperatureErr, $
-                            DENSITY_ERROR=DensityErr, $
+                            ERR_TEMPERATURE=TemperatureErr, $
+                            ERR_DENSITY=DensityErr, $
                             /ARRAYS
 
   IF KEYWORD_SET(jvPlotData.use_source_avgs) THEN BEGIN

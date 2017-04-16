@@ -773,6 +773,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                            SDTNAME__JMAG=jMagName, $
                                            INFERRED_E_NUMFLUX=inferred_e_numFlux, $
                                            SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
+                                           /STRANGEWAY_DECIMATE, $
                                            QUIET=quiet)
 
      magCurrent = DATA_CUT(magCurrent,itvlTime)*mapRatio

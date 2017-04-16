@@ -4,11 +4,12 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                               DENSITY=Density, $
                               ERR_TEMPERATURE=TemperatureErr, $
                               ERR_DENSITY=DensityErr, $
+                              SKIP_USEINDS=skip_useInds, $
                               ARRAYS=arrays
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  IF KEYWORD_SET(avgs_JVfit) THEN BEGIN
+  IF KEYWORD_SET(avgs_JVfit) AND ~KEYWORD_SET(skip_useInds) THEN BEGIN
      useInds              = avgs_JVfit.useInds
   ENDIF ELSE BEGIN
      useInds              = LINDGEN(N_ELEMENTS(jvPlotData.time))

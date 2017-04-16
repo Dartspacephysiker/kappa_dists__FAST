@@ -238,7 +238,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
   ENDIF
 
   IF KEYWORD_SET(plot_j_v_potBar) THEN BEGIN
-     PLOT_J_VS_POTBAR,jvPlotData, $
+     PLOT_J_VS_POTBAR,jvPlotData,avgs_jvFit, $
                       J_ON_YAXIS=jvPotBar__j_on_yAxis, $
                       SAVEPLOT=savePlot, $
                       SPNAME=jvpotBar_spName, $
@@ -417,7 +417,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      
   ENDIF
 
-  plot_magCurrent_vs_current = 0
+  plot_magCurrent_vs_current = 1
   IF KEYWORD_SET(plot_magCurrent_vs_current) THEN BEGIN
 
      ;; tmpCur = 0.D * curPotList[0].cur
@@ -454,6 +454,30 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                      SYMBOL='*', $
                      COLOR='red', $
                      /OVERPLOT)
+
+     IF KEYWORD_SET(useInds__twoLumps) AND KEYWORD_SET(useInds) THEN BEGIN
+        
+        minI      = MIN(useInds)
+        maxI      = MAX(useInds)
+        line1X    = [jvPlotData.tDiff[minI],jvPlotData.tDiff[minI]]
+        line2X    = [jvPlotData.tDiff[maxI],jvPlotData.tDiff[maxI]]
+
+        line1Y    = MINMAX([jvPlotData.cur,jvPlotData.magCur])
+        line2Y    = line1Y
+
+        linePlot1 = PLOT(line1X, $
+                         line1Y, $
+                         ;; RGB_TABLE=hammerCT, $
+                         ;; VERT_COLORS=jvPlotData.tMag[[minI,minI]], $
+                         /OVERPLOT)
+        
+        linePlot2 = PLOT(line2X, $
+                         line2Y, $
+                         ;; RGB_TABLE=hammerCT, $
+                         ;; VERT_COLORS=jvPlotData.tMag[[maxI,maxI]], $
+                         /OVERPLOT)
+
+     ENDIF
 
   ENDIF
 

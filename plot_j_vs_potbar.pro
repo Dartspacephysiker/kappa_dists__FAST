@@ -1,5 +1,5 @@
 ;;2017/03/04
-PRO PLOT_J_VS_POTBAR,jvPlotData, $
+PRO PLOT_J_VS_POTBAR,jvPlotData,avgs_jvFit, $
                      J_ON_YAXIS=j_on_yAxis, $
                      SAVEPLOT=savePlot, $
                      SPNAME=spName, $
@@ -30,12 +30,13 @@ PRO PLOT_J_VS_POTBAR,jvPlotData, $
   curDataErr      = jvPlotData.curErr
   potDataErr      = jvPlotData.phiBarErr
 
-  CURANDPOT__SELECT_T_AND_N,jvPlotData, $ ;avgs_JVfit, $
+  CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=TDown, $
                             DENSITY=NDown, $
-                            TEMPERATURE_ERROR=TDownErr, $
-                            DENSITY_ERROR=NDownErr, $
-                            ARRAYS=arrays
+                            ERR_TEMPERATURE=TDownErr, $
+                            ERR_DENSITY=NDownErr, $
+                            /SKIP_USEINDS, $
+                            /ARRAYS
 
   only_neg_current = 1
   IF KEYWORD_SET(only_neg_current) THEN BEGIN
