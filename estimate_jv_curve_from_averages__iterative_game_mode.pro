@@ -91,16 +91,69 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                       FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF, $
                       EPOCH=time_epoch[arbInd]
 
+  CASE 1 OF
+     KEYWORD_SET(jvPlotData.BModelInfo.T89): BEGIN
+
+        GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[k]
+
+     END
+     KEYWORD_SET(jvPlotData.BModelInfo.T96): BEGIN
+
+        GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[k]
+
+     END
+     KEYWORD_SET(jvPlotData.BModelInfo.T01): BEGIN
+
+        GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[k]
+
+     END
+     ELSE: BEGIN
+
+        GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                     FAST_Bx,FAST_By,FAST_Bz, $
+                     TILT=thisTilt, $
+                     EPOCH=time_epoch[k], $
+                     IOPGEN=IOPGen, $
+                     IOPT=IOPT, $
+                     IOPB=IOPB, $
+                     IOPR=IOPR
+
+     END
+  ENDCASE
+
+
   FAST_GSM       = [FAST_GSM_x,FAST_GSM_y,FAST_GSM_z]
   FAST_RE        = SQRT(TOTAL(FAST_GSM^2))
   FAST_B_IGRF    = [FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF]
-  FAST_B_IGRFMag = SQRT(TOTAL(FAST_B_IGRF^2))
+  ;; FAST_B_IGRFMag = SQRT(TOTAL(FAST_B_IGRF^2))
+
+  FAST_B         = [FAST_Bx,FAST_By,FAST_Bz] + FAST_B_IGRF
+  FAST_BMag      = SQRT(TOTAL((FAST_B + FAST_B_IGRF)^2))
 
   CASE 1 OF
      KEYWORD_SET(jvPlotData.mRatio.BModelInfo.T89): BEGIN
         tmpParMod = jvPlotData.mRatio.BModelInfo.IOPT_89[arbInd]
 
         T89       = 1
+        T96       = 0
+        T01       = 0
+        TS04      = 0
+
+     END
+     KEYWORD_SET(jvPlotData.mRatio.BModelInfo.T96): BEGIN
+        tmpParMod = jvPlotData.mRatio.BModelInfo.parMod[*,arbInd]
+
+        T89       = 0
+        T96       = 1
         T01       = 0
         TS04      = 0
 
@@ -110,6 +163,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
         tmpParMod[4:5] = jvPlotData.mRatio.BModelInfo.GParms[arbInd,*]
 
         T89       = 0
+        T96       = 0
         T01       = 1
         TS04      = 0
 
@@ -118,6 +172,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
         tmpParMod = jvPlotData.mRatio.BModelInfo.parMod[*,arbInd]
 
         T89       = 0
+        T96       = 0
         T01       = 0
         TS04      = 1
 
@@ -224,7 +279,6 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                          T89=T89, $
                          T01=T01, $
                          TS04=TS04, $
-                         ;; IGRF=IGRF, $
                          /IGRF, $
                          TILT=thisTilt, $ ;should be in degrees
                          EPOCH=time_epoch[arbInd], $
@@ -243,64 +297,101 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                          T89=T89, $
                          T01=T01, $
                          TS04=TS04, $
-                         ;; IGRF=IGRF, $
                          /IGRF, $
                          TILT=thisTilt, $ ;should be in degrees
                          EPOCH=time_epoch[arbInd], $
                          DSMAX=dsMax, $
                          ERR=traceErr
 
-        ;; CASE 1 OF
-        ;;    KEYWORD_SET(jvPlotData.BModelInfo.T89): BEGIN
+        ;;Calculate external contribution
+        CASE 1 OF
+           KEYWORD_SET(jvPlotData.BModelInfo.T89): BEGIN
 
-        ;;       GEOPACK_T89,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
-        ;;                   downTail_Bx,downTail_By,downTail_Bz, $
-        ;;                   TILT=thisTilt, $
-        ;;                   EPOCH=time_epoch[arbInd]
+              GEOPACK_T89,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
+                          downTail_Bx,downTail_By,downTail_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;       GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-        ;;                   FAST_Bx,FAST_By,FAST_Bz, $
-        ;;                   TILT=thisTilt, $
-        ;;                   EPOCH=time_epoch[arbInd]
+              GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                          FAST_Bx,FAST_By,FAST_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;       GEOPACK_T89,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
-        ;;                   ionos_Bx,ionos_By,ionos_Bz, $
-        ;;                   TILT=thisTilt, $
-        ;;                   EPOCH=time_epoch[arbInd]
+              GEOPACK_T89,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
+                          ionos_Bx,ionos_By,ionos_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;    END
-        ;;    ELSE: BEGIN
+           END
+           KEYWORD_SET(jvPlotData.BModelInfo.T96): BEGIN
 
-        ;;       GEOPACK_TS04,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
-        ;;                    downTail_Bx,downTail_By,downTail_Bz, $
-        ;;                    TILT=thisTilt, $
-        ;;                    EPOCH=time_epoch[arbInd], $
-        ;;                    IOPGEN=IOPGen, $
-        ;;                    IOPT=IOPT, $
-        ;;                    IOPB=IOPB, $
-        ;;                    IOPR=IOPR
+              GEOPACK_T96,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
+                          downTail_Bx,downTail_By,downTail_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;       GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-        ;;                    FAST_Bx,FAST_By,FAST_Bz, $
-        ;;                    TILT=thisTilt, $
-        ;;                    EPOCH=time_epoch[arbInd], $
-        ;;                    IOPGEN=IOPGen, $
-        ;;                    IOPT=IOPT, $
-        ;;                    IOPB=IOPB, $
-        ;;                    IOPR=IOPR
+              GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                          FAST_Bx,FAST_By,FAST_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;       GEOPACK_TS04,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
-        ;;                    ionos_Bx,ionos_By,ionos_Bz, $
-        ;;                    TILT=thisTilt, $
-        ;;                    EPOCH=time_epoch[arbInd], $
-        ;;                    IOPGEN=IOPGen, $
-        ;;                    IOPT=IOPT, $
-        ;;                    IOPB=IOPB, $
-        ;;                    IOPR=IOPR
+              GEOPACK_T96,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
+                          ionos_Bx,ionos_By,ionos_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
 
-        ;;    END
-        ;; ENDCASE
+           END
+           KEYWORD_SET(jvPlotData.BModelInfo.T01): BEGIN
 
+              GEOPACK_T01,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
+                          downTail_Bx,downTail_By,downTail_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
+
+              GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                          FAST_Bx,FAST_By,FAST_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
+
+              GEOPACK_T01,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
+                          ionos_Bx,ionos_By,ionos_Bz, $
+                          TILT=thisTilt, $
+                          EPOCH=time_epoch[arbInd]
+
+           END
+           ELSE: BEGIN
+
+              GEOPACK_TS04,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
+                           downTail_Bx,downTail_By,downTail_Bz, $
+                           TILT=thisTilt, $
+                           EPOCH=time_epoch[arbInd], $
+                           IOPGEN=IOPGen, $
+                           IOPT=IOPT, $
+                           IOPB=IOPB, $
+                           IOPR=IOPR
+
+              GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                           FAST_Bx,FAST_By,FAST_Bz, $
+                           TILT=thisTilt, $
+                           EPOCH=time_epoch[arbInd], $
+                           IOPGEN=IOPGen, $
+                           IOPT=IOPT, $
+                           IOPB=IOPB, $
+                           IOPR=IOPR
+
+              GEOPACK_TS04,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
+                           ionos_Bx,ionos_By,ionos_Bz, $
+                           TILT=thisTilt, $
+                           EPOCH=time_epoch[arbInd], $
+                           IOPGEN=IOPGen, $
+                           IOPT=IOPT, $
+                           IOPB=IOPB, $
+                           IOPR=IOPR
+
+           END
+        ENDCASE
+
+        ;;Internal contribution
         GEOPACK_IGRF_GSW_08,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
                             downTail_Bx_IGRF,downTail_By_IGRF,downTail_Bz_IGRF, $
                             EPOCH=time_epoch[arbInd]
@@ -310,35 +401,29 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                             EPOCH=time_epoch[arbInd]
 
 
-        downTail_GSM = [downTail_GSM_x,downTail_GSM_y,downTail_GSM_z]
-        ionos_GSM    = [ionos_GSM_x,ionos_GSM_y,ionos_GSM_z]
+        downTail_GSM        = [downTail_GSM_x,downTail_GSM_y,downTail_GSM_z]
+        ionos_GSM           = [ionos_GSM_x,ionos_GSM_y,ionos_GSM_z]
 
         downTail_RE         = SQRT(TOTAL(downTail_GSM^2))
         ionos_RE            = SQRT(TOTAL(ionos_GSM^2))
 
-        ;; FAST_km             = (FAST_RE     - 1.D ) * RE_to_km
-        ;; downTail_km         = (downTail_RE - 1.D ) * RE_to_km
-        ;; ionos_km            = (ionos_RE    - 1.D ) * RE_to_km
-
-        ;; FAST_B              = [FAST_Bx,FAST_By,FAST_Bz]
-        ;; downTail_B          = [downTail_Bx,downTail_By,downTail_Bz]
-        ;; ionos_B             = [ionos_Bx,ionos_By,ionos_Bz]
-
-        ;; FAST_BMag           = SQRT(TOTAL(FAST_B^2))
-        ;; downTail_BMag       = SQRT(TOTAL(downTail_B^2))
-        ;; ionos_BMag          = SQRT(TOTAL(ionos_B^2))
-
-        ;; R_B_FAST            = FAST_BMag/downTail_BMag
-        ;; R_B_ionos           = ionos_BMag/downTail_BMag
+        downTail_B          = [downTail_Bx,downTail_By,downTail_Bz]
+        ionos_B             = [ionos_Bx,ionos_By,ionos_Bz]
 
         downTail_B_IGRF     = [downTail_Bx_IGRF,downTail_By_IGRF,downTail_Bz_IGRF]
         ionos_B_IGRF        = [ionos_Bx_IGRF,ionos_By_IGRF,ionos_Bz_IGRF]
 
-        downTail_B_IGRFMag  = SQRT(TOTAL(downTail_B_IGRF^2))
-        ionos_B_IGRFMag     = SQRT(TOTAL(ionos_B_IGRF^2))
+        ;; downTail_B_IGRFMag  = SQRT(TOTAL(downTail_B_IGRF^2))
+        ;; ionos_B_IGRFMag     = SQRT(TOTAL(ionos_B_IGRF^2))
 
-        R_B_IGRF_FAST       = FAST_B_IGRFMag/downTail_B_IGRFMag
-        R_B_IGRF_ionos      = ionos_B_IGRFMag/downTail_B_IGRFMag
+        downTail_BMag       = SQRT(TOTAL((downTail_B + downTail_B_IGRF)^2))
+        ionos_BMag          = SQRT(TOTAL((ionos_B + ionos_B_IGRF)^2))
+
+        R_B_FAST            = FAST_BMag/downTail_BMag
+        R_B_ionos           = ionos_BMag/downTail_BMag
+
+        ;; R_B_IGRF_FAST       = FAST_B_IGRFMag/downTail_B_IGRFMag
+        ;; R_B_IGRF_ionos      = ionos_B_IGRFMag/downTail_B_IGRFMag
 
         checkRB             = R_B_IGRF_ionos
         oldoldRLim          = oldRLim
@@ -382,10 +467,14 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      ;;Update B ratio
      IF STRMATCH(STRUPCASE(fit_type),'KAPPA') THEN parInfoNye[0].value = A[0]
 
-     jvPlotData.mRatio.R_B_IGRF.FAST[*]  = TEMPORARY(R_B_IGRF_FAST)
-     jvPlotData.mRatio.R_B_IGRF.ionos[*] = TEMPORARY(R_B_IGRF_ionos)
+     ;; jvPlotData.mRatio.R_B_IGRF.FAST[*]  = TEMPORARY(R_B_FAST)
+     ;; jvPlotData.mRatio.R_B_IGRF.ionos[*] = TEMPORARY(R_B_ionos)
 
-     parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
+     jvPlotData.mRatio.R_B.FAST[*]  = TEMPORARY(R_B_FAST)
+     jvPlotData.mRatio.R_B.ionos[*] = TEMPORARY(R_B_ionos)
+
+     ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
+     parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B.FAST[avgs_JVfit.useInds])*NFactor
 
      dens_arr                            = [dens_arr,parInfoNye[2].value]
      RLim_arr                            = [RLim_arr,RLim]
@@ -393,8 +482,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      dRB_arr                             = [dRB_arr,(oldRB-newRB)]
      RB_arr                              = [RB_arr ,newRB]
 
-     ;;See if we're done (no R_B_IGRF_FAST means we skipped the loop, children)
-     ;; done = (N_ELEMENTS(R_B_IGRF_FAST)) EQ 0 AND ( ABS((dens_arr[-1]-dens_arr[-2])/dens_arr[-2]) LE 0.1 )
+     ;;See if we're done (no R_B_FAST means we skipped the loop, children)
+     ;; done = (N_ELEMENTS(R_B_FAST)) EQ 0 AND ( ABS((dens_arr[-1]-dens_arr[-2])/dens_arr[-2]) LE 0.1 )
      done = isSatisfied AND ( ABS((dens_arr[-1]-dens_arr[-2])/dens_arr[-2]) LE 0.1 )
 
      IF done THEN BEGIN

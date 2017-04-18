@@ -1,5 +1,5 @@
 ;2017/04/06
-PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
+PRO JOURNAL__20170418__DIST_FUNC_AND_JE_V_SIDE_BY_SIDE, $
    TRUNCATE_AT=truncate_at, $
    SAVE_EPS=save_eps
 
@@ -10,12 +10,12 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   T        = 500                ;eV
   E_b      = 1D3                ;Bulk energy
 
-  R_B      = 15
-  RBSuff   = " (src ~1-2 R!D E!N)"
-  ;; R_B      = 1000
-  ;; RBSuff   = " (src ~13-15 R!D E!N)"
+  ;; R_B      = 15
+  ;; RBSuff   = " (src ~1-2 R!D E!N)"
+  R_B      = 1000
+  RBSuff   = " (src ~13-15 R!D E!N)"
 
-  kappas   = [0,5,2.5,2.0,1.8,1.6]
+  kappas   = [0,5,2.5,1.9,1.8,1.6]
   nKappa   = N_ELEMENTS(kappas)
 
   potBarTop = 2D4
@@ -35,7 +35,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   IF N_ELEMENTS(R_B) EQ 1 THEN R_B = REPLICATE(R_B,nKappa)
 
   ;;Plot opts, things
-  outPlotPref = 'kappa_seminar__dist_JV_'
+  outPlotPref = 'kappa__dist_Je_V_'
   SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
   IF N_ELEMENTS(save_eps) EQ 0 THEN save_eps = 0
   theorPArr = MAKE_ARRAY(nKappa,/OBJ)
@@ -50,7 +50,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   ;; FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.2)',muLetter+' = ',kappas[k])]
 
   ;;Get datas first
-  curArr   = !NULL
+  jeArr   = !NULL
   distFArr = !NULL
   FOR k=0,nKappa-1 DO BEGIN
 
@@ -58,24 +58,31 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
 
      CASE kappas[k] OF
         0: BEGIN
-           tmpCur   = KNIGHT_RELATION__DORS_KLETZING_4(T[k],N[k],pot,R_B[k], $
-                                                       OUT_POTBAR=potBar, $
-                                                       /NO_MULT_BY_CHARGE)
+
+           tmpJe = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL(T[k],N[k],pot,R_B[k], $
+                                                             OUT_POTBAR=potBar)
+           ;; tmpJe   = KNIGHT_RELATION__DORS_KLETZING_4(T[k],N[k],pot,R_B[k], $
+           ;;                                             OUT_POTBAR=potBar, $
+           ;;                                             /NO_MULT_BY_CHARGE)
 
            tmpDistF = MAXWELL_FLUX__FUNC(pot,Pthing, $
                                          UNITS=distUnits)
         END
         ELSE: BEGIN
-           tmpCur = KNIGHT_RELATION__DORS_KLETZING_11(kappas[k],T[k],N[k],pot,R_B[k], $
-                                                       OUT_POTBAR=potBar, $
-                                                      /NO_MULT_BY_CHARGE)
+           ;; IF kappas[k] EQ 2.0 THEN STOP
+           tmpJe = KAPPA_1__DORS_KLETZING_EQ_15__EFLUX(kappas[k],T[k],N[k],pot,R_B[k], $
+                                                    OUT_POTBAR=potBar, $
+                                                    MASS=mass)
+           ;; tmpJe = KNIGHT_RELATION__DORS_KLETZING_11(kappas[k],T[k],N[k],pot,R_B[k], $
+           ;;                                             OUT_POTBAR=potBar, $
+           ;;                                            /NO_MULT_BY_CHARGE)
 
            tmpDistF = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(pot,Pthing, $
                                                                              UNITS=distUnits)
         END
      ENDCASE
 
-     curArr   = [curArr,TRANSPOSE(tmpCur)]
+     jeArr   = [jeArr,TRANSPOSE(tmpJe)]
      distFArr = [distFArr,TRANSPOSE(tmpDistF)]
 
   ENDFOR
@@ -102,12 +109,12 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   energyRange     = [1,4D4]
 
   potBarRange     = [0.1,MAX(potBar)]
-  curRange        = MINMAX(curArr[*,WHERE(potBar GE potBarRange[0])])*1D6
-  curRange[1]    *= 1.1
+  jeRange        = MINMAX(jeArr[*,WHERE(potBar GE potBarRange[0])])*1D6
+  jeRange[1]    *= 1.1
 
   potLog          = 1
   energyLog       = 1
-  curLog          = 1
+  jeLog          = 1
   distFLog        = 1
 
   font_size       = 16
@@ -115,7 +122,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   truncate_at     = KEYWORD_SET(truncate_at) ? truncate_at : 6
 
   junk            = MIN(ABS(potBar-10),kbTeq10Ind)
-  prosjent        = (curArr[*,kbTeq10Ind]-curArr[0,kbTeq10Ind])/curArr[0,kbTeq10Ind]
+  prosjent        = (jeArr[*,kbTeq10Ind]-jeArr[0,kbTeq10Ind])/jeArr[0,kbTeq10Ind]
 
   distFName = 'Maxw(+0%)'
   FOR k=1,nKappa-1 DO distFName = [distFName,STRING(FORMAT='(A0,F0.1," (+",I0,"%)")','$\kappa$=',kappas[k],100.*prosjent[k])]
@@ -151,14 +158,14 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
      CASE k OF
         0: BEGIN
 
-           theorPArr[k] = PLOT(potBar,TRANSPOSE(curArr[k,*])*1D6, $
+           theorPArr[k] = PLOT(potBar,TRANSPOSE(jeArr[k,*])*1D6, $
                                NAME=distFName[k], $
                                XTITLE='e $\phi$ / k!DB!NT', $
-                               YTITLE='Current Density ($\mu$A/m!U2!N)', $
+                               YTITLE='Energy flux (mW/m!U2!N)', $
                                XLOG=potLog, $
-                               YLOG=curLog, $
+                               YLOG=jeLog, $
                                XRANGE=potBarRange, $
-                               YRANGE=curRange, $
+                               YRANGE=jeRange, $
                                XSTYLE=1, $
                                XTICKFORMAT='exponentlabel', $
                                YTICKFORMAT='exponentlabel', $
@@ -182,7 +189,7 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
         END
         ELSE: BEGIN
 
-           theorPArr[k] = PLOT(potBar,TRANSPOSE(curArr[k,*])*1D6, $
+           theorPArr[k] = PLOT(potBar,TRANSPOSE(jeArr[k,*])*1D6, $
                                NAME=distFName[k], $
                                COLOR=colors[k], $
                                LINESTYLE=lStyles[k], $
@@ -265,3 +272,4 @@ PRO JOURNAL__20170406__PLASMA_SEMINAR__DIST_FUNC_AND_JV_SIDE_BY_SIDE, $
   ENDIF
 
 END
+

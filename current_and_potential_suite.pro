@@ -87,6 +87,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+   ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
@@ -214,7 +215,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
 
-  suppress_magRat_sum = 0
+  suppress_magRat_sum = ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
+                          KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km))
   ;; to_polar            = 0
   ;; " Within its polar orbit with geocentric perigee and apogee of 1.8 and 9.0 RE, respectively … " Laakso et al. [2003]
   ;;"… 9 RE (56,500 km) and a perigee of 2 RE (11,500 km) …" --https://directory.eoportal.org/web/eoportal/satellite-missions/p/polar
@@ -227,6 +229,18 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                      TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
                                      TO_THIS_RE=jv_theor__initial_source_R_E, $
                                      TO_THIS_KM=to_km)
+
+     add_Denton2006 = 1
+     IF KEYWORD_SET(add_Denton2006) THEN BEGIN
+
+        ne_F   = MEAN(jvPlotData.source.NDown[avgs_JVfit.useInds])
+        mlt    = MEAN(junk.mlt[avgs_JVfit.useInds])
+        RE_F   = MEAN(junk.R_E.fast[avgs_JVfit.useInds])
+        Lshell = MEAN(junk.lshell.T[avgs_JVfit.useInds])
+
+        dentonParams = GET_DENTON_ET_AL_2006__EQUATORIAL_DENSITY(ne_F,mlt,RE_F,Lshell)
+
+     ENDIF
 
      STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
 
