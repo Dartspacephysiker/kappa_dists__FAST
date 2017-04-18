@@ -36,7 +36,11 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+   JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+   JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+   JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -300,7 +304,11 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__FIT_JE=jv_theor__fit_je, $
      JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
      JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+     JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+     JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+     JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
      JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+     JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
      JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
      JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
      TN_YLOG_NDOWN=TN_yLog_nDown, $
@@ -309,6 +317,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      PLOT_T_AND_N=plot_T_and_N, $
      PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
      PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+     PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
      PLOT_EN_SPECS=plot_en_specs, $
      EN_SPECS__MOVIE=en_specs__movie, $
      A_LA_ELPHIC_SPNAME=a_la_Elphic_spName, $

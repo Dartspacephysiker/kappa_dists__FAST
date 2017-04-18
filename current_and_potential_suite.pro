@@ -82,7 +82,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+   JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+   JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+   JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
@@ -211,15 +215,17 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       _EXTRA=e
 
   suppress_magRat_sum = 0
-  to_polar            = 0
-  to_RE               = 3
+  ;; to_polar            = 0
+  ;; " Within its polar orbit with geocentric perigee and apogee of 1.8 and 9.0 RE, respectively … " Laakso et al. [2003]
+  ;;"… 9 RE (56,500 km) and a perigee of 2 RE (11,500 km) …" --https://directory.eoportal.org/web/eoportal/satellite-missions/p/polar
+  ;; to_RE               = 3
   IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
 
      junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
                                      /TIME_ARRAY, $
-                                     TO_EQUATOR=to_equator, $
-                                     TO_POLAR_SATELLITE=to_polar, $
-                                     TO_THIS_RE=to_RE, $
+                                     TO_EQUATOR=jv_theor__initial_source__equator, $
+                                     TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
+                                     TO_THIS_RE=jv_theor__initial_source_R_E, $
                                      TO_THIS_KM=to_km)
 
      STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
@@ -347,6 +353,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            DENSLIMS=DensLims, $    
                                            MAGRATIOLIMS=magRatioLims, $
                                            /ITERATIVE_GAME_MODE, $
+                                           ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $
@@ -417,7 +424,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      
   ENDIF
 
-  plot_magCurrent_vs_current = 1
+  ;; plot_magCurrent_vs_current = 1
   IF KEYWORD_SET(plot_magCurrent_vs_current) THEN BEGIN
 
      ;; tmpCur = 0.D * curPotList[0].cur
@@ -432,12 +439,14 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; ENDIF
      ;; tmpCur = curPotList.cur[0] + curPotList.cur[1] + curPotList.cur[2]
 
-     plot     = PLOT(jvPlotData.cur[avgs_JVfit.useInds], $
-                     jvPlotData.magCur[avgs_JVfit.useInds], $
-                     LINESTYLE='', $
-                     SYMBOL='*', $
-                     XTITLE='j$_{ESA}$', $
-                     YTITLE='j$_{Mag}$')
+     ;; plot     = PLOT(jvPlotData.cur[avgs_JVfit.useInds], $
+     ;;                 jvPlotData.magCur[avgs_JVfit.useInds], $
+     ;;                 LINESTYLE='', $
+     ;;                 SYMBOL='*', $
+     ;;                 XTITLE='j$_{ESA}$', $
+     ;;                 YTITLE='j$_{Mag}$')
+
+     winder   = WINDOW(DIMENSIONS=[800,600])
 
      plot2_1  = PLOT(jvPlotData.time-jvPlotData.time[0], $
                      jvPlotData.magCur, $
@@ -445,7 +454,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                      LINESTYLE='', $
                      SYMBOL='*', $
                      XTITLE='t since ' + TIME_TO_STR(jvPlotData.time[0],/MS), $
-                     YTITLE='j$_{||}$')
+                     YTITLE='j$_{||}$', $
+                     /CURRENT)
 
      plot2_2  = PLOT(jvPlotData.time-jvPlotData.time[0], $
                      jvPlotData.cur, $
@@ -478,6 +488,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                          /OVERPLOT)
 
      ENDIF
+
+     legend = LEGEND(TARGET=[plot2_1,plot2_2])
 
   ENDIF
 

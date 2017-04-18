@@ -55,8 +55,7 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
                          fixed:0B        , $
                          parname:''      , $
                          ;; relstep:0.D     , $
-                         ;; mpmaxstep:0.D   , $
-                         mpmaxstep:AMaxStep   , $
+                         mpmaxstep:0.D   , $ ;;Do it this way, chump! Previously you were providing FOUR (identical) mpmaxstep values for EACH param
                          limited:[0B,0]   , $
                          limits:[0.D,0]} , $
                         ;; 7)
@@ -72,7 +71,7 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
   paramInfo[*].parName = ["kappa","T","N","R_B"]
 
   ;;Got it. What about anything like, you know, a max step size?
-  ;; paramInfo[*].mpmaxstep  = AMaxStep
+  paramInfo[*].mpmaxstep  = AMaxStep
 
   ;;So certain values can't be exceeded?
   paramInfo[*].limited[0] = Alimited[*,0]

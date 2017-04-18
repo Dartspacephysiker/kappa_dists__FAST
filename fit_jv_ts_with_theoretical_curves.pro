@@ -37,7 +37,7 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
 
   IF N_ELEMENTS(kappa_A) EQ 0 THEN BEGIN
      ;;        kappa, Temp,Dens, R_B
-     kappa_A = [  10,  300, 0.1, 5D3]
+     kappa_A = [  10,  300, 0.1, 9D2]
   ENDIF
 
   IF N_ELEMENTS(Gauss_A) EQ 0 THEN BEGIN
@@ -94,11 +94,12 @@ PRO FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
      STR_ELEMENT,fa_Gauss,'in_densities',Gauss_fitN,/ADD_REPLACE
   ENDIF
 
-  X           = pot
-  Y           = cur*(KEYWORD_SET(flip_current_sign) ? -1D : 1D)
-  XError      = potErr
-  YError      = curErr
-  weights     = 1./ABS(curErr)^2
+  tmpSort     = SORT(pot)
+  X           = pot[tmpSort]
+  Y           = (cur*(KEYWORD_SET(flip_current_sign) ? -1D : 1D))[tmpSort]
+  XError      = potErr[tmpSort]
+  YError      = curErr[tmpSort]
+  weights     = (1./ABS(curErr)^2)[tmpSort]
 
   fitKappa_A  = MPFITFUN(jvFitFunc, $
                          X,Y, $

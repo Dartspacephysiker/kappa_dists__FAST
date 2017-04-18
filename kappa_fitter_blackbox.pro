@@ -103,7 +103,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
                           CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
                           CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                          CURANDPOT_JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+                          CURANDPOT_JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+                          CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                           CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+                          CURAND_POT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -404,7 +408,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__FIT_JE=jv_theor__fit_je, $
         JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
         JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+        JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+        JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+        JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
         JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+        JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -764,223 +772,216 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDIF
 
-  IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
+  ;;I'm sure something was supposed to happen here, but I don't know what it was. I think I was trying to fit the J-V curve using
+  ;;parameter values from best fits at each time step, but it never quite worked. So I give up/try an alternate route
+  
+  ;; IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
 
-     ;;See if the time series align
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time',VALUE=kTimes
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'time',VALUE=gTimes
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=kChi2
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=gChi2
+  ;;    ;;See if the time series align
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time',VALUE=kTimes
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'time',VALUE=gTimes
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=kChi2
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=gChi2
 
-     sAIFac  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : 1
-     maxDiff = (STRMATCH(STRUPCASE(eeb_or_ees),'*ES') ? 0.7 : 0.1) * sAIFac
+  ;;    sAIFac  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : 1
+  ;;    maxDiff = (STRMATCH(STRUPCASE(eeb_or_ees),'*ES') ? 0.7 : 0.1) * sAIFac
 
-     datUseInds = avgs_JVfit.useInds
-     nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
-     nKappa  = N_ELEMENTS(kTimes)
-     nGauss  = N_ELEMENTS(gTimes)
-     IF nDat EQ nKappa THEN BEGIN
+  ;;    datUseInds = avgs_JVfit.useInds
+  ;;    nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
+  ;;    nKappa  = N_ELEMENTS(kTimes)
+  ;;    nGauss  = N_ELEMENTS(gTimes)
+  ;;    IF nDat EQ nKappa THEN BEGIN
 
-        IF (WHERE(ABS(kTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
-        kFitUseInds = datUseInds
+  ;;       IF (WHERE(ABS(kTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+  ;;       kFitUseInds = datUseInds
 
-     ENDIF ELSE BEGIN
+  ;;    ENDIF ELSE BEGIN
 
-        CASE 1 OF
-           (nDat GT nKappa): BEGIN
-              datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],kTimes,/CONSTRAINED)
-              datUseInds   = datUseInds[datUseIndsII]
-              kFitUseInds  = LINDGEN(nKappa)
+  ;;       CASE 1 OF
+  ;;          (nDat GT nKappa): BEGIN
 
-              ;; IF (WHERE(ABS(kTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
-              ;; checker = WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
-              ;;                COMPLEMENT=realKeep)
+  ;;             datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],kTimes,/CONSTRAINED)
+  ;;             datUseInds   = datUseInds[datUseIndsII]
+  ;;             kFitUseInds  = LINDGEN(nKappa)
 
-              ;; IF nChecker GT 0 THEN BEGIN
-              ;;    kFitUseInds = kFitUseInds[realKeep]
-              ;;    datUseInds  = datUseInds[realKeep]
-              ;; ENDIF
+  ;;          END
+  ;;          (nDat LT nKappa): BEGIN
+  ;;             kFitUseInds = VALUE_CLOSEST2(kTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
 
-           END
-           (nDat LT nKappa): BEGIN
-              kFitUseInds = VALUE_CLOSEST2(kTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
+  ;;          END
+  ;;       ENDCASE
 
-              ;; IF (WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+  ;;       checker = WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
+  ;;                       COMPLEMENT=realKeep)
 
-           END
-        ENDCASE
+  ;;       IF nChecker GT 0 THEN BEGIN
+  ;;          kFitUseInds = kFitUseInds[realKeep]
+  ;;          datUseInds  = datUseInds[realKeep]
+  ;;       ENDIF
 
-        checker = WHERE(ABS(kTimes[kFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
-                        COMPLEMENT=realKeep)
+  ;;       nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
+  ;;       nKappa  = N_ELEMENTS(kTimes)
 
-        IF nChecker GT 0 THEN BEGIN
-           kFitUseInds = kFitUseInds[realKeep]
-           datUseInds  = datUseInds[realKeep]
-        ENDIF
+  ;;    ENDELSE
 
-        nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
-        nKappa  = N_ELEMENTS(kTimes)
+  ;;    IF nDat EQ nGauss THEN BEGIN
+  ;;       IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+  ;;       gFitUseInds = datUseInds
+  ;;       ;; gFitUseInds = LINDGEN(datUseInds
+  ;;    ENDIF ELSE BEGIN
 
-     ENDELSE
+  ;;       CASE 1 OF
+  ;;          (nDat GT nGauss): BEGIN
 
-     IF nDat EQ nGauss THEN BEGIN
-        IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
-        gFitUseInds = datUseInds
-        ;; gFitUseInds = LINDGEN(datUseInds
-     ENDIF ELSE BEGIN
+  ;;             datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],gTimes,/CONSTRAINED)
+  ;;             datUseInds   = datUseInds[datUseIndsII]
+  ;;             gFitUseinds  = LINDGEN(nGauss)
 
-        CASE 1 OF
-           (nDat GT nGauss): BEGIN
+  ;;             ;; IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
 
-              datUseIndsII = VALUE_CLOSEST2(curPotList[0].time[datUseInds],gTimes,/CONSTRAINED)
-              datUseInds   = datUseInds[datUseIndsII]
-              gFitUseinds  = LINDGEN(nGauss)
+  ;;          END
+  ;;          (nDat LT nGauss): BEGIN
+  ;;             gFitUseInds = VALUE_CLOSEST2(gTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
 
-              ;; IF (WHERE(ABS(gTimes-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+  ;;             ;; IF (WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
 
-           END
-           (nDat LT nGauss): BEGIN
-              gFitUseInds = VALUE_CLOSEST2(gTimes,curPotList[0].time[datUseInds],/CONSTRAINED)
+  ;;          END
+  ;;       ENDCASE
 
-              ;; IF (WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff))[0] NE -1 THEN STOP
+  ;;       checker = WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
+  ;;                       COMPLEMENT=realKeep)
 
-           END
-        ENDCASE
+  ;;       IF nChecker GT 0 THEN BEGIN
+  ;;          gFitUseInds = gFitUseInds[realKeep]
+  ;;          datUseInds  = datUseInds[realKeep]
+  ;;       ENDIF
 
-        checker = WHERE(ABS(gTimes[gFitUseInds]-curPotList[0].time[datUseInds]) GT maxDiff,nChecker, $
-                        COMPLEMENT=realKeep)
+  ;;       nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
+  ;;       nKappa  = N_ELEMENTS(kTimes)
 
-        IF nChecker GT 0 THEN BEGIN
-           gFitUseInds = gFitUseInds[realKeep]
-           datUseInds  = datUseInds[realKeep]
-        ENDIF
+  ;;    ENDELSE
 
-        nDat    = N_ELEMENTS(curPotList[0].time[datUseInds])
-        nKappa  = N_ELEMENTS(kTimes)
-
-     ENDELSE
-
-     jvPD_inds  = VALUE_CLOSEST2(jvPlotData.time,curPotList[0].time[datUseInds])
+  ;;    jvPD_inds  = VALUE_CLOSEST2(jvPlotData.time,curPotList[0].time[datUseInds])
 
 
-     fitUseII   = WHERE(((kChi2[kFitUseInds] LE 1000) OR (gChi2[gFitUseInds] LE 1000)) AND $
-                      (ABS(jvPlotData.cur[jvPD_inds]) GE 0.5),nFitUseII)
-     IF nFitUseII LE 1 THEN STOP
+  ;;    fitUseII   = WHERE(((kChi2[kFitUseInds] LE 1000) OR (gChi2[gFitUseInds] LE 1000)) AND $
+  ;;                     (ABS(jvPlotData.cur[jvPD_inds]) GE 0.5),nFitUseII)
+  ;;    IF nFitUseII LE 1 THEN STOP
 
-     kFitUseInds = kFitUseInds[fitUseII]
-     gFitUseInds = gFitUseInds[fitUseII]
-     ;; datUseInds  = datUseInds[fitUseII]
-     jvPD_inds  = jvPD_inds[fitUseII]
+  ;;    kFitUseInds = kFitUseInds[fitUseII]
+  ;;    gFitUseInds = gFitUseInds[fitUseII]
+  ;;    ;; datUseInds  = datUseInds[fitUseII]
+  ;;    jvPD_inds  = jvPD_inds[fitUseII]
 
-     ion     = 0
-     pot     = jvPlotData.pot[jvPD_inds]
-     cur     = jvPlotData.cur[jvPD_inds]*(ion ? 1.D : -1.D)
-     potErr  = jvPlotData.potErr[jvPD_inds]
-     curErr  = jvPlotData.curErr[jvPD_inds]
-     T       = jvPlotData.TDown[jvPD_inds]
-     N       = jvPlotData.NDown[jvPD_inds]
+  ;;    ion     = 0
+  ;;    pot     = jvPlotData.pot[jvPD_inds]
+  ;;    cur     = jvPlotData.cur[jvPD_inds]*(ion ? 1.D : -1.D)
+  ;;    potErr  = jvPlotData.potErr[jvPD_inds]
+  ;;    curErr  = jvPlotData.curErr[jvPD_inds]
+  ;;    T       = jvPlotData.TDown[jvPD_inds]
+  ;;    N       = jvPlotData.NDown[jvPD_inds]
 
-     kappas     = AStruct.kappa[kFitUseInds]
+  ;;    kappas     = AStruct.kappa[kFitUseInds]
 
-     kappa_fitT = AStruct.temperature[kFitUseInds]
-     gauss_fitT = AStructGauss.temperature[gFitUseInds]
+  ;;    kappa_fitT = AStruct.temperature[kFitUseInds]
+  ;;    gauss_fitT = AStructGauss.temperature[gFitUseInds]
      
-     kappa_fitN = AStruct.N[kFitUseInds]
-     gauss_fitN = AStructGauss.N[gFitUseInds]
+  ;;    kappa_fitN = AStruct.N[kFitUseInds]
+  ;;    gauss_fitN = AStructGauss.N[gFitUseInds]
      
-     ;; kappa_fitT = jvPlotData.TDown[jvPD_inds]
-     ;; gauss_fitT = jvPlotData.TDown[jvPD_inds]
+  ;;    ;; kappa_fitT = jvPlotData.TDown[jvPD_inds]
+  ;;    ;; gauss_fitT = jvPlotData.TDown[jvPD_inds]
      
-     ;; kappa_fitN = jvPlotData.NDown[jvPD_inds]
-     ;; gauss_fitN = jvPlotData.NDown[jvPD_inds]
+  ;;    ;; kappa_fitN = jvPlotData.NDown[jvPD_inds]
+  ;;    ;; gauss_fitN = jvPlotData.NDown[jvPD_inds]
      
-     kappa_fixA = [0,1,1,0]
-     Gauss_fixA = [1,1,1,0]
+  ;;    kappa_fixA = [0,1,1,0]
+  ;;    Gauss_fixA = [1,1,1,0]
 
-     FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
-                                       potErr,curErr, $
-                                       T,N, $
-                                       ;; USEINDS=useInds, $
-                                       ;; /FLIP_CURRENT_SIGN, $
-                                       KAPPA_FIXA=kappa_fixA, $
-                                       GAUSS_FIXA=gauss_fixA, $
-                                       KAPPA_A=kappa_A, $
-                                       GAUSS_A=Gauss_A, $
-                                       FIT_KAPPAS=kappas, $
-                                       KAPPA_FIT_TEMPERATURE=kappa_fitT, $
-                                       GAUSS_FIT_TEMPERATURE=gauss_fitT, $
-                                       KAPPA_FIT_DENSITY=kappa_fitN, $
-                                       GAUSS_FIT_DENSITY=gauss_fitN, $
-                                       MAXITER=maxIter, $
-                                       FTOL=fTol, $
-                                       GTOL=gTol, $
-                                       OUT_FITKAPPA_A=fitKappa_A, $
-                                       OUT_FITGAUSS_A=fitGauss_A, $
-                                       OUT_FITKAPPA_CUR=fitKappa_cur, $
-                                       OUT_FITGAUSS_CUR=fitGauss_cur
+  ;;    FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
+  ;;                                      potErr,curErr, $
+  ;;                                      T,N, $
+  ;;                                      ;; USEINDS=useInds, $
+  ;;                                      ;; /FLIP_CURRENT_SIGN, $
+  ;;                                      KAPPA_FIXA=kappa_fixA, $
+  ;;                                      GAUSS_FIXA=gauss_fixA, $
+  ;;                                      KAPPA_A=kappa_A, $
+  ;;                                      GAUSS_A=Gauss_A, $
+  ;;                                      FIT_KAPPAS=kappas, $
+  ;;                                      KAPPA_FIT_TEMPERATURE=kappa_fitT, $
+  ;;                                      GAUSS_FIT_TEMPERATURE=gauss_fitT, $
+  ;;                                      KAPPA_FIT_DENSITY=kappa_fitN, $
+  ;;                                      GAUSS_FIT_DENSITY=gauss_fitN, $
+  ;;                                      MAXITER=maxIter, $
+  ;;                                      FTOL=fTol, $
+  ;;                                      GTOL=gTol, $
+  ;;                                      OUT_FITKAPPA_A=fitKappa_A, $
+  ;;                                      OUT_FITGAUSS_A=fitGauss_A, $
+  ;;                                      OUT_FITKAPPA_CUR=fitKappa_cur, $
+  ;;                                      OUT_FITGAUSS_CUR=fitGauss_cur
 
-     titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-                               'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL),avgs_JVfit.T.avg,avgs_JVfit.N.avg)
-     kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',fitKappa_A[0],fitKappa_A[3])
-     gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',fitGauss_A[3])
+  ;;    titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
+  ;;                              'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL),avgs_JVfit.T.avg,avgs_JVfit.N.avg)
+  ;;    kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',fitKappa_A[0],fitKappa_A[3])
+  ;;    gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',fitGauss_A[3])
 
-     window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
+  ;;    window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 
-     dSym = '*'
-     kSym = 'tu'
-     gSym = 'td'
+  ;;    dSym = '*'
+  ;;    kSym = 'tu'
+  ;;    gSym = 'td'
 
-     ;; that             = ERRORPLOT(X,Y,XError,YError, $
-     that             = ERRORPLOT(pot,Cur,curErr, $
-                                  SYMBOL=dSym, $
-                                  LINESTYLE='', $
-                                  NAME='Data', $
-                                  TITLE=titleStr, $
-                                  XTITLE='$\Phi$ (V)', $
-                                  YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
-                                  /CURRENT)
+  ;;    ;; that             = ERRORPLOT(X,Y,XError,YError, $
+  ;;    that             = ERRORPLOT(pot,Cur,curErr, $
+  ;;                                 SYMBOL=dSym, $
+  ;;                                 LINESTYLE='', $
+  ;;                                 NAME='Data', $
+  ;;                                 TITLE=titleStr, $
+  ;;                                 XTITLE='$\Phi$ (V)', $
+  ;;                                 YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
+  ;;                                 /CURRENT)
      
-     ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
-     this             = PLOT(pot,fitKappa_cur, $
-                             NAME=kappaName, $
-                             LINESTYLE='', $
-                             SYMBOL=kSym, $
-                             SYM_COLOR='BLUE', $
-                             /OVERPLOT)
-     those            = PLOT(pot,fitGauss_cur, $
-                             NAME=gaussName, $
-                             LINESTYLE='', $
-                             SYMBOL=gSym, $
-                             SYM_COLOR='Brown', $
-                             /OVERPLOT)
+  ;;    ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
+  ;;    this             = PLOT(pot,fitKappa_cur, $
+  ;;                            NAME=kappaName, $
+  ;;                            LINESTYLE='', $
+  ;;                            SYMBOL=kSym, $
+  ;;                            SYM_COLOR='BLUE', $
+  ;;                            /OVERPLOT)
+  ;;    those            = PLOT(pot,fitGauss_cur, $
+  ;;                            NAME=gaussName, $
+  ;;                            LINESTYLE='', $
+  ;;                            SYMBOL=gSym, $
+  ;;                            SYM_COLOR='Brown', $
+  ;;                            /OVERPLOT)
 
-     ;; legPos__data  = [(MAX(X)-MIN(X))*0.2+MIN(X),(MAX(Y)-MIN(Y))*0.95+MIN(Y)]
-     ;; legPos           = [0.5,0.85]
-     legPos           = [0.5,0.5]
-     ;; leg           = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
-     leg              = LEGEND(TARGET=[that,this,those], $
-                               POSITION=legPos)
+  ;;    ;; legPos__data  = [(MAX(X)-MIN(X))*0.2+MIN(X),(MAX(Y)-MIN(Y))*0.95+MIN(Y)]
+  ;;    ;; legPos           = [0.5,0.85]
+  ;;    legPos           = [0.5,0.5]
+  ;;    ;; leg           = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
+  ;;    leg              = LEGEND(TARGET=[that,this,those], $
+  ;;                              POSITION=legPos)
 
-     ;; fitKappa_A[3]    = 589
-     ;; fitGauss_A[3]    = 1D3
+  ;;    ;; fitKappa_A[3]    = 589
+  ;;    ;; fitGauss_A[3]    = 1D3
 
-     ;; R_B__Mguess      = fitGauss_A[3]
-     ;; ;; fitGauss_cur     = KNIGHT_RELATION__DORS_KLETZING_4(gauss_fitT, $
-     ;; fitGauss_cur     = KNIGHT_RELATION__DORS_KLETZING_4(T, $
-     ;;                                                     gauss_fitN, $
-     ;;                                                     pot, $
-     ;;                                                     R_B__Mguess, $
-     ;;                                                     /NO_MULT_BY_CHARGE)*1D6
+  ;;    ;; R_B__Mguess      = fitGauss_A[3]
+  ;;    ;; ;; fitGauss_cur     = KNIGHT_RELATION__DORS_KLETZING_4(gauss_fitT, $
+  ;;    ;; fitGauss_cur     = KNIGHT_RELATION__DORS_KLETZING_4(T, $
+  ;;    ;;                                                     gauss_fitN, $
+  ;;    ;;                                                     pot, $
+  ;;    ;;                                                     R_B__Mguess, $
+  ;;    ;;                                                     /NO_MULT_BY_CHARGE)*1D6
 
-     ;; R_B__Kguess      = fitKappa_A[3]
-     ;; fitKappa_cur     = KNIGHT_RELATION__DORS_KLETZING_11(kappas, $
-     ;;                                                      ;; kappa_fitT, $
-     ;;                                                      T, $
-     ;;                                                      kappa_fitN, $
-     ;;                                                      pot, $
-     ;;                                                      R_B__Kguess, $
-     ;;                                                      /NO_MULT_BY_CHARGE)*1D6
+  ;;    ;; R_B__Kguess      = fitKappa_A[3]
+  ;;    ;; fitKappa_cur     = KNIGHT_RELATION__DORS_KLETZING_11(kappas, $
+  ;;    ;;                                                      ;; kappa_fitT, $
+  ;;    ;;                                                      T, $
+  ;;    ;;                                                      kappa_fitN, $
+  ;;    ;;                                                      pot, $
+  ;;    ;;                                                      R_B__Kguess, $
+  ;;    ;;                                                      /NO_MULT_BY_CHARGE)*1D6
 
-  ENDIF
+  ;; ENDIF
 
 END
