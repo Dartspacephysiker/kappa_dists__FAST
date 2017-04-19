@@ -44,7 +44,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   useInds     = avgs_JVfit.useInds
 
   ;;initialize old mirror ratio
-  oldRB       = MEAN(jvPlotData.mRatio.R_B.ionos[useInds])
+  oldRB       = MEAN(jvPlotData.mRatio.R_B.FAST[useInds])
   parInfoNye  = parInfo
 
   IF KEYWORD_SET(NFac) THEN BEGIN
@@ -65,7 +65,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                                              parInfoNye[1].value, $
                                              0, $
                                              parInfoNye[2].value, $
-                                             MEAN(jvPlotData.mRatio.R_B.ionos[useInds]))
+                                             MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
 
   ;;Talk about it
   PRINT,FORMAT='(A0,A0,A0,F0.2)','Beginning game mode for ',fit_type,' fit with R_B = ',oldRB
@@ -251,8 +251,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
         dsMax           = 0.05
         traceErr        = 0.0001
-        oldMaxRLimStep  = 0.2
-        maxRLimStep     = defMaxRLimStep
+        ;; oldMaxRLimStep  = 0.2
+        ;; maxRLimStep     = defMaxRLimStep
 
      ENDELSE
      ;; WHILE ABS(checkRB-newRB) GT 4 DO BEGIN
@@ -472,9 +472,14 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
         IF RLim GT 200 THEN BEGIN
            PRINT,"This is definitely bogus; RLim > 200"
-           BREAK
+           STOP
         ENDIF
            
+        IF downTail_RE LT FAST_RE THEN BEGIN
+           PRINT,"At FAST! Bogusssss"
+           BREAK
+        ENDIF
+
      ENDWHILE
 
      CASE count2 OF
@@ -493,8 +498,9 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      ;; jvPlotData.mRatio.R_B_IGRF.FAST[*]  = TEMPORARY(R_B_FAST)
      ;; jvPlotData.mRatio.R_B_IGRF.ionos[*] = TEMPORARY(R_B_ionos)
 
-     jvPlotData.mRatio.R_B.FAST[useInds]  = TEMPORARY(R_B_FAST)
-     jvPlotData.mRatio.R_B.ionos[useInds] = TEMPORARY(R_B_ionos)
+     ;; jvPlotData.mRatio.R_B.FAST[useInds]  = TEMPORARY(R_B_FAST)
+     newRB                               = TEMPORARY(R_B_FAST) > 1
+     ;; jvPlotData.mRatio.R_B.ionos[useInds] = TEMPORARY(R_B_ionos)
 
      ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
      ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B.FAST[avgs_JVfit.useInds])*NFactor
@@ -507,7 +513,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                                                                         parInfoNye[1].value, $
                                                                         0, $
                                                                         avgs_JVfit.N_SC.avg, $ ;??????????
-                                                                        MEAN(jvPlotData.mRatio.R_B.ionos[useInds]))
+                                                                        newRB > 1)
 
      dens_arr                            = [dens_arr,parInfoNye[2].value]
      RLim_arr                            = [RLim_arr,RLim]
@@ -591,6 +597,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   PRINT,"Et nous avons fini. Voilà le " + fit_type + " fit: "
   PRINT_JV_FIT_PARAMS,A
   PRINT_ITERATIVE_GAME_MODE_FITHISTORY,gameFitInfo
+
+  A[3] = A[3] > 1
 
   RETURN,A
   

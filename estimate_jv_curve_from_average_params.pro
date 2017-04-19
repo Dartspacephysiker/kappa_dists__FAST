@@ -569,7 +569,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                  Y         : Y      , $
                  Yerror    : Yerror , $
                  YFit      : Yfit   , $
-                 YGaussFit : YGaussfit}
+                 YGaussFit : YGaussfit, $
+                 AKappa    : A, $
+                 AGauss    : AGauss}
 
      END
      ELSE: BEGIN
@@ -642,7 +644,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                  Y         : Y      , $
                  Yerror    : Yerror , $
                  YFit      : Yfit   , $
-                 YGaussFit : YGaussFit}
+                 YGaussFit : YGaussFit, $
+                 AKappa    : A, $
+                 AGauss    : AGauss}
 
 
      END
