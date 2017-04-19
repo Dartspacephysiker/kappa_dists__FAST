@@ -30,13 +30,17 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
 
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
                             orbPref,Temperature,Density)
-  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
-  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
+  ;; kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
+  ;; gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
+  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3,", N=",G0.3,", T=",G0.3)',A[0],A[3],A[2],A[1])
+  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3,", N=",G0.3,", T=",G0.3)',AGauss[3],AGauss[2],AGauss[1])
 
   window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 
+  sortie           = SORT(pData.x)
+
   ;; that             = ERRORPLOT(X,Y,XError,YError, $
-  that             = ERRORPLOT(pData.X,pData.Y,pData.YError, $
+  that             = ERRORPLOT(pData.X[sortie],pData.Y[sortie],pData.YError[sortie], $
                                SYMBOL='*', $
                                LINESTYLE='', $
                                NAME='Data', $
@@ -46,11 +50,11 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                /CURRENT)
   
   ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
-  this             = PLOT(pData.X,pData.YFit, $
+  this             = PLOT(pData.X[sortie],pData.YFit[sortie], $
                           NAME=kappaName, $
                           COLOR='BLUE', $
                           /OVERPLOT)
-  those            = PLOT(pData.X,pData.yGaussFit, $
+  those            = PLOT(pData.X[sortie],pData.yGaussFit[sortie], $
                           NAME=gaussName, $
                           COLOR='Brown', $
                           /OVERPLOT)

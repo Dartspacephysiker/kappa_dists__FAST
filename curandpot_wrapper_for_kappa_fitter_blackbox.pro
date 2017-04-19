@@ -25,6 +25,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    PLOT_T_AND_N=plot_T_and_N, $
    PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
    PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+   PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
    PLOT_EN_SPECS=plot_en_specs, $
    EN_SPECS__MOVIE=en_specs__movie, $
    JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
@@ -41,6 +42,9 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+   MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+   MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+   MAP__2D=map__2D, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -309,6 +313,9 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
      JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
      JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+     MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+     MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+     MAP__2D=map__2D, $
      JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
      JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
      TN_YLOG_NDOWN=TN_yLog_nDown, $
@@ -317,6 +324,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      PLOT_T_AND_N=plot_T_and_N, $
      PLOT_J_V_AND_THEORY=plot_j_v_and_theory, $
      PLOT_J_V__FIXED_T_AND_N=plot_j_v__fixed_t_and_n, $
+     PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
      PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
      PLOT_EN_SPECS=plot_en_specs, $
      EN_SPECS__MOVIE=en_specs__movie, $

@@ -88,8 +88,8 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
         kappa_fixA  = [0,1,1,0]
         gauss_fixA  = [1,1,1,0]
 
-        TmultFac__kappa    = [1]
-        TmultFac__Maxwell  = [1]
+        ;; TmultFac__kappa    = [1]
+        ;; TmultFac__Maxwell  = [1]
 
         ;; PRINT,"Kappa startGuess: "
         ;; PRINT_JV_FIT_PARAMS,A

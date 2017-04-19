@@ -18,17 +18,22 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;GEOPACKers
-  traceErr = 0.0001             ;Check out http://geo.phys.spbu.ru/~tsyganenko/Examples1_and_2.html. 0.0001 is what Tsyganenko himself uses. Baller, right?
-  dsMax    = 0.05               ;Max R_E step size
+  traceErr = 0.00001            ;Check out http://geo.phys.spbu.ru/~tsyganenko/Examples1_and_2.html. 0.0001 is what Tsyganenko himself uses. Baller, right?
+  dsMax    = 0.01               ;Max R_E step size
 
   __TRACE_ANTIPARALLEL_B = 1
   __TRACE_PARALLEL_B     = -1
+
+  useInds     = avgs_JVfit.useInds
+  ;;initialize old mirror ratio
+  parInfoNye  = parInfo
 
   CASE 1 OF
      KEYWORD_SET(functArgs.is_Maxwellian_fit): BEGIN
         fit_type = 'Maxwellian'
         defMaxRLimStep = 0.1
-
+        parInfoNye[0].limits[1] = 10000
+        parInfoNye[0].value     = 1000
      END
      ELSE: BEGIN
         fit_type = 'Kappa'
@@ -36,16 +41,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      END
   ENDCASE
 
-  A           = A_in
-
-  done        = 0
-  count       = 0
-
-  useInds     = avgs_JVfit.useInds
-
-  ;;initialize old mirror ratio
-  oldRB       = MEAN(jvPlotData.mRatio.R_B.FAST[useInds])
-  parInfoNye  = parInfo
+  ;; A           = A_in
 
   IF KEYWORD_SET(NFac) THEN BEGIN
      PRINT,FORMAT='(A0,F0.2)',"Iterative game density increase factor : ",NFac
@@ -56,19 +52,25 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   ENDELSE
 
   ;;First two get updated later
-  dRB_arr     = 0
-  RB_arr      = oldRB
-  RE_arr      = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
-  RLim_arr    = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
-  ;; dens_arr    = parInfoNye[2].value
-  dens_arr    = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
-                                             parInfoNye[1].value, $
-                                             0, $
-                                             parInfoNye[2].value, $
-                                             MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
+  oldR_B      = MEAN(jvPlotData.mRatio.R_B.ionos[useInds])
+
+  dR_B_arr     = 0
+  R_B_arr      = oldR_B
+  R_E_arr      = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
+  RLim_arr     = R_E_arr
+  R0_arr       = MEAN(jvPlotData.mRatio.R_E.FAST[useInds])
+  ;; RLim_arr    = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
+  dens_arr    = parInfoNye[2].value
+
+  ;;Don't use this here!!! You're double-mapping it!!
+  ;; dens_arr    = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+  ;;                                            parInfoNye[1].value, $
+  ;;                                            0, $
+  ;;                                            parInfoNye[2].value, $
+  ;;                                            MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
 
   ;;Talk about it
-  PRINT,FORMAT='(A0,A0,A0,F0.2)','Beginning game mode for ',fit_type,' fit with R_B = ',oldRB
+  PRINT,FORMAT='(A0,A0,A0,F0.2)','Beginning game mode for ',fit_type,' fit with R_B = ',oldR_B
   
 
   time_epoch  = UTC_TO_CDF_EPOCH(jvPlotData.mRatio.time)
@@ -189,8 +191,12 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   FAST_B         = [FAST_Bx,FAST_By,FAST_Bz] + FAST_B_IGRF
   FAST_BMag      = SQRT(TOTAL((FAST_B + FAST_B_IGRF)^2))
 
-  oldRLim = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
-  oldoldRLim = 0
+  oldRLim        = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
+  oldoldRLim     = 10000
+
+  minR0      = FAST_RE
+  oldR0      = minR0
+  oldoldR0   = 1
 
   ;; RLim_arr = [oldRLim]
 
@@ -198,6 +204,42 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   maxRLimStep     = defMaxRLimStep
 
   nNukes  = 0
+
+  ;;Initial curve prediction
+  A           = MPFITFUN(jvFitFunc, $
+                         X,Y, $
+                         /NAN, $
+                         WEIGHTS=weights, $
+                         FUNCTARGS=functArgs, $
+                         BESTNORM=bestNorm, $
+                         NFEV=nfev, $
+                         FTOL=fTol, $
+                         GTOL=gTol, $
+                         STATUS=status, $
+                         BEST_RESID=best_resid, $
+                         PFREE_INDEX=ifree, $
+                         /CALC_FJAC, $
+                         BEST_FJAC=best_fjac, $
+                         PARINFO=parInfoNye, $
+                         NPEGGED=npegged, $
+                         NFREE=nfree, $
+                         DOF=dof, $
+                         COVAR=covar, $
+                         PERROR=perror, $
+                         MAXITER=maxIter, $
+                         NITER=itNum, $
+                         YFIT=yFit, $
+                         /QUIET, $
+                         ERRMSG=errMsg, $
+                         _EXTRA=extra)
+
+  done        = 0
+  count       = 0
+  deathRLim   = 300
+  deathR0     = 1
+  deathR0Step   = 0.01
+  deathRLimStep = 0.01
+  isSatisfied = 0
   WHILE ~done DO BEGIN
 
      A           = MPFITFUN(jvFitFunc, $
@@ -229,54 +271,83 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
      ;; IF ( (count MOD 5) EQ 0 ) THEN STOP
 
-     newRB = A[3]
+     goalR_B = A[3]
 
-     dRB   = newRB-oldRB
-     PRINT,FORMAT='(A0," (possibly inconsistent) fitparams --- count = ",I0,", dRB = ",F0.2,", R_B = ",F0.2)',fit_type,count++,dRB,newRB
+     dRB   = goalR_B-oldR_B
+     PRINT,FORMAT='(A0," (possibly inconsistent) fitparams --- count = ",I0,", dRB = ",F0.2,", R_B = ",F0.2)',fit_type,count++,dRB,goalR_B
      PRINT_JV_FIT_PARAMS,A
      PRINT,""
 
-     checkRB    = oldRB
-     PRINT,FORMAT='("Trying to get R_B = ",F0.2," ...")',newRB
+     lookR_B    = oldR_B
+     PRINT,FORMAT='("Trying to get R_B = ",F0.2," ...")',goalR_B
 
-     wasSatisfied = ABS(oldRB-newRB) LE 4
+     wasSatisfied = ABS(oldR_B-goalR_B) LE 4
 
-     IF wasSatisfied THEN BEGIN
-        RLim            = oldRLim
-        dsMax           = 0.01
-        traceErr        = 0.00001
+     ;; IF wasSatisfied THEN BEGIN
+     ;;    RLim            = oldRLim
+        ;; dsMax           = 0.01
+        ;; traceErr        = 0.00001
         ;; oldMaxRLimStep  = 0.2
         ;; maxRLimStep     = 0.1
-     ENDIF ELSE BEGIN
+     ;; ENDIF ELSE BEGIN
 
-        dsMax           = 0.05
-        traceErr        = 0.0001
-        ;; oldMaxRLimStep  = 0.2
-        ;; maxRLimStep     = defMaxRLimStep
+     ;;    dsMax           = 0.01
+     ;;    traceErr        = 0.00001
+     ;;    ;; oldMaxRLimStep  = 0.2
+     ;;    ;; maxRLimStep     = defMaxRLimStep
 
-     ENDELSE
-     ;; WHILE ABS(checkRB-newRB) GT 4 DO BEGIN
+     ;; ENDELSE
+     ;; WHILE ABS(lookR_B-goalR_B) GT 4 DO BEGIN
 
      nRepeats    = 0
      count2      = 0
      done2       = 0
      WHILE ~done2 DO BEGIN
         
-        maxRLimStep = ( ABS(checkRB-newRB)/100. ) < maxRLimStep
-        comeNearer  = checkRB GT newRB
-        RLim        = oldRLim + ( maxRLimStep ) * ( comeNearer ? -1 : 1 ) 
+        IF isSatisfied AND wasSatisfied THEN BREAK
 
-        IF ((maxRLimStep EQ oldMaxRLimStep) AND (RLim EQ oldoldRLim)) OR $
-           (checkRB EQ newRB) $
+        maxRLimStep = ( ABS(lookR_B-goalR_B)/100. ) < maxRLimStep
+        comeNearer  = lookR_B GT goalR_B
+        RLim        = ( oldRLim + ( maxRLimStep ) * ( comeNearer ? -1 : 1 ) ) < deathRLim
+        R0          = oldR0 > deathR0
+
+        deathR0    += deathR0Step * comeNearer
+        deathRLim  -= deathRLimStep * (~comeNearer)
+
+        PRINT,'deathR0,Rlim',deathR0,deathRLim
+
+        ;; IF ((maxRLimStep EQ oldMaxRLimStep) OR (RLim EQ oldoldRLim)) OR $
+        ;;    (lookR_B EQ goalR_B) OR (R0 EQ oldoldR0) $
+        ;; THEN BEGIN
+        IF ((maxRLimStep EQ oldMaxRLimStep) AND (RLim EQ oldoldRLim)) $
         THEN BEGIN
 
            nRepeats++
 
+           ;; IF R0 GT RLim THEN STOP
+
            IF nRepeats GE 2 THEN BEGIN
 
-              maxRLimStep *= 0.95
-              RLim         = MEAN([oldRLim,oldoldRLim])
+              maxRLimStep *= 0.99
+              ;; RLim         = MEAN([oldRLim,oldoldRLim])
               nRepeats     = 0
+
+              IF (RLim EQ oldoldRLim) THEN BEGIN
+                 RLim         = MEAN([oldRLim,oldoldRLim])
+              ENDIF
+
+              IF (oldRLim EQ oldoldRLim) THEN BEGIN
+                 deathRLim = deathRLim < oldRLim
+              ENDIF
+
+              IF (R0 EQ oldoldR0) THEN BEGIN
+                 R0         = MEAN([oldR0,oldoldR0])
+              ENDIF
+
+              IF (oldR0 EQ oldoldR0) THEN BEGIN
+                 deathR0 = deathR0 > oldR0
+              ENDIF
+
            ENDIF
            
         ENDIF ELSE BEGIN
@@ -441,15 +512,19 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
         ;; R_B_IGRF_FAST       = FAST_B_IGRFMag/downTail_B_IGRFMag
         ;; R_B_IGRF_ionos      = ionos_B_IGRFMag/downTail_B_IGRFMag
 
-        ;; checkRB             = R_B_IGRF_ionos
-        checkRB             = R_B_ionos
+        ;; lookR_B             = R_B_IGRF_ionos
+        lookR_B             = R_B_ionos
+
         oldoldRLim          = oldRLim
         oldRLim             = RLim
+
+        oldoldR0            = oldR0
+        oldR0               = R0
 
         oldMaxRLimStep      = maxRLimStep
         IF (count2++ MOD 25) EQ 0 THEN  PRINT,"MaxRLIMSTEP (RLIM) ",maxRLimStep,'(' + STRCOMPRESS(RLim,/REMOVE_ALL) + ')'
 
-        isSatisfied         = ABS(checkRB-oldRB) LE 4
+        isSatisfied         = ABS(lookR_B-oldR_B) LE 4
 
         IF wasSatisfied THEN BEGIN
            tmpString = "I was satisfied ..."
@@ -487,7 +562,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
            PRINT,"Flew right through with " + STRCOMPRESS(downTail_RE,/REMOVE_ALL) + " R_E"
         END
         ELSE: BEGIN
-           PRINT,"Cool, settled on " + STRCOMPRESS(downTail_RE,/REMOVE_ALL) + " R_E"
+
+           IF isSatisfied THEN PRINT,"Cool, settled on " + STRCOMPRESS(downTail_RE,/REMOVE_ALL) + " R_E"
 
         END
      ENDCASE
@@ -499,7 +575,10 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      ;; jvPlotData.mRatio.R_B_IGRF.ionos[*] = TEMPORARY(R_B_ionos)
 
      ;; jvPlotData.mRatio.R_B.FAST[useInds]  = TEMPORARY(R_B_FAST)
-     newRB                               = TEMPORARY(R_B_FAST) > 1
+
+     ;;NEWSFLASH
+     goalR_B                               = TEMPORARY(R_B_ionos) > 1 < parInfoNye[3].limits[1]
+     densR_B                              = TEMPORARY(R_B_FAST)
      ;; jvPlotData.mRatio.R_B.ionos[useInds] = TEMPORARY(R_B_ionos)
 
      ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
@@ -513,13 +592,13 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                                                                         parInfoNye[1].value, $
                                                                         0, $
                                                                         avgs_JVfit.N_SC.avg, $ ;??????????
-                                                                        newRB > 1)
+                                                                        densR_B > 1)
 
      dens_arr                            = [dens_arr,parInfoNye[2].value]
      RLim_arr                            = [RLim_arr,RLim]
-     RE_arr                              = [RE_arr ,downTail_RE]
-     dRB_arr                             = [dRB_arr,(oldRB-newRB)]
-     RB_arr                              = [RB_arr ,newRB]
+     R_E_arr                              = [R_E_arr ,downTail_RE]
+     dR_B_arr                             = [dR_B_arr,(oldR_B-goalR_B)]
+     R_B_arr                              = [R_B_arr ,goalR_B]
 
      ;;See if we're done (no R_B_FAST means we skipped the loop, children)
      ;; done = (N_ELEMENTS(R_B_FAST)) EQ 0 AND ( ABS((dens_arr[-1]-dens_arr[-2])/dens_arr[-2]) LE 0.1 )
@@ -531,7 +610,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      ENDIF
 
      IF nNukes GT 5 THEN BEGIN
-        IF N_ELEMENTS(WHERE(ABS(dRB_arr) LT 0.00001)) GT 4 THEN BEGIN
+        IF N_ELEMENTS(WHERE(ABS(dR_B_arr) LT 0.00001)) GT 4 THEN BEGIN
            PRINT,"Can't handle it!! Getting out!"
            BREAK
         ENDIF
@@ -539,32 +618,32 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      
      IF count GT 2 THEN BEGIN
 
-        PRINT,FORMAT='("dRB_arr  : ",20(F0.2,:,", "))',dRB_arr
-        PRINT,FORMAT='("RB_arr   : ",20(F0.2,:,", "))',RB_arr
+        PRINT,FORMAT='("dR_B_arr  : ",20(F0.2,:,", "))',dR_B_arr
+        PRINT,FORMAT='("R_B_arr   : ",20(F0.2,:,", "))',R_B_arr
         PRINT,FORMAT='("RLim_arr : ",20(F0.2,:,", "))',RLim_arr
-        PRINT,FORMAT='("RE_arr   : ",20(F0.2,:,", "))',RE_arr
+        PRINT,FORMAT='("R_E_arr   : ",20(F0.2,:,", "))',R_E_arr
         PRINT,FORMAT='("dens_arr : ",20(G0.4,:,", "))',dens_arr
         WAIT,1
      ENDIF
 
      oldRLim                = RLim
-     oldRB                  = newRB
-     oldRE                  = downTail_RE
+     oldR_B                 = goalR_B
+     oldR_E                 = downTail_RE
   ENDWHILE
 
-  history                   = {dRB  : TEMPORARY(dRB_arr ), $
-                               RB   : TEMPORARY(RB_arr  ), $
-                               RLim : TEMPORARY(RLim_arr), $
-                               RE   : TEMPORARY(RE_arr  ), $
-                               dens : TEMPORARY(dens_arr)}
+  history                   = {dR_B  : TEMPORARY(dR_B_arr ), $
+                               R_B   : TEMPORARY(R_B_arr  ), $
+                               RLim  : TEMPORARY(RLim_arr), $
+                               R_E   : TEMPORARY(R_E_arr  ), $
+                               dens  : TEMPORARY(dens_arr)}
 
 
   ;; IF N_ELEMENTS(RLim_arr) GT 0 THEN BEGIN
   ;;    STR_ELEMENT,history,'RLim',RLim_arr,/ADD_REPLACE
   ;; ENDIF
 
-  ;; IF N_ELEMENTS(RE_arr) GT 0 THEN BEGIN
-  ;;    STR_ELEMENT,history,'RE',RE_arr,/ADD_REPLACE
+  ;; IF N_ELEMENTS(R_E_arr) GT 0 THEN BEGIN
+  ;;    STR_ELEMENT,history,'RE',R_E_arr,/ADD_REPLACE
   ;; ENDIF
 
   ;; IF N_ELEMENTS(dens_arr) EQ 0 THEN BEGIN

@@ -1,8 +1,10 @@
 ;2017/04/12
 PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
-   ;; USE_SOURCE_AVGS=use_source_avgs, $
    MAP__2D=map__2D, $
    ORBIT=orbit, $
+   IN_KAPPA_A=A, $
+   IN_GAUSS_A=AGauss, $
+   OUT_YBEST=out_yBest, $
    SAVEPLOT=savePlot
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -132,6 +134,23 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         PRINT,FORMAT='(F0.2,T10,F0.2,T20,F0.2)', $
               mMagDat.chi2[ind],yVar[ind],mMagDat.magRat[ind]
         PRINT,''
+
+        ;;GET THAT CURVE!!
+
+        ;; yBest = KNIGHT_RELATION__DORS_KLETZING_11(mMagDat.kappa[ind], $
+        ;;                                           Temperature, $
+        ;;                                           DENSITY_FACTOR__BARBOSA_1977(jvplotdata.pot[avgs_jvfit.useinds], $
+        ;;                                                                        Temperature, $
+        ;;                                                                        0, $
+        ;;                                                                        avgs_JVfit.N_SC.avg, $
+        ;;                                                                        mMagDat.magRat[ind]), $
+        ;;                                           jvplotdata.pot[avgs_jvfit.useinds], $
+        ;;                                           mMagDat.magRat[ind], $
+        ;;                                           /NO_MULT_BY_CHARGE)*1D6
+
+
+        ;; plot1 = PLOT(jvplotdata.pot[avgs_jvfit.useinds],yBest)
+
      END
      ELSE: BEGIN
 

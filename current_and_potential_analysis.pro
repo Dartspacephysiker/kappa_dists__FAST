@@ -17,8 +17,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORDER=order, $
    LABEL=label, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
+   USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+   USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
-   ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+   ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
    ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
    ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -67,6 +69,38 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      upTimes                 = REFORM(STR_TO_TIME(upTimesStr  ),SIZE(upTimesStr  ,/DIMENSIONS))
      timesList               = LIST(downTimes,upTimes)
   ENDIF
+
+  IF N_ELEMENTS(use_msph_sourcecone_for_dens) GT 0 THEN BEGIN
+     CASE N_ELEMENTS(use_msph_sourcecone_for_dens) OF
+        1: BEGIN
+           msph_sc_dens = [use_msph_sourcecone_for_dens,0,0]
+        END
+        2: BEGIN
+           msph_sc_dens = [use_msph_sourcecone_for_dens,0]
+        END
+        3: BEGIN
+           msph_sc_dens = use_msph_sourcecone_for_dens
+        END
+     ENDCASE        
+  ENDIF ELSE BEGIN
+     msph_sc_dens       = [0,0,0]
+  ENDELSE
+
+  IF N_ELEMENTS(use_msph_sourcecone_for_temp) GT 0 THEN BEGIN
+     CASE N_ELEMENTS(use_msph_sourcecone_for_temp) OF
+        1: BEGIN
+           msph_sc_temp = [use_msph_sourcecone_for_temp,0,0]
+        END
+        2: BEGIN
+           msph_sc_temp = [use_msph_sourcecone_for_temp,0]
+        END
+        3: BEGIN
+           msph_sc_temp = use_msph_sourcecone_for_temp
+        END
+     ENDCASE        
+  ENDIF ELSE BEGIN
+     msph_sc_temp       = [0,0,0]
+  ENDELSE
 
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
@@ -395,9 +429,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDCASE
 
         aRange__dens = !NULL
-        IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
-           aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
-        ENDIF
+        ;; IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
+        ;; IF KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
+        ;;    aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
+        ;; ENDIF
+        aRange__dens    = KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) ? 'source' : !NULL
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange

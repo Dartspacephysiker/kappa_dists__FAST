@@ -4,24 +4,34 @@ PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
   nUsers       = N_ELEMENTS(useInds)
   useInds      = useInds[SORT(jvplotdata.time[useInds])]
 
-  CASE 1 OF
-     KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
+  CURANDPOT__SELECT_T_AND_N,jvPlotData, $ ;avgs_JVfit, $
+                            TEMPERATURE=Temperature, $
+                            DENSITY=Density, $
+                            ERR_TEMPERATURE=TemperatureErr, $
+                            ERR_DENSITY=DensityErr, $
+                            /SKIP_USEINDS, $
+                            ;; THESE_USEINDS=useInds, $
+                            /ARRAYS
+  ;; CASE 1 OF
+  ;;    KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
 
-        Temperature    = JVPlotData.source.TDown
-        Density        = JVPlotData.source.NDown
-        TemperatureErr = JVPlotData.source.TDownErr
-        DensityErr     = JVPlotData.source.NDownErr
+  ;;       Temperature    = JVPlotData.source.TDown
+  ;;       Density        = JVPlotData.source.NDown
+  ;;       TemperatureErr = JVPlotData.source.TDownErr
+  ;;       DensityErr     = JVPlotData.source.NDownErr
 
-     END
-     ELSE: BEGIN
+  ;;    END
+  ;;    ELSE: BEGIN
 
-        Temperature    = JVPlotData.TDown
-        Density        = JVPlotData.NDown
-        TemperatureErr = JVPlotData.TDownErr
-        DensityErr     = JVPlotData.NDownErr
+  ;;       Temperature    = JVPlotData.TDown
+  ;;       Density        = JVPlotData.NDown
+  ;;       TemperatureErr = JVPlotData.TDownErr
+  ;;       DensityErr     = JVPlotData.NDownErr
 
-     END
-  ENDCASE
+  ;;    END
+  ;; ENDCASE
+
+  
 
   PRINT,FORMAT='(A0,T5,A0,T30,A0,T40,A0,T50,A0,T60,A0,T70,A0,T80,A0,T90,A0)', $
         'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
@@ -81,7 +91,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__MAGRATIOLIMS=magRatioLims, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-   JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   ;; JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
@@ -136,8 +146,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
-     ;; ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
-     ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+     USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+     USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+     ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -186,8 +197,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
-                                      ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
-                                      USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                                      ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+                                      ;; USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                                      USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+                                      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
                                       ERROR_BAR_FACTOR=errorBarFac, $
                                       USEI__RELCHANGE=useInds__relChange, $
                                       FRACCHANGE_NDOWN=fracChange_NDown, $
@@ -211,40 +224,43 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       MAXCUR=maxCur, $
                                       USEINDS=useInds, $
                                       PLOT_J_RATIOS=plot_j_ratios, $
+                                      JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+                                      JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+                                      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                                       IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
 
-  suppress_magRat_sum = ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
-                          KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km))
-  ;; to_polar            = 0
-  ;; " Within its polar orbit with geocentric perigee and apogee of 1.8 and 9.0 RE, respectively … " Laakso et al. [2003]
-  ;;"… 9 RE (56,500 km) and a perigee of 2 RE (11,500 km) …" --https://directory.eoportal.org/web/eoportal/satellite-missions/p/polar
-  ;; to_RE               = 3
-  IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
+  ;; suppress_magRat_sum = ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
+  ;;                         KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km))
+  ;; ;; to_polar            = 0
+  ;; ;; " Within its polar orbit with geocentric perigee and apogee of 1.8 and 9.0 RE, respectively … " Laakso et al. [2003]
+  ;; ;;"… 9 RE (56,500 km) and a perigee of 2 RE (11,500 km) …" --https://directory.eoportal.org/web/eoportal/satellite-missions/p/polar
+  ;; ;; to_RE               = 3
+  ;; IF ~KEYWORD_SET(suppress_magRat_sum) THEN BEGIN
 
-     junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
-                                     /TIME_ARRAY, $
-                                     TO_EQUATOR=jv_theor__initial_source__equator, $
-                                     TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
-                                     TO_THIS_RE=jv_theor__initial_source_R_E, $
-                                     TO_THIS_KM=to_km)
+  ;;    junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
+  ;;                                    /TIME_ARRAY, $
+  ;;                                    TO_EQUATOR=jv_theor__initial_source__equator, $
+  ;;                                    TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
+  ;;                                    TO_THIS_RE=jv_theor__initial_source_R_E, $
+  ;;                                    TO_THIS_KM=to_km)
 
-     add_Denton2006 = 0
-     IF KEYWORD_SET(add_Denton2006) THEN BEGIN
+  ;;    add_Denton2006 = 0
+  ;;    IF KEYWORD_SET(add_Denton2006) THEN BEGIN
 
-        ne_F   = MEAN(jvPlotData.source.NDown[avgs_JVfit.useInds])
-        mlt    = MEAN(junk.mlt[avgs_JVfit.useInds])
-        RE_F   = MEAN(junk.R_E.fast[avgs_JVfit.useInds])
-        Lshell = MEAN(junk.lshell.T[avgs_JVfit.useInds])
+  ;;       ne_F   = MEAN(jvPlotData.source.NDown[avgs_JVfit.useInds])
+  ;;       mlt    = MEAN(junk.mlt[avgs_JVfit.useInds])
+  ;;       RE_F   = MEAN(junk.R_E.fast[avgs_JVfit.useInds])
+  ;;       Lshell = MEAN(junk.lshell.T[avgs_JVfit.useInds])
 
-        dentonParams = GET_DENTON_ET_AL_2006__EQUATORIAL_DENSITY(ne_F,mlt,RE_F,Lshell)
+  ;;       dentonParams = GET_DENTON_ET_AL_2006__EQUATORIAL_DENSITY(ne_F,mlt,RE_F,Lshell)
 
-     ENDIF
+  ;;    ENDIF
 
-     STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
+  ;;    STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
 
-  ENDIF
+  ;; ENDIF
 
   IF KEYWORD_SET(plot_jv_a_la_Elphic) THEN BEGIN
      PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
@@ -389,13 +405,21 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
   IF KEYWORD_SET(plot_j_v_map__r_b_and_kappa__fixed_t_and_n) THEN BEGIN
 
      ;;Options for R_B map
-     minR_B  = 5
-     maxR_B  = 1D3
      map__2D = 1B
-     dR_B    = KEYWORD_SET(map__2D) ? 5 : 1
-     nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
 
-     map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
+     ;; minR_B  = 1
+     ;; maxR_B  = 1D3
+     ;; dR_B    = KEYWORD_SET(map__2D) ? 5 : 1
+     ;; nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
+     ;; map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
+
+     minR_B  = 1
+     maxR_B  = 1D4
+     dR_B    = 1.05D
+     ;; nR_B    = ALOG10(maxR_B/minR_B)/ALOG10(dR_B)
+     ;; map__multi_magRatio_array = minR_B*dR_B^(INDGEN(nR_B+1))
+     map__multi_magRatio_array = POWGEN(minR_B,maxR_B,dR_B)
+
      ;; map__multi_kappa_array    = [1.501,1.55,1.6,1.65,1.7,1.75,1.8,1.85,1.9,1.95,2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.25,3.50,3.75,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]
      ;; map__multi_kappa_array    = [1.501,1.51,1.52,1.53,1.54,1.55,1.56,1.57,1.58,1.59, $
      map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
@@ -424,15 +448,25 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $
-                                           ;; OUT_PLOTDATA=pData, $
+                                           OUT_PLOTDATA=pData, $
                                            OUT_MULTI_MAGRATIO=mMagDat, $
                                            _EXTRA=e
 
-
-     PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,avgs_JVFit, $
+     PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         MAP__2D=map__2D, $
         ORBIT=orbit, $
+        IN_KAPPA_A=A, $
+        IN_GAUSS_A=AGauss, $
         SAVEPLOT=savePlot
+
+     PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+                                  KAPPA_A=A, $
+                                  GAUSS_A=AGauss, $
+                                  ORIGINATING_ROUTINE=routName, $
+                                  ORBIT=orbit, $
+                                  SAVEPLOT=savePlot, $
+                                  SPNAME=j_v__fixTandN__spName, $
+                                  _EXTRA=e
 
      STOP
      

@@ -92,6 +92,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
                           CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
                           CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+                          CURANDPOT_PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=cAP_plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
                           CURANDPOT_PLOT_EN_SPECS=cAP_plot_en_specs, $
                           CURANDPOT_EN_SPECS__MOVIE=cAP_en_specs__movie, $
                           CURANDPOT_JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
@@ -107,7 +108,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                           CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
-                          CURAND_POT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+                          CURANDPOT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+                          CURANDPOT__MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
+                          CURANDPOT__MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
+                          CURANDPOT__MAP__2D=cAP_map__2D, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -397,6 +401,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PLOT_T_AND_N=cAP_plot_T_and_N, $
         PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
         PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+        PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=cAP_plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
         PLOT_EN_SPECS=cAP_plot_en_specs, $
         EN_SPECS__MOVIE=cAP_en_specs__movie, $
         JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
@@ -413,6 +418,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
         JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
         JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+        MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
+        MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
+        MAP__2D=cAP_map__2D, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $

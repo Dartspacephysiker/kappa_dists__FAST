@@ -28,8 +28,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
-                                        ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
-                                        USE_MSPH_SOURCE=use_msph_source, $
+                                        ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
+                                        ;; USE_MSPH_SOURCE=use_msph_source, $
+                                        USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+                                        USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
                                         SPNAME=spName, $
                                         OUT_SPNAME=out_spName, $
                                         ERROR_BAR_FACTOR=errorBarFac, $
@@ -56,6 +58,9 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         MAXCUR=maxCur, $
                                         USEINDS=useInds, $
                                         PLOT_J_RATIOS=plot_j_ratios, $
+                                        JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+                                        JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+                                        JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                                         IN_MAGCURRENT=magCurrent, $
                                         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                         _EXTRA=e
@@ -68,14 +73,6 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   looking         = nListMem
   ind             = 0
-
-  ;;Use source cone stuff?
-  have_sourceCone = 0
-  IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
-     IF (WHERE(also_msph_sourcecone))[0] NE -1 THEN BEGIN
-        have_sourceCone = 1
-     ENDIF
-  ENDIF
 
   IF ~(KEYWORD_SET(use_charE_for_downPot) OR KEYWORD_SET(use_peakE_for_downPot)) THEN BEGIN
      use_charE_for_downPot = 1B
@@ -99,6 +96,15 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      ENDIF
      ind++
   ENDWHILE
+
+  ;;Use source cone stuff?
+  have_sourceCone = 0
+  ;; IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
+  ;; IF (WHERE(also_msph_sourcecone))[0] NE -1 THEN BEGIN
+  ;;    have_sourceCone = 1
+  ;; ENDIF
+  ;; ENDIF
+  have_sourceCone = TAG_EXIST(curPotList[edind],'source')
 
   IF ~(ARRAY_EQUAL(curPotList[0].time,curPotList[1].time) AND $
        ARRAY_EQUAL(curPotList[0].time,curPotList[2].time))    $
@@ -322,7 +328,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                          pot          : {chare : KEYWORD_SET(use_charE_for_downPot), $
                                                          peak_en : KEYWORD_SET(use_peakE_for_downPot), $
                                                          add_iu_pot : KEYWORD_SET(add_iu_pot)}}, $
-                           use_source_avgs : KEYWORD_SET(use_msph_source) AND have_sourceCone}
+                           use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens) AND have_sourceCone, $
+                           use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp) AND have_sourceCone}
 
   IF have_sourceCone THEN BEGIN
 
@@ -434,9 +441,38 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
      IF ~EXECUTE(exec2Str) THEN STOP
 
-     STR_ELEMENT,avgs_JVfit,'use_source_avgs',jvPlotData.use_source_avgs,/ADD_REPLACE
+     STR_ELEMENT,avgs_JVfit,'use_source_dens',jvPlotData.use_source_dens,/ADD_REPLACE
+     STR_ELEMENT,avgs_JVfit,'use_source_temp',jvPlotData.use_source_temp,/ADD_REPLACE
 
   ENDFOR
+
+  IF ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
+       KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km)) $
+  THEN jv_theor__initial_source__Polar = 1
+
+  
+  junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
+                                  /TIME_ARRAY, $
+                                  TO_EQUATOR=jv_theor__initial_source__equator, $
+                                  TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
+                                  TO_THIS_RE=jv_theor__initial_source_R_E, $
+                                  TO_THIS_KM=to_km)
+
+  STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
+
+  ;; add_Denton2006 = 0
+  ;; IF KEYWORD_SET(add_Denton2006) THEN BEGIN
+
+  ;;    ne_F   = MEAN(jvPlotData.source.NDown[avgs_JVfit.useInds])
+  ;;    mlt    = MEAN(junk.mlt[avgs_JVfit.useInds])
+  ;;    RE_F   = MEAN(junk.R_E.fast[avgs_JVfit.useInds])
+  ;;    Lshell = MEAN(junk.lshell.T[avgs_JVfit.useInds])
+
+  ;;    dentonParams = GET_DENTON_ET_AL_2006__EQUATORIAL_DENSITY(ne_F,mlt,RE_F,Lshell)
+
+  ;; ENDIF
+
+
 
 
 END
