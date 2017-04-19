@@ -17,12 +17,28 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
 
   IF KEYWORD_SET(arrays) THEN BEGIN
 
+
      CASE 1 OF
         KEYWORD_SET(jvPlotData.use_source_avgs): BEGIN
-           Temperature    = jvPlotData.source.TDown[useInds]
-           Density        = jvPlotData.source.NDown[useInds]/jvPlotData.mRatio.R_B_IGRF.FAST[useInds]
-           TemperatureErr = jvPlotData.source.TDownErr[useInds]
-           DensityErr     = jvPlotData.source.NDownErr[useInds]/jvPlotData.mRatio.R_B_IGRF.FAST[useInds]
+           ;;Alder
+           ;; Temperature    = jvPlotData.source.TDown[useInds]
+           ;; TemperatureErr = jvPlotData.source.TDownErr[useInds]
+           ;; Density        = jvPlotData.source.NDown[useInds]/jvPlotData.mRatio.R_B.FAST[useInds]
+           ;; DensityErr     = jvPlotData.source.NDownErr[useInds]/jvPlotData.mRatio.R_B.FAST[useInds]
+
+           Temperature    = jvPlotData.TDown[useInds]
+           TemperatureErr = jvPlotData.TDownErr[useInds]
+           Density        = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                                                         Temperature, $
+                                                         0, $
+                                                         jvPlotData.source.NDown[useInds], $
+                                                         jvPlotData.mRatio.R_B.FAST[useInds])
+
+           DensityErr     = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                                                         Temperature, $
+                                                         0, $
+                                                         jvPlotData.source.NDownErr[useInds], $
+                                                         jvPlotData.mRatio.R_B.FAST[useInds])
         END
         ELSE: BEGIN
            Temperature    = jvPlotData.TDown[useInds]
@@ -36,7 +52,12 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
 
      IF KEYWORD_SET(avgs_JVfit.use_source_avgs) THEN BEGIN
         Temperature = avgs_JVfit.T_SC.avg
-        Density     = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[useInds])
+        ;; Density     = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[useInds])
+        Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+                                                   Temperature, $
+                                                   0, $
+                                                   avgs_JVfit.N_SC.avg, $
+                                                   MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
      ENDIF ELSE BEGIN
         Temperature = avgs_JVfit.T.avg
         Density     = avgs_JVfit.N.avg

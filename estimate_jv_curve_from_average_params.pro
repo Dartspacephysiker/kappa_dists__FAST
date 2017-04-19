@@ -22,7 +22,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   maxIter     = 3000
-  fTol     = 1D-15
+  fTol        = 1D-15
   gTol        = 1D-15
 
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $

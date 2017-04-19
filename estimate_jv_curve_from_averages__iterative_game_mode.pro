@@ -27,9 +27,12 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   CASE 1 OF
      KEYWORD_SET(functArgs.is_Maxwellian_fit): BEGIN
         fit_type = 'Maxwellian'
+        defMaxRLimStep = 0.1
+
      END
      ELSE: BEGIN
         fit_type = 'Kappa'
+        defMaxRLimStep = 0.1
      END
   ENDCASE
 
@@ -38,8 +41,10 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   done        = 0
   count       = 0
 
+  useInds     = avgs_JVfit.useInds
+
   ;;initialize old mirror ratio
-  oldRB       = MEAN(jvPlotData.mRatio.R_B_IGRF.ionos)
+  oldRB       = MEAN(jvPlotData.mRatio.R_B.ionos[useInds])
   parInfoNye  = parInfo
 
   IF KEYWORD_SET(NFac) THEN BEGIN
@@ -53,16 +58,22 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   ;;First two get updated later
   dRB_arr     = 0
   RB_arr      = oldRB
-  RE_arr      = MEAN(jvPlotData.mRatio.R_E.downTail)
-  RLim_arr    = MEAN(jvPlotData.mRatio.R_E.downTail)
-  dens_arr    = parInfoNye[2].value
+  RE_arr      = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
+  RLim_arr    = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
+  ;; dens_arr    = parInfoNye[2].value
+  dens_arr    = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+                                             parInfoNye[1].value, $
+                                             0, $
+                                             parInfoNye[2].value, $
+                                             MEAN(jvPlotData.mRatio.R_B.ionos[useInds]))
 
   ;;Talk about it
   PRINT,FORMAT='(A0,A0,A0,F0.2)','Beginning game mode for ',fit_type,' fit with R_B = ',oldRB
   
 
   time_epoch  = UTC_TO_CDF_EPOCH(jvPlotData.mRatio.time)
-  arbInd      = N_ELEMENTS(jvPlotData.mRatio.DOY.Year)/2
+  arbInd      = N_ELEMENTS(jvPlotData.mRatio.DOY.Year[useInds])/2
+  arbInd      = useInds[arbInd] 
   GEOPACK_RECALC_08,jvPlotData.mRatio.DOY.Year[arbInd], $
                     jvPlotData.mRatio.DOY.Month[arbInd], $
                     jvPlotData.mRatio.DOY.Day[arbInd], $
@@ -82,62 +93,6 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      trace_to_equator = __TRACE_PARALLEL_B
      trace_to_ionos   = __TRACE_ANTIPARALLEL_B
   ENDELSE
-
-  GEOPACK_CONV_COORD_08,tmpPos[0],tmpPos[1],tmpPos[2], $
-                        FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                        /FROM_GSE,/TO_GSW,EPOCH=time_epoch[arbInd]
-
-  GEOPACK_IGRF_GSW_08,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                      FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF, $
-                      EPOCH=time_epoch[arbInd]
-
-  CASE 1 OF
-     KEYWORD_SET(jvPlotData.BModelInfo.T89): BEGIN
-
-        GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                    FAST_Bx,FAST_By,FAST_Bz, $
-                    TILT=thisTilt, $
-                    EPOCH=time_epoch[k]
-
-     END
-     KEYWORD_SET(jvPlotData.BModelInfo.T96): BEGIN
-
-        GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                    FAST_Bx,FAST_By,FAST_Bz, $
-                    TILT=thisTilt, $
-                    EPOCH=time_epoch[k]
-
-     END
-     KEYWORD_SET(jvPlotData.BModelInfo.T01): BEGIN
-
-        GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                    FAST_Bx,FAST_By,FAST_Bz, $
-                    TILT=thisTilt, $
-                    EPOCH=time_epoch[k]
-
-     END
-     ELSE: BEGIN
-
-        GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                     FAST_Bx,FAST_By,FAST_Bz, $
-                     TILT=thisTilt, $
-                     EPOCH=time_epoch[k], $
-                     IOPGEN=IOPGen, $
-                     IOPT=IOPT, $
-                     IOPB=IOPB, $
-                     IOPR=IOPR
-
-     END
-  ENDCASE
-
-
-  FAST_GSM       = [FAST_GSM_x,FAST_GSM_y,FAST_GSM_z]
-  FAST_RE        = SQRT(TOTAL(FAST_GSM^2))
-  FAST_B_IGRF    = [FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF]
-  ;; FAST_B_IGRFMag = SQRT(TOTAL(FAST_B_IGRF^2))
-
-  FAST_B         = [FAST_Bx,FAST_By,FAST_Bz] + FAST_B_IGRF
-  FAST_BMag      = SQRT(TOTAL((FAST_B + FAST_B_IGRF)^2))
 
   CASE 1 OF
      KEYWORD_SET(jvPlotData.mRatio.BModelInfo.T89): BEGIN
@@ -179,9 +134,69 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      END
   ENDCASE
 
-  oldRLim = MEAN(jvPlotData.mRatio.R_E.downTail)
+  GEOPACK_CONV_COORD_08,tmpPos[0],tmpPos[1],tmpPos[2], $
+                        FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                        /FROM_GSE,/TO_GSW,EPOCH=time_epoch[arbInd]
+
+  GEOPACK_IGRF_GSW_08,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                      FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF, $
+                      EPOCH=time_epoch[arbInd]
+
+  CASE 1 OF
+     KEYWORD_SET(T89): BEGIN
+
+        GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[arbInd]
+
+     END
+     KEYWORD_SET(T96): BEGIN
+
+        GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[arbInd]
+
+     END
+     KEYWORD_SET(T01): BEGIN
+
+        GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                    FAST_Bx,FAST_By,FAST_Bz, $
+                    TILT=thisTilt, $
+                    EPOCH=time_epoch[arbInd]
+
+     END
+     ELSE: BEGIN
+
+        GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+                     FAST_Bx,FAST_By,FAST_Bz, $
+                     TILT=thisTilt, $
+                     EPOCH=time_epoch[arbInd], $
+                     IOPGEN=IOPGen, $
+                     IOPT=IOPT, $
+                     IOPB=IOPB, $
+                     IOPR=IOPR
+
+     END
+  ENDCASE
+
+  FAST_GSM       = [FAST_GSM_x,FAST_GSM_y,FAST_GSM_z]
+  FAST_RE        = SQRT(TOTAL(FAST_GSM^2))
+  FAST_B_IGRF    = [FAST_Bx_IGRF,FAST_By_IGRF,FAST_Bz_IGRF]
+  ;; FAST_B_IGRFMag = SQRT(TOTAL(FAST_B_IGRF^2))
+
+  FAST_B         = [FAST_Bx,FAST_By,FAST_Bz] + FAST_B_IGRF
+  FAST_BMag      = SQRT(TOTAL((FAST_B + FAST_B_IGRF)^2))
+
+  oldRLim = MEAN(jvPlotData.mRatio.R_E.downTail[useInds])
   oldoldRLim = 0
+
   ;; RLim_arr = [oldRLim]
+
+  oldMaxRLimStep  = 0.2
+  maxRLimStep     = defMaxRLimStep
+
   nNukes  = 0
   WHILE ~done DO BEGIN
 
@@ -227,17 +242,18 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      wasSatisfied = ABS(oldRB-newRB) LE 4
 
      IF wasSatisfied THEN BEGIN
-        RLim        = oldRLim
-        dsMax       = 0.01
-        traceErr    = 0.00001
-        oldMaxRLimStep = 0.2
-        maxRLimStep = 0.1
+        RLim            = oldRLim
+        dsMax           = 0.01
+        traceErr        = 0.00001
+        ;; oldMaxRLimStep  = 0.2
+        ;; maxRLimStep     = 0.1
      ENDIF ELSE BEGIN
 
-        dsMax       = 0.05
-        traceErr    = 0.0001
-        oldMaxRLimStep = 0.2
-        maxRLimStep = 0.1   
+        dsMax           = 0.05
+        traceErr        = 0.0001
+        oldMaxRLimStep  = 0.2
+        maxRLimStep     = defMaxRLimStep
+
      ENDELSE
      ;; WHILE ABS(checkRB-newRB) GT 4 DO BEGIN
 
@@ -305,7 +321,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
         ;;Calculate external contribution
         CASE 1 OF
-           KEYWORD_SET(jvPlotData.BModelInfo.T89): BEGIN
+           KEYWORD_SET(T89): BEGIN
 
               GEOPACK_T89,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
                           downTail_Bx,downTail_By,downTail_Bz, $
@@ -323,7 +339,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                           EPOCH=time_epoch[arbInd]
 
            END
-           KEYWORD_SET(jvPlotData.BModelInfo.T96): BEGIN
+           KEYWORD_SET(T96): BEGIN
 
               GEOPACK_T96,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
                           downTail_Bx,downTail_By,downTail_Bz, $
@@ -341,7 +357,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                           EPOCH=time_epoch[arbInd]
 
            END
-           KEYWORD_SET(jvPlotData.BModelInfo.T01): BEGIN
+           KEYWORD_SET(T01): BEGIN
 
               GEOPACK_T01,tmpParMod,downTail_GSM_x,downTail_GSM_y,downTail_GSM_z, $
                           downTail_Bx,downTail_By,downTail_Bz, $
@@ -425,7 +441,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
         ;; R_B_IGRF_FAST       = FAST_B_IGRFMag/downTail_B_IGRFMag
         ;; R_B_IGRF_ionos      = ionos_B_IGRFMag/downTail_B_IGRFMag
 
-        checkRB             = R_B_IGRF_ionos
+        ;; checkRB             = R_B_IGRF_ionos
+        checkRB             = R_B_ionos
         oldoldRLim          = oldRLim
         oldRLim             = RLim
 
@@ -452,6 +469,12 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
            nNukes++
            BREAK
         ENDIF
+
+        IF RLim GT 200 THEN BEGIN
+           PRINT,"This is definitely bogus; RLim > 200"
+           BREAK
+        ENDIF
+           
      ENDWHILE
 
      CASE count2 OF
@@ -470,11 +493,21 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      ;; jvPlotData.mRatio.R_B_IGRF.FAST[*]  = TEMPORARY(R_B_FAST)
      ;; jvPlotData.mRatio.R_B_IGRF.ionos[*] = TEMPORARY(R_B_ionos)
 
-     jvPlotData.mRatio.R_B.FAST[*]  = TEMPORARY(R_B_FAST)
-     jvPlotData.mRatio.R_B.ionos[*] = TEMPORARY(R_B_ionos)
+     jvPlotData.mRatio.R_B.FAST[useInds]  = TEMPORARY(R_B_FAST)
+     jvPlotData.mRatio.R_B.ionos[useInds] = TEMPORARY(R_B_ionos)
 
      ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
-     parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B.FAST[avgs_JVfit.useInds])*NFactor
+     ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B.FAST[avgs_JVfit.useInds])*NFactor
+
+     ;;Use A[2] or parInfoNye[2].value in what's below?
+     ;; PRINT,A[2]
+     ;; PRINT,parInfoNye[2].value
+     
+     parInfoNye[2].value                 = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+                                                                        parInfoNye[1].value, $
+                                                                        0, $
+                                                                        avgs_JVfit.N_SC.avg, $ ;??????????
+                                                                        MEAN(jvPlotData.mRatio.R_B.ionos[useInds]))
 
      dens_arr                            = [dens_arr,parInfoNye[2].value]
      RLim_arr                            = [RLim_arr,RLim]

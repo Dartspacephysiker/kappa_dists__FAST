@@ -230,7 +230,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                      TO_THIS_RE=jv_theor__initial_source_R_E, $
                                      TO_THIS_KM=to_km)
 
-     add_Denton2006 = 1
+     add_Denton2006 = 0
      IF KEYWORD_SET(add_Denton2006) THEN BEGIN
 
         ne_F   = MEAN(jvPlotData.source.NDown[avgs_JVfit.useInds])
