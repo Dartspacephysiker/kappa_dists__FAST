@@ -18,8 +18,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;GEOPACKers
-  traceErr = 0.00001            ;Check out http://geo.phys.spbu.ru/~tsyganenko/Examples1_and_2.html. 0.0001 is what Tsyganenko himself uses. Baller, right?
-  dsMax    = 0.01               ;Max R_E step size
+  traceErr = 0.000001D          ;Check out http://geo.phys.spbu.ru/~tsyganenko/Examples1_and_2.html. 0.0001 is what Tsyganenko himself uses. Baller, right?
+  dsMax    = 0.001D             ;Max R_E step size
 
   __TRACE_ANTIPARALLEL_B = 1
   __TRACE_PARALLEL_B     = -1
@@ -271,17 +271,20 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
      ;; IF ( (count MOD 5) EQ 0 ) THEN STOP
 
+     parInfoNye[3].value = A[3]
      goalR_B = A[3]
 
      dRB   = goalR_B-oldR_B
-     PRINT,FORMAT='(A0," (possibly inconsistent) fitparams --- count = ",I0,", dRB = ",F0.2,", R_B = ",F0.2)',fit_type,count++,dRB,goalR_B
+     PRINT,FORMAT='(A0," (possibly inconsistent) fitparams --- count = ",I0,", dRB = ",F0.2," (",F0.2,"%), R_B = ",F0.2)',fit_type,count++,dRB,dRB/goalR_B,goalR_B
      PRINT_JV_FIT_PARAMS,A
      PRINT,""
 
      lookR_B    = oldR_B
      PRINT,FORMAT='("Trying to get R_B = ",F0.2," ...")',goalR_B
 
-     wasSatisfied = ABS(oldR_B-goalR_B) LE 4
+     ;; wasSatisfied = ABS(oldR_B-goalR_B) LE 4
+     wasSatisfied = (ABS(dRB)/goalR_B LE 0.05) AND (ABS(dRB) LE 30)
+
 
      ;; IF wasSatisfied THEN BEGIN
      ;;    RLim            = oldRLim
@@ -328,7 +331,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
            IF nRepeats GE 2 THEN BEGIN
 
-              maxRLimStep *= 0.99
+              maxRLimStep *= 0.995
               ;; RLim         = MEAN([oldRLim,oldoldRLim])
               nRepeats     = 0
 
@@ -524,7 +527,8 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
         oldMaxRLimStep      = maxRLimStep
         IF (count2++ MOD 25) EQ 0 THEN  PRINT,"MaxRLIMSTEP (RLIM) ",maxRLimStep,'(' + STRCOMPRESS(RLim,/REMOVE_ALL) + ')'
 
-        isSatisfied         = ABS(lookR_B-oldR_B) LE 4
+        ;; isSatisfied         = ABS(lookR_B-goalR_B) LE 4
+        isSatisfied = (ABS(lookR_B-goalR_B)/goalR_B LE 0.05) AND (ABS(dRB) LE 30)
 
         IF wasSatisfied THEN BEGIN
            tmpString = "I was satisfied ..."
@@ -539,9 +543,16 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
            ENDELSE
         ENDIF
 
-        IF maxRLimStep LT 1D-5 THEN BEGIN
+        IF maxRLimStep LT 1D-4 THEN BEGIN
            PRINT,"Nuclear"
            nNukes++
+
+           IF nNukes GT 5 THEN BEGIN
+              PRINT,'Split the diff'
+              isSatisfied = 1
+              wasSatisfied = 1
+           ENDIF
+
            BREAK
         ENDIF
 
@@ -578,7 +589,9 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
 
      ;;NEWSFLASH
      goalR_B                               = TEMPORARY(R_B_ionos) > 1 < parInfoNye[3].limits[1]
-     densR_B                              = TEMPORARY(R_B_FAST)
+     densR_B                               = TEMPORARY(R_B_FAST)
+
+     parInfoNye[3].value = goalR_B
      ;; jvPlotData.mRatio.R_B.ionos[useInds] = TEMPORARY(R_B_ionos)
 
      ;; parInfoNye[2].value                 = avgs_JVfit.N_SC.avg/MEAN(jvPlotData.mRatio.R_B_IGRF.FAST[avgs_JVfit.useInds])*NFactor
@@ -661,7 +674,7 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                   best_resid  : best_resid , $
                   ifree       : ifree      , $
                   best_fjac   : best_fjac  , $
-                  parInfoNye  : parInfoNye , $
+                  parInfo     : parInfoNye , $
                   npegged     : npegged    , $
                   nfree       : nfree      , $
                   dof         : dof        , $

@@ -257,14 +257,6 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         AGauss[2] = MEAN(plotDensG)
         AGauss[3] = bestRBG
 
-        pData = {X         : X      , $
-                 Y         : Y      , $
-                 Yerror    : Yerror , $
-                 YFit      : Yfit   , $
-                 YGaussFit : YGaussfit, $
-                 AKappa    : A, $
-                 AGauss    : AGauss}
-
      END
      KEYWORD_SET(iterative_game_mode): BEGIN
 
@@ -303,13 +295,27 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                                                       OUT_PARINFO=gaussParamStructNye)
 
 
-        pData = {X         : X      , $
-                 Y         : Y      , $
-                 Yerror    : Yerror , $
-                 YFit      : Yfit   , $
-                 YGaussFit : YGaussfit, $
-                 AKappa    : A, $
-                 AGauss    : AGauss}
+        potVals = POWGEN(1D2,1D5,1.05)
+
+        YFit       = CALL_FUNCTION(jvFitFunc, $
+                                   potVals, $
+                                   A, $
+                                   IS_MAXWELLIAN_FIT=fa_kappa.is_Maxwellian_fit, $
+                                   NO_MULT_BY_CHARGE=fa_kappa.no_mult_by_charge)
+        YGaussFit  = CALL_FUNCTION(jvFitFunc, $
+                                   potVals, $
+                                   AGauss, $
+                                   IS_MAXWELLIAN_FIT=fa_Gauss.is_Maxwellian_fit, $
+                                   NO_MULT_BY_CHARGE=fa_Gauss.no_mult_by_charge)
+
+
+        ;; pData = {X         : X      , $
+        ;;          Y         : Y      , $
+        ;;          Yerror    : Yerror , $
+        ;;          YFit      : Yfit   , $
+        ;;          YGaussFit : YGaussfit, $
+        ;;          AKappa    : A, $
+        ;;          AGauss    : AGauss}
 
      END
      ELSE: BEGIN
@@ -378,16 +384,18 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         PRINT_JV_FIT_PARAMS,AGauss
         PRINT,""
 
-        pData = {X         : X      , $
-                 Y         : Y      , $
-                 Yerror    : Yerror , $
-                 YFit      : Yfit   , $
-                 YGaussFit : YGaussFit, $
-                 AKappa    : A, $
-                 AGauss    : AGauss}
-
-
      END
   ENDCASE
+
+  pData = {X         : X      , $
+           Y         : Y      , $
+           Yerror    : Yerror , $
+           XFit      : potVals, $
+           YFit      : Yfit   , $
+           YGaussFit : YGaussFit, $
+           AKappa    : A, $
+           AGauss    : AGauss}
+
+
 
 END
