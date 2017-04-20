@@ -4,6 +4,7 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                               DENSITY=Density, $
                               ERR_TEMPERATURE=TemperatureErr, $
                               ERR_DENSITY=DensityErr, $
+                              DONT_MAP_SOURCEDENS=dont_map_sourceDens, $
                               THESE_USEINDS=these_useInds, $
                               SKIP_USEINDS=skip_useInds, $
                               ARRAYS=arrays
@@ -56,17 +57,28 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
      CASE 1 OF
         KEYWORD_SET(jvPlotData.use_source_dens): BEGIN
 
-           Density        = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
-                                                         Temperature, $
-                                                         0, $
-                                                         jvPlotData.source.NDown[useInds], $
-                                                         jvPlotData.mRatio.R_B.FAST[useInds])
+           CASE 1 OF
+              KEYWORD_SET(dont_map_sourceDens): BEGIN
 
-           DensityErr     = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
-                                                         Temperature, $
-                                                         0, $
-                                                         jvPlotData.source.NDownErr[useInds], $
-                                                         jvPlotData.mRatio.R_B.FAST[useInds])
+                 Density        = jvPlotData.source.NDown[useInds]
+                 DensityErr     = jvPlotData.source.NDownErr[useInds]
+
+              END
+              ELSE: BEGIN
+                 Density        = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                                                               Temperature, $
+                                                               0, $
+                                                               jvPlotData.source.NDown[useInds], $
+                                                               jvPlotData.mRatio.R_B.FAST[useInds])
+
+                 DensityErr     = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                                                               Temperature, $
+                                                               0, $
+                                                               jvPlotData.source.NDownErr[useInds], $
+                                                               jvPlotData.mRatio.R_B.FAST[useInds])
+
+              END
+           ENDCASE
         END
         ELSE: BEGIN
            Density        = jvPlotData.NDown[useInds]
@@ -85,11 +97,20 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
 
      ;;Density
      IF KEYWORD_SET(avgs_JVfit.use_source_dens) THEN BEGIN
-        Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
-                                                   Temperature, $
-                                                   0, $
-                                                   avgs_JVfit.N_SC.avg, $
-                                                   MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
+
+        CASE 1 OF
+           KEYWORD_SET(dont_map_sourceDens): BEGIN
+              Density     = avgs_JVfit.N_SC.avg
+           END
+           ELSE: BEGIN
+              
+              Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+                                                         Temperature, $
+                                                         0, $
+                                                         avgs_JVfit.N_SC.avg, $
+                                                         MEAN(jvPlotData.mRatio.R_B.FAST[useInds]))
+           END
+        ENDCASE
      ENDIF ELSE BEGIN
         Density     = avgs_JVfit.N.avg
      ENDELSE
