@@ -103,7 +103,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__MAGRATIOLIMS=magRatioLims, $
                           CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
                           CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-                          CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                          ;; CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                          CURANDPOT_USE_MSPH_SOURCECONE_FOR_DENS=cAP_use_msph_sourcecone_for_dens, $
+                          CURANDPOT_USE_MSPH_SOURCECONE_FOR_TEMP=cAP_use_msph_sourcecone_for_temp, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
@@ -412,7 +414,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__MAGRATIOLIMS=magRatioLims, $
         JV_THEOR__FIT_JE=jv_theor__fit_je, $
         JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-        JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+        USE_MSPH_SOURCECONE_FOR_DENS=cAP_use_msph_sourcecone_for_dens, $
+        USE_MSPH_SOURCECONE_FOR_TEMP=cAP_use_msph_sourcecone_for_temp, $
         JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
         JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
         JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $

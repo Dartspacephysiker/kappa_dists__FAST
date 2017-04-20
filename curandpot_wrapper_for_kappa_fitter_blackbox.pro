@@ -36,7 +36,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__MAGRATIOLIMS=magRatioLims, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-   JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+   USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+   USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
@@ -189,7 +190,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; blankers                = !NULL
   blankers                = 'lc'
 
-  also_msph_sourcecone    = [1,0,0]
+  ;; also_msph_sourcecone    = [1,0,0]
 
   label__which_eeb        = [0,0,1]
   label__which_times      = [0,1,0]
@@ -233,7 +234,6 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
-     ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -307,7 +307,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__MAGRATIOLIMS=magRatioLims, $
      JV_THEOR__FIT_JE=jv_theor__fit_je, $
      JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-     JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+     USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
+     USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
      JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
      JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $

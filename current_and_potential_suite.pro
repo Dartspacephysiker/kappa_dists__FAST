@@ -91,7 +91,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__MAGRATIOLIMS=magRatioLims, $
    JV_THEOR__FIT_JE=jv_theor__fit_je, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-   ;; JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
