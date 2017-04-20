@@ -407,7 +407,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
            YFit      : Yfit   , $
            YGaussFit : YGaussFit, $
            AKappa    : A, $
-           AGauss    : AGauss}
+           AGauss    : AGauss, $
+           is_sourceDens : KEYWORD_SET(iterative_game_mode)}
 
 
 

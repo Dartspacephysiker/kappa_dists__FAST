@@ -160,6 +160,21 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
   extend_fitStruct_eRange = 1
 
+  nEnergies                         = N_ELEMENTS(diff_eFlux.energy[*,0,0])
+  nTotAngles                        = N_ELEMENTS(diff_eFlux.theta[0,*,0])
+
+  ;;Gotta do this up front, or it plagues everyone
+  ;; IF KEYWORD_SET(KF2D__SDTData_opt.manual_angle_correction) THEN BEGIN
+  ;;    MANUALLY_CORRECT_DIFF_EFLUX_ANGLE,diff_eFlux,KF2D__SDTData_opt.manual_angle_correction
+  ;; ENDIF
+
+  ;; IF KEYWORD_SET(KF2D__SDTData_opt.manual_angle_correction) THEN BEGIN
+  ;;    junk             = MIN(ABS(KF2D__SDTData_opt.manual_angle_correction-diff_eFlux.theta[nEnergies/2,*,0]),minInd)
+  ;;    junk             = MIN(ABS(diff_eFlux.theta[nEnergies/2,*,0]),zeroInd)
+  ;;    shiftInd         = (minInd-zeroInd) MOD nTotAngles
+  ;;    diff_eFlux.theta = SHIFT(diff_eFlux.theta,0,shiftInd,0)
+  ;; ENDIF
+
   ;;So the order becomes [angle,energy,time] for each of these arrays
   times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
   energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])
@@ -167,9 +182,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ddata                             = TRANSPOSE(diff_eFlux.ddata,[1,0,2])
   oneCount_data                     = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
   angles                            = TRANSPOSE(diff_eFlux.theta,[1,0,2])
-
-  nEnergies                         = N_ELEMENTS(energies[0,*,0])
-  nTotAngles                        = N_ELEMENTS(angles[*,0,0])
 
   IF KEYWORD_SET(debug__skip_to_this_time) THEN BEGIN
      CASE SIZE(debug__skip_to_this_time,/TYPE) OF
@@ -357,8 +369,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ENDIF
 
      IF N_ELEMENTS(breakTime) GT 0 THEN BEGIN
-        FOR jjBeak=0,N_ELEMENTS(breakTime)-1 DO BEGIN
-           IF ABS(t-breakTime[jjBeak]) LT 0.5 THEN STOP
+        FOR jjBleakerStreet=0,N_ELEMENTS(breakTime)-1 DO BEGIN
+           IF ABS(t-breakTime[jjBleakerStreet]) LT 0.5 THEN STOP
         ENDFOR
      ENDIF
 
@@ -370,6 +382,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         oneCountArr   = oneCount_data[*,*,iTime]
      END
      AorigArr         = angles[*,*,iTime]
+
+     ;; IF KEYWORD_SET(KF2D__SDTData_opt.manual_angle_correction) THEN BEGIN
+     ;;    junk          = MIN(ABS(KF2D__SDTData_opt.manual_angle_correction-AorigArr[*,nEnergies/2]),minInd)
+     ;;    junk          = MIN(ABS(AorigArr[*,nEnergies/2]),zeroInd)
+     ;;    shiftInd      = (minInd-zeroInd) MOD nTotAngles
+     ;;    AorigArr      = SHIFT(AorigArr,shiftInd,0)
+     ;; ENDIF
 
      IF KEYWORD_SET(KF2D__Curvefit_opt.min_peak_energy) THEN BEGIN
         ;;Try taking it from the top
@@ -905,7 +924,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                         /ADD_FITPARAMS_TEXT, $
                         ;; /ADD_ANGLE_LABEL, $
                         ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
-                        ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
+                        ;; ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
                         /ADD_CHI_VALUE, $
                         ADD_WINTITLE=add_winTitle, $
                         /SAVE_FITPLOTS, $

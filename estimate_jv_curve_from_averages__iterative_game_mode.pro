@@ -644,6 +644,14 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
      oldR_E                 = downTail_RE
   ENDWHILE
 
+  ;;Final update to A
+  A[2]                      = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+                                                           parInfoNye[1].value, $
+                                                           0, $
+                                                           avgs_JVfit.N_SC.avg, $ ;??????????
+                                                           densR_B > 1)
+
+
   history                   = {dR_B  : TEMPORARY(dR_B_arr ), $
                                R_B   : TEMPORARY(R_B_arr  ), $
                                RLim  : TEMPORARY(RLim_arr), $
@@ -689,8 +697,6 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
   PRINT,"Et nous avons fini. Voilà le " + fit_type + " fit: "
   PRINT_JV_FIT_PARAMS,A
   PRINT_ITERATIVE_GAME_MODE_FITHISTORY,gameFitInfo
-
-  A[3] = A[3] > 1
 
   RETURN,A
   

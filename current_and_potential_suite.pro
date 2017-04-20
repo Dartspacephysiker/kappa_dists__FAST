@@ -157,6 +157,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
      ARANGE__CHARE_E_UP=aRange__charE_e_up, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
      MOMENT_ENERGYARR=moment_energyArr, $

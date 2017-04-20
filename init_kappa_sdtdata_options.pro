@@ -3,6 +3,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     DO_ALL_TIMES=do_all_times, $
                                     ENERGY_ELECTRONS=energy_electrons, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
+                                    MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                                     ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                                     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                                     FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
@@ -24,6 +25,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    energy_electrons    :[4,3.5e4], $
                    routine             :'get_fa_' + defEEB_or_EES, $
                    electron_anglerange :defElectron_angleRange, $
+                   manual_angle_correction : 0, $
                    ;; electron_lca        :[-180.,180.], $
                    fit2D_dens_aRange   :defFit2D_dens_angleRange, $
                    estimate_sourceCone_from_dist : 0B, $
@@ -97,6 +99,21 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ;;    ;;       kSDTData_opt.fit2D_dens_aRange
   ;; ENDIF
   
+  IF N_ELEMENTS(manual_angle_correction) GT 0 THEN BEGIN
+     STR_ELEMENT,kSDTData_opt,'manual_angle_correction',manual_angle_correction,/ADD_REPLACE
+     CASE SIZE(manual_angle_correction,/TYPE) OF
+        7: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.manual_angle_correction",T45,":",T48,A0)', $
+                 kSDTData_opt.manual_angle_correction
+        END
+        ELSE: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.manual_angle_correction",T45,":",T48,2(F0.2,:,", "))', $
+                 kSDTData_opt.manual_angle_correction
+        END
+     ENDCASE
+  ENDIF
+
+
   IF N_ELEMENTS(fit2D__density_angleRange) GT 0 THEN BEGIN
      ;; kSDTData_opt.fit2D_dens_aRange      = fit2D__density_angleRange
      STR_ELEMENT,kSDTData_opt,'fit2D_dens_aRange',fit2D__density_angleRange,/ADD_REPLACE

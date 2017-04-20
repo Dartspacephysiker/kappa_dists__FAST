@@ -76,6 +76,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    ADD_ANGLE_LABEL=add_angle_label, $
    FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
+   MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
    ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
    NO_PLOTS=no_plots, $
    SAVE_FITPLOTS=save_fitplots, $
@@ -161,6 +162,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      TIME_ARR=time_arr, $
      ENERGY_ELECTRONS=energy_electrons, $
      ELECTRON_ANGLERANGE=electron_angleRange, $
+     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
      FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $

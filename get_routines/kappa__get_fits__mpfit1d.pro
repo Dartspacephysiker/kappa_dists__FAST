@@ -270,7 +270,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      kappaFit                    = {x:X, $
                                     y:yFit, $
-                                    NAME:"Kappa distribution", $
+                                    ;; NAME:"Kappa distribution", $
+                                    NAME:STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",A[2]), $
                                     A:A, $
                                     time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
                                     time_index:bounds_i, $
@@ -419,7 +420,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
         gaussFit              = {x:KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
                                  y:yGaussFit, $
-                                 NAME:"Maxwellian distribution" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
+                                 ;; NAME:"Maxwellian distribution" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
+                                 NAME:"Maxwellian" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
                                  A:AGauss, $
                                  time:STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i]), $
                                  time_index:bounds_i, $

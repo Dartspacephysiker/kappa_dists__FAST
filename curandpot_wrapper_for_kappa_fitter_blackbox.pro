@@ -3,6 +3,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    ORBIT=orbit, $
    EEB_OR_EES=eeb_or_ees, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
+   MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
    MOMENT_ENERGYARR=moment_energyArr, $
    ORIGINATING_ROUTINE=routName, $
    REMAKE_MASTERFILE=remake_masterFile, $
@@ -243,6 +244,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
      ARANGE__CHARE_E_UP=aRange__charE_e_up, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
      MOMENT_ENERGYARR=moment_energyArr, $

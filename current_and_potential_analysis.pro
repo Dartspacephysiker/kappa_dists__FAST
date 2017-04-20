@@ -30,6 +30,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
    ARANGE__CHARE_E_UP=aRange__charE_e_up, $
    ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+   MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
    MOMENT_ENERGYARR=moment_energyArr, $
@@ -308,6 +309,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF gotIt THEN BEGIN
            afterString = "Restored "
+
+           IF KEYWORD_SET(manual_angle_correction) THEN BEGIN
+              ;; STOP
+              ;; cLimit = 0
+              ;; COMMON cc,counter
+              ;; IF N_ELEMENTS(counter) EQ 0 THEN counter = 1 ELSE counter += 1
+              ;; IF counter GE cLimit THEN STOP
+              MANUALLY_CORRECT_DIFF_EFLUX_ANGLE,diff_eFlux,manual_angle_correction
+           ENDIF
         ENDIF ELSE BEGIN
            afterString = "Made "
 
@@ -318,6 +328,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           ;; UNITS=eSpecUnits, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
+                          MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                           SC_POT=sc_pot, $
                           OUT_DIFF_EFLUX=diff_eflux, $
                           SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $

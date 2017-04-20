@@ -304,11 +304,17 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ENDIF
 
   IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
-     fitTitle          = ["Bulk energy  (eV)","Plasma temp. (eV)","Kappa","Density     (cm^-3)"]
-     fitInfoStr        = [STRING(FORMAT='(F-15.2)',kappaFit.A[0]), $
-                          STRING(FORMAT='(F-15.2)',kappaFit.A[1]), $
-                          STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
+     ;; fitTitle          = ["Bulk energy  (eV)","Plasma temp. (eV)","Kappa","Density     (cm^-3)"]
+     ;; fitInfoStr        = [STRING(FORMAT='(F-15.2)',kappaFit.A[0]), $
+     ;;                      STRING(FORMAT='(F-15.2)',kappaFit.A[1]), $
+     ;;                      STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
+     ;;                      STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
+     fitTitle          = ["Bulk energy  (eV)","Plasma temp. (eV)","Density     (cm^-3)"]
+     fitInfoStr        = [STRING(FORMAT='(I-15)',kappaFit.A[0]), $
+                          STRING(FORMAT='(F-15.1)',kappaFit.A[1]), $
+                          ;; STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
                           STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
+
      IF KEYWORD_SET(add_angle_label) THEN BEGIN
         fitTitle       = [fitTitle,"Angle         (deg)"]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
@@ -321,17 +327,19 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2)]
         fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x)-4))]
-        chiInd     = 4 + KEYWORD_SET(add_angle_label)
+        ;; chiInd     = 4 + KEYWORD_SET(add_angle_label)
+        chiInd     = 3 + KEYWORD_SET(add_angle_label)
      ENDIF
 
      ;; fitParamsText     = TEXT(0.17,0.22, $
-     fitParamsText     = TEXT(0.17,0.31, $
+     fitParamsText     = TEXT(0.17,0.25, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
-                              STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
+                              ;; STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
                               (KEYWORD_SET(add_angle_label) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' : '') + $
+                               ;; STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[chiInd],fitInfoStr[chiInd]) + '!C' : ''), $; + $
                               ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(kappaFit.fitStatus EQ 0 ? 'Y' : 'N')), $
@@ -342,10 +350,11 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                               FONT_STYLE=fitInfoFont_style)
 
      IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-        fitTitle       = ["Bulk energy  (eV)","Plasma temp. (eV)","Kappa","Density     (cm^-3)"]
-        fitInfoStr     = [STRING(FORMAT='(F-15.2)',gaussFit.A[0]), $
-                          STRING(FORMAT='(F-15.2)',gaussFit.A[1]), $
-                          STRING(FORMAT='(F-7.3)',gaussFit.A[2]), $
+        ;; fitTitle       = ["Bulk energy  (eV)","Plasma temp. (eV)","Kappa","Density     (cm^-3)"]
+        fitTitle       = ["Bulk energy  (eV)","Plasma temp. (eV)","Density     (cm^-3)"]
+        fitInfoStr     = [STRING(FORMAT='(I-15)',gaussFit.A[0]), $
+                          STRING(FORMAT='(F-15.1)',gaussFit.A[1]), $
+                          ;; STRING(FORMAT='(F-7.3)',gaussFit.A[2]), $
                           STRING(FORMAT='(F-8.4)',gaussFit.A[3])]
 
         IF KEYWORD_SET(add_angle_label) THEN BEGIN
@@ -359,17 +368,17 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
            fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',gaussFit.chi2/(N_ELEMENTS(gaussFit.x)-3))]
-           chiInd     = 4 + KEYWORD_SET(add_angle_label)
+           chiInd     = 3 + KEYWORD_SET(add_angle_label)
         ENDIF
 
         ;; fitParamsText  = TEXT(0.49,0.22, $
-        fitParamsText     = TEXT(0.17,0.14, $
+        fitParamsText     = TEXT(0.17,0.12, $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
+                              ;; STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
-                              STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
                               (KEYWORD_SET(add_angle_label) ? $
-                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C' : '') + $
+                               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' : '') + $
                               (KEYWORD_SET(add_chi_value) ? $
                                STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[chiInd],fitInfoStr[chiInd]) + '!C' : ''), $; + $
                               ;; STRING(FORMAT='("GaussFit success",T20,": ",A0)',(gaussFit.fitStatus EQ 0 ? 'Y' : 'N')), $

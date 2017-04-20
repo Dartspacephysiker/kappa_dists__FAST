@@ -13,6 +13,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    TIME_ARR=time_arr, $
    ADD_ONECOUNT_CURVE=add_oneCount_curve, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
+   MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
    FIT_EACH_ANGLE=fit_each_angle, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
@@ -74,6 +75,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      DO_ALL_TIMES=do_all_times, $
                      ENERGY_ELECTRONS=energy_electrons, $
                      ELECTRON_ANGLERANGE=electron_angleRange, $
+                     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                      FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
@@ -137,6 +139,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               OUT_NORTHSOUTH=north_south, $
                               FIT_EACH_ANGLE=fit_each_angle, $
                               CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
+                              MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                               ANGLESTR=angleStr, $
                               ;; ESPECUNITS=KF__Curvefit_opt.units, $
                               ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $

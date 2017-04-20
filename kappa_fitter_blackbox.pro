@@ -2,6 +2,7 @@
 PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ELECTRON_SOURCECONEANGLE=electron_angleRange, $
                           ;; ELECTRON_LOSSCONEANGLE=electron_lca, $
+                          MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                           ENERGY_ELECTRONS=energy_electrons, $
                           JUST_DIFF_EFLUX=just_diff_eFlux, $
                           DIFF_EFLUX=diff_eFlux, $
@@ -254,6 +255,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ADD_ANGLE_LABEL=add_angle_label, $
         FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
         ELECTRON_ANGLERANGE=electron_angleRange, $
+        MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
         ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
         NO_PLOTS=no_plots, $
         SAVE_FITPLOTS=save_fitplots, $
@@ -381,6 +383,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ORBIT=orbit, $
         EEB_OR_EES=eeb_or_ees, $
         ELECTRON_ANGLERANGE=electron_angleRange, $
+        MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
         MOMENT_ENERGYARR=cAP_moment_energyArr, $
         ORIGINATING_ROUTINE=routName, $
         REMAKE_MASTERFILE=cAP_remake_masterFile, $
