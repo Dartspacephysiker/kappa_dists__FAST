@@ -14,7 +14,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   nColors          = 256
   transpose        = 1
   hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
-  cbRange          = ALOG10(MINMAX(mMagDat.chi2))
+  cbRange          = ALOG10(MINMAX(mMagDat.chi2 < 1.0D4))
   cbRange[0]       = cbRange[0] < 0.0
   tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
   ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
@@ -65,7 +65,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         yVar       = mMagDat.kappa
         yTitle     = 'Kappa'
 
-        instead_q  = 1
+        instead_q  = 0
         IF KEYWORD_SET(instead_q) THEN BEGIN
            yVar    = 1D + 1D/(mMagDat.kappa-1.5D)
            yTitle  = 'q'

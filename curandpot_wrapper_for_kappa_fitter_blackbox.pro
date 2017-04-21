@@ -44,6 +44,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+   JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
    MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
    MAP__2D=map__2D, $
@@ -316,6 +317,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
      JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
      JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+     JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
      MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
      MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
      MAP__2D=map__2D, $

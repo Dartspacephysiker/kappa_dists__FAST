@@ -35,11 +35,6 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
      ;;Temperature
      CASE 1 OF
         KEYWORD_SET(jvPlotData.use_source_temp): BEGIN
-           ;;Alder
-           ;; Temperature    = jvPlotData.source.TDown[useInds]
-           ;; TemperatureErr = jvPlotData.source.TDownErr[useInds]
-           ;; Density        = jvPlotData.source.NDown[useInds]/jvPlotData.mRatio.R_B.FAST[useInds]
-           ;; DensityErr     = jvPlotData.source.NDownErr[useInds]/jvPlotData.mRatio.R_B.FAST[useInds]
 
            Temperature    = jvPlotData.source.TDown[useInds]
            TemperatureErr = jvPlotData.source.TDownErr[useInds]

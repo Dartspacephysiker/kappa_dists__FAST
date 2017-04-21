@@ -24,7 +24,8 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
 
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=temperature, $
-                            DENSITY=density
+                            DENSITY=density, $
+                            /DONT_MAP_SOURCEDENS
 
   ;; IF KEYWORD_SET(avgs_JVfit.use_source_avgs) THEN BEGIN
   ;;    Temperature = avgs_JVfit.T_SC.avg
@@ -34,10 +35,16 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
   ;;    Density     = avgs_JVfit.N.avg
   ;; ENDELSE
 
-  ;; titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
-  ;;                           orbPref,Temperature,Density)
-  titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV)")', $
-                            orbPref,Temperature)
+  ;; showDens         = KEYWORD_SET(pData.is_sourceDens)
+
+  ;; IF showDens THEN BEGIN
+  IF KEYWORD_SET(pData.is_sourceDens) THEN BEGIN
+     titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N!DFAST!N=",G0.3," cm!U-3!N)")', $
+                               orbPref,Temperature,Density)
+  ENDIF ELSE BEGIN
+     titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV)")', $
+                               orbPref,Temperature)
+  ENDELSE
   ;; kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3)',A[0],A[3])
   ;; gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3)',AGauss[3])
   ;; kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3,", N=",G0.3,", T=",G0.3)',A[0],A[3],A[2],A[1])

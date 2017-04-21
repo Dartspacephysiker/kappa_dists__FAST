@@ -96,6 +96,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+   JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
@@ -376,6 +377,16 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   IF KEYWORD_SET(jv_theor__iterative_game) THEN BEGIN
 
+     
+     ;; STOP
+     ;; jv_theor__itergame_tie_R_B_and_dens = 1
+     IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
+        GET_FA_FIELD_LINE,jvPlotData.time, $
+                          USEINDS=avgs_JVFit.useInds, $
+                          /TIME_ARRAY, $
+                          MRATIO=jvPlotData.mRatio
+     ENDIF
+
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
@@ -384,6 +395,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            MAGRATIOLIMS=magRatioLims, $
                                            /ITERATIVE_GAME_MODE, $
                                            ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+                                           ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $
@@ -413,7 +425,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
      ;; map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
 
-     minR_B  = 1
+     minR_B  = 4
      maxR_B  = 1D4
      dR_B    = 1.05D
      ;; nR_B    = ALOG10(maxR_B/minR_B)/ALOG10(dR_B)

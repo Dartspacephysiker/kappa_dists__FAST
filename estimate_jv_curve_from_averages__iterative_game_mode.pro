@@ -1,6 +1,7 @@
 ;2017/04/17
 FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError, $
    DENSITY_INCREASE=NFac, $
+   TIE_RB_AND_DENS=tie_R_B_and_dens, $
    A_IN=A_in, $
    WEIGHTS=weights, $
    JVPLOTDATA=jvPlotData, $
@@ -402,10 +403,10 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                           TILT=thisTilt, $
                           EPOCH=time_epoch[arbInd]
 
-              GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                          FAST_Bx,FAST_By,FAST_Bz, $
-                          TILT=thisTilt, $
-                          EPOCH=time_epoch[arbInd]
+              ;; GEOPACK_T89,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+              ;;             FAST_Bx,FAST_By,FAST_Bz, $
+              ;;             TILT=thisTilt, $
+              ;;             EPOCH=time_epoch[arbInd]
 
               GEOPACK_T89,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
                           ionos_Bx,ionos_By,ionos_Bz, $
@@ -420,10 +421,10 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                           TILT=thisTilt, $
                           EPOCH=time_epoch[arbInd]
 
-              GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                          FAST_Bx,FAST_By,FAST_Bz, $
-                          TILT=thisTilt, $
-                          EPOCH=time_epoch[arbInd]
+              ;; GEOPACK_T96,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+              ;;             FAST_Bx,FAST_By,FAST_Bz, $
+              ;;             TILT=thisTilt, $
+              ;;             EPOCH=time_epoch[arbInd]
 
               GEOPACK_T96,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
                           ionos_Bx,ionos_By,ionos_Bz, $
@@ -438,10 +439,10 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                           TILT=thisTilt, $
                           EPOCH=time_epoch[arbInd]
 
-              GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                          FAST_Bx,FAST_By,FAST_Bz, $
-                          TILT=thisTilt, $
-                          EPOCH=time_epoch[arbInd]
+              ;; GEOPACK_T01,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+              ;;             FAST_Bx,FAST_By,FAST_Bz, $
+              ;;             TILT=thisTilt, $
+              ;;             EPOCH=time_epoch[arbInd]
 
               GEOPACK_T01,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
                           ionos_Bx,ionos_By,ionos_Bz, $
@@ -460,14 +461,14 @@ FUNCTION ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE,X,Y,XError,YError,
                            IOPB=IOPB, $
                            IOPR=IOPR
 
-              GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
-                           FAST_Bx,FAST_By,FAST_Bz, $
-                           TILT=thisTilt, $
-                           EPOCH=time_epoch[arbInd], $
-                           IOPGEN=IOPGen, $
-                           IOPT=IOPT, $
-                           IOPB=IOPB, $
-                           IOPR=IOPR
+              ;; GEOPACK_TS04,tmpParMod,FAST_GSM_x,FAST_GSM_y,FAST_GSM_z, $
+              ;;              FAST_Bx,FAST_By,FAST_Bz, $
+              ;;              TILT=thisTilt, $
+              ;;              EPOCH=time_epoch[arbInd], $
+              ;;              IOPGEN=IOPGen, $
+              ;;              IOPT=IOPT, $
+              ;;              IOPB=IOPB, $
+              ;;              IOPR=IOPR
 
               GEOPACK_TS04,tmpParMod,ionos_GSM_x,ionos_GSM_y,ionos_GSM_z, $
                            ionos_Bx,ionos_By,ionos_Bz, $

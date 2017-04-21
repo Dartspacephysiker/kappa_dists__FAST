@@ -41,7 +41,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
                           FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
                           ADD_ONECOUNT_CURVE=add_oneCount_curve, $
-                          SAVE_KAPPA_PLOTS=save_kappa_plot, $
+                          SAVE_POSTKAPPA_PLOTS=save_postKappa_plot, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
                           CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $
                           PLOTDIR=plotDir, $
@@ -112,6 +112,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                           CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
                           CURANDPOT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+                          CURANDPOT_JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                           CURANDPOT__MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
                           CURANDPOT__MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
                           CURANDPOT__MAP__2D=cAP_map__2D, $
@@ -424,6 +425,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
         JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
         JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+        JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
         MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
         MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
         MAP__2D=cAP_map__2D, $
@@ -643,7 +645,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      IF KEYWORD_SET(show_post_plots) THEN BEGIN
 
-        POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir,save_kappa_plot, $
+        POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir,save_postKappa_plot, $
                                CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save                            
 
      ENDIF

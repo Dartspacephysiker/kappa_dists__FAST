@@ -22,7 +22,7 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
 
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[2]     = 0.5
-  AMaxStep        = DOUBLE([1.0, $
+  AMaxStep        = DOUBLE([0.5, $
                             100., $
                             0.5, $
                             250])
@@ -33,7 +33,7 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
                       [1,1]]
   
   kappaLim        = KEYWORD_SET(kappaLims    ) ? kappaLims    : [1.505D   ,100.0   ]
-  TempLim         = KEYWORD_SET(TempLims     ) ? TempLims     : [10      ,1.0E4   ]
+  TempLim         = KEYWORD_SET(TempLims     ) ? TempLims     : [10      ,1.0D4   ]
   DensLim         = KEYWORD_SET(DensLims     ) ? DensLims     : [1E-3    ,100     ] 
   magRatioLim     = KEYWORD_SET(magRatioLims ) ? magRatioLims : [1       ,1D4     ]
 
@@ -71,7 +71,9 @@ FUNCTION INIT_JV_FITPARAM_INFO,A,fixA, $
   paramInfo[*].parName = ["kappa","T","N","R_B"]
 
   ;;Got it. What about anything like, you know, a max step size?
-  paramInfo[*].mpmaxstep  = AMaxStep
+  IF N_ELEMENTS(AMaxStep) GT 0 THEN BEGIN
+     paramInfo[*].mpmaxstep  = AMaxStep
+  ENDIF
 
   ;;So certain values can't be exceeded?
   paramInfo[*].limited[0] = Alimited[*,0]
