@@ -86,6 +86,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   CASE 1 OF
      KEYWORD_SET(multi_magRatio_mode): BEGIN
 
+        meanPot   = 10.^(MEAN(ALOG10(X)))
+
         CASE 1 OF
            KEYWORD_SET(map__2D): BEGIN
 
@@ -114,7 +116,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
 
                  FOR k=0,nMagRatio-1 DO BEGIN
 
-                    dens = DENSITY_FACTOR__BARBOSA_1977(X, $
+                    dens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
                                                         A[1], $
                                                         0, $
                                                         avgs_JVfit.N_SC.avg, $
@@ -166,7 +168,6 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
               ;;Save it for senere
               A_in      = kappaParamStruct[*].value
 
-              meanPot   = 10.^(MEAN(ALOG10(X)))
               FOR k=0,nMagRatio-1 DO BEGIN
 
                  kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
@@ -247,7 +248,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         plotDensG = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
                                                 Temperature, $
                                                 0, $
-                                                avgs_JVfit.N_SC.avg*fastR_BFac, $
+                                                avgs_JVfit.N_SC.avg, $
                                                 bestRBG)
 
         YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(Temperature,plotDensG,potVals,bestRBG, $
@@ -258,7 +259,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         plotDens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
                                                 Temperature, $
                                                 0, $
-                                                avgs_JVfit.N_SC.avg*fastR_BFac, $
+                                                avgs_JVfit.N_SC.avg, $
                                                 bestRB)
 
         yFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $

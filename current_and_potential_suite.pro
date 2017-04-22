@@ -434,6 +434,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
      ;; map__multi_kappa_array    = [1.501,1.55,1.6,1.65,1.7,1.75,1.8,1.85,1.9,1.95,2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.25,3.50,3.75,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]
      ;; map__multi_kappa_array    = [1.501,1.51,1.52,1.53,1.54,1.55,1.56,1.57,1.58,1.59, $
+
      map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
                                   1.6,1.625,1.65,1.675, $
                                   1.7,1.725,1.75,1.775, $
@@ -447,6 +448,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   7.0,7.5, $
                                   8.0]
 
+     map2D__log_kappa          = 0
+     IF KEYWORD_SET(map2D__logkappa) THEN BEGIN
+        map__multi_kappa_array = [map__multi_kappa_array,LINDGEN(100) + 9]
+     ENDIF
+     
      ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                            A_IN=A_in, $
                                            KAPPALIMS=kappaLims, $   
@@ -466,6 +472,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
      PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         MAP__2D=map__2D, $
+        MAP2D__LOG_KAPPA=map2D__log_kappa, $
         ORBIT=orbit, $
         IN_KAPPA_A=A, $
         IN_GAUSS_A=AGauss, $

@@ -1,6 +1,7 @@
 ;2017/04/12
 PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    MAP__2D=map__2D, $
+   MAP2D__LOG_KAPPA=map2D__log_kappa, $
    ORBIT=orbit, $
    IN_KAPPA_A=A, $
    IN_GAUSS_A=AGauss, $
@@ -9,22 +10,52 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  nCBTicks         = 5
   rgbTable         = 4
   nColors          = 256
   transpose        = 1
   hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
-  cbRange          = ALOG10(MINMAX(mMagDat.chi2 < 1.0D4))
-  cbRange[0]       = cbRange[0] < 0.0
-  tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
-  ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
-  IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
-     cbRange[0]    = FLOOR(cbRange[0])
-     tickValues    = FLOOR(tickValues)
-     tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
-     tickName      = STRING(FORMAT='(F0.2)',10.^tickValues)
+
+  log_cbRange = 0
+  IF log_cbRange THEN BEGIN
+
+     zVar             = ALOG10(mMagDat.chi2)
+     nCBTicks         = 5
+
+     cbRange          = ALOG10(MINMAX(mMagDat.chi2 < 1.0D3))
+     ;; cbRange[0]       = cbRange[0] < 0.0
+     cbRange[0]       = cbRange[0]
+     tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+
+
+     ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
+     IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
+        cbRange[0]    = FLOOR(cbRange[0])
+        tickValues    = FLOOR(tickValues)
+        tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
+        tickName      = STRING(FORMAT='(F0.2)',10.^tickValues)
+     ENDIF ELSE BEGIN
+        tickName      = STRING(FORMAT='(I0)',10.^tickValues)
+     ENDELSE
   ENDIF ELSE BEGIN
-     tickName      = STRING(FORMAT='(I0)',10.^tickValues)
+
+     zVar             = mMagDat.chi2
+     nCBTicks         = 10
+
+     ;; cbRange          = MINMAX(mMagDat.chi2 < 1.0D2)
+     cbRange          = [0,MAX(mMagDat.chi2 < 1.0D2)]
+     tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+
+
+     ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
+     IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
+        cbRange[0]    = FLOOR(cbRange[0])
+        tickValues    = FLOOR(tickValues)
+        tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
+        tickName      = STRING(FORMAT='(F0.2)',tickValues)
+     ENDIF ELSE BEGIN
+        tickName      = STRING(FORMAT='(I0)',tickValues)
+     ENDELSE
+
   ENDELSE
 
   ;;Winder
@@ -86,13 +117,13 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
         ;; ENDIF ELSE BEGIN
 
-        contPlot    = CONTOUR(ALOG10(mMagDat.chi2),mMagDat.magRat, $
+        contPlot    = CONTOUR(zVar,mMagDat.magRat, $
                               yVar, $
                               XRANGE=MINMAX(mMagDat.magRat), $
                               XTITLE='Mirror ratio', $
                               YTITLE=yTitle, $
                               /XLOG, $
-                              ;; /YLOG, $
+                              YLOG=map2D__log_kappa AND ~instead_q, $
                               AXIS_STYLE=2, $
                               C_VALUE=c_values, $
                               YSTYLE=1, $
