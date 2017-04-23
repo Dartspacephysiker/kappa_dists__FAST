@@ -91,7 +91,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
         CASE 1 OF
            KEYWORD_SET(map__2D): BEGIN
 
-              dof = N_ELEMENTS(X); - 4
+              dofK = N_ELEMENTS(X) - 2; treat kappa and R_B as free; - 4
+              dofG = N_ELEMENTS(X) - 1; treat R_B as free
 
               ;;Fix kappa [0] and magratio [3]
               kappaParamStruct[0].fixed = 1B
@@ -102,29 +103,56 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
               ;; m2D_multi_kappa_array     = multi_kappa_array              # MAKE_ARRAY(nMagRatio,/FLOAT,VALUE=1.0)
               ;; m2D_multi_magRatio_array  = MAKE_ARRAY(nKappa,/FLOAT,VALUE=1.0) # multi_magRatio_array
 
-              kappaArr  = multi_kappa_array                   # MAKE_ARRAY(nMagRatio,/FLOAT,VALUE=1.0)
-              magRatArr = MAKE_ARRAY(nKappa,/FLOAT,VALUE=1.0) # multi_magRatio_array
+              densArr   = MAKE_ARRAY(nMagRatio,/DOUBLE)
+              ;; densMoms  = MAKE_ARRAY(4,nMagRatio,/DOUBLE)
 
-              chi2Arr   = MAKE_ARRAY(nKappa,nMagRatio,/FLOAT)
+              kappaArr  = multi_kappa_array                     # MAKE_ARRAY(nMagRatio,/DOUBLE,VALUE=1.0D)
+              magRatArr = MAKE_ARRAY(nKappa,/DOUBLE,VALUE=1.0D) # multi_magRatio_array
+
+              chi2ArrK  = MAKE_ARRAY(nKappa,nMagRatio,/DOUBLE)
+              chi2ArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE) ;'cause kappa is fixed at infinity, o' course
 
               fastR_BFac= jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0]
 
               ;;Reclaim
               A         = kappaParamStruct[*].value
+              AGauss    = kappaParamStruct[*].value
+              AGauss[0] = 10000.D
+              
+              ;;Get all dens values
+              FOR k=0,nMagRatio-1 DO BEGIN
 
+                 densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+                                                                A[1], $
+                                                                0, $
+                                                                avgs_JVfit.N_SC.avg, $
+                                                                multi_magRatio_array[k]*fastR_BFac))
+                 ;; densMoms[*,k] = MOMENT(DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+                 ;;                                                A[1], $
+                 ;;                                                0, $
+                 ;;                                                avgs_JVfit.N_SC.avg, $
+                 ;;                                                multi_magRatio_array[k]*fastR_BFac))
+                 ;; IF SQRT(densMoms[1,k])
+              ENDFOR
+
+              ;;First kappa
               FOR j=0,nKappa-1 DO BEGIN
 
                  FOR k=0,nMagRatio-1 DO BEGIN
 
-                    dens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-                                                        A[1], $
-                                                        0, $
-                                                        avgs_JVfit.N_SC.avg, $
-                                                        magRatArr[j,k]*fastR_BFac) ;, $
-                                                        ;; MAGICFAC1_OUT=magicFac1, $
-                                                        ;; MAGICFAC2_OUT=magicFac2, $
-                                                        ;; /EXHAUSTIVE_LIMITCHECK)
+                    ;; dens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+                    ;;                                     A[1], $
+                    ;;                                     0, $
+                    ;;                                     avgs_JVfit.N_SC.avg, $
+                    ;;                                     magRatArr[j,k]*fastR_BFac) ;, $
+                    ;;                                     ;; MAGICFAC1_OUT=magicFac1, $
+                    ;;                                     ;; MAGICFAC2_OUT=magicFac2, $
+                    ;;                                     ;; /EXHAUSTIVE_LIMITCHECK)
+
+                    ;; dens = densArr[k]
+
                     ;; PRINT,kappaArr[j,k],A[1],MEAN(dens),magRatArr[j,k]
+                    ;; PRINT,kappaArr[j,k],A[1],densArr[k],magRatArr[j,k]
 
                     yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
                                                              A[1], $
@@ -136,21 +164,41 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                                              ;;                              MAGICFAC1_OUT=magicFac1, $
                                                              ;;                              MAGICFAC2_OUT=magicFac2, $
                                                              ;;                              /EXHAUSTIVE_LIMITCHECK), $
-                                                             dens, $
+                                                             densArr[k], $
                                                              ;; A[2], $
                                                              X, $
                                                              magRatArr[j,k], $
-                                                             IN_POTBAR=in_potBar, $
-                                                             OUT_POTBAR=potBar, $
+                                                             ;; IN_POTBAR=in_potBar, $
+                                                             ;; OUT_POTBAR=potBar, $
                                                              /NO_MULT_BY_CHARGE)*1D6
                     
                     ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
                     ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
-                    chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dof
-                    chi2Arr[j,k]  = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                    chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofK
+                    chi2ArrK[j,k]  = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
                     ;; kappaArr[j,k] = A[0]
 
                  ENDFOR
+
+              ENDFOR
+
+              ;;Now Gauss
+              PRINT,"Now Gauss 1-D map ..."
+              FOR k=0,nMagRatio-1 DO BEGIN
+
+                 yFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
+                                                          densArr[k], $
+                                                          X, $
+                                                          multi_magRatio_array[k], $
+                                                          ;; IN_POTBAR=in_potBar, $
+                                                          ;; OUT_POTBAR=potBar, $
+                                                          /NO_MULT_BY_CHARGE)*1D6
+                 
+                 ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
+                 ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                 chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofG
+                 chi2ArrG[k]    = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                 ;; kappaArr[j,k] = A[0]
 
               ENDFOR
 
@@ -163,7 +211,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
 
               magRatArr = multi_magRatio_array
               kappaArr  = MAKE_ARRAY(nMagRatio,/FLOAT)
-              chi2Arr   = MAKE_ARRAY(nMagRatio,/FLOAT)
+              chi2ArrK  = MAKE_ARRAY(nMagRatio,/FLOAT)
 
               ;;Save it for senere
               A_in      = kappaParamStruct[*].value
@@ -219,61 +267,67 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
 
            END
         ENDCASE
+        ;;Kappa
 
-        mMagDat = {kappa  : TEMPORARY(kappaArr), $
-                   T      : Temperature, $
-                   N      : Density, $
-                   magRat : magRatArr, $
-                   chi2   : TEMPORARY(chi2Arr)}
+        junk      = MIN(chi2ArrK,indK)
+        indK2D    = ARRAY_INDICES(chi2ArrK,indK)
 
-        junk = MIN(mMagDat.chi2,ind)
+        bestKappa = kappaArr[indK]
+        bestRBK   = magRatArr[indK]
+        potVals   = jvPlotData.pot[avgs_jvfit.useinds]
 
-        junkGauss = MIN(mMagDat.chi2[WHERE(mMagDat.kappa GE 8)],indG)
-        indG      = (WHERE(mMagDat.kappa GE 8))[indG]
-        bestRBG   = mMagDat.magRat[indG]
+        bestDensK = densArr[indK2D[1]]
 
-        bestKappa = mMagDat.kappa[ind]
-        bestRB    = mMagDat.magRat[ind]
-        potVals   = jvplotdata.pot[avgs_jvfit.useinds]
+        ;; plotDens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+        ;;                                         A[1], $
+        ;;                                         0, $
+        ;;                                         avgs_JVfit.N_SC.avg, $
+        ;;                                         bestRB)
 
-        PRINT,"WIN2D"
-        ;; PRINT,FORMAT='(A0,T10,A0,T20,A0)', $
-        ;;       'Chi^2_red',yTitle,'R_B'
-        ;; PRINT,FORMAT='(F0.2,T10,F0.2,T20,F0.2)', $
-        ;;       mMagDat.chi2[ind],yVar[ind],bestRB
-        ;; PRINT,''
+        yFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $
+                                                 A[1], $
+                                                 bestDensK, $
+                                                 potVals, $
+                                                 bestRBK, $
+                                                 /NO_MULT_BY_CHARGE)*1D6
+
+        A[0]      = bestKappa
+        ;; A[1]      = A[1]
+        A[2]      = bestDensK
+        A[3]      = bestRBK
 
 
         ;;Gauss
-        plotDensG = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-                                                Temperature, $
-                                                0, $
-                                                avgs_JVfit.N_SC.avg, $
-                                                bestRBG)
 
-        YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(Temperature,plotDensG,potVals,bestRBG, $
+        ;; junkGauss = MIN(mMagDat.chi2[WHERE(mMagDat.kappa GE 8)],indG)
+        ;; indG      = (WHERE(mMagDat.kappa GE 8))[indG]
+        junkGauss = MIN(chi2ArrG,indG)
+        bestRBG   = multi_magRatio_array[indG]
+        bestDensG = densArr[indG]
+
+        ;; plotDensG = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+        ;;                                         Temperature, $
+        ;;                                         0, $
+        ;;                                         avgs_JVfit.N_SC.avg, $
+        ;;                                         bestRBG)
+
+        YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1],bestDensG,potVals,bestRBG, $
                                                      /NO_MULT_BY_CHARGE, $
                                                      MASS=mass)*1D6
 
-        ;;Kappa
-        plotDens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-                                                Temperature, $
-                                                0, $
-                                                avgs_JVfit.N_SC.avg, $
-                                                bestRB)
-
-        yFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $
-                                                 Temperature, $
-                                                 plotDens, $
-                                                 potVals, $
-                                                 bestRB, $
-                                                 /NO_MULT_BY_CHARGE)*1D6
-
-        A         = [bestKappa,Temperature,MEAN(plotDens),bestRB]
-        AGauss    = A
-        AGauss[0] = 1000
-        AGauss[2] = MEAN(plotDensG)
+        AGauss[2] = bestDensG
         AGauss[3] = bestRBG
+
+
+        mMagDat = {K :    {kappa  : TEMPORARY(kappaArr), $
+                           T      : A[1], $
+                           N      : bestDensK, $
+                           magRat : magRatArr, $
+                           chi2   : TEMPORARY(chi2ArrK)}, $
+                   G :    {T      : AGauss[1], $
+                           N      : bestDensG, $
+                           magRat : multi_magRatio_array, $
+                           chi2   : TEMPORARY(chi2ArrG)}}
 
      END
      KEYWORD_SET(iterative_game_mode) AND ~KEYWORD_SET(itergame_tie_R_B_and_dens): BEGIN

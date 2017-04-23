@@ -10,6 +10,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  ;;For adding an R_E axis, if that's wassup
+  @common__jv_curve_fit__tie_r_b_and_dens.pro
+
   rgbTable         = 4
   nColors          = 256
   transpose        = 1
@@ -18,10 +21,10 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   log_cbRange = 0
   IF log_cbRange THEN BEGIN
 
-     zVar             = ALOG10(mMagDat.chi2)
+     zVar             = ALOG10(mMagDat.K.chi2)
      nCBTicks         = 5
 
-     cbRange          = ALOG10(MINMAX(mMagDat.chi2 < 1.0D3))
+     cbRange          = ALOG10(MINMAX(mMagDat.K.chi2 < 1.0D3))
      ;; cbRange[0]       = cbRange[0] < 0.0
      cbRange[0]       = cbRange[0]
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
@@ -38,11 +41,11 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      ENDELSE
   ENDIF ELSE BEGIN
 
-     zVar             = mMagDat.chi2
+     zVar             = mMagDat.K.chi2
      nCBTicks         = 10
 
-     ;; cbRange          = MINMAX(mMagDat.chi2 < 1.0D2)
-     cbRange          = [0,MAX(mMagDat.chi2 < 1.0D2)]
+     ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
+     cbRange          = [0,MAX(mMagDat.K.chi2 < 1.0D2)]
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
 
@@ -75,7 +78,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;; contPos          = [0.10,0.06,0.95,0.81]
   ;;Supposing a vertical color bar
   cbpos            = [0.95,0.06,0.97,0.92]
-  contPos          = [0.10,0.09,0.85,0.92]
+  contPos          = [0.07,0.19,0.82,0.92]
 
 
   orbPref          = ''
@@ -89,16 +92,48 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
                             orbPref,Temperature,Density)
+
+  ;;Are we going to add an R_E axis?
+
+  ;;ionosphere R_B values - ind 1
+  ;;FAST R_B values       - ind 0
+
+  IF N_ELEMENTS(tRB_fLineRE) GT 0 THEN BEGIN
+     make_R_E_axis    = 1
+     ;; R_E_vals  = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),REFORM(mMagDat.K.magRat[0,*]))
+     ;; IF MIN(mMagDat.magRat) LT 10 THEN BEGIN
+     R_B_axis_vals    = [MIN(mMagDat.K.magRat),(MIN(mMagDat.K.magRat) LT 10 ? 10 : 100)]
+     ;; ENDIF ELSE BEGIN
+     ;;    R_B_axis_vals = [MIN(mMagDat.K.magRat),100]
+     ;; ENDELSE
+
+     WHILE MAX(R_B_axis_vals) LT MAX(mMagDat.K.magRat) DO BEGIN
+        R_B_axis_vals = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
+     ENDWHILE
+
+     R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
+     ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
+     nVals            = N_ELEMENTS(R_E_axis_vals)
+     ;; nValsStr         = STRING('(I0)',nVals)
+     ;; R_E_axis_names   = STRING(FORMAT='('+nValsStr+'(F0.1))',R_E_axis_vals)
+     R_E_axis_names   = STRING(FORMAT='(F0.1)',R_E_axis_vals)
+
+  ENDIF
+
+  ;; xTitle = 'Mirror ratio'
+  xTitle = 'R!DB!N'
+
   CASE 1 OF
      KEYWORD_SET(map__2D): BEGIN
 
 
-        yVar       = mMagDat.kappa
-        yTitle     = 'Kappa'
+        yVar       = mMagDat.K.kappa
+        ;; yTitle     = 'Kappa'
+        yTitle     = '$\kappa$'
 
         instead_q  = 0
         IF KEYWORD_SET(instead_q) THEN BEGIN
-           yVar    = 1D + 1D/(mMagDat.kappa-1.5D)
+           yVar    = 1D + 1D/(mMagDat.K.kappa-1.5D)
            yTitle  = 'q'
         ENDIF
 
@@ -107,20 +142,20 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         nContours  = 201
         c_values   = FINDGEN(nContours+1)/nContours*(cbRange[1]-cbRange[0])+cbRange[0]
 
-        ;; nPoints     = N_ELEMENTS(mMagDat.magRat)
+        ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
 
         ;; IF KEYWORD_SET(minSurface) THEN BEGIN
 
-        ;;    R = MIN_CURVE_SURF(ALOG10(mMagDat.chi2),mMagDat.magRat,mMagDat.kappa, $
-        ;;                       YOUT=mMagDat.kappa[*,0], $
-        ;;                       XOUT=REFORM(mMagDat.magRat[0,*]))
+        ;;    R = MIN_CURVE_SURF(ALOG10(mMagDat.K.chi2),mMagDat.K.magRat,mMagDat.K.kappa, $
+        ;;                       YOUT=mMagDat.K.kappa[*,0], $
+        ;;                       XOUT=REFORM(mMagDat.K.magRat[0,*]))
 
         ;; ENDIF ELSE BEGIN
 
-        contPlot    = CONTOUR(zVar,mMagDat.magRat, $
+        contPlot    = CONTOUR(zVar,mMagDat.K.magRat, $
                               yVar, $
-                              XRANGE=MINMAX(mMagDat.magRat), $
-                              XTITLE='Mirror ratio', $
+                              XRANGE=MINMAX(mMagDat.K.magRat), $
+                              XTITLE=xTitle, $
                               YTITLE=yTitle, $
                               /XLOG, $
                               YLOG=map2D__log_kappa AND ~instead_q, $
@@ -158,41 +193,53 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                                /NORMAL)
 
 
-        junk = MIN(mMagDat.chi2,ind)
+        IF KEYWORD_SET(make_R_E_axis) THEN BEGIN
+           R_Eaxis = AXIS('X', $
+                          TARGET=contPlot, $
+                          ;; LOCATION="bottom", $
+                          LOCATION=[0,MIN(contPlot.yrange)-0.88,0], $
+                          TITLE='R!DE!N', $
+                          SUBTICKLEN=0.0, $
+                          TICKLEN=0.015, $
+                          TICKFONT_SIZE=14, $
+                          TICKVALUES=R_B_axis_vals, $
+                          TICKNAME=R_E_axis_names);, $
+                          ;; AXIS_RANGE=MINMAX(R_E_axis_vals))
+        ENDIF
+
+
+        junkK = MIN(mMagDat.K.chi2,indK)
+        junkG = MIN(mMagDat.G.chi2,indG)
+
         PRINT,"WIN2D"
-        PRINT,FORMAT='(A0,T10,A0,T20,A0)', $
-              'Chi^2_red',yTitle,'R_B'
-        PRINT,FORMAT='(F0.2,T10,F0.2,T20,F0.2)', $
-              mMagDat.chi2[ind],yVar[ind],mMagDat.magRat[ind]
+        PRINT,"******"
+        PRINT,"Kappa"
+        PRINT,"******"
+        PRINT,FORMAT='(A0,T15,A0,T25,A0)', $
+              'Chi^2_red','R_B',yTitle
+        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2)', $
+              mMagDat.K.chi2[indK],mMagDat.K.magRat[indK],yVar[indK]
         PRINT,''
-
-        ;;GET THAT CURVE!!
-
-        ;; yBest = KNIGHT_RELATION__DORS_KLETZING_11(mMagDat.kappa[ind], $
-        ;;                                           Temperature, $
-        ;;                                           DENSITY_FACTOR__BARBOSA_1977(jvplotdata.pot[avgs_jvfit.useinds], $
-        ;;                                                                        Temperature, $
-        ;;                                                                        0, $
-        ;;                                                                        avgs_JVfit.N_SC.avg, $
-        ;;                                                                        mMagDat.magRat[ind]), $
-        ;;                                           jvplotdata.pot[avgs_jvfit.useinds], $
-        ;;                                           mMagDat.magRat[ind], $
-        ;;                                           /NO_MULT_BY_CHARGE)*1D6
-
-
-        ;; plot1 = PLOT(jvplotdata.pot[avgs_jvfit.useinds],yBest)
+        PRINT,"******"
+        PRINT,"Maxwell"
+        PRINT,"******"
+        PRINT,FORMAT='(A0,T15,A0)', $
+              'Chi^2_red','R_B'
+        PRINT,FORMAT='(F0.2,T15,F0.2)', $
+              mMagDat.G.chi2[indG],mMagDat.G.magRat[indG]
+        PRINT,''
 
      END
      ELSE: BEGIN
 
-        ;; nPoints     = N_ELEMENTS(mMagDat.magRat)
+        ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
         
         p1pos            = [0.10,0.08,0.95,0.50]
         p2pos            = [0.10,0.53,0.95,0.94]
         cbpos            = [0.10,0.97,0.95,0.99]
 
-        plot_1           = SCATTERPLOT(mMagDat.magRat, $
-                                       mMagDat.kappa, $
+        plot_1           = SCATTERPLOT(mMagDat.K.magRat, $
+                                       mMagDat.K.kappa, $
                                        ;; XRANGE=tRange, $
                                        ;; YRANGE=TDownRange, $
                                        ;; YRANGE=errTDownRange, $
@@ -204,7 +251,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                                        SYM_SIZE=3.0, $
                                        /SYM_FILLED, $
                                        RGB_TABLE=hammerCT, $
-                                       MAGNITUDE=mMagDat.chi2, $
+                                       MAGNITUDE=mMagDat.K.chi2, $
                                        XGRIDSTYLE=xGridStyle, $
                                        YGRIDSTYLE=yGridStyle, $
                                        XTICKLEN=xTickLen, $
@@ -214,8 +261,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                                        /CURRENT, $
                                        POSITION=p1pos)
 
-        plot_2            = SCATTERPLOT(mMagDat.magRat, $
-                                        mMagDat.chi2, $
+        plot_2            = SCATTERPLOT(mMagDat.K.magRat, $
+                                        mMagDat.K.chi2, $
                                         XTICKFORMAT="(A1)", $
                                         ;; XTITLE="Mirror ratio", $
                                         YTITLE="$\Chi$!U2!Dred!N", $
@@ -235,9 +282,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
         ;; cb_i        = (INDGEN(nCBTicks)*nPoints)/(nCBTicks-1)
         ;; IF cb_i[-1] EQ nPoints THEN cb_i[-1] -= 1
-        ;; tickValues  = (mMagDat.chi2[SORT(mMagDat.chi2)])[cb_i]
+        ;; tickValues  = (mMagDat.K.chi2[SORT(mMagDat.K.chi2)])[cb_i]
         ;; tickName    = STRING(FORMAT='(F0.2)',tickValues)
-        ;; tMagRange   = ALOG10(MINMAX(mMagDat.chi2))
+        ;; tMagRange   = ALOG10(MINMAX(mMagDat.K.chi2))
         ;; tickValues  = FINDGEN(nCBTicks+1)/nCBTicks*(tMagRange[1]-tMagRange[0])+tMagRange[0]
         ;; tickName    = STRING(FORMAT='(F0.2)',10.^tickValues)
         cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $

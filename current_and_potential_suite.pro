@@ -419,14 +419,21 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;;Options for R_B map
      map__2D = 1B
 
+     IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
+        GET_FA_FIELD_LINE,jvPlotData.time, $
+                          USEINDS=avgs_JVFit.useInds, $
+                          /TIME_ARRAY, $
+                          MRATIO=jvPlotData.mRatio
+     ENDIF
+
      ;; minR_B  = 1
      ;; maxR_B  = 1D3
      ;; dR_B    = KEYWORD_SET(map__2D) ? 5 : 1
      ;; nR_B    = CEIL(FLOAT(maxR_B-minR_B)/dR_B)
      ;; map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
 
-     minR_B  = 4
-     maxR_B  = 1D4
+     minR_B  = 5
+     maxR_B  = 1D3
      dR_B    = 1.05D
      ;; nR_B    = ALOG10(maxR_B/minR_B)/ALOG10(dR_B)
      ;; map__multi_magRatio_array = minR_B*dR_B^(INDGEN(nR_B+1))
@@ -435,17 +442,19 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; map__multi_kappa_array    = [1.501,1.55,1.6,1.65,1.7,1.75,1.8,1.85,1.9,1.95,2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.25,3.50,3.75,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]
      ;; map__multi_kappa_array    = [1.501,1.51,1.52,1.53,1.54,1.55,1.56,1.57,1.58,1.59, $
 
+     helper                    = [0.0D,0.025D,0.05D,0.075D]
+     helper2                   = [0.0D,0.25D,0.50D,0.75D]
      map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
-                                  1.6,1.625,1.65,1.675, $
-                                  1.7,1.725,1.75,1.775, $
-                                  1.8,1.825,1.85,1.875, $
-                                  1.9,1.95, $
+                                  1.6 + helper, $
+                                  1.7 + helper, $
+                                  1.8 + helper, $
+                                  1.9 + helper, $
                                   2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9, $
-                                  3.0,3.25,3.50,3.75, $
-                                  4.0,4.25,4.5,4.75, $
-                                  5.0,5.25,5.5,5.75, $
-                                  6.0,6.25,6.5,6.75, $
-                                  7.0,7.5, $
+                                  3.0D + helper2, $
+                                  4.0D + helper2, $
+                                  5.0D + helper2, $
+                                  6.0D + helper2, $
+                                  7.0D + helper2, $
                                   8.0]
 
      map2D__log_kappa          = 0
@@ -463,6 +472,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
                                            MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
                                            MAP__2D=map__2D, $
+                                           ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $
