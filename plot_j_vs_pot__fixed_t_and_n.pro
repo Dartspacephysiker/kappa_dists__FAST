@@ -62,6 +62,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
   window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 
   sortie           = SORT(pData.x)
+  sortieFit        = SORT(pData.xFit)
 
   xFrac            = 0.1
   yFrac            = 0.1
@@ -89,7 +90,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                /CURRENT)
   
   ;; that          = PLOT(X,Y,SYMBOL='*',LINESTYLE='')
-  this             = PLOT(pData.XFit,pData.YFit, $
+  this             = PLOT(pData.XFit[sortieFit],pData.YFit[sortieFit], $
                           NAME=kappaName, $
                           LINESTYLE='--', $
                           THICK=thick, $
@@ -97,7 +98,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                           COLOR='BLUE', $
                           /OVERPLOT)
 
-  those            = PLOT(pData.XFit,pData.yGaussFit, $
+  those            = PLOT(pData.XFit[sortieFit],pData.yGaussFit[sortieFit], $
                           NAME=gaussName, $
                           LINESTYLE='-:', $
                           THICK=thick, $
