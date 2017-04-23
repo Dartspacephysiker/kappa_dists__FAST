@@ -39,7 +39,7 @@ PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
 
      PRINT,FORMAT='(I0,T5,A0,T30,F-8.1,T40,F-8.3,T50,F-8.1,T60,F-8.3,T70,F-8.1,T80,F-8.3,T90,F-8.3)', $
            k, $
-           TIME_TO_STR(JVPlotData.time[useInds[k]]), $
+           TIME_TO_STR(JVPlotData.time[useInds[k]],/MS), $
            Temperature[useInds[k]], $
            Density[useInds[k]], $
            JVPlotData.pot[useInds[k]], $
