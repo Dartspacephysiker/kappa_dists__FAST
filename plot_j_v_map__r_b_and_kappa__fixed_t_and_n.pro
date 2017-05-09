@@ -45,14 +45,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      nCBTicks         = 10
 
      ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
-     cbRange          = [0,MAX(mMagDat.K.chi2 < 1.0D2)]
+     cbRange          = [5,MAX(mMagDat.K.chi2 < 2.0D1)]
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
 
      ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
      IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
         cbRange[0]    = FLOOR(cbRange[0])
-        tickValues    = FLOOR(tickValues)
+        ;; tickValues    = FLOOR(tickValues)
+        tickValues    = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1)
         tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
         tickName      = STRING(FORMAT='(F0.2)',tickValues)
      ENDIF ELSE BEGIN
@@ -138,6 +139,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         ENDIF
 
         yRange     = MINMAX(yVar)
+        yRange     = [yRange[0],5]
 
         nContours  = 201
         c_values   = FINDGEN(nContours+1)/nContours*(cbRange[1]-cbRange[0])+cbRange[0]
