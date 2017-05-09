@@ -111,7 +111,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         R_B_axis_vals = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
      ENDWHILE
 
-     R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
+     R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
+
+     R_B_axis_vals    = STRING(FORMAT='(F0.1)',R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
      nVals            = N_ELEMENTS(R_E_axis_vals)
      ;; nValsStr         = STRING('(I0)',nVals)
@@ -172,6 +174,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                               XSUBTICKLEN=xSubTickLen, $
                               YSUBTICKLEN=ySubTickLen, $
                               ;; C_THICK=4.0, $
+                              XTICKNAME=R_B_axis_names, $
+                              XTICKVALUES=R_B_axis_vals, $
                               FONT_SIZE=16, $
                               XTICKFONT_SIZE=14, $
                               YTICKFONT_SIZE=14, $

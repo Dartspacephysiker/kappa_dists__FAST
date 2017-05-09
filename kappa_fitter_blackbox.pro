@@ -744,7 +744,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              TIMEBARS=timeBars
 
-
      ENDIF
 
      ;;W I P
