@@ -54,6 +54,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__NEWELL_INTERP=sway__Newell_interp, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
+                          KSUM__EANGLE=kSum__eAngle, $
                           KSUM__SAVE_PS=kSum__save_ps, $
                           KSUM__SAVE_PNG=kSum__save_png, $
                           KSUM__CONV_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
@@ -701,6 +702,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              TPLT_VARS=tPlt_vars, $
                              EEB_OR_EES=eeb_or_ees, $
                              ENERGY_ELECTRONS=energy_electrons, $
+                             ELECTRON_ANGLERANGE=KEYWORD_SET(kSum__eAngle) ? kSum__eAngle : electron_angleRange, $
                              TLIMIT_NORTH=tlimit_north, $
                              TLIMIT_SOUTH=tlimit_south, $
                              TLIMIT_ALL=tlimit_all, $
@@ -722,7 +724,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              JVPLOTDATA=jvPlotData, $
                              ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
                              SC_POT=sc_pot, $
-                             ELECTRON_ANGLERANGE=electron_angleRange, $
                              CHI2_THRESHOLD=chi2_thresh, $
                              CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                              HIGHDENSITY_THRESHOLD=highDens_thresh, $

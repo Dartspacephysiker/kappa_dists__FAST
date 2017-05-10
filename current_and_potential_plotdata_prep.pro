@@ -61,6 +61,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
                                         JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
                                         JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
+                                        MAP_TO_100KM=map_to_100km, $
                                         IN_MAGCURRENT=magCurrent, $
                                         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                         _EXTRA=e
@@ -140,11 +141,30 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   IF KEYWORD_SET(use_all_currents) THEN BEGIN
 
-     cur      = curPotList[edind].cur+curPotList[euind].cur+curPotList[iuind].cur
-     curErr   = [[curPotList[edind].curErr],[curPotList[euind].curErr],[curPotList[iuind].curErr]]
+     CASE 1 OF
+        KEYWORD_SET(map_to_100km): BEGIN
+           cur      = curPotList[edind].cur*curPotList[edind].mapRatio + $
+                      curPotList[euind].cur*curPotList[euind].mapRatio + $
+                      curPotList[iuind].cur*curPotList[iuind].mapRatio
+           curErr   = [[curPotList[edind].curErr*curPotList[edind].mapRatio], $
+                       [curPotList[euind].curErr*curPotList[euind].mapRatio], $
+                       [curPotList[iuind].curErr*curPotList[iuind].mapRatio]]
 
-     je       = curPotList[edind].je+curPotList[euind].je+curPotList[iuind].je
-     jeErr    = [[curPotList[edind].jeErr],[curPotList[euind].jeErr],[curPotList[iuind].jeErr]]
+           je       = curPotList[edind].je*curPotList[edind].mapRatio + $
+                      curPotList[euind].je*curPotList[euind].mapRatio + $
+                      curPotList[iuind].je*curPotList[iuind].mapRatio
+           jeErr    = [[curPotList[edind].jeErr*curPotList[edind].mapRatio], $
+                       [curPotList[euind].jeErr*curPotList[euind].mapRatio], $
+                       [curPotList[iuind].jeErr*curPotList[iuind].mapRatio]]
+        END
+        ELSE: BEGIN
+           cur      = curPotList[edind].cur+curPotList[euind].cur+curPotList[iuind].cur
+           curErr   = [[curPotList[edind].curErr],[curPotList[euind].curErr],[curPotList[iuind].curErr]]
+
+           je       = curPotList[edind].je+curPotList[euind].je+curPotList[iuind].je
+           jeErr    = [[curPotList[edind].jeErr],[curPotList[euind].jeErr],[curPotList[iuind].jeErr]]
+        END
+     ENDCASE
 
   ENDIF ELSE BEGIN
 
@@ -159,33 +179,71 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      CASE 1 OF
         KEYWORD_SET(use_mag_current): BEGIN
            ;; cur                  += (TEMPORARY(magCurrent)).y
-           cur                     += magCurrent
+           IF KEYWORD_SET(map_to_100km) THEN BEGIN
+              IF N_ELEMENTS(curPotList[edind].mapRatio) NE N_ELEMENTS(magCurrent) THEN STOP
+              cur                  += magCurrent * curPotList[edind].mapRatio
+           ENDIF ELSE BEGIN
+              cur                  += magCurrent
+           ENDELSE
         END
         ELSE: BEGIN
 
-           IF KEYWORD_SET(use_ed_current) THEN BEGIN
-              cur                  += curPotList[edind].cur
-              curErr[*,curErr_i++]  = curPotList[edind].curErr
+           CASE 1 OF
+              KEYWORD_SET(map_to_100km): BEGIN
 
-              je                   += curPotList[edind].je
-              jeErr[*,jeErr_i++]    = curPotList[edind].jeErr
-           ENDIF
+                 IF KEYWORD_SET(use_ed_current) THEN BEGIN
+                    cur                  += curPotList[edind].cur    * curPotList[edind].mapRatio
+                    curErr[*,curErr_i++]  = curPotList[edind].curErr * curPotList[edind].mapRatio
+                                                                                                 
+                    je                   += curPotList[edind].je     * curPotList[edind].mapRatio
+                    jeErr[*,jeErr_i++]    = curPotList[edind].jeErr  * curPotList[edind].mapRatio
+                 ENDIF
 
-           IF KEYWORD_SET(use_eu_current) THEN BEGIN
-              cur                  += curPotList[euind].cur
-              curErr[*,curErr_i++]  = curPotList[euind].curErr
+                 IF KEYWORD_SET(use_eu_current) THEN BEGIN
+                    cur                  += curPotList[euind].cur    * curPotList[euind].mapRatio
+                    curErr[*,curErr_i++]  = curPotList[euind].curErr * curPotList[euind].mapRatio
+                                                                                                 
+                    je                   += curPotList[euind].je     * curPotList[euind].mapRatio
+                    jeErr[*,jeErr_i++]    = curPotList[euind].jeErr  * curPotList[euind].mapRatio
+                 ENDIF
 
-              je                   += curPotList[euind].je
-              jeErr[*,jeErr_i++]    = curPotList[euind].jeErr
-           ENDIF
+                 IF KEYWORD_SET(use_iu_current) THEN BEGIN
+                    cur                  += curPotList[iuind].cur    * curPotList[iuind].mapRatio
+                    curErr[*,curErr_i++]  = curPotList[iuind].curErr * curPotList[iuind].mapRatio
 
-           IF KEYWORD_SET(use_iu_current) THEN BEGIN
-              cur                  += curPotList[iuind].cur
-              curErr[*,curErr_i++]  = curPotList[iuind].curErr
+                    je                   += curPotList[iuind].je     * curPotList[iuind].mapRatio
+                    jeErr[*,jeErr_i++]    = curPotList[iuind].jeErr  * curPotList[iuind].mapRatio
+                 ENDIF
 
-              je                   += curPotList[iuind].je
-              jeErr[*,jeErr_i++]    = curPotList[iuind].jeErr
-           ENDIF
+              END
+              ELSE: BEGIN
+
+                 IF KEYWORD_SET(use_ed_current) THEN BEGIN
+                    cur                  += curPotList[edind].cur
+                    curErr[*,curErr_i++]  = curPotList[edind].curErr
+
+                    je                   += curPotList[edind].je
+                    jeErr[*,jeErr_i++]    = curPotList[edind].jeErr
+                 ENDIF
+
+                 IF KEYWORD_SET(use_eu_current) THEN BEGIN
+                    cur                  += curPotList[euind].cur
+                    curErr[*,curErr_i++]  = curPotList[euind].curErr
+
+                    je                   += curPotList[euind].je
+                    jeErr[*,jeErr_i++]    = curPotList[euind].jeErr
+                 ENDIF
+
+                 IF KEYWORD_SET(use_iu_current) THEN BEGIN
+                    cur                  += curPotList[iuind].cur
+                    curErr[*,curErr_i++]  = curPotList[iuind].curErr
+
+                    je                   += curPotList[iuind].je
+                    jeErr[*,jeErr_i++]    = curPotList[iuind].jeErr
+                 ENDIF
+
+              END
+           ENDCASE
 
            ;;Now square all participating jerent errors for each time, sum them, and take the square root
            curErr = curErr[*,0:(curErr_i-1)]
@@ -321,12 +379,13 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                            NDownErr   : curPotList[edind].Nerr[safe_i], $
                            TDown      : REFORM(curPotList[edind].T[3,safe_i]), $
                            TDownErr   : curPotList[edind].Terr[safe_i], $
-                           info       : {cur          : {ed  : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
-                                                         eu  : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
-                                                         iu  : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $
-                                                         mag : KEYWORD_SET(use_mag_current)}, $
-                                         pot          : {chare : KEYWORD_SET(use_charE_for_downPot), $
-                                                         peak_en : KEYWORD_SET(use_peakE_for_downPot), $
+                           info       : {cur          : {ed         : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
+                                                         eu         : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
+                                                         iu         : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $
+                                                         mag        : KEYWORD_SET(use_mag_current), $
+                                                         is_mapped  : KEYWORD_SET(map_to_100km)}, $
+                                         pot          : {chare      : KEYWORD_SET(use_charE_for_downPot), $
+                                                         peak_en    : KEYWORD_SET(use_peakE_for_downPot), $
                                                          add_iu_pot : KEYWORD_SET(add_iu_pot)}}, $
                            use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens) AND have_sourceCone, $
                            use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp) AND have_sourceCone}
@@ -341,6 +400,13 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                           NDownErr   : curPotList[edind].source.Nerr   [safe_i], $
                           TDown      : REFORM(curPotList[edind].source.T[3,safe_i]), $
                           TDownErr   : curPotList[edind].source.Terr   [safe_i]}
+
+     IF KEYWORD_SET(map_to_100km) THEN BEGIN
+        source.cur    *= curPotList[edind].mapRatio
+        source.curErr *= curPotList[edind].mapRatio
+        source.je     *= curPotList[edind].mapRatio
+        source.jeErr  *= curPotList[edind].mapRatio
+     ENDIF
 
      STR_ELEMENT,jvPlotData,'source',TEMPORARY(source),/ADD_REPLACE
 
@@ -453,6 +519,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   
   junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
                                   /TIME_ARRAY, $
+                                  ;; USE_FAST_AS_IONOS=~KEYWORD_SET(map_to_100km), $
                                   TO_EQUATOR=jv_theor__initial_source__equator, $
                                   TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
                                   TO_THIS_RE=jv_theor__initial_source_R_E, $

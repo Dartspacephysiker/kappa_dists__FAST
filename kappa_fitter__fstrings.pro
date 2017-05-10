@@ -179,7 +179,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
            ENDELSE
         END
         ELSE: BEGIN
-           fitFile    = defEFluxFile
+           fitFile    = defFitFile
         END
      ENDCASE
   ;; ENDIF

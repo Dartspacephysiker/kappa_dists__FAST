@@ -10,6 +10,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                           ITERATIVE_GAME_MODE=iterative_game_mode, $
                                           ITERATIVE_GAME__DENSITY_INCREASE=itergame_NFac, $
                                           ITERATIVE_GAME__TIE_RB_AND_DENS=itergame_tie_R_B_and_dens, $
+                                          MAP_TO_100KM=map_to_100km, $
                                           MAP__MULTI_MAGRATIO_ARRAY=multi_magRatio_array, $
                                           MAP__MULTI_KAPPA_ARRAY=multi_kappa_array, $
                                           MAP__2D=map__2D, $
@@ -129,7 +130,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
               chi2ArrK  = MAKE_ARRAY(nKappa,nMagRatio,/DOUBLE)
               chi2ArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE) ;'cause kappa is fixed at infinity, o' course
 
-              fastR_BFac= jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0]
+              fastR_BFac= KEYWORD_SET(map_to_100km) ? $
+                          jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0] : $
+                          1.D
 
               ;;Reclaim
               A         = kappaParamStruct[*].value

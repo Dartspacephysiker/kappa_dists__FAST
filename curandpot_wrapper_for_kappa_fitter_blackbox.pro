@@ -73,7 +73,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   error_estimates         = 1
   ;; remake_masterFile       = 1
-  map_to_100km            = KEYWORD_SET(map_to_100km) OR (N_ELEMENTS(map_to_100km) EQ 0)
+  ;; map_to_100km            = KEYWORD_SET(map_to_100km) OR (N_ELEMENTS(map_to_100km) EQ 0)
+  map_to_100km            = (N_ELEMENTS(map_to_100km) EQ 0) ? 1 : map_to_100km
 
   add_oneCount_stats      = 1
 
@@ -95,7 +96,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   plot_t1                 = STR_TO_TIME(plot_times[0])
   plot_t2                 = STR_TO_TIME(plot_times[1])
-  add_iu_pot              =  KEYWORD_SET(add_iu_pot)     OR (N_ELEMENTS(add_iu_pot    ) EQ 0)
+  add_iu_pot              = (N_ELEMENTS(add_iu_pot    ) EQ 0) ? 1 : add_iu_pot
   use_ed_current          = (KEYWORD_SET(use_ed_current) OR (N_ELEMENTS(use_ed_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
   use_iu_current          = (KEYWORD_SET(use_iu_current) OR (N_ELEMENTS(use_iu_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
 
@@ -161,33 +162,60 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   label                   = ['downgoing_e','upgoing_e','upgoing_i']
 
   ;;OPTIONS! OPTIONS! OPTIONS!
-  all_pitchAngles = 0
-  IF KEYWORD_SET(all_pitchAngles) THEN BEGIN
+  all_pitchAngles           = 0
+  allPitch_except_atm_lc    = 1
+  CASE 1 OF
+     KEYWORD_SET(all_pitchAngles): BEGIN
 
-     aRange__moments_e_down  = [0.,360.]
-     aRange__moments_i_up = [0.,360.]
-     aRange__peakEn_i_up  = 'lc'
-     aRange__charE_i_up   = 'lc'
+        masterFile          = masterFile.Replace('blkBox-','blkBox-allPitch-')
+        saveCurPotFile      = saveCurPotFile.Replace('blkBox-','blkBox-allPitch-')
 
-     moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[20,3.0e4],[100,3.0e4],[20,2.4e4]]
+        aRange__moments_e_down  = [0.,360.]
+        aRange__moments_i_up = [0.,360.]
+        aRange__peakEn_i_up  = 'lc'
+        aRange__charE_i_up   = 'lc'
 
-     min_peak_energyArr   = [300,100,100]
-     max_peak_energyArr   = [3e4,3e4,2.4e4]
+        ;; moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[20,3.0e4],[100,3.0e4],[20,2.4e4]]
+        moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.1D4],[100,3.1D4],[20,2.48D4]]
 
-  ENDIF ELSE BEGIN
+        min_peak_energyArr   = [300,100,100]
+        max_peak_energyArr   = [3e4,3e4,2.4e4]
 
-     aRange__moments_e_down  = KEYWORD_SET(electron_angleRange) ? electron_angleRange : 'lc'
+     END
+     KEYWORD_SET(allPitch_except_atm_lc): BEGIN
 
-     aRange__moments_i_up = 'lc'
-     aRange__peakEn_i_up  = 'lc'
-     aRange__charE_i_up   = 'lc'
+        masterFile          = masterFile.Replace('blkBox-','blkBox-allP_excl_atmLC-')
+        saveCurPotFile      = saveCurPotFile.Replace('blkBox-','blkBox-allP_excl_atmLC-')
 
-     moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.0e4],[100,3.0e4],[100,2.4e4]]
+        aRange__dens_e_down  = 'lc__excl_atm'
+        aRange__moments_e_down  = 'lc__excl_atm'
+        aRange__moments_i_up = [0.,360.]
+        aRange__peakEn_i_up  = 'lc'
+        aRange__charE_i_up   = 'lc'
 
-     min_peak_energyArr   = [300,100,100]
-     max_peak_energyArr   = [3e4,3e4,2.4e4]
+        ;; moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[20,3.0e4],[100,3.0e4],[20,2.4e4]]
+        moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.1D4],[100,3.1D4],[20,2.48D4]]
 
-  ENDELSE
+        min_peak_energyArr   = [300,100,100]
+        max_peak_energyArr   = [3e4,3e4,2.4e4]
+
+     END
+     ELSE: BEGIN
+
+        aRange__moments_e_down  = KEYWORD_SET(electron_angleRange) ? electron_angleRange : 'lc'
+
+        aRange__moments_i_up = 'lc'
+        aRange__peakEn_i_up  = 'lc'
+        aRange__charE_i_up   = 'lc'
+
+        moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.1e4],[100,3.1e4],[100,2.48e4]]
+
+        min_peak_energyArr   = [300,100,100]
+        max_peak_energyArr   = [3e4,3e4,2.4e4]
+
+     END
+  ENDCASE
+  
 
   ;; blankers                = !NULL
   blankers                = 'lc'
@@ -236,6 +264,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ORDER=order, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
+     ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $

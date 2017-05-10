@@ -201,6 +201,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      j_list                = LIST()
      je_list               = LIST()
      cur_list              = LIST()
+     mapRatio_list         = LIST()
      chare_list            = LIST()
 
      jerr_list             = LIST()
@@ -487,6 +488,29 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                  IF upgoing THEN aRange__moments = (360.*((aRange__moments-180)/360.-FLOOR((aRange__moments-180)/360.)))
 
               END
+              STRMATCH(STRUPCASE(aRange__moments[0]),'LC__EXCL_ATM'): BEGIN
+
+                 IF STRLEN(aRange__moments[0]) GT 12 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'LC__EXCL_ATM',/EXTRACT))
+                 ENDIF ELSE BEGIN
+                    factor = 1
+                 ENDELSE
+                 
+                 IF north_south[0] EQ -1 THEN BEGIN
+                    ;; aRange__moments = [180.-factor*lcw,180+factor*lcw]
+                    aRange__moments = [factor*lcw,360.-factor*lcw]
+                 ENDIF ELSE BEGIN
+                    ;; aRange__moments = [(-180.)+factor*lcw,180.-factor*lcw]
+                    aRange__moments = [180.+factor*lcw,180.-factor*lcw]
+                 ENDELSE
+
+                 ;; ENDIF ELSE BEGIN
+                 ;;    ;;you're getting the loss cone, not the whole thing excluding the loss cone
+                 ;;    STOP
+                 ;;    aRange__moments = lc_angleRange
+                 ;; ENDELSE
+
+              END
               ELSE: BEGIN
                  PRINT,"Huh?"
                  STOP
@@ -669,7 +693,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         SC_POT=sc_pot, $
                         EEB_OR_EES=eeb_OR_ees, $
                         ERROR_ESTIMATES=error_estimates, $
-                        MAP_TO_100KM=map_to_100km, $ 
+                        ;; MAP_TO_100KM=map_to_100km, $ 
                         ORBIT=orbit, $
                         /NEW_MOMENT_ROUTINE, $
                         QUIET=quiet, $
@@ -699,9 +723,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ARANGE__MOMENTS=aRange__moments, $
                            ARANGE__CHARE=aRange__charE, $
                            SC_POT=sc_pot, $
-                           EEB_OR_EES=eeb_OR_ees, $
+                           EEB_OR_EES=eeb_or_ees, $
                            ERROR_ESTIMATES=error_estimates, $
-                           MAP_TO_100KM=map_to_100km, $ 
+                           ;; MAP_TO_100KM=map_to_100km, $ 
                            ORBIT=orbit, $
                            /NEW_MOMENT_ROUTINE, $
                            QUIET=quiet, $
@@ -748,6 +772,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         j_list.Add,momStruct.j
         je_list.Add,momStruct.je
         cur_list.Add,momStruct.cur
+        mapRatio_list.Add,mapRatio
         chare_list.Add,momStruct.charE
         nerr_list.Add,momStruct.nerr
         jerr_list.Add,momStruct.jerr
@@ -823,14 +848,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                            /STRANGEWAY_DECIMATE, $
                                            QUIET=quiet)
 
-     magCurrent = DATA_CUT(magCurrent,itvlTime)*mapRatio
+     magCurrent = DATA_CUT(magCurrent,itvlTime)
 
      afterString = "Made "
 
      SAVE,t1,t2, $
           north_southArr_list, $
           lc_angleRange, $
-          mapRatio, $
           err_list, $
           err1_list, $
           time_list, $
@@ -838,6 +862,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           j_list, $
           je_list, $
           cur_list, $
+          mapRatio_list, $
           chare_list, $
           T_list, $
           nerr_list, $
@@ -930,6 +955,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlTerr       = !NULL
      itvlCurErr     = !NULL
      itvlErrors     = !NULL
+     itvlMapRatio   = !NULL
 
      itvlN1         = !NULL
      itvlJ1         = !NULL
@@ -983,6 +1009,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpJ                = (j_list[k])[theseInds]
         tmpJe               = (je_list[k])[theseInds]
         tmpCur              = (cur_list[k])[theseInds]
+        tmpMapRatio         = (mapRatio_list[k])[theseInds]
         tmpCharE            = (chare_list[k])[theseInds]
         tmpPeakE            = (peak_energy_list[k])[theseInds]
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
@@ -1082,6 +1109,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         itvlcharE            = [itvlcharE     ,tmpChare     ]
         itvlT                = [itvlT         ,tmpT         ]
         itvlCur              = [itvlCur       ,tmpCur       ]
+        itvlMapRatio         = [itvlMapRatio  , tmpMapRatio ]
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
@@ -1136,6 +1164,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              chare    : TEMPORARY(itvlcharE)  , $
                              T        : TEMPORARY(itvlT)      , $
                              cur      : TEMPORARY(itvlCur)    , $
+                             mapRatio : TEMPORARY(itvlMapRatio), $
                              Nerr     : TEMPORARY(itvlNerr)   , $
                              Jerr     : TEMPORARY(itvlJerr)   , $
                              JeErr    : TEMPORARY(itvlJeErr)   , $
@@ -1149,6 +1178,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              j1       : TEMPORARY(itvlJ1)     , $
                              je1      : TEMPORARY(itvlJe1)    , $
                              cur1     : TEMPORARY(itvlCur1)   , $
+                             mapRatio : tmpStruct.mapRatio    , $
                              chare1   : TEMPORARY(itvlcharE1) , $
                              T1       : TEMPORARY(itvlT1)     , $
                              N1err    : TEMPORARY(itvlN1err)  , $
@@ -1189,12 +1219,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              je       : TEMPORARY(itvlJe)     , $
                              chare    : TEMPORARY(itvlcharE)  , $
                              T        : TEMPORARY(itvlT)      , $
-                             cur      : TEMPORARY(itvlCur)    }
+                             cur      : TEMPORARY(itvlCur)    , $
+                             mapRatio : TEMPORARY(itvlMapRatio)}
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
               tmp1Struct  = {j1       : TEMPORARY(itvlJ1)     , $
                              je1      : TEMPORARY(itvlJe1)    , $
                              cur1     : TEMPORARY(itvlCur1)   , $
+                             mapRatio : tmpStruct.mapRatio    , $
                              chare1   : TEMPORARY(itvlcharE1) , $
                              N1       : TEMPORARY(itvlN1)     , $
                              T1       : TEMPORARY(itvlT1)     }

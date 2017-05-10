@@ -14,16 +14,29 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
 
      CASE SIZE(aRange__moments_e_down,/TYPE) OF
         7: BEGIN
-           IF STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'*LC') THEN BEGIN
-              LCStr = 'LC'
-              IF STRLEN(aRange__moments_e_down[0]) GT 2 THEN BEGIN
-                 factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_e_down[0]),'LC',/EXTRACT))
-                 LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
-              ENDIF
-              fSuff = "-aR_mom_eD_" + LCStr.Replace('.','_')
-           ENDIF ELSE BEGIN
-              STOP
-           ENDELSE
+
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'*LC'): BEGIN
+                 LCStr = 'LC'
+                 IF STRLEN(aRange__moments_e_down[0]) GT 2 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_e_down[0]),'LC',/EXTRACT))
+                    LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
+                 ENDIF
+                 fSuff = "-aR_mom_eD_" + LCStr.Replace('.','_')
+              END
+              STRMATCH(STRUPCASE(aRange__moments_e_down[0]),'LC__EXCL_ATM'): BEGIN
+                 LCStr = 'LC__excl_atm'
+                 IF STRLEN(aRange__moments_e_down[0]) GT 12 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments_e_down[0]),'LC__EXCL_ATM',/EXTRACT))
+                    LCStr = STRING(FORMAT='(F0.1)',factor) + LCStr
+                 ENDIF
+
+                 fSuff = "-aR_mom_eD_" + LCStr.Replace('.','_')
+              END
+              ELSE: BEGIN
+                 STOP
+              END
+           ENDCASE
         END
         ELSE: BEGIN
            fSuff = STRING(FORMAT='("-aR_mom_eD_",I0,"-",I0)',aRange__moments_e_down[0],aRange__moments_e_down[1])

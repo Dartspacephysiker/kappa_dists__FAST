@@ -45,7 +45,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      nCBTicks         = 10
 
      ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
-     cbRange          = [5,MAX(mMagDat.K.chi2 < 2.0D1)]
+     cbRange          = [5,MAX(mMagDat.K.chi2 < 15)]
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
 
@@ -112,14 +112,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         R_B_axis_vals = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
      ENDWHILE
 
-     R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
+     ;; R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
 
-     R_B_axis_vals    = STRING(FORMAT='(F0.1)',R_B_axis_vals)
+     R_B_axis_names   = STRING(FORMAT='(F0.1)',R_B_axis_vals)
+     R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
      nVals            = N_ELEMENTS(R_E_axis_vals)
      ;; nValsStr         = STRING('(I0)',nVals)
      ;; R_E_axis_names   = STRING(FORMAT='('+nValsStr+'(F0.1))',R_E_axis_vals)
-     R_E_axis_names   = STRING(FORMAT='(F0.1)',R_E_axis_vals)
+     R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
 
   ENDIF
 
@@ -138,10 +139,12 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         IF KEYWORD_SET(instead_q) THEN BEGIN
            yVar    = 1D + 1D/(mMagDat.K.kappa-1.5D)
            yTitle  = 'q'
-        ENDIF
+           yRange  = MINMAX(yVar)
+        ENDIF ELSE BEGIN
+           yRange  = MINMAX(yVar)
+           yRange  = [yRange[0],5]
+        ENDELSE
 
-        yRange     = MINMAX(yVar)
-        yRange     = [yRange[0],5]
 
         nContours  = 201
         c_values   = FINDGEN(nContours+1)/nContours*(cbRange[1]-cbRange[0])+cbRange[0]
@@ -162,7 +165,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                               XTITLE=xTitle, $
                               YTITLE=yTitle, $
                               /XLOG, $
-                              YLOG=map2D__log_kappa AND ~instead_q, $
+                              YLOG=map2D__log_kappa OR instead_q, $
                               AXIS_STYLE=2, $
                               C_VALUE=c_values, $
                               YSTYLE=1, $
@@ -203,7 +206,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            R_Eaxis = AXIS('X', $
                           TARGET=contPlot, $
                           ;; LOCATION="bottom", $
-                          LOCATION=[0,MIN(contPlot.yrange)-0.88,0], $
+                          LOCATION=[0,MIN(contPlot.yrange)-0.48,0], $
                           TITLE='R!DE!N', $
                           SUBTICKLEN=0.0, $
                           TICKLEN=0.015, $
@@ -216,6 +219,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
         junkK = MIN(mMagDat.K.chi2,indK)
         junkG = MIN(mMagDat.G.chi2,indG)
+
+        close_i     = WHERE(mMagDat.K.magRat LT 20)
+        junkKClose = MIN(mMagDat.K.chi2[close_i],indKClose)
 
         PRINT,"WIN2D"
         PRINT,"******"
@@ -234,6 +240,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         PRINT,FORMAT='(F0.2,T15,F0.2)', $
               mMagDat.G.chi2[indG],mMagDat.G.magRat[indG]
         PRINT,''
+        PRINT,"******"
+        PRINT,"Close (R_B < 20)"
+        PRINT,"******"
+        PRINT,FORMAT='(A0,T15,A0,T25,A0)', $
+              'Chi^2_red','R_B',yTitle
+        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2)', $
+              mMagDat.K.chi2[close_i[indKClose]],mMagDat.K.magRat[close_i[indKClose]],yVar[close_i[indKClose]]
+        PRINT,''
+
 
      END
      ELSE: BEGIN

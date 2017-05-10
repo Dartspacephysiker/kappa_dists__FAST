@@ -72,7 +72,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
   yRFitInds        = WHERE((pData.XFit GE xRange[0]) AND (pData.XFit LE xRange[1]))
   yRange           = [MIN([pData.Y,pData.YFit[yRFitInds],pData.YGaussFit[yRFitInds]]),MAX(pData.Y+pData.Yerror)]
   yRange           = [yRange[0]*((1.D)-yFrac),yRange[1]*((1.D)+yFrac)]
-  yRange[0]        = 0 < yRange[0]
+  ;; yRange[0]        = 0 < yRange[0]
 
   ;; that             = ERRORPLOT(X,Y,XError,YError, $
   that             = ERRORPLOT(pData.X[sortie],pData.Y[sortie],pData.YError[sortie], $
