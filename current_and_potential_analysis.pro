@@ -1178,7 +1178,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              j1       : TEMPORARY(itvlJ1)     , $
                              je1      : TEMPORARY(itvlJe1)    , $
                              cur1     : TEMPORARY(itvlCur1)   , $
-                             mapRatio : tmpStruct.mapRatio    , $
+                             ;; mapRatio : tmpStruct.mapRatio    , $
                              chare1   : TEMPORARY(itvlcharE1) , $
                              T1       : TEMPORARY(itvlT1)     , $
                              N1err    : TEMPORARY(itvlN1err)  , $

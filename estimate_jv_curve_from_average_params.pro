@@ -130,9 +130,11 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
               chi2ArrK  = MAKE_ARRAY(nKappa,nMagRatio,/DOUBLE)
               chi2ArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE) ;'cause kappa is fixed at infinity, o' course
 
-              fastR_BFac= KEYWORD_SET(map_to_100km) ? $
-                          jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0] : $
-                          1.D
+              ;;WRONG
+              ;; fastR_BFac= KEYWORD_SET(map_to_100km) ? $
+              ;;             jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0] : $
+              ;;             1.D
+              fastR_BFac= jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0]
 
               ;;Reclaim
               A         = kappaParamStruct[*].value
