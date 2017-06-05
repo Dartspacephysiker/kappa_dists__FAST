@@ -587,15 +587,15 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
      END
   ENDCASE
 
-  pData = {X         : X      , $
-           Y         : Y      , $
-           Yerror    : Yerror , $
-           XFit      : potVals, $
-           YFit      : Yfit   , $
-           YGaussFit : YGaussFit, $
-           AKappa    : A, $
-           AGauss    : AGauss, $
-           is_sourceDens : KEYWORD_SET(iterative_game_mode)}
+  pData = {X              : X      , $
+           Y              : Y      , $
+           Yerror         : Yerror , $
+           XFit           : potVals, $
+           YFit           : Yfit   , $
+           YGaussFit      : YGaussFit, $
+           AKappa         : A, $
+           AGauss         : AGauss, $
+           is_sourceDens  : KEYWORD_SET(iterative_game_mode) OR KEYWORD_SET(itergame_tie_R_B_and_dens)}
 
 
 

@@ -45,11 +45,11 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      zVar             = mMagDat.K.chi2
      nCBTicks         = 10
 
-     ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
+     cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
      ;; cbRange          = [5.,MAX(mMagDat.K.chi2 < 15.)]
-     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.
+     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.05
      ;; cbRange          = MINMAX(mMagDat.K.chi2) < 10.05
-     cbRange          = MINMAX(mMagDat.K.chi2) < 5.05
+     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 5.05
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
 
@@ -93,9 +93,10 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=Temperature, $
-                            DENSITY=Density ;, $
+                            DENSITY=Density, $
+                            /DONT_MAP_SOURCEDENS ;, $
 
-  titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N=",G0.3," cm!U-3!N)")', $
+  titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N!DFAST!N=",G0.3," cm!U-3!N)")', $
                             orbPref,Temperature,Density)
 
   ;;Are we going to add an R_E axis?
@@ -280,18 +281,21 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         addWinSym = 1
         IF KEYWORD_SET(addWinSym) THEN BEGIN
 
-           winX = [winK.magRat,winG.magRat,winKClose.magRat] > MIN(mMagDat.K.magRat)*1.01
-           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar] < MAX(yRange)*0.99
+           ;; winX = [winK.magRat,winG.magRat,winKClose.magRat] > (MIN(mMagDat.K.magRat)*1.01) < (MAX(mMagDat.K.magRat)*0.88)
+           ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar] < (MAX(yRange)*0.99) > (MIN(yRange)*1.01)
+           winX = [winK.magRat,winG.magRat,winKClose.magRat]
+           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar]
 
 
            ;; mySymChoiceIsMINE = 'Star'
            mySymChoiceIsMINE = '*'
            symThick = 3.0
-           
+           symColor = 'Black'
+
            syms = SYMBOL(winX, $
                          winY, $
                          mySymChoiceisMINE, $
-                         SYM_COLOR='Gray', $
+                         SYM_COLOR=symColor, $
                          /DATA, $
                          /SYM_FILLED, $
                          SYM_SIZE=2, $

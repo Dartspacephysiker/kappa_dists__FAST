@@ -235,7 +235,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   upgoingArr                      = [0,1,1]
 
   ;; use_sc_pot_for_lowerbound = 
-  use_sc_pot_for_lowerbound = 0
+  use_sc_pot_for_lowerbound = 1
   pot__save_file          = 0
   pot__all                = 0
   pot__from_fa_potential  = 1
