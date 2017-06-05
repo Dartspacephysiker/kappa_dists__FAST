@@ -19,6 +19,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   transpose        = 1
   hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
 
+  defFontSize      = 14
+  defBigFontSize   = 16
+
   log_cbRange = 0
   IF log_cbRange THEN BEGIN
 
@@ -45,7 +48,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      zVar             = mMagDat.K.chi2
      nCBTicks         = 10
 
-     cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
+     ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
+     cbRange          = MINMAX(mMagDat.K.chi2 < 50.05)
      ;; cbRange          = [5.,MAX(mMagDat.K.chi2 < 15.)]
      ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.05
      ;; cbRange          = MINMAX(mMagDat.K.chi2) < 10.05
@@ -188,9 +192,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                               ;; C_THICK=4.0, $
                               XTICKNAME=R_B_axis_names, $
                               XTICKVALUES=R_B_axis_vals, $
-                              FONT_SIZE=16, $
-                              XTICKFONT_SIZE=14, $
-                              YTICKFONT_SIZE=14, $
+                              FONT_SIZE=defBigFontSize, $
+                              XTICKFONT_SIZE=defFontSize, $
+                              YTICKFONT_SIZE=defFontSize, $
                               RGB_TABLE=hammerCT, $
                               POSITION=contPos, $
                               /CURRENT)
@@ -205,7 +209,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                                TICKVALUES=tickValues, $
                                POSITION=cbpos, $
                                RANGE=cbRange, $
-                               FONT_SIZE=14, $
+                               FONT_SIZE=defFontSize, $
                                /NORMAL)
 
 
@@ -217,7 +221,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                           TITLE='R!DE!N', $
                           SUBTICKLEN=0.0, $
                           TICKLEN=0.015, $
-                          TICKFONT_SIZE=14, $
+                          TICKFONT_SIZE=defFontSize, $
                           TICKVALUES=R_B_axis_vals, $
                           TICKNAME=R_E_axis_names);, $
                           ;; AXIS_RANGE=MINMAX(R_E_axis_vals))
@@ -283,24 +287,50 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
            ;; winX = [winK.magRat,winG.magRat,winKClose.magRat] > (MIN(mMagDat.K.magRat)*1.01) < (MAX(mMagDat.K.magRat)*0.88)
            ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar] < (MAX(yRange)*0.99) > (MIN(yRange)*1.01)
-           winX = [winK.magRat,winG.magRat,winKClose.magRat]
-           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar]
+           ;; winX = [winK.magRat,winG.magRat,winKClose.magRat]
+           ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar]
+           winX = [winK.magRat,winG.magRat]
+           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange)+0.08]
 
+           ;; labels = 'Min $\chi$!U2!N!Dred,' + ['K','M'] + '!N'
+           ;; labels = 'Min $\chi$!U2!N!Dred!N,' + ['$\kappa$','M'] + '!N'
+           labels = 'Min $\chi$!U2!N!Dred!N (' + ['Kappa','Maxwellian'] + ')'
+           labPos = ['TL','BR']
+           nSyms = N_ELEMENTS(labPos)
 
            ;; mySymChoiceIsMINE = 'Star'
-           mySymChoiceIsMINE = '*'
-           symThick = 3.0
-           symColor = 'Black'
+           ;; mySymChoiceIsMINE = '*'
+           ;; symThick = 3.0
+           ;; mySymChoiceIsMINE = 'tu' ;triangle up
+           ;; mySymChoiceIsMINE = REPLICATE('d',nSyms) ;diamond
+           mySymChoiceIsMINE = ['d','tu']
+           symColor = REPLICATE('Black',nSyms)
+           ;; symFill  = 'White'
+           symFill  = REPLICATE('Light Gray',nSyms)
+           symSize  = REPLICATE(2,nSyms)
+           labFontStyle = REPLICATE(1,nSyms) ;bold
+           labelFontSize = defFontSize+2
+           ;; symColor = 'Gray'
+           ;; symFill  = 'Black'
 
-           syms = SYMBOL(winX, $
-                         winY, $
-                         mySymChoiceisMINE, $
-                         SYM_COLOR=symColor, $
-                         /DATA, $
-                         /SYM_FILLED, $
-                         SYM_SIZE=2, $
-                         SYM_THICK=symThick, $
-                         CLIP=0)
+           FOR k=0,nSyms-1 DO BEGIN
+
+              syms = SYMBOL(winX[k], $
+                            winY[k], $
+                            mySymChoiceisMINE[k], $
+                            LABEL_STRING=labels[k], $
+                            LABEL_POSITION=labPos[k], $
+                            SYM_COLOR=symColor[k], $
+                            SYM_FILL_COLOR=symFill[k], $
+                            /DATA, $
+                            /SYM_FILLED, $
+                            SYM_SIZE=symSize[k], $
+                            SYM_THICK=N_ELEMENTS(symThick) GT 0 ? symThick[k] : !NULL, $
+                            LABEL_FONT_SIZE=labelFontSize, $
+                            ;; LABEL_FONT_STYLE=N_ELEMENTS(labFontStyle) GT 0 ? labFontStyle[k] : !NULL, $
+                            CLIP=0)
+
+           ENDFOR
 
         ENDIF
 
