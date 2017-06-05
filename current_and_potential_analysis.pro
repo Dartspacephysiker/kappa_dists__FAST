@@ -387,7 +387,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
            sc_pot                    = sc_pot_list[eeb_k]
-        ENDIF
+        ENDIF ELSE BEGIN
+           
+        ENDELSE
 
         eeb_or_ees                   = eeb_or_eesArr[eeb_k]
 

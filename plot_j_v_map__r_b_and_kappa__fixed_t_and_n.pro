@@ -6,7 +6,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    IN_KAPPA_A=A, $
    IN_GAUSS_A=AGauss, $
    OUT_YBEST=out_yBest, $
-   SAVEPLOT=savePlot
+   SAVEPLOT=savePlot, $
+   ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -45,7 +46,10 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      nCBTicks         = 10
 
      ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
-     cbRange          = [5,MAX(mMagDat.K.chi2 < 15)]
+     ;; cbRange          = [5.,MAX(mMagDat.K.chi2 < 15.)]
+     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.
+     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 10.05
+     cbRange          = MINMAX(mMagDat.K.chi2) < 5.05
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
 
@@ -53,7 +57,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
         cbRange[0]    = FLOOR(cbRange[0])
         ;; tickValues    = FLOOR(tickValues)
-        tickValues    = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1)
+        tickValues    = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1,/FLOOR)
         tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
         tickName      = STRING(FORMAT='(F0.2)',tickValues)
      ENDIF ELSE BEGIN
@@ -142,12 +146,14 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            yRange  = MINMAX(yVar)
         ENDIF ELSE BEGIN
            yRange  = MINMAX(yVar)
-           yRange  = [yRange[0],5]
+           yRange  = [yRange[0],KEYWORD_SET(zoom_on_extreme_kappa) ? 1.8 : 5.0]
         ENDELSE
 
 
         nContours  = 201
         c_values   = FINDGEN(nContours+1)/nContours*(cbRange[1]-cbRange[0])+cbRange[0]
+        ;; PRINT,"C values"
+        ;; PRINT,c_values
 
         ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
 
@@ -221,33 +227,78 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         junkG = MIN(mMagDat.G.chi2,indG)
 
         close_i     = WHERE(mMagDat.K.magRat LT 20)
-        junkKClose = MIN(mMagDat.K.chi2[close_i],indKClose)
+        junkKClose  = MIN(mMagDat.K.chi2[close_i],indKClose)
+
+        IF N_ELEMENTS(tRB_fLineRE) GT 0 THEN BEGIN
+           winKR_E  = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),mMagDat.K.magRat[indK])
+           winGR_E  = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),mMagDat.G.magRat[indG])
+           winKCR_E = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),mMagDat.K.magRat[close_i[indKClose]])
+        ENDIF ELSE BEGIN
+           winKR_E  = 0.
+           winGR_E  = 0.
+           winKCR_E = 0.
+        ENDELSE
+
+        winK        = {chi2   : mMagDat.K.chi2[indK], $
+                       magRat : mMagDat.K.magRat[indK], $
+                       yVar   : yVar[indK], $
+                       R_E    : winKR_E}
+        winG        = {chi2   : mMagDat.G.chi2[indG], $
+                       magRat : mMagDat.G.magRat[indG], $
+                       R_E    : winGR_E}
+        winKClose   = {chi2   : mMagDat.K.chi2[close_i[indKClose]], $
+                       magRat : mMagDat.K.magRat[close_i[indKClose]], $
+                       yVar   : yVar[close_i[indKClose]], $
+                       R_E    : winKCR_E}
 
         PRINT,"WIN2D"
         PRINT,"******"
         PRINT,"Kappa"
         PRINT,"******"
-        PRINT,FORMAT='(A0,T15,A0,T25,A0)', $
-              'Chi^2_red','R_B',yTitle
-        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2)', $
-              mMagDat.K.chi2[indK],mMagDat.K.magRat[indK],yVar[indK]
+        PRINT,FORMAT='(A0,T15,A0,T25,A0,T35,A0)', $
+              'Chi^2_red','R_B','R_E',yTitle
+        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2,T35,F0.2)', $
+              winK.chi2,winK.magRat,winK.R_E,winK.yVar
         PRINT,''
         PRINT,"******"
         PRINT,"Maxwell"
         PRINT,"******"
-        PRINT,FORMAT='(A0,T15,A0)', $
-              'Chi^2_red','R_B'
-        PRINT,FORMAT='(F0.2,T15,F0.2)', $
-              mMagDat.G.chi2[indG],mMagDat.G.magRat[indG]
+        PRINT,FORMAT='(A0,T15,A0,T25,A0)', $
+              'Chi^2_red','R_B','R_E'
+        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2)', $
+              winG.chi2,winG.magRat,winG.R_E
         PRINT,''
         PRINT,"******"
         PRINT,"Close (R_B < 20)"
         PRINT,"******"
-        PRINT,FORMAT='(A0,T15,A0,T25,A0)', $
-              'Chi^2_red','R_B',yTitle
-        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2)', $
-              mMagDat.K.chi2[close_i[indKClose]],mMagDat.K.magRat[close_i[indKClose]],yVar[close_i[indKClose]]
+        PRINT,FORMAT='(A0,T15,A0,T25,A0,T35,A0)', $
+              'Chi^2_red','R_B','R_E',yTitle
+        PRINT,FORMAT='(F0.2,T15,F0.2,T25,F0.2,T35,F0.2)', $
+              winKClose.chi2,winKClose.magRat,winKClose.R_E,winKClose.yVar
         PRINT,''
+
+        addWinSym = 1
+        IF KEYWORD_SET(addWinSym) THEN BEGIN
+
+           winX = [winK.magRat,winG.magRat,winKClose.magRat] > MIN(mMagDat.K.magRat)*1.01
+           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar] < MAX(yRange)*0.99
+
+
+           ;; mySymChoiceIsMINE = 'Star'
+           mySymChoiceIsMINE = '*'
+           symThick = 3.0
+           
+           syms = SYMBOL(winX, $
+                         winY, $
+                         mySymChoiceisMINE, $
+                         SYM_COLOR='Gray', $
+                         /DATA, $
+                         /SYM_FILLED, $
+                         SYM_SIZE=2, $
+                         SYM_THICK=symThick, $
+                         CLIP=0)
+
+        ENDIF
 
 
      END

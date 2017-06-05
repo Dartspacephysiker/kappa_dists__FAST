@@ -45,6 +45,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
    JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   ALL_PITCHANGLES=all_pitchAngles, $
+   ALLPITCH_EXCEPT_ATM_LC=allPitch_except_atm_lc, $
    MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
    MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
    MAP__2D=map__2D, $
@@ -163,7 +165,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   ;;OPTIONS! OPTIONS! OPTIONS!
   all_pitchAngles           = 0
-  allPitch_except_atm_lc    = 1
+  allPitch_except_atm_lc    = 0
   CASE 1 OF
      KEYWORD_SET(all_pitchAngles): BEGIN
 
@@ -232,17 +234,18 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   peak_energy__start_at_highEArr  = [0,1,1]
   upgoingArr                      = [0,1,1]
 
-  use_sc_pot_for_lowerbound = 1
+  ;; use_sc_pot_for_lowerbound = 
+  use_sc_pot_for_lowerbound = 0
   pot__save_file          = 0
   pot__all                = 0
   pot__from_fa_potential  = 1
 
   ;;If doing energy spectra
-  en_spec__names          = ['SC_e','ALL_e','LC_i','ALL_i']
-  en_spec__eeb_or_ees     = ['ee','ee','ie','ie']
-  en_spec__angle_ranges   = ['lc','all','lc','all']
-  en_spec__energy_ranges  = [[4,3D4],[4,3D4],[3,2.4D4],[3,2.4D4]]
-  en_spec__upgoing        = [0,0,1,0]
+  ;; en_spec__names          = ['SC_e','ALL_e','LC_i','ALL_i']
+  ;; en_spec__eeb_or_ees     = ['ee','ee','ie','ie']
+  ;; en_spec__angle_ranges   = ['lc','all','lc','all']
+  ;; en_spec__energy_ranges  = [[4,3D4],[4,3D4],[3,2.4D4],[3,2.4D4]]
+  ;; en_spec__upgoing        = [0,0,1,0]
 
   CURRENT_AND_POTENTIAL_SUITE, $
      ORBIT=orbit, $
