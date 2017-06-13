@@ -119,8 +119,17 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
 
   CASE SIZE(KF__SDTData_opt.fit2D_dens_aRange,/TYPE) OF
      7: BEGIN
-        IF ~STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*LC') THEN STOP
-        fit2D_DensPickMeUpToo = 1
+
+        CASE 1 OF
+           STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*LC'): BEGIN
+              fit2D_DensPickMeUpToo = 1
+           END
+           STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*ALL__EXCL_ATM'): BEGIN
+              fit2D_DensPickMeUpAll = 1
+           END
+           
+        ENDCASE
+
      END
      ELSE:
   ENDCASE
@@ -140,6 +149,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                               FIT_EACH_ANGLE=fit_each_angle, $
                               CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
                               MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
+                              ALLEXCLATM_ARANGE=allExclAtm_aRange, $
                               ANGLESTR=angleStr, $
                               ;; ESPECUNITS=KF__Curvefit_opt.units, $
                               ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
@@ -162,15 +172,24 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
      ENDIF
   ENDELSE
 
-  IF KEYWORD_SET(fit2D_DensPickMeUpToo) THEN BEGIN
-     STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
-     fit2D__density_angleRange = e_angle
-  ENDIF ELSE BEGIN
-     flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
-     IF nFlip GT 0 THEN BEGIN
-        KF__SDTData_opt.fit2D_dens_aRange[flip] -= 360.
-     ENDIF
-  ENDELSE
+  CASE 1 OF
+     KEYWORD_SET(fit2D_DensPickMeUpToo): BEGIN
+        STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
+        fit2D__density_angleRange = e_angle
+     END
+     KEYWORD_SET(fit2D_DensPickMeUpAll): BEGIN
+        STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',allExclAtm_aRange,/ADD_REPLACE
+        fit2D__density_angleRange = allExclAtm_aRange
+     END
+     ELSE: BEGIN
+        flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
+        IF nFlip GT 0 THEN BEGIN
+           KF__SDTData_opt.fit2D_dens_aRange[flip] -= 360.
+        ENDIF
+     END
+
+  ENDCASE
+
 
   orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
   ;; ENDIF ELSE BEGIN

@@ -660,6 +660,16 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      PRINT,FORMAT='("(N w/ k ≤ 2.5)/nTot : ",I0,"/",I0)', $
            N_ELEMENTS(WHERE(fit2DK.fitParams[2,*] LE 2.5)), $
            N_ELEMENTS(fit2DK.nIter)
+     IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
+        theseInds = WHERE(fit2DK.SDT.time GE STR_TO_TIME(tRanges[0]) AND $
+                          fit2DK.SDT.time LE STR_TO_TIME(tRanges[1]),nHjar)
+        IF nHjar EQ 0 THEN STOP
+        FOR k=0,nHjar-1 DO BEGIN & $
+           PRINT,FORMAT='(A0,T30,F0.2)',TIME_TO_STR(fit2DK.SDT[theseInds[k]].time),fit2DK.fitParams[2,theseInds[k]] & $
+        ENDFOR
+        PRINT,''
+        PRINT,"Avg kappa value: ",MEAN(fit2DK.fitParams[2,theseInds])
+     ENDIF
 
 
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN

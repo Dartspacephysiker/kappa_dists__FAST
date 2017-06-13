@@ -164,8 +164,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   label                   = ['downgoing_e','upgoing_e','upgoing_i']
 
   ;;OPTIONS! OPTIONS! OPTIONS!
-  all_pitchAngles           = 0
-  allPitch_except_atm_lc    = 0
+  ;; all_pitchAngles           = 0
+  ;; allPitch_except_atm_lc    = 0
   CASE 1 OF
      KEYWORD_SET(all_pitchAngles): BEGIN
 

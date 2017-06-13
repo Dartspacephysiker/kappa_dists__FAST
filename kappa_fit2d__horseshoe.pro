@@ -192,10 +192,10 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   ENDCASE
 
   IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN
-     tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
-                          MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
+     tmpSourceConeRange= LONG([MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
+                          MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])])
   ENDIF ELSE BEGIN
-     tmpSourceConeRange= KF2D__SDTData_opt.fit2D_dens_aRange
+     tmpSourceConeRange= LONG(KF2D__SDTData_opt.fit2D_dens_aRange)
   ENDELSE
 
   ;; tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $

@@ -7,7 +7,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    IN_GAUSS_A=AGauss, $
    OUT_YBEST=out_yBest, $
    SAVEPLOT=savePlot, $
-   ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa
+   ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -20,15 +21,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
 
   defFontSize      = 14
-  defBigFontSize   = 16
+  defBigFontSize   = 18
 
-  log_cbRange = 0
+  log_cbRange = 1
   IF log_cbRange THEN BEGIN
 
      zVar             = ALOG10(mMagDat.K.chi2)
      nCBTicks         = 5
 
-     cbRange          = ALOG10(MINMAX(mMagDat.K.chi2 < 1.0D3))
+     cbRange          = ALOG10(MINMAX(mMagDat.K.chi2 < 1.0D2))
      ;; cbRange[0]       = cbRange[0] < 0.0
      cbRange[0]       = cbRange[0]
      tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
@@ -49,7 +50,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      nCBTicks         = 10
 
      ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
-     cbRange          = MINMAX(mMagDat.K.chi2 < 50.05)
+     cbRange          = MINMAX(mMagDat.K.chi2 < 30.05)
      ;; cbRange          = [5.,MAX(mMagDat.K.chi2 < 15.)]
      ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.05
      ;; cbRange          = MINMAX(mMagDat.K.chi2) < 10.05
@@ -295,7 +296,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            ;; labels = 'Min $\chi$!U2!N!Dred,' + ['K','M'] + '!N'
            ;; labels = 'Min $\chi$!U2!N!Dred!N,' + ['$\kappa$','M'] + '!N'
            labels = 'Min $\chi$!U2!N!Dred!N (' + ['Kappa','Maxwellian'] + ')'
-           labPos = ['TL','BR']
+           ;; labPos = ['TL','BR']
+           labPos = ['TR','BL']
            nSyms = N_ELEMENTS(labPos)
 
            ;; mySymChoiceIsMINE = 'Star'

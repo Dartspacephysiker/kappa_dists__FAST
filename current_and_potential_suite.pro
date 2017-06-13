@@ -437,15 +437,17 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
      minR_B  = 5
      maxR_B  = 1D3
-     dR_B    = 1.05D
+     dR_B    = 1.03D
      ;; nR_B    = ALOG10(maxR_B/minR_B)/ALOG10(dR_B)
      ;; map__multi_magRatio_array = minR_B*dR_B^(INDGEN(nR_B+1))
      map__multi_magRatio_array = POWGEN(minR_B,maxR_B,dR_B)
-
+     IF map__multi_magRatio_array[-1] LT maxR_B THEN map__multi_magRatio_array = [map__multi_magRatio_array,maxR_B]
      ;; map__multi_kappa_array    = [1.501,1.55,1.6,1.65,1.7,1.75,1.8,1.85,1.9,1.95,2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.25,3.50,3.75,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0]
      ;; map__multi_kappa_array    = [1.501,1.51,1.52,1.53,1.54,1.55,1.56,1.57,1.58,1.59, $
 
-     helper                    = [0.0D,0.025D,0.05D,0.075D]
+     ;; helper                    = [0.0D,0.025D,0.05D,0.075D]
+     ;; helper                    = [0.0D,0.01D,0.02D,0.03D,0.04D,0.05D,0.06D,0.07D,0.08D,0.09D]
+     helper                    = LINDGEN(20)*0.005D
      helper2                   = [0.0D,0.25D,0.50D,0.75D]
      map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
                                   1.6 + helper, $
@@ -489,7 +491,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         ORBIT=orbit, $
         IN_KAPPA_A=A, $
         IN_GAUSS_A=AGauss, $
-        SAVEPLOT=savePlot
+        SAVEPLOT=savePlot, $
+        _EXTRA=e
 
      PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                   KAPPA_A=A, $
@@ -498,6 +501,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   ORBIT=orbit, $
                                   SAVEPLOT=savePlot, $
                                   SPNAME=j_v__fixTandN__spName, $
+                                  /NO_TITLE, $
                                   _EXTRA=e
 
      STOP
