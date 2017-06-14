@@ -15,61 +15,117 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;;For adding an R_E axis, if that's wassup
   @common__jv_curve_fit__tie_r_b_and_dens.pro
 
-  rgbTable         = 4
-  nColors          = 256
+  contChiPlotName  = 'contChiPlot'
+
+  rgbTable         = 0
+  ctBottom         = 30
+  nColorsIn        = 256
+  nContours        = 5
   transpose        = 1
-  hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
+  ;; hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
+  ;; hammerCT         = COLORTABLE(rgbTable,STRETCH=stretch,NCOLORS=nColors,TRANSPOSE=transpose)
+  LOADCT,rgbTable,NCOLORS=nColors,RGB_TABLE=hammerCT
+  hammerCT         = [hammerCT[ctBottom:-1,0],hammerCT[ctBottom:-1,1],hammerCT[ctBottom:-1,2]]
+  hammerCT         = CONGRID(REFORM(hammerCT,N_ELEMENTS(hammerCT)/3,3),256,3,/INTERP)
+  nColors          = N_ELEMENTS(hammerCT[*,0])
+  ;; ctInds           = FIX(FINDGEN(nContours+1)/(nContours)*(nColors-1))+ctBottom
+  ;; nKillEm          = 40
+  ;; hammerCT         = hammerCT[*,nKillEm:-1]
+  ;; ctInds           = FIX(FINDGEN(nContours)/(nContours-1)*(nColors-1-nKillEm))
+  include_TTaper   = 1
+  include_BTaper   = 0
+  CASE 1 OF
+     include_TTaper AND include_BTaper: BEGIN
+        taper      = 1
+     END
+     include_TTaper: BEGIN
+        taper      = 3
+     END
+     include_BTaper: BEGIN
+        taper      = 2
+     END
+  ENDCASE
 
   defFontSize      = 14
   defBigFontSize   = 18
+  defMidFontSize   = 16
 
+  nLinCBTicks      = 10
+  nLogCBTicks      = 5
+
+  add_surface_inl  = 0
+  surfKappaRange   = [MIN(mMagDat.K.kappa),1.8]
+  xSRange          = [40,MAX(mMagDat.K.magRat)]
+
+  ;;First get CB range
   log_cbRange = 1
   IF log_cbRange THEN BEGIN
 
-     zVar             = ALOG10(mMagDat.K.chi2)
-     nCBTicks         = 5
+     zVar          = ALOG10(mMagDat.K.chi2)
 
-     cbRange          = ALOG10(MINMAX(mMagDat.K.chi2 < 1.0D2))
-     ;; cbRange[0]       = cbRange[0] < 0.0
-     cbRange[0]       = cbRange[0]
-     tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+     cbRange       = ALOG10(MINMAX(mMagDat.K.chi2 < 1D2))
+
+     cbRange[0]    = cbRange[0] < 0.0
+     ;; cbRange[0]    = cbRange[0]
+  ENDIF ELSE BEGIN
+
+     zVar          = mMagDat.K.chi2
+     ;; cbRange       = MINMAX(mMagDat.K.chi2 < 1.0D2)
+     cbRange       = MINMAX(mMagDat.K.chi2 < 30.05)
+     ;; cbRange       = [5.,MAX(mMagDat.K.chi2 < 15.)]
+     ;; cbRange       = MINMAX(mMagDat.K.chi2) < 15.05
+     ;; cbRange       = MINMAX(mMagDat.K.chi2) < 10.05
+     ;; cbRange       = MINMAX(mMagDat.K.chi2) < 5.05
+
+  ENDELSE
+
+  ;;Now do contour things
+  tickValues       = (FINDGEN(nContours+include_TTaper+include_BTaper))/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
+  c_values         = FINDGEN(nContours+include_TTaper+include_BTaper)/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
+
+  cb_use_c_vals    = 1
+  ;; PRINT,"C values"
+  ;; PRINT,c_values
 
 
-     ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
-     IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
-        cbRange[0]    = FLOOR(cbRange[0])
-        tickValues    = FLOOR(tickValues)
-        tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
-        tickName      = STRING(FORMAT='(F0.2)',10.^tickValues)
+  ;;Now finish the colorbar job
+  IF log_cbRange THEN BEGIN
+
+     nCBTicks      = nLogCBTicks
+     ;; tickValues    = KEYWORD_SET(cb_use_c_vals) ? c_values : FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+     IF ~KEYWORD_SET(cb_use_c_vals) THEN BEGIN
+        tickValues    = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+     ENDIF
+
+     ;; tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
+     IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
+        cbRange[0] = FLOOR(cbRange[0])
+        tickValues = FLOOR(tickValues)
+        tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
+        tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
      ENDIF ELSE BEGIN
-        tickName      = STRING(FORMAT='(I0)',10.^tickValues)
+        tickName   = STRING(FORMAT='(F0.1)',10.^tickValues)
      ENDELSE
   ENDIF ELSE BEGIN
 
-     zVar             = mMagDat.K.chi2
-     nCBTicks         = 10
+     nCBTicks      = nLinCBTicks
+     tickValues    = KEYWORD_SET(cb_use_c_vals) ? c_values : FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
 
-     ;; cbRange          = MINMAX(mMagDat.K.chi2 < 1.0D2)
-     cbRange          = MINMAX(mMagDat.K.chi2 < 30.05)
-     ;; cbRange          = [5.,MAX(mMagDat.K.chi2 < 15.)]
-     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 15.05
-     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 10.05
-     ;; cbRange          = MINMAX(mMagDat.K.chi2) < 5.05
-     tickValues       = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
-
-
-     ;; tickName         = STRING(FORMAT='(F0.2)',10.^tickValues)
-     IF (WHERE(tickValues) LT 0.)[0] NE -1 THEN BEGIN
-        cbRange[0]    = FLOOR(cbRange[0])
+     ;; tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
+     IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
+        cbRange[0] = FLOOR(cbRange[0])
         ;; tickValues    = FLOOR(tickValues)
-        tickValues    = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1,/FLOOR)
-        tickValues    = tickValues[UNIQ(tickValues,SORT(tickValues))]
-        tickName      = STRING(FORMAT='(F0.2)',tickValues)
+        tickValues = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1,/FLOOR)
+        tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
+        tickName   = STRING(FORMAT='(F0.2)',tickValues)
      ENDIF ELSE BEGIN
-        tickName      = STRING(FORMAT='(I0)',tickValues)
+        tickName   = STRING(FORMAT='(F0.1)',tickValues)
      ENDELSE
 
   ENDELSE
+
+  IF include_TTaper THEN tickName = [tickName,'bro']
+  ;; IF include_BTaper THEN tickName = ['bro',tickName]
 
   ;;Winder
   winDim           = [900,600]
@@ -87,8 +143,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;; cbpos            = [0.10,0.97,0.95,0.99]
   ;; contPos          = [0.10,0.06,0.95,0.81]
   ;;Supposing a vertical color bar
-  cbpos            = [0.95,0.06,0.97,0.92]
-  contPos          = [0.07,0.19,0.82,0.92]
+  cbpos            = [0.96,0.06,0.975,0.92]
+  contPos          = [0.09,0.19,0.82,0.92]
+  surfPos          = [0.50,0.40,0.75,0.80]
 
 
   orbPref          = ''
@@ -101,7 +158,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                             DENSITY=Density, $
                             /DONT_MAP_SOURCEDENS ;, $
 
-  titleStr         = STRING(FORMAT='(A0," (T=",F0.1," eV, N!DFAST!N=",G0.3," cm!U-3!N)")', $
+  titleStr         = STRING(FORMAT='(A0," (T!DF!N=",I0," eV, n!DF!N=",G0.3," cm!U-3!N)")', $
                             orbPref,Temperature,Density)
 
   ;;Are we going to add an R_E axis?
@@ -124,7 +181,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
      ;; R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
 
-     R_B_axis_names   = STRING(FORMAT='(F0.1)',R_B_axis_vals)
+     R_B_axis_names   = STRING(FORMAT='(I0)',R_B_axis_vals)
      R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
      nVals            = N_ELEMENTS(R_E_axis_vals)
@@ -141,6 +198,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      KEYWORD_SET(map__2D): BEGIN
 
 
+        xVar       = mMagDat.K.magRat
         yVar       = mMagDat.K.kappa
         ;; yTitle     = 'Kappa'
         yTitle     = '$\kappa$'
@@ -150,16 +208,17 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            yVar    = 1D + 1D/(mMagDat.K.kappa-1.5D)
            yTitle  = 'q'
            yRange  = MINMAX(yVar)
+           ySRange = 1D + 1D/(surfKappaRange-1.5D)
         ENDIF ELSE BEGIN
            yRange  = MINMAX(yVar)
-           yRange  = [yRange[0],KEYWORD_SET(zoom_on_extreme_kappa) ? 1.8 : 5.0]
+           yRange  = [yRange[0],KEYWORD_SET(zoom_on_extreme_kappa) ? 1.8 : 3.0]
+           ySRange = surfKappaRange
         ENDELSE
 
+        surfInds   = WHERE((yVar GE ySRange[0]) AND (yVar LE ySRange[1]) AND $
+                           (xVar GE xSRange[0]) AND (xVar LE xSRange[1]))
+        zSRange    = MINMAX(zVar[surfInds]) < MAX(cbRange)
 
-        nContours  = 201
-        c_values   = FINDGEN(nContours+1)/nContours*(cbRange[1]-cbRange[0])+cbRange[0]
-        ;; PRINT,"C values"
-        ;; PRINT,c_values
 
         ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
 
@@ -171,8 +230,10 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
         ;; ENDIF ELSE BEGIN
 
-        contPlot    = CONTOUR(zVar,mMagDat.K.magRat, $
+        contPlot    = CONTOUR(zVar, $
+                              xVar, $
                               yVar, $
+                              NAME=contChiPlotName, $
                               XRANGE=MINMAX(mMagDat.K.magRat), $
                               XTITLE=xTitle, $
                               YTITLE=yTitle, $
@@ -194,8 +255,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                               XTICKNAME=R_B_axis_names, $
                               XTICKVALUES=R_B_axis_vals, $
                               FONT_SIZE=defBigFontSize, $
-                              XTICKFONT_SIZE=defFontSize, $
-                              YTICKFONT_SIZE=defFontSize, $
+                              XTICKFONT_SIZE=defMidFontSize, $
+                              YTICKFONT_SIZE=defMidFontSize, $
                               RGB_TABLE=hammerCT, $
                               POSITION=contPos, $
                               /CURRENT)
@@ -203,14 +264,20 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         ;; ENDELSE
         
         cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
+                               TARGET=contChiPlotName, $
                                ORIENTATION=1, $
                                TEXT_ORIENTATION=0, $
-                               RGB_TABLE=hammerCT, $
+                               ;; RGB_TABLE=hammerCT[*,ctInds], $
+                               ;; TEXTPOS=1, $
+                               TAPER=taper, $
+                               TICKDIR=1, $
+                               /BORDER, $
+                               MAJOR=nContours, $
                                TICKNAME=tickName, $
-                               TICKVALUES=tickValues, $
+                               ;; TICKVALUES=tickValues[1:-1], $
                                POSITION=cbpos, $
-                               RANGE=cbRange, $
-                               FONT_SIZE=defFontSize, $
+                               ;; RANGE=cbRange, $
+                               FONT_SIZE=defMidFontSize, $
                                /NORMAL)
 
 
@@ -218,22 +285,26 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            R_Eaxis = AXIS('X', $
                           TARGET=contPlot, $
                           ;; LOCATION="bottom", $
-                          LOCATION=[0,MIN(contPlot.yrange)-0.48,0], $
+                          LOCATION=[0,MIN(contPlot.yrange)-0.48*(MAX(yRange)/5.0)^1.6,0], $
                           TITLE='R!DE!N', $
                           SUBTICKLEN=0.0, $
                           TICKLEN=0.015, $
-                          TICKFONT_SIZE=defFontSize, $
+                          TICKFONT_SIZE=defMidFontSize, $
                           TICKVALUES=R_B_axis_vals, $
                           TICKNAME=R_E_axis_names);, $
                           ;; AXIS_RANGE=MINMAX(R_E_axis_vals))
         ENDIF
 
 
-        junkK = MIN(mMagDat.K.chi2,indK)
-        junkG = MIN(mMagDat.G.chi2,indG)
+        checkMe = mMagDat.K.chi2
+        checkMeG = mMagDat.G.chi2
+        ;; checkMe = SMOOTH(mMagDat.K.chi2,[11,11])
+        ;; checkMeG = mMagDat.G.chi2
+        junkK = MIN(checkMe,indK)
+        junkG = MIN(checkMeG,indG)
 
         close_i     = WHERE(mMagDat.K.magRat LT 20)
-        junkKClose  = MIN(mMagDat.K.chi2[close_i],indKClose)
+        junkKClose  = MIN(checkMe[close_i],indKClose)
 
         IF N_ELEMENTS(tRB_fLineRE) GT 0 THEN BEGIN
            winKR_E  = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),mMagDat.K.magRat[indK])
@@ -245,14 +316,14 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            winKCR_E = 0.
         ENDELSE
 
-        winK        = {chi2   : mMagDat.K.chi2[indK], $
+        winK        = {chi2   : checkMe[indK], $
                        magRat : mMagDat.K.magRat[indK], $
                        yVar   : yVar[indK], $
                        R_E    : winKR_E}
-        winG        = {chi2   : mMagDat.G.chi2[indG], $
+        winG        = {chi2   : checkMeG[indG], $
                        magRat : mMagDat.G.magRat[indG], $
                        R_E    : winGR_E}
-        winKClose   = {chi2   : mMagDat.K.chi2[close_i[indKClose]], $
+        winKClose   = {chi2   : checkMe[close_i[indKClose]], $
                        magRat : mMagDat.K.magRat[close_i[indKClose]], $
                        yVar   : yVar[close_i[indKClose]], $
                        R_E    : winKCR_E}
@@ -291,13 +362,22 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            ;; winX = [winK.magRat,winG.magRat,winKClose.magRat]
            ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar]
            winX = [winK.magRat,winG.magRat]
-           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange)+0.08]
+           winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange)+0.08*(MAX(yRange)/5.0)^1.5]
 
            ;; labels = 'Min $\chi$!U2!N!Dred,' + ['K','M'] + '!N'
            ;; labels = 'Min $\chi$!U2!N!Dred!N,' + ['$\kappa$','M'] + '!N'
-           labels = 'Min $\chi$!U2!N!Dred!N (' + ['Kappa','Maxwellian'] + ')'
-           ;; labPos = ['TL','BR']
-           labPos = ['TR','BL']
+           ;; labels = 'Min $\chi$!U2!N!Dred!N (' + ['Kappa','Maxwellian'] + ')'
+           labels = 'Min $\chi$!U2!N!Dred,' + ['Kappa','Maxwellian ($\kappa \rightarrow \infty$)'] + '!N'
+
+           ;;For not-local analysis
+           ;; labPos   = ['TL','BR']
+           ;; labColor = ['black','black']
+
+           ;;For local analysis
+           labPos = ['T','BL']
+           labColor = ['black','white']
+           ;; labColor = ['light gray','light gray']
+
            nSyms = N_ELEMENTS(labPos)
 
            ;; mySymChoiceIsMINE = 'Star'
@@ -320,6 +400,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
               syms = SYMBOL(winX[k], $
                             winY[k], $
                             mySymChoiceisMINE[k], $
+                            LABEL_COLOR=labColor[k], $
                             LABEL_STRING=labels[k], $
                             LABEL_POSITION=labPos[k], $
                             SYM_COLOR=symColor[k], $
@@ -405,6 +486,49 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
      END
   ENDCASE
+
+  IF KEYWORD_SET(add_surface_inl) THEN BEGIN
+     zSInds   = ARRAY_INDICES(zVar,surfInds)
+     ;; zSInds   = [zSInds[0,*],zSInds[1,*]]
+
+     ;; max(zsinds[0,*])
+     ;; 54
+     ;; min(zsinds[0,*])
+     ;; 0
+     ;; max(zsinds[1,*])
+     ;; 180
+     ;; min(zsinds[1,*])
+     ;; 71
+
+     indables = [MAX(zSInds[1,*])-MIN(zSInds[1,*]),MAX(zSInds[0,*])-MIN(zSInds[0,*])]+1
+     zSurf    = REFORM(zVar[zSInds[0,*],zSInds[1,*]],indables)
+     xSurf    = REFORM(xVar[zSInds[0,*],zSInds[1,*]],indables)
+     ySurf    = REFORM(yVar[zSInds[0,*],zSInds[1,*]],indables)
+
+     ;; surfPlot = SURFACE(TRI_SURF(zSurf, $
+     ;;                             XVALUES=xSurf[UNIQ(xSurf,SORT(xSurf))], $
+     ;;                             YVALUES=ySurf[UNIQ(ySurf,SORT(ySurf))],/LINEAR), $
+     ;;                             XVALUES=REFORM(xSurf), $
+     ;;                             YVALUES=REFORM(ySurf),/LINEAR), $
+     ;; surfPlot = SURFACE(MIN_CURVE_SURF(zSurf, $
+     ;;                                   XVALUES=xSurf[UNIQ(xSurf,SORT(xSurf))], $
+     ;;                                   YVALUES=ySurf[UNIQ(ySurf,SORT(ySurf))], $
+     ;;                                   XPOUT=xOut, $
+     ;;                                   YPOUT=yOut), $
+     ;; surfPlot = SURFACE(zVar[[zSInds[0,*],zSInds[1,*]]],xVar[[zSInds[0,*],zSInds[1,*]]],yVar[[zSInds[0,*],zSInds[1,*]]], $
+     ;; surfPlot = SURFACE(MIN_CURVE_SURF(zVar[zSInds[0,*],zSInds[1,*]]), $
+     ;; surfPlot = SURFACE(SMOOTH(zVar[zSInds[0,*],zSInds[1,*]],[5,1]), $
+     ;; surfPlot = SURFACE((SMOOTH(zVar,[5,5]))[zSInds[0,*],zSInds[1,*]], $
+     surfPlot = SURFACE(SMOOTH(zSurf,[11,11]), $
+                        xSurf, $
+                        ySurf, $
+                        XRANGE=xSRange, $
+                        YRANGE=ySRange, $
+                        ZRANGE=zSRange, $
+                        /CURRENT, $
+                        POSITION=surfPos)
+
+  ENDIF
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
 

@@ -449,7 +449,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; helper                    = [0.0D,0.01D,0.02D,0.03D,0.04D,0.05D,0.06D,0.07D,0.08D,0.09D]
      helper                    = LINDGEN(20)*0.005D
      helper2                   = [0.0D,0.25D,0.50D,0.75D]
-     map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
+     ;; map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
+     map__multi_kappa_array    = [1.5 + helper[1:-1], $
                                   1.6 + helper, $
                                   1.7 + helper, $
                                   1.8 + helper, $

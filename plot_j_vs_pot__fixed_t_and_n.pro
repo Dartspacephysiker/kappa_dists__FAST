@@ -89,7 +89,8 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                TITLE=titleStr, $
                                XTITLE='$\Phi$ (V)', $
                                YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
-                               XRANGE=xRange, $
+                               ;; XRANGE=xRange, $
+                               XSTYLE=2, $
                                SYM_THICK=sym_thick, $
                                ;; YRANGE=MINMAX(pData.Y+pData.YError), $
                                YRANGE=yRange, $
