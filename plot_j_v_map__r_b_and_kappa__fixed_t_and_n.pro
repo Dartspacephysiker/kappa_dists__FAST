@@ -374,8 +374,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            ;; labColor = ['black','black']
 
            ;;For local analysis
-           labPos = ['T','BL']
-           labColor = ['black','white']
+           ;; labPos = ['T','BL']
+           labPos = ['TR','BL']
+           labColor = ['white','white']
            ;; labColor = ['light gray','light gray']
 
            nSyms = N_ELEMENTS(labPos)

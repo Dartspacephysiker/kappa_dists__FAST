@@ -77,48 +77,49 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
                           ORIGINATING_ROUTINE=routName, $
                           CURANDPOT_ANALYSIS=curAndPot_analysis, $
-                          CURANDPOT_TRANGES=cAP_tRanges, $
-                          CURANDPOT_MOMENT_ENERGYARR=cAP_moment_energyArr, $
-                          CURANDPOT_REMAKE_MASTERFILE=cAP_remake_masterFile, $
-                          CURANDPOT_MAP_TO_100KM=cAP_map_to_100km, $
-                          CURANDPOT_USE_ALL_CURRENTS=cAP_use_all_currents, $
-                          CURANDPOT_USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
-                          CURANDPOT_USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
-                          CURANDPOT_USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
-                          CURANDPOT_USE_MAGNETOMETER_CURRENT=cAP_use_mag_current, $
-                          CURANDPOT_USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
-                          CURANDPOT_USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
-                          CURANDPOT_ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
-                          CURANDPOT_PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
-                          CURANDPOT_PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
-                          CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
-                          CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
-                          CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
-                          CURANDPOT_PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=cAP_plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
-                          CURANDPOT_PLOT_EN_SPECS=cAP_plot_en_specs, $
-                          CURANDPOT_EN_SPECS__MOVIE=cAP_en_specs__movie, $
-                          CURANDPOT_JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
-                          CURANDPOT_JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
-                          CURANDPOT_JV_THEOR__KAPPALIMS=kappaLims, $   
-                          CURANDPOT_JV_THEOR__TEMPLIMS=TempLims, $    
-                          CURANDPOT_JV_THEOR__DENSLIMS=DensLims, $    
-                          CURANDPOT_JV_THEOR__MAGRATIOLIMS=magRatioLims, $
-                          CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
-                          CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
-                          ;; CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
-                          CURANDPOT_USE_MSPH_SOURCECONE_FOR_DENS=cAP_use_msph_sourcecone_for_dens, $
-                          CURANDPOT_USE_MSPH_SOURCECONE_FOR_TEMP=cAP_use_msph_sourcecone_for_temp, $
-                          CURANDPOT_ALL_PITCHANGLES=cAP_all_pitchAngles, $
-                          CURANDPOT_ALLPITCH_EXCEPT_ATM_LC=cAP_allPitch_except_atm_lc, $
-                          CURANDPOT_JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
-                          CURANDPOT_JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
-                          CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
-                          CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
-                          CURANDPOT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
-                          CURANDPOT_JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
-                          CURANDPOT__MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
-                          CURANDPOT__MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
-                          CURANDPOT__MAP__2D=cAP_map__2D, $
+                          CAP_STRUCT=cAP_struct, $
+                          ;; CURANDPOT_TRANGES=cAP_tRanges, $
+                          ;; CURANDPOT_MOMENT_ENERGYARR=cAP_moment_energyArr, $
+                          ;; CURANDPOT_REMAKE_MASTERFILE=cAP_remake_masterFile, $
+                          ;; CURANDPOT_MAP_TO_100KM=cAP_map_to_100km, $
+                          ;; CURANDPOT_USE_ALL_CURRENTS=cAP_use_all_currents, $
+                          ;; CURANDPOT_USE_DOWNGOING_ELECTRON_CURRENT=cAP_use_ed_current, $
+                          ;; CURANDPOT_USE_UPGOING_ION_CURRENT=cAP_use_iu_current, $
+                          ;; CURANDPOT_USE_UPGOING_ELECTRON_CURRENT=cAP_use_eu_current, $
+                          ;; CURANDPOT_USE_MAGNETOMETER_CURRENT=cAP_use_mag_current, $
+                          ;; CURANDPOT_USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
+                          ;; CURANDPOT_USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
+                          ;; CURANDPOT_ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
+                          ;; CURANDPOT_PLOT_J_V_POTBAR=cAP_plot_j_v_potBar, $
+                          ;; CURANDPOT_PLOT_JV_A_LA_ELPHIC=cAP_plot_jv_a_la_Elphic, $
+                          ;; CURANDPOT_PLOT_T_AND_N=cAP_plot_T_and_N, $
+                          ;; CURANDPOT_PLOT_J_V_AND_THEORY=cAP_plot_j_v_and_theory, $
+                          ;; CURANDPOT_PLOT_J_V__FIXED_T_AND_N=cAP_plot_j_v__fixed_t_and_n, $
+                          ;; CURANDPOT_PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=cAP_plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
+                          ;; CURANDPOT_PLOT_EN_SPECS=cAP_plot_en_specs, $
+                          ;; CURANDPOT_EN_SPECS__MOVIE=cAP_en_specs__movie, $
+                          ;; CURANDPOT_JV_THEOR__R_B_INIT=jv_theor__R_B_init, $
+                          ;; CURANDPOT_JV_THEOR__KAPPA_INIT=jv_theor__kappa_init, $
+                          ;; CURANDPOT_JV_THEOR__KAPPALIMS=kappaLims, $   
+                          ;; CURANDPOT_JV_THEOR__TEMPLIMS=TempLims, $    
+                          ;; CURANDPOT_JV_THEOR__DENSLIMS=DensLims, $    
+                          ;; CURANDPOT_JV_THEOR__MAGRATIOLIMS=magRatioLims, $
+                          ;; CURANDPOT_JV_THEOR__FIT_JE=jv_theor__fit_je, $
+                          ;; CURANDPOT_JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
+                          ;; ;; CURANDPOT_JV_THEOR__USE_MSPH_SOURCE=jv_theor__use_msph_source, $
+                          ;; CURANDPOT_USE_MSPH_SOURCECONE_FOR_DENS=cAP_use_msph_sourcecone_for_dens, $
+                          ;; CURANDPOT_USE_MSPH_SOURCECONE_FOR_TEMP=cAP_use_msph_sourcecone_for_temp, $
+                          ;; CURANDPOT_ALL_PITCHANGLES=cAP_all_pitchAngles, $
+                          ;; CURANDPOT_ALLPITCH_EXCEPT_ATM_LC=cAP_allPitch_except_atm_lc, $
+                          ;; CURANDPOT_JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+                          ;; CURANDPOT_JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+                          ;; CURANDPOT_JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
+                          ;; CURANDPOT_JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+                          ;; CURANDPOT_JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
+                          ;; CURANDPOT_JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                          ;; CURANDPOT__MAP__MULTI_MAGRATIO_ARRAY=cAP_map__multi_magRatio_array, $
+                          ;; CURANDPOT__MAP__MULTI_KAPPA_ARRAY=cAP_map__multi_kappa_array, $
+                          ;; CURANDPOT__MAP__2D=cAP_map__2D, $
                           TIMEBARS=timeBars, $
                           EPS=eps
   
@@ -378,8 +379,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      plot_times           = [t1Str,t2Str]
      
-     IF KEYWORD_SET(cAP_tRanges) THEN BEGIN
-        tRanges           = cAP_tRanges
+     IF KEYWORD_SET(cAP_struct) THEN IF (WHERE(TAG_NAMES(cAP_struct) EQ 'TRANGES'))[0] NE -1 THEN BEGIN
+        tRanges           = cAP_struct.tRanges
         useInds__twoLumps = 1
      ENDIF
 
@@ -441,7 +442,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_JVPLOTDATA=jvPlotData, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
         OUT_SC_POT=sc_pot, $
-        EPS=eps
+        EPS=eps, $
+        _EXTRA=cAP_struct
 
   ENDIF
 

@@ -38,6 +38,10 @@ PRO PLOT_J_VS_POTBAR,jvPlotData,avgs_jvFit, $
                             /SKIP_USEINDS, $
                             /ARRAYS
 
+  IF jvPlotData.info.pot.T_PMFac NE 0 THEN BEGIN
+     potData     += Temperature*jvPlotData.info.pot.T_PMFac
+  ENDIF
+
   only_neg_current = 1
   IF KEYWORD_SET(only_neg_current) THEN BEGIN
 

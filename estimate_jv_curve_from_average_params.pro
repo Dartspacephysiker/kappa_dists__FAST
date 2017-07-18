@@ -75,6 +75,19 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   YError      = jvPlotData.curErr[avgs_JVfit.useInds]
   weights     = 1./ABS(jvPlotData.curErr[avgs_JVfit.useInds])^2
 
+  IF jvPlotData.info.pot.T_PMFac NE 0 THEN BEGIN
+     CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                               TEMPERATURE=T, $
+                               ;; DENSITY=Density, $
+                               ERR_TEMPERATURE=TErr, $
+                               ;; ERR_DENSITY=DensityErr, $
+                               ;; DONT_MAP_SOURCEDENS=dont_map_sourceDens, $
+                               ;; /SKIP_USEINDS, $
+                               /ARRAYS
+
+     X       += T*jvPlotData.info.pot.T_PMFac
+  ENDIF
+
   IF KEYWORD_SET(itergame_tie_R_B_and_dens) THEN BEGIN
 
      COMMON tieRB,tRB_RBpairs,tRB_fLine,tRB_nFAST,tRB_nFLine,tRB_fLineRE
@@ -340,7 +353,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
 
         bestKappa = kappaArr[indK]
         bestRBK   = magRatArr[indK]
-        potVals   = jvPlotData.pot[avgs_jvFit.useinds]
+        potVals   = X;        potVals   = jvPlotData.pot[avgs_jvFit.useinds]
 
         IF KEYWORD_SET(all_temps) THEN BEGIN
            ;; bestDensK = MEAN(densArr[*,indK2D[1]])

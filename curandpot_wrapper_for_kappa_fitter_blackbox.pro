@@ -16,6 +16,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
    ADD_UPGOING_ION_POT=add_iu_pot, $
+   T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
    PLOT_TIMES=plot_times, $
    IN_BONUSPREF=in_bonusPref, $
    USEI__RELCHANGE=useInds__relChange, $
@@ -57,7 +58,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
    OUT_SC_POT=out_sc_pot, $
-   EPS=eps
+   EPS=eps, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -306,6 +308,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
      USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
      ADD_UPGOING_ION_POT=add_iu_pot, $
+     T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
      ERROR_BAR_FACTOR=errorBarFac, $
      USEI__RELCHANGE=useInds__relChange, $
      USEI__TWOLUMPS=useInds__twoLumps, $

@@ -150,12 +150,28 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
   jRange           = MINMAX(jvPlotData.cur)
 
+  ;;Amplify/diminish pot by factor(s) of T?
+  pot              = jvPlotData.pot
+  IF jvPlotData.info.pot.T_PMFac NE 0 THEN BEGIN
+     CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
+                               TEMPERATURE=Temperature, $
+                               DENSITY=Density, $
+                               ERR_TEMPERATURE=TemperatureErr, $
+                               ERR_DENSITY=DensityErr, $
+                               DONT_MAP_SOURCEDENS=dont_map_sourceDens, $
+                               ;; THESE_USEINDS=these_useInds, $
+                               /SKIP_USEINDS, $
+                               ARRAYS=arrays
+
+     pot          += Temperature*jvPlotData.info.pot.T_PMFac
+  ENDIF
+
   IF KEYWORD_SET(orig_plotIdee) THEN BEGIN
      window        = WINDOW(DIMENSIONS=winDim, $
                         BUFFER=savePlot)
 
      sPlot         = SCATTERPLOT(jvPlotData.cur, $
-                             jvPlotData.pot, $
+                             pot, $
                              XRANGE=jRange, $
                              YRANGE=potRange, $
                              /YLOG, $
@@ -226,7 +242,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
         ;;Second plot
 
         plot_2            = SCATTERPLOT(jvPlotData.tDiff, $
-                                        jvPlotData.pot, $
+                                        pot, $
                                         ;; XTITLE='Seconds since ' + TIME_TO_STR(curPotList[0].time[safe_i[0]]), $
                                         YTITLE=potTitle, $
                                         RGB_TABLE=hammerCT, $
@@ -241,7 +257,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;;Third plot
         plot_3      = SCATTERPLOT(jvPlotData.cur, $
-                                  jvPlotData.pot, $
+                                  pot, $
                                   XRANGE=jRange, $
                                   YRANGE=potRange, $
                                   /YLOG, $
@@ -327,9 +343,9 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
         inds              = [0,1]
         tmpPotErr         = jvPlotData.potErr[inds]
 
-        errPotRange       = MINMAX(jvPlotData.pot)
+        errPotRange       = MINMAX(pot)
         plot_2            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.pot[inds], $
+                                      pot[inds], $
                                       tmpPotErr, $
                                       XRANGE=tRange, $
                                       /YLOG, $
@@ -361,7 +377,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
            tmpPotErr      = jvPlotData.potErr[inds]
 
            plot_2         = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.pot[inds], $
+                                      pot[inds], $
                                       tmpPotErr, $
                                       /YLOG, $
                                       VERT_COLORS=hammerCT[*,CTInds[inds]], $
@@ -385,7 +401,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
         tmpPotErr         = jvPlotData.potErr[inds]
 
         plot_3      = ERRORPLOT(jvPlotData.cur[inds], $
-                                jvPlotData.pot[inds], $
+                                pot[inds], $
                                 tmpCurErr, $
                                 tmpPotErr, $
                                 XRANGE=jRange, $
@@ -419,7 +435,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
            tmpPotErr      = jvPlotData.potErr[inds]
 
            plot_3         = ERRORPLOT((jvPlotData.cur[inds]), $
-                                      jvPlotData.pot[inds], $
+                                      pot[inds], $
                                       tmpCurErr, $
                                       tmpPotErr, $
                                       ;; RGB_TABLE=hammerCT, $

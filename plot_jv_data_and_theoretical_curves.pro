@@ -105,6 +105,10 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
                                   DENSITY=N, $
                                   /ARRAYS
 
+  IF jvPlotData.info.pot.T_PMFac NE 0 THEN BEGIN
+     pot          += Temperature*jvPlotData.info.pot.T_PMFac
+  ENDIF
+
         FIT_JV_TS_WITH_THEORETICAL_CURVES,pot,cur, $
                                           potErr,curErr, $
                                           T,N, $
