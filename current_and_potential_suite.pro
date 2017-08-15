@@ -95,9 +95,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
-   JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
-   JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
-   JV_THEOR__ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   ;; JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
+   JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
+   JV_THEOR__ITERGAME__DENSFAC=jv_theor__itergame_densFac, $
+   JV_THEOR__ITERGAME_TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
@@ -119,6 +120,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    TN_SPNAME=TN_spName, $
    JV_THEOR_SPNAME=JV_theor_spName, $
    J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
+   J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+   J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
    EN_SPEC__SPNAME=en_spec__spName, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
@@ -235,6 +238,146 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
+
+  ;; dir         = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
+
+  ;; doSAVE = 1
+  ;; IF doSAVE THEN BEGIN
+  ;;    ;; plotDatFile = 'minusDat.dat'
+  ;;    plotDatFile = 'plusDat.dat'
+
+  ;;    PRINT,'Saving ' + plotDatFile + ' ...'
+  ;;    SAVE,curpotlist,jvplotdata,avgs_JVfit, $
+  ;;         plot_t1, $
+  ;;         plot_t2, $
+  ;;         use_all_currents, $
+  ;;         use_ed_current, $
+  ;;         use_iu_current, $
+  ;;         use_eu_current, $
+  ;;         use_mag_current, $
+  ;;         use_charE_for_downPot, $
+  ;;         use_peakE_for_downPot, $
+  ;;         add_iu_pot, $
+  ;;         T_plusMinusFac_for_pot, $
+  ;;         errorBarFac, $
+  ;;         useInds__relChange, $
+  ;;         useInds__twoLumps, $
+  ;;         en_spec__names, $
+  ;;         en_spec__eeb_or_ees, $
+  ;;         en_spec__angle_ranges, $
+  ;;         en_spec__energy_ranges, $
+  ;;         en_spec__upgoing, $
+  ;;         upCurrent_conductivities, $
+  ;;         jv_theor__minPot, $
+  ;;         jv_theor__maxPot, $
+  ;;         jv_theor__minCur, $
+  ;;         jv_theor__maxCur, $
+  ;;         plot_j_ratios, $
+  ;;         plot_ion_elec_ratios, $
+  ;;         JV_theor__fit_time_series, $
+  ;;         jv_theor__R_B_init, $
+  ;;         jv_theor__kappa_init, $
+  ;;         kappaLims, $   
+  ;;         TempLims, $    
+  ;;         DensLims, $    
+  ;;         magRatioLims, $
+  ;;         jv_theor__fit_je, $
+  ;;         jv_theor__fit_both, $
+  ;;         jv_theor__initial_source_R_E, $
+  ;;         jv_theor__initial_source__Polar, $
+  ;;         jv_theor__initial_source__equator, $
+  ;;         jv_theor__iterative_game, $
+  ;;         jv_theor__itergame_NFac, $
+  ;;         jv_theor__itergame_tie_R_B_and_dens, $
+  ;;         ;; add_Denton2006, $
+  ;;         jvPotBar__j_on_yAxis, $
+  ;;         interactive_overplot, $
+  ;;         map__multi_magRatio_array, $
+  ;;         map__multi_kappa_array, $
+  ;;         map__2D, $
+  ;;         TN_yLog_nDown, $
+  ;;         plot_j_v_potBar, $
+  ;;         plot_jv_a_la_Elphic, $
+  ;;         plot_T_and_N, $
+  ;;         plot_j_v_and_theory, $
+  ;;         plot_j_v__fixed_t_and_n, $
+  ;;         plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
+  ;;         plot_magCurrent_vs_current, $
+  ;;         plot_en_specs, $
+  ;;         en_specs__movie, $
+  ;;         a_la_Elphic_spName, $
+  ;;         jvpotBar_spName, $
+  ;;         TN_spName, $
+  ;;         JV_theor_spName, $
+  ;;         j_v__fixTandN__spName, $
+  ;;         en_spec__spName, $
+  ;;         curPotList, $
+  ;;         jvPlotData, $
+  ;;         avgs_JVfit, $
+  ;;         out_sc_pot, $
+  ;;         plotDir, $
+  ;;         orbit, $
+  ;;         orbTimes, $
+  ;;         orbBurstTimes, $
+  ;;         bonusPref, $
+  ;;         downTimesStr, $
+  ;;         upTimesStr, $
+  ;;         timesList, $
+  ;;         units, $
+  ;;         outDir, $
+  ;;         masterFile, $
+  ;;         remake_masterFile, $
+  ;;         save_diff_eFlux_file, $
+  ;;         load_diff_eFlux_file, $
+  ;;         eeb_or_eesArr, $
+  ;;         order, $
+  ;;         label, $
+  ;;         add_oneCount_stats, $
+  ;;         use_msph_sourcecone_for_dens, $
+  ;;         use_msph_sourcecone_for_temp, $
+  ;;         ;; also_msph_sourcecone, $
+  ;;         aRange__dens_e_down, $
+  ;;         aRange__moments_e_down, $
+  ;;         aRange__moments_e_up, $
+  ;;         aRange__moments_i_up, $
+  ;;         aRange__peakEn_e_down, $
+  ;;         aRange__peakEn_e_up, $
+  ;;         aRange__peakEn_i_up, $
+  ;;         aRange__charE_e_down, $
+  ;;         aRange__charE_e_up, $
+  ;;         aRange__charE_i_up, $
+  ;;         manual_angle_correction, $
+  ;;         label__which_eeb, $
+  ;;         label__which_times, $
+  ;;         moment_energyArr, $
+  ;;         use_sc_pot_for_lowerbound, $
+  ;;         pot__from_fa_potential, $
+  ;;         pot__Chaston_style, $
+  ;;         pot__from_file, $
+  ;;         pot__save_file, $
+  ;;         aRange__moments_list, $
+  ;;         aRange__peakEn_list, $
+  ;;         aRange__charE_list, $
+  ;;         Elphic1998_defaults, $
+  ;;         min_peak_energyArr, $
+  ;;         max_peak_energyArr, $
+  ;;         peak_energy__start_at_highEArr, $
+  ;;         upgoingArr, $
+  ;;         error_estimates, $
+  ;;         spectra_average_interval, $
+  ;;         map_to_100km, $
+  ;;         saveCurPotFile, $
+  ;;         curPotList, $
+  ;;         magCurrent, $
+  ;;         out_sc_pot, $
+  ;;         diff_eFlux_files, $
+  ;;         out_sourcecone, $
+  ;;         out_losscone, $
+  ;;         FILENAME=dir+plotDatFile
+
+  ;;    STOP
+
+  ;; ENDIF
 
   ;; suppress_magRat_sum = ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
   ;;                         KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km))
@@ -371,6 +514,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   ORBIT=orbit, $
                                   SAVEPLOT=savePlot, $
                                   SPNAME=j_v__fixTandN__spName, $
+                                 J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                 J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                  ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                  ;; DATAFILENAME=j_v__fixTandN__dataFilename, $
                                   _EXTRA=e
 
 
@@ -379,9 +526,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
-  IF KEYWORD_SET(jv_theor__iterative_game) THEN BEGIN
+  IF KEYWORD_SET(jv_theor__iterative_RBDens_game) THEN BEGIN
 
-     
      ;; STOP
      ;; jv_theor__itergame_tie_R_B_and_dens = 1
      IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
@@ -504,7 +650,12 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   ORBIT=orbit, $
                                   SAVEPLOT=savePlot, $
                                   SPNAME=j_v__fixTandN__spName, $
+                                  J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                  J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                  ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                  ;; SDNAME=j_v__fixTandN__dataFilename, $
                                   /NO_TITLE, $
+                                  IN_MMAGDAT=mMagDat, $
                                   _EXTRA=e
 
      STOP

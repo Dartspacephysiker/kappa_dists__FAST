@@ -7,8 +7,11 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                  ORIGINATING_ROUTINE=routName, $
                                  SAVEPLOT=savePlot, $
                                  SPNAME=sPName, $
+                                 J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                 J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                  NO_TITLE=no_title, $
-                                  _EXTRA=e
+                                 IN_MMAGDAT=mMagDat, $
+                                 _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -17,6 +20,36 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
      orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
+  ;; j_v__fixTandN__savePlotData = 1
+  IF KEYWORD_SET(j_v__fixTandN__savePlotData) THEN BEGIN
+
+     @common__jv_curve_fit__tie_r_b_and_dens.pro
+
+     dir   = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
+     fNamePref = KEYWORD_SET(j_v__fixTandN__dataFilename) ? j_v__fixTandN__dataFilename : 'fixTandN_plotData'
+     count = 0
+     fName = fNamePref + '.sav'
+     WHILE FILE_TEST(dir+fName) DO BEGIN
+        fName = STRING(FORMAT='(A0,"_",I02,".sav")',fNamePref,count+1)
+        count++
+     ENDWHILE
+
+     PRINT,"Saving fixTandN plotdata file: " + fName
+
+     SAVE,jvPlotData,avgs_JVfit,pData, $
+          A, $
+          AGauss, $
+          orbit, $
+          routName, $
+          mMagDat, $
+          tRB_RBpairs, $
+          tRB_fLine, $
+          tRB_nFAST, $
+          tRB_nFLine, $
+          tRB_fLineRE, $
+          FILENAME=dir+fName
+  ENDIF
+  
   symbol      = '+'
   sym_thick   = 2.0
   thick       = 2.2
