@@ -1,25 +1,28 @@
 ;2017/03/18
-PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                          ;; USE_SOURCE_AVGS=use_source_avgs, $
-                                          A_IN=A_in, $
-                                          KAPPALIMS=kappaLims, $   
-                                          TEMPLIMS=TempLims, $    
-                                          DENSLIMS=DensLims, $    
-                                          MAGRATIOLIMS=magRatioLims, $
-                                          MULTI_MAGRATIO_MODE=multi_magRatio_mode, $
-                                          ITERATIVE_GAME_MODE=iterative_game_mode, $
-                                          ITERATIVE_GAME__DENSITY_INCREASE=itergame_NFac, $
-                                          ITERATIVE_GAME__TIE_RB_AND_DENS=itergame_tie_R_B_and_dens, $
-                                          MAP_TO_100KM=map_to_100km, $
-                                          MAP__MULTI_MAGRATIO_ARRAY=multi_magRatio_array, $
-                                          MAP__MULTI_KAPPA_ARRAY=multi_kappa_array, $
-                                          MAP__2D=map__2D, $
-                                          ORIGINATING_ROUTINE=routName, $
-                                          OUT_KAPPA_A=A, $
-                                          OUT_GAUSS_A=AGauss, $
-                                          OUT_PLOTDATA=pData, $
-                                          OUT_MULTI_MAGRATIO=mMagDat, $
-                                          _EXTRA=e
+PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
+   jvPlotData,avgs_JVfit, $
+   ;; USE_SOURCE_AVGS=use_source_avgs, $
+   A_IN=A_in, $
+   KAPPALIMS=kappaLims, $   
+   TEMPLIMS=TempLims, $    
+   DENSLIMS=DensLims, $    
+   MAGRATIOLIMS=magRatioLims, $
+   MULTI_MAGRATIO_MODE=multi_magRatio_mode, $
+   ITERATIVE_GAME_MODE=iterative_game_mode, $
+   JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
+   JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   ;; ITERATIVE_GAME__DENSITY_INCREASE=itergame_densFac, $
+   ;; ITERATIVE_GAME__TIE_RB_AND_DENS=itergame_tie_R_B_and_dens, $
+   MAP_TO_100KM=map_to_100km, $
+   MAP__MULTI_MAGRATIO_ARRAY=multi_magRatio_array, $
+   MAP__MULTI_KAPPA_ARRAY=multi_kappa_array, $
+   MAP__2D=map__2D, $
+   ORIGINATING_ROUTINE=routName, $
+   OUT_KAPPA_A=A, $
+   OUT_GAUSS_A=AGauss, $
+   OUT_PLOTDATA=pData, $
+   OUT_MULTI_MAGRATIO=mMagDat, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -32,7 +35,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=temperature, $
                             DENSITY=density, $
-                            DONT_MAP_SOURCEDENS=KEYWORD_SET(itergame_tie_R_B_and_dens)
+                            DONT_MAP_SOURCEDENS=KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens)
   
                              ;;            kappa,       Temp,   Dens, R_B
   A           = KEYWORD_SET(A_in) ? A_in : [  10,Temperature,Density, 1D4]
@@ -88,12 +91,12 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
      X       += T*jvPlotData.info.pot.T_PMFac
   ENDIF
 
-  IF KEYWORD_SET(itergame_tie_R_B_and_dens) THEN BEGIN
+  IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
 
      COMMON tieRB,tRB_RBpairs,tRB_fLine,tRB_nFAST,tRB_nFLine,tRB_fLineRE
 
-     STR_ELEMENT,fa_kappa,'tie_R_B_and_dens',itergame_tie_R_B_and_dens,/ADD_REPLACE
-     STR_ELEMENT,fa_Gauss,'tie_R_B_and_dens',itergame_tie_R_B_and_dens,/ADD_REPLACE
+     STR_ELEMENT,fa_kappa,'tie_R_B_and_dens',jv_theor__itergame_tie_R_B_and_dens,/ADD_REPLACE
+     STR_ELEMENT,fa_Gauss,'tie_R_B_and_dens',jv_theor__itergame_tie_R_B_and_dens,/ADD_REPLACE
 
      IF KEYWORD_SET(all_temps) THEN BEGIN
         tRB_nFAST = jvPlotData.source.NDown[avgs_JVfit.useInds]
@@ -420,13 +423,13 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                            chi2   : TEMPORARY(chi2ArrG)}}
 
      END
-     KEYWORD_SET(iterative_game_mode) AND ~KEYWORD_SET(itergame_tie_R_B_and_dens): BEGIN
+     KEYWORD_SET(iterative_game_mode) AND ~KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens): BEGIN
 
         IF ~KEYWORD_SET(jvPlotData.use_source_dens) THEN STOP
 
         A = ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE(X,Y,XError,YError, $
-                                                                 DENSITY_INCREASE=itergame_NFac, $
-                                                                 TIE_RB_AND_DENS=itergame_tie_R_B_and_dens, $
+                                                                 DENSITY_INCREASE=jv_theor__itergame_densFac, $
+                                                                 TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                                                  A_IN=Aorig, $
                                                                  WEIGHTS=weights, $
                                                                  JVPLOTDATA=jvPlotData, $
@@ -442,7 +445,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                                                  OUT_PARINFO=kappaParamStructNye)
 
         AGauss = ESTIMATE_JV_CURVE_FROM_AVERAGES__ITERATIVE_GAME_MODE(X,Y,XError,YError, $
-                                                                      DENSITY_INCREASE=itergame_NFac, $
+                                                                      DENSITY_INCREASE=jv_theor__itergame_densFac, $
                                                                       A_IN=Aorig, $
                                                                       WEIGHTS=weights, $
                                                                       JVPLOTDATA=jvPlotData, $
@@ -542,7 +545,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
                                _EXTRA=extra)
 
         ;;Update density with the REAL fitparam if we were playing a game
-        IF KEYWORD_SET(itergame_tie_R_B_and_dens) THEN BEGIN
+        IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
 
            @common__jv_curve_fit__tie_r_b_and_dens.pro
 
@@ -608,7 +611,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
            YGaussFit      : YGaussFit, $
            AKappa         : A, $
            AGauss         : AGauss, $
-           is_sourceDens  : KEYWORD_SET(iterative_game_mode) OR KEYWORD_SET(itergame_tie_R_B_and_dens)}
+           is_sourceDens  : KEYWORD_SET(iterative_game_mode) OR KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens)}
 
 
 

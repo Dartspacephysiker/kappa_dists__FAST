@@ -98,7 +98,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    ;; JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
    JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
    JV_THEOR__ITERGAME__DENSFAC=jv_theor__itergame_densFac, $
-   JV_THEOR__ITERGAME_TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
@@ -544,8 +544,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            DENSLIMS=DensLims, $    
                                            MAGRATIOLIMS=magRatioLims, $
                                            /ITERATIVE_GAME_MODE, $
-                                           ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
-                                           ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                           JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
+                                           JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                            MAP_TO_100KM=map_to_100km, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
@@ -626,7 +626,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
                                            MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
                                            MAP__2D=map__2D, $
-                                           ITERATIVE_GAME__TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                           ITERATIVE_GAME__TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $

@@ -47,7 +47,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    ;; JV_THEOR__ITERATIVE_GAME__DENSITY_INCREASE=jv_theor__itergame_NFac, $
    JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
    JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
-   JV_THEOR__ITERGAME_TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
    J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
    ALL_PITCHANGLES=all_pitchAngles, $
@@ -357,7 +357,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ;; JV_THEOR__ITERATIVE_DENSITY_AND_R_B_GAME=jv_theor__iterative_game, $
      JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
      JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
-     JV_THEOR__ITERGAME_TIE_RB_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+     JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
      MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
      MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
      MAP__2D=map__2D, $
