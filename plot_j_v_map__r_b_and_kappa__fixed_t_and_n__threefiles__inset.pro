@@ -3,21 +3,28 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__THREEFILES__INSET
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  date            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
-  dir             = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
-  fErs            = ['reg','plus','minus']
-  files           = 'fixTandN__' + fErs + 'Dat.sav'
-  showCase_i      = WHERE(STRUPCASE(fErs) EQ 'REG')
+  ;;For adding an R_E axis, if that's wassup
+  @common__jv_curve_fit__tie_r_b_and_dens.pro
 
-  jvPlotDataList  = LIST()
-  avgs_JVfitList  = LIST()
-  pDataList       = LIST()
-  AList           = LIST()
-  AGaussList      = LIST()
-  orbitList       = LIST()
-  routNameList    = LIST()
-  mMagDatList     = LIST()
+  date             = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  dir              = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
+  fErs             = ['reg','plus','minus']
+  files            = 'fixTandN__' + fErs + 'Dat.sav'
+  showCase_i       = WHERE(STRUPCASE(fErs) EQ 'REG')
 
+  jvPlotDataList   = LIST()
+  avgs_JVfitList   = LIST()
+  pDataList        = LIST()
+  AList            = LIST()
+  AGaussList       = LIST()
+  orbitList        = LIST()
+  routNameList     = LIST()
+  mMagDatList      = LIST()
+  tRB_RBpairsList  = LIST()
+  tRB_fLineList    = LIST()
+  tRB_nFASTList    = LIST()
+  tRB_nFLineList   = LIST()
+  tRB_fLineREList  = LIST()
 
   nFiles          = N_ELEMENTS(fErs)
   FOREACH file,files,file_i DO BEGIN
@@ -28,6 +35,12 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__THREEFILES__INSET
               nFiles, $
               file
         
+;; tRB_RBpairsList
+;; tRB_fLineList  
+;; tRB_nFASTList  
+;; tRB_nFLineList 
+;; tRB_fLineREList
+
         RESTORE,dir+file
         
         PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotData,avgs_JVFit, $
@@ -41,7 +54,6 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__THREEFILES__INSET
            ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
            _EXTRA=e
 
-
         ;;Make lists for any reason at all?
         IF KEYWORD_SET(makeLists) THEN BEGIN 
            jvPlotDataList.Add,TEMPORARY(jvPlotData)
@@ -52,6 +64,21 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__THREEFILES__INSET
            orbitList.Add,TEMPORARY(orbit)     
            routNameList.Add,TEMPORARY(routName)  
            mMagDatList.Add,TEMPORARY(mMagDat)   
+           IF N_ELEMENTS(tRB_RBpairs) GT 0 THEN BEGIN
+              tRB_RBpairsList.Add,TEMPORARY(tRB_RBpairs)
+           ENDIF
+           IF N_ELEMENTS(tRB_fLine) GT 0 THEN BEGIN
+              tRB_fLineList.Add,TEMPORARY(tRB_fLine)
+           ENDIF
+           IF N_ELEMENTS(tRB_nFAST) GT 0 THEN BEGIN
+              tRB_nFASTList.Add,TEMPORARY(tRB_nFAST)
+           ENDIF
+           IF N_ELEMENTS(tRB_nFLine) GT 0 THEN BEGIN
+              tRB_nFLineList.Add,TEMPORARY(tRB_nFLine)
+           ENDIF
+           IF N_ELEMENTS(tRB_fLineRE) GT 0 THEN BEGIN
+              tRB_fLineREList.Add,TEMPORARY(tRB_fLineRE)
+           ENDIF
         ENDIF
         
      ENDIF ELSE BEGIN

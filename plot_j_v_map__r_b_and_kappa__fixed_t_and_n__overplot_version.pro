@@ -8,6 +8,10 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
    OUT_YBEST=out_yBest, $
    SAVEPLOT=savePlot, $
    ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
+   COLORTABLEINDEX=colorTableIndex, $
+   COLORTABLEBOTTOM=colorTableBottom, $
+   NUMCONTOURS=numContours, $
+   COLORBAR=colorbar, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -17,27 +21,31 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
   contChiPlotName  = 'contChiPlot'
 
-  ctIndex          = 0
-  ctBottom         = 30
+  colb             = N_ELEMENTS(colorbar        ) GT 0 ? colorbar         : 1
+  ctIndex          = N_ELEMENTS(colorTableIndex ) GT 0 ? colorTableIndex  : 0
+  ctBottom         = N_ELEMENTS(colorTableBottom) GT 0 ? colorTableBottom : 30
   nColorsIn        = 256
-  nContours        = 5
+  nContours        = N_ELEMENTS(numContours     ) GT 0 ? numContours      : 5
   LOADCT,ctIndex,NCOLORS=nColors,RGB_TABLE=hammerCT
   hammerCT         = [hammerCT[ctBottom:-1,0],hammerCT[ctBottom:-1,1],hammerCT[ctBottom:-1,2]]
   hammerCT         = CONGRID(REFORM(hammerCT,N_ELEMENTS(hammerCT)/3,3),256,3,/INTERP)
   nColors          = N_ELEMENTS(hammerCT[*,0])
-  include_TTaper   = 1
-  include_BTaper   = 0
-  CASE 1 OF
-     include_TTaper AND include_BTaper: BEGIN
-        taper      = 1
-     END
-     include_TTaper: BEGIN
-        taper      = 3
-     END
-     include_BTaper: BEGIN
-        taper      = 2
-     END
-  ENDCASE
+
+  IF KEYWORD_SET(colb) THEN BEGIN
+     include_TTaper   = 1
+     include_BTaper   = 0
+     CASE 1 OF
+        include_TTaper AND include_BTaper: BEGIN
+           taper      = 1
+        END
+        include_TTaper: BEGIN
+           taper      = 3
+        END
+        include_BTaper: BEGIN
+           taper      = 2
+        END
+     ENDCASE
+  ENDIF
 
   defFontSize      = 14
   defBigFontSize   = 18
@@ -50,22 +58,25 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
   surfKappaRange   = [MIN(mMagDat.K.kappa),1.8]
   xSRange          = [40,MAX(mMagDat.K.magRat)]
 
-  ;;First get CB range
-  log_cbRange = 1
-  IF log_cbRange THEN BEGIN
+  IF KEYWORD_SET(colb) THEN BEGIN
+     ;;First get CB range
+     log_cbRange = 1
+     IF log_cbRange THEN BEGIN
 
-     zVar          = ALOG10(mMagDat.K.chi2)
+        zVar          = ALOG10(mMagDat.K.chi2)
 
-     cbRange       = ALOG10(MINMAX(mMagDat.K.chi2 < 1D2))
+        cbRange       = ALOG10(MINMAX(mMagDat.K.chi2 < 1D2))
 
-     cbRange[0]    = cbRange[0] < 0.0
-  ENDIF ELSE BEGIN
+        cbRange[0]    = cbRange[0] < 0.0
+     ENDIF ELSE BEGIN
 
-     zVar          = mMagDat.K.chi2
-     cbRange       = MINMAX(mMagDat.K.chi2 < 30.05)
+        zVar          = mMagDat.K.chi2
+        cbRange       = MINMAX(mMagDat.K.chi2 < 30.05)
 
-  ENDELSE
+     ENDELSE
 
+  ENDIF
+  
   ;;Now do contour things
   tickValues       = (FINDGEN(nContours+include_TTaper+include_BTaper))/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
   c_values         = FINDGEN(nContours+include_TTaper+include_BTaper)/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
@@ -76,38 +87,41 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
 
   ;;Now finish the colorbar job
-  IF log_cbRange THEN BEGIN
+  IF KEYWORD_SET(colb) THEN BEGIN
+     IF log_cbRange THEN BEGIN
 
-     nCBTicks      = nLogCBTicks
+        nCBTicks      = nLogCBTicks
 
-     IF ~KEYWORD_SET(cb_use_c_vals) THEN BEGIN
-        tickValues    = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
-     ENDIF
+        IF ~KEYWORD_SET(cb_use_c_vals) THEN BEGIN
+           tickValues    = FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+        ENDIF
 
-     ;; tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
-     IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
-        cbRange[0] = FLOOR(cbRange[0])
-        tickValues = FLOOR(tickValues)
-        tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
-        tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
+        ;; tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
+        IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
+           cbRange[0] = FLOOR(cbRange[0])
+           tickValues = FLOOR(tickValues)
+           tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
+           tickName   = STRING(FORMAT='(F0.2)',10.^tickValues)
+        ENDIF ELSE BEGIN
+           tickName   = STRING(FORMAT='(F0.1)',10.^tickValues)
+        ENDELSE
      ENDIF ELSE BEGIN
-        tickName   = STRING(FORMAT='(F0.1)',10.^tickValues)
+
+        nCBTicks      = nLinCBTicks
+        tickValues    = KEYWORD_SET(cb_use_c_vals) ? c_values : FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
+
+        IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
+           cbRange[0] = FLOOR(cbRange[0])
+           tickValues = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1,/FLOOR)
+           tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
+           tickName   = STRING(FORMAT='(F0.2)',tickValues)
+        ENDIF ELSE BEGIN
+           tickName   = STRING(FORMAT='(F0.1)',tickValues)
+        ENDELSE
+
      ENDELSE
-  ENDIF ELSE BEGIN
 
-     nCBTicks      = nLinCBTicks
-     tickValues    = KEYWORD_SET(cb_use_c_vals) ? c_values : FINDGEN(nCBTicks+1)/nCBTicks*(cbRange[1]-cbRange[0])+cbRange[0]
-
-     IF (WHERE(tickValues LT 0.))[0] NE -1 THEN BEGIN
-        cbRange[0] = FLOOR(cbRange[0])
-        tickValues = ROUND_TO_NTH_DECIMAL_PLACE(tickValues,-1,/FLOOR)
-        tickValues = tickValues[UNIQ(tickValues,SORT(tickValues))]
-        tickName   = STRING(FORMAT='(F0.2)',tickValues)
-     ENDIF ELSE BEGIN
-        tickName   = STRING(FORMAT='(F0.1)',tickValues)
-     ENDELSE
-
-  ENDELSE
+  ENDIF
 
   IF include_TTaper THEN tickName = [tickName,'bro']
   ;; IF include_BTaper THEN tickName = ['bro',tickName]
@@ -242,23 +256,24 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
         ;; ENDELSE
         
-        cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
-                               TARGET=contChiPlotName, $
-                               ORIENTATION=1, $
-                               TEXT_ORIENTATION=0, $
-                               ;; RGB_TABLE=hammerCT[*,ctInds], $
-                               ;; TEXTPOS=1, $
-                               TAPER=taper, $
-                               TICKDIR=1, $
-                               /BORDER, $
-                               MAJOR=nContours, $
-                               TICKNAME=tickName, $
-                               ;; TICKVALUES=tickValues[1:-1], $
-                               POSITION=cbpos, $
-                               ;; RANGE=cbRange, $
-                               FONT_SIZE=defMidFontSize, $
-                               /NORMAL)
-
+        IF KEYWORD_SET(colb) THEN BEGIN
+           cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
+                                  TARGET=contChiPlotName, $
+                                  ORIENTATION=1, $
+                                  TEXT_ORIENTATION=0, $
+                                  ;; RGB_TABLE=hammerCT[*,ctInds], $
+                                  ;; TEXTPOS=1, $
+                                  TAPER=taper, $
+                                  TICKDIR=1, $
+                                  /BORDER, $
+                                  MAJOR=nContours, $
+                                  TICKNAME=tickName, $
+                                  ;; TICKVALUES=tickValues[1:-1], $
+                                  POSITION=cbpos, $
+                                  ;; RANGE=cbRange, $
+                                  FONT_SIZE=defMidFontSize, $
+                                  /NORMAL)
+        ENDIF
 
         IF KEYWORD_SET(make_R_E_axis) THEN BEGIN
            R_Eaxis = AXIS('X', $
@@ -456,14 +471,17 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
         ;; tMagRange   = ALOG10(MINMAX(mMagDat.K.chi2))
         ;; tickValues  = FINDGEN(nCBTicks+1)/nCBTicks*(tMagRange[1]-tMagRange[0])+tMagRange[0]
         ;; tickName    = STRING(FORMAT='(F0.2)',10.^tickValues)
-        cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
-                               RGB_TABLE=hammerCT, $
-                               TICKNAME=tickName, $
-                               TICKVALUES=tickValues, $
-                               POSITION=cbpos, $
-                               RANGE=cbRange, $
-                               /NORMAL)
 
+        IF KEYWORD_SET(colb) THEN BEGIN
+           cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
+                                  RGB_TABLE=hammerCT, $
+                                  TICKNAME=tickName, $
+                                  TICKVALUES=tickValues, $
+                                  POSITION=cbpos, $
+                                  RANGE=cbRange, $
+                                  /NORMAL)
+        ENDIF
+        
      END
   ENDCASE
 
