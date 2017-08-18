@@ -78,6 +78,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
   YError      = jvPlotData.curErr[avgs_JVfit.useInds]
   weights     = 1./ABS(jvPlotData.curErr[avgs_JVfit.useInds])^2
 
+  nPts        = N_ELEMENTS(X)
+
   IF jvPlotData.info.pot.T_PMFac NE 0 THEN BEGIN
      CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                                TEMPERATURE=T, $
@@ -121,8 +123,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         CASE 1 OF
            KEYWORD_SET(map__2D): BEGIN
 
-              dofK = N_ELEMENTS(X) - 2; treat kappa and R_B as free; - 4
-              dofG = N_ELEMENTS(X) - 1; treat R_B as free
+              dofK = nPts - 2; treat kappa and R_B as free; - 4
+              dofG = nPts - 1; treat R_B as free
 
               ;;Fix kappa [0] and magratio [3]
               kappaParamStruct[0].fixed = 1B
@@ -144,7 +146,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               magRatArr = MAKE_ARRAY(nKappa,/DOUBLE,VALUE=1.0D) # multi_magRatio_array
 
               chi2ArrK  = MAKE_ARRAY(nKappa,nMagRatio,/DOUBLE)
-              chi2ArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE) ;'cause kappa is fixed at infinity, o' course
+              chi2ArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE)        ;'cause kappa is fixed at infinity, o' course
+              wtSSRK    = MAKE_ARRAY(nKappa,nMagRatio,/DOUBLE) ;weighted sum of squared residuals
+              wtSSRG    = MAKE_ARRAY(nMagRatio,/DOUBLE)        ;likevel
 
               ;;WRONG
               ;; fastR_BFac= KEYWORD_SET(map_to_100km) ? $
@@ -236,8 +240,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     
                     ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
                     ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
-                    chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofK
-                    chi2ArrK[j,k]  = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                    wtSSRK[j,k]    = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                    ;; chi2           = wtSSRK[j,k] / dofK
+                    chi2ArrK[j,k]  = wtSSRK[j,k] / dofK ;[chi2Arr,TEMPORARY(chi2)]
                     ;; kappaArr[j,k] = A[0]
 
                  ENDFOR
@@ -268,8 +273,10 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                        
                        ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
                        ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
-                       chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofG
-                       chi2ArrG[k]    = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                       ;; chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofG
+                       ;; chi2ArrG[k]    = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                       wtSSRG[k]      = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                       chi2ArrG[k]    = wtSSRG[k] / dofG ;[chi2Arr,TEMPORARY(chi2)]
                        ;; kappaArr[j,k] = A[0]
               ENDFOR
 
@@ -416,11 +423,19 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                            T      : A[1], $
                            N      : bestDensK, $
                            magRat : magRatArr, $
-                           chi2   : TEMPORARY(chi2ArrK)}, $
+                           chi2   : TEMPORARY(chi2ArrK), $
+                           nParms : 4, $
+                           nPts   : nPts, $
+                           wtdSSR : TEMPORARY(wtSSRK), $
+                           wts    : weights}, $
                    G :    {T      : AGauss[1], $
                            N      : bestDensG, $
                            magRat : multi_magRatio_array, $
-                           chi2   : TEMPORARY(chi2ArrG)}}
+                           chi2   : TEMPORARY(chi2ArrG), $
+                           nParms : 3, $
+                           nPts   : nPts, $
+                           wtdSSR : TEMPORARY(wtSSRG), $
+                           wts    : weights}}
 
      END
      KEYWORD_SET(iterative_game_mode) AND ~KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens): BEGIN

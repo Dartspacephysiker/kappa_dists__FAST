@@ -167,20 +167,66 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   restored_fitFile = 0B
   IF KEYWORD_SET(restore_fitFile) THEN BEGIN
 
-     IF FILE_TEST(outDir+fitFile) THEN BEGIN
-        PRINT,'Restoring ' + fitFile + ' ...'
-        RESTORE,outDir+fitFile
-        restored_fitFile = 1B
-        ;; just_diff_eFlux  = 1B
+     searchbackward1month = 1
 
-        ;;And diff eFlux
-        RESTORE,outDir+diff_eFlux_file
+     remaining = KEYWORD_SET(searchbackward1month) ? 30 : 0
 
-     ENDIF ELSE BEGIN
-        PRINT,"Couldn't get file!"
-        STOP
-     ENDELSE
-     
+        foundFitFile = 0
+        tmpFitFile   = fitFile
+        WHILE ~foundFitFile AND remaining GT -1 DO BEGIN
+
+           IF FILE_TEST(outDir+tmpFitFile) THEN BEGIN
+
+              foundFitFile = 1
+              fitFile      = TEMPORARY(tmpFitFile)
+              
+              PRINT,'Restoring ' + fitFile + ' ...'
+              RESTORE,outDir+fitFile
+              restored_fitFile = 1B
+              ;; just_diff_eFlux  = 1B
+
+              ;;And diff eFlux
+              RESTORE,outDir+diff_eFlux_file
+
+           ENDIF ELSE BEGIN
+              ;; PRINT,"Couldn't get file!"
+              ;; STOP
+              date = (STRSPLIT(tmpFitFile,'-',/EXTRACT))
+              rest = STRJOIN(date[1:-1],'-')
+              date = date[0]
+              dd   = FIX(STRMID(date,STRLEN(date)-2,2))
+              mm   = FIX(STRMID(date,STRLEN(date)-4,2))
+              jahr = FIX(STRMID(date,STRLEN(date)-8,4))
+
+              CASE 1 OF
+                 ((dd EQ 1) AND (mm EQ 1)): BEGIN
+                    jahr--
+                    dd = 31
+                    mm = 12
+                 END
+                 (dd EQ 1): BEGIN
+                    dd = 31
+                    mm--
+                 END
+                 ELSE: BEGIN
+                    dd--
+                 END
+              ENDCASE
+              
+              tmpFitFile = STRJOIN([STRING(FORMAT='(I04,I02,I02)',jahr,mm,dd),rest],'-')
+
+
+              remaining--
+
+           ENDELSE
+           
+        ENDWHILE
+
+        IF ~foundFitFile THEN BEGIN
+           PRINT,"Couldn't get file!"
+           STOP
+        ENDIF
+        
   ENDIF ELSE BEGIN
 
      KAPPA_EFLUX_FIT2D, $

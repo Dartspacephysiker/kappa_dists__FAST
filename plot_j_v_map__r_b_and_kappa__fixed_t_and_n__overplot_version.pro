@@ -2,50 +2,73 @@
 PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotData,avgs_JVFit, $
    MAP__2D=map__2D, $
    MAP2D__LOG_KAPPA=map2D__log_kappa, $
+   ADDWINSYM=addWinSym, $
    ORBIT=orbit, $
    IN_KAPPA_A=A, $
    IN_GAUSS_A=AGauss, $
    OUT_YBEST=out_yBest, $
+   CALC_FTEST=calc_fTest, $
+   ZLOG=zLog, $
    SAVEPLOT=savePlot, $
    ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
    COLORTABLEINDEX=colorTableIndex, $
    COLORTABLEBOTTOM=colorTableBottom, $
+   REVERSE_COLORTABLE=reverse_ct, $
    NUMCONTOURS=numContours, $
+   C_VALUE=c_value, $
+   FILL=fill, $
    COLORBAR=colorbar, $
+   RANGE_COLORBAR=range_colorbar, $
+   OVERPLOT=overplot, $
+   TRANSPARENCY=transparency, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  ALT_R_E_POS = 0
+
   ;;For adding an R_E axis, if that's wassup
   @common__jv_curve_fit__tie_r_b_and_dens.pro
+  COMMON OVERPLOT_J_V,OPJV_count
 
-  contChiPlotName  = 'contChiPlot'
+  IF N_ELEMENTS(OPJV_count) EQ 0 OR ~KEYWORD_SET(overplot) THEN BEGIN
+     OPJV_count    = 0
+  ENDIF ELSE OPJV_count++
 
-  colb             = N_ELEMENTS(colorbar        ) GT 0 ? colorbar         : 1
+  contChiPlotName  = 'contChiPlot' + (OPJV_count EQ 0 ? '' : STRING(FORMAT='(I02)',OPJV_count))
+
+  log_cbRange      = N_ELEMENTS(zLog) GT 0 ? zLog : 1
+
+  colb             = (N_ELEMENTS(colorbar       ) GT 0 ? colorbar         : 1) $
+                     AND ~KEYWORD_SET(overplot)
   ctIndex          = N_ELEMENTS(colorTableIndex ) GT 0 ? colorTableIndex  : 0
   ctBottom         = N_ELEMENTS(colorTableBottom) GT 0 ? colorTableBottom : 30
   nColorsIn        = 256
   nContours        = N_ELEMENTS(numContours     ) GT 0 ? numContours      : 5
+  ;; IF KEYWORD_SET(c_value) THEN BEGIN
+  ;;    nContours     = N_ELEMENTS(c_value)
+  ;; ENDIF
   LOADCT,ctIndex,NCOLORS=nColors,RGB_TABLE=hammerCT
   hammerCT         = [hammerCT[ctBottom:-1,0],hammerCT[ctBottom:-1,1],hammerCT[ctBottom:-1,2]]
   hammerCT         = CONGRID(REFORM(hammerCT,N_ELEMENTS(hammerCT)/3,3),256,3,/INTERP)
+  IF KEYWORD_SET(reverse_ct) THEN BEGIN
+     hammerCT      = REVERSE(hammerCT,1)
+  ENDIF
   nColors          = N_ELEMENTS(hammerCT[*,0])
 
-  IF KEYWORD_SET(colb) THEN BEGIN
-     include_TTaper   = 1
-     include_BTaper   = 0
-     CASE 1 OF
-        include_TTaper AND include_BTaper: BEGIN
-           taper      = 1
-        END
-        include_TTaper: BEGIN
-           taper      = 3
-        END
-        include_BTaper: BEGIN
-           taper      = 2
-        END
-     ENDCASE
-  ENDIF
+  include_TTaper   = 1
+  include_BTaper   = 0
+  CASE 1 OF
+     include_TTaper AND include_BTaper: BEGIN
+        taper      = 1
+     END
+     include_TTaper: BEGIN
+        taper      = 3
+     END
+     include_BTaper: BEGIN
+        taper      = 2
+     END
+  ENDCASE
 
   defFontSize      = 14
   defBigFontSize   = 18
@@ -58,30 +81,95 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
   surfKappaRange   = [MIN(mMagDat.K.kappa),1.8]
   xSRange          = [40,MAX(mMagDat.K.magRat)]
 
-  IF KEYWORD_SET(colb) THEN BEGIN
-     ;;First get CB range
-     log_cbRange = 1
+  CASE 1 OF
+     KEYWORD_SET(calc_fTest): BEGIN
+
+        ;; kappaArr  = multi_kappa_array                     # MAKE_ARRAY(nMagRatio,/DOUBLE,VALUE=1.0D)
+        ;; magRatArr = MAKE_ARRAY(nKappa,/DOUBLE,VALUE=1.0D) # multi_magRatio_array
+
+        ;; tmpwtdSSRG = mMagDat.G.wtdSSR # MAKE_ARRAY(N_ELEMENTS(mMagDat.K.kappa[*,0]),/DOUBLE,VALUE=1.0D)
+        tmpwtdSSRG = MAKE_ARRAY(N_ELEMENTS(mMagDat.K.kappa[*,0]),/DOUBLE,VALUE=1.0D) # mMagDat.G.wtdSSR
+        zVar       = ( (tmpwtdSSRG - mMagDat.K.wtdSSR) / (mMagDat.K.nParms - mMagDat.G.nParms) ) $
+                     / ( mMagDat.K.wtdSSR / ( mMagDat.K.nPts - mMagDat.K.nParms) )
+
+        IF log_cbRange THEN BEGIN
+
+           fi_i       = WHERE(zVar GE 0 AND FINITE(zVar), $
+                              nPos, $
+                              NCOMPLEMENT=nNotPos, $
+                              COMPLEMENT=nFi_i)
+           IF nNotPos GT 0 THEN BEGIN
+              zVar[nFi_i] = MAX(zVar[fi_i])
+           ENDIF
+
+        ENDIF
+        ;;Wanna see?
+        ;; mMagInd = 0
+        ;; FOR k=0,N_ELEMENTS(mmagdat.k.kappa[*,mMagInd])-1 DO BEGIN
+        ;;    PRINT,FORMAT='(F0.2,T15,F0.2,T30,F0.2)', $
+        ;;          mmagdat.k.kappa[k,mMagInd], $
+        ;;          mmagdat.k.wtdSSR[k,mMagInd], $
+        ;;          mmagdat.g.wtdSSR[mMagInd]
+        ;; ENDFOR
+
+        ;;According to the Wikipedia article (https://en.wikipedia.org/wiki/F-test#Regression_problems),
+        ;;we should look at an F distribution with (p2 - p1, n - p2) degrees of freedom. Do we believe?
+        critclPrb = 0.05D
+        F_DOF1    = mMagDat.K.nParms - mMagDat.G.nParms
+        F_DOF2    = mMagDat.K.nPts - mMagDat.K.nParms
+        critisk_F = F_CVF(critclPrb, F_DOF1, F_DOF2)
+
+        zVar     /= critisk_F
+
+        title     = 'F / F!D0.05!N'
+
+        FWIN      = WHERE(zVar GE critisk_F,nFWin)
+
+        PRINT,FORMAT='(A0,F0.2,A0)',"Kappa is better for ", $
+              FLOAT(nFWin)/N_ELEMENTS(zVar)*100., $
+              '% of the possibilities'
+
+     END
+     ELSE: BEGIN
+        title      = '$\chi$!U2!Dred!N'
+        zVar       = mMagDat.K.chi2
+     END
+  ENDCASE
+
+  ;;First get CB range (need this whether or not we actually make a colorbar!)
+  IF KEYWORD_SET(range_colorbar) THEN BEGIN
+
+     cbRange = range_colorbar
+
+  ENDIF ELSE BEGIN
+
      IF log_cbRange THEN BEGIN
 
-        zVar          = ALOG10(mMagDat.K.chi2)
+        zVar          = ALOG10(zVar)
 
-        cbRange       = ALOG10(MINMAX(mMagDat.K.chi2 < 1D2))
+        ;; cbRange       = ALOG10(MINMAX(zVar < 1D2))
+        cbRange       = MINMAX(zVar < 2)
 
         cbRange[0]    = cbRange[0] < 0.0
      ENDIF ELSE BEGIN
 
-        zVar          = mMagDat.K.chi2
-        cbRange       = MINMAX(mMagDat.K.chi2 < 30.05)
+        cbRange       = MINMAX(zVar < 30.05)
 
      ENDELSE
 
-  ENDIF
+  ENDELSE
+
+  ;; IF KEYWORD_SET(colb) THEN BEGIN
+  ;; ENDIF
   
   ;;Now do contour things
   tickValues       = (FINDGEN(nContours+include_TTaper+include_BTaper))/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
+  ;; c_values         = KEYWORD_SET(c_value) ? c_value : $
+  ;;                    FINDGEN(nContours+include_TTaper+include_BTaper) / $
+  ;;                    (nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
   c_values         = FINDGEN(nContours+include_TTaper+include_BTaper)/(nContours-1+include_TTaper+include_BTaper)*(cbRange[1]-cbRange[0])+cbRange[0]
 
-  cb_use_c_vals    = 1
+  cb_use_c_vals    = ~KEYWORD_SET(c_value)
   ;; PRINT,"C values"
   ;; PRINT,c_values
 
@@ -121,33 +209,43 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
      ENDELSE
 
-  ENDIF
+     IF include_TTaper THEN tickName = [tickName,'bro']
+     ;; IF include_BTaper THEN tickName = ['bro',tickName]
 
-  IF include_TTaper THEN tickName = [tickName,'bro']
-  ;; IF include_BTaper THEN tickName = ['bro',tickName]
+  ENDIF
 
   ;;Winder
   winDim           = [900,600]
-  window1          = WINDOW(DIMENSIONS=winDim, $
+  IF ~KEYWORD_SET(overplot) THEN BEGIN
+     window1      = WINDOW(DIMENSIONS=winDim, $
                             BUFFER=savePlot)
 
-  ;;These all pertain to grid creation
-  xGridStyle       = ':'
-  yGridStyle       = ':'
-  xTickLen         = 1
-  yTickLen         = 1
-  xSubTickLen      = 0.01
-  ySubTickLen      = 0.01
+     ;;These all pertain to grid creation
+     xGridStyle   = ':'
+     yGridStyle   = ':'
+     xTickLen     = 1
+     yTickLen     = 1
+     xSubTickLen  = 0.01
+     ySubTickLen  = 0.01
+
+  ENDIF
 
   ;;Supposing a vertical color bar
-  cbpos            = [0.96,0.06,0.975,0.92]
-  contPos          = [0.09,0.19,0.82,0.92]
-  surfPos          = [0.50,0.40,0.75,0.80]
+  ;; IF KEYWORD_SET(colb) THEN BEGIN
+  cbpos           = [0.96,0.06,0.975,0.92]
+  contPos         = [0.09,0.19,0.82,0.92]
 
+  IF KEYWORD_SET(ALT_R_E_POS) THEN BEGIN
+     contPos      = [0.09,0.09,0.82,0.82]
+  ENDIF
+  ;; ENDIF ELSE BEGIN
+  ;;    contPos   = [0.09,0.19,0.96,0.92]
+  ;; ENDELSE
+  surfPos         = [0.50,0.40,0.75,0.80] ;if you add a surface, you know?
 
-  orbPref          = ''
+  orbPref         = ''
   IF KEYWORD_SET(orbit) THEN BEGIN
-     orbPref       = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
+     orbPref      = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
@@ -155,18 +253,23 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                             DENSITY=Density, $
                             /DONT_MAP_SOURCEDENS ;, $
 
-  IF ~KEYWORD_SET(overplot) THEN $
-     titleStr         = STRING(FORMAT='(A0," (T!DF!N=",I0," eV, n!DF!N=",G0.3," cm!U-3!N)")', $
+  IF ~KEYWORD_SET(overplot) THEN BEGIN
+     titleStr      = STRING(FORMAT='(A0," (T!DF!N=",I0," eV, n!DF!N=",G0.3," cm!U-3!N)")', $
                                orbPref,Temperature,Density)
+     ;; xTitle = 'Mirror ratio'
+     xTitle        = 'R!DB!N'
 
+  
+  ENDIF
+  
   ;;Are we going to add an R_E axis?
 
   ;;ionosphere R_B values - ind 1
   ;;FAST R_B values       - ind 0
 
-  IF N_ELEMENTS(tRB_fLineRE) GT 0 THEN BEGIN
-     make_R_E_axis    = 1
-     R_B_axis_vals    = [MIN(mMagDat.K.magRat),(MIN(mMagDat.K.magRat) LT 10 ? 10 : 100)]
+  IF N_ELEMENTS(tRB_fLineRE) GT 0 AND ~KEYWORD_SET(overplot) THEN BEGIN
+     make_R_E_axis = 1
+     R_B_axis_vals = [MIN(mMagDat.K.magRat),(MIN(mMagDat.K.magRat) LT 10 ? 10 : 100)]
 
      WHILE MAX(R_B_axis_vals) LT MAX(mMagDat.K.magRat) DO BEGIN
         R_B_axis_vals = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
@@ -174,18 +277,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
      ;; R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
 
-     R_B_axis_names   = STRING(FORMAT='(I0)',R_B_axis_vals)
-     R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
+     R_B_axis_names = STRING(FORMAT='(I0)',R_B_axis_vals)
+     R_E_axis_vals  = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
-     nVals            = N_ELEMENTS(R_E_axis_vals)
-     ;; nValsStr         = STRING('(I0)',nVals)
+     nVals          = N_ELEMENTS(R_E_axis_vals)
+     ;; nValsStr    = STRING('(I0)',nVals)
      ;; R_E_axis_names   = STRING(FORMAT='('+nValsStr+'(F0.1))',R_E_axis_vals)
-     R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
+     R_E_axis_names = STRING(FORMAT='(F0.2)',R_E_axis_vals)
 
   ENDIF
-
-  ;; xTitle = 'Mirror ratio'
-  xTitle = 'R!DB!N'
 
   CASE 1 OF
      KEYWORD_SET(map__2D): BEGIN
@@ -212,18 +312,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                            (xVar GE xSRange[0]) AND (xVar LE xSRange[1]))
         zSRange    = MINMAX(zVar[surfInds]) < MAX(cbRange)
 
+        IF ~KEYWORD_SET(overplot) THEN BEGIN
 
-        ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
-
-        ;; IF KEYWORD_SET(minSurface) THEN BEGIN
-
-        ;;    R = MIN_CURVE_SURF(ALOG10(mMagDat.K.chi2),mMagDat.K.magRat,mMagDat.K.kappa, $
-        ;;                       YOUT=mMagDat.K.kappa[*,0], $
-        ;;                       XOUT=REFORM(mMagDat.K.magRat[0,*]))
-
-        ;; ENDIF ELSE BEGIN
-
-        contPlot    = CONTOUR(zVar, $
+           contPlot = CONTOUR(zVar, $
                               xVar, $
                               yVar, $
                               NAME=contChiPlotName, $
@@ -244,7 +335,6 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                               YTICKLEN=yTickLen, $
                               XSUBTICKLEN=xSubTickLen, $
                               YSUBTICKLEN=ySubTickLen, $
-                              ;; C_THICK=4.0, $
                               XTICKNAME=R_B_axis_names, $
                               XTICKVALUES=R_B_axis_vals, $
                               FONT_SIZE=defBigFontSize, $
@@ -252,12 +342,12 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                               YTICKFONT_SIZE=defMidFontSize, $
                               RGB_TABLE=hammerCT, $
                               POSITION=contPos, $
+                              OVERPLOT=overplot, $
+                              TRANSPARENCY=transparency, $
                               /CURRENT)
 
-        ;; ENDELSE
-        
-        IF KEYWORD_SET(colb) THEN BEGIN
-           cb          = COLORBAR(TITLE='$\chi$!U2!Dred!N', $
+           IF KEYWORD_SET(colb) THEN BEGIN
+              cb       = COLORBAR(TITLE=title, $
                                   TARGET=contChiPlotName, $
                                   ORIENTATION=1, $
                                   TEXT_ORIENTATION=0, $
@@ -273,22 +363,46 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                                   ;; RANGE=cbRange, $
                                   FONT_SIZE=defMidFontSize, $
                                   /NORMAL)
-        ENDIF
+           ENDIF
 
-        IF KEYWORD_SET(make_R_E_axis) THEN BEGIN
-           R_Eaxis = AXIS('X', $
-                          TARGET=contPlot, $
-                          ;; LOCATION="bottom", $
-                          LOCATION=[0,MIN(contPlot.yrange)-0.48*(MAX(yRange)/5.0)^1.6,0], $
-                          TITLE='R!DE!N', $
-                          SUBTICKLEN=0.0, $
-                          TICKLEN=0.015, $
-                          TICKFONT_SIZE=defMidFontSize, $
-                          TICKVALUES=R_B_axis_vals, $
-                          TICKNAME=R_E_axis_names);, $
-                          ;; AXIS_RANGE=MINMAX(R_E_axis_vals))
-        ENDIF
+           IF KEYWORD_SET(make_R_E_axis) THEN BEGIN
 
+              REaxPos    = [0,MIN(contPlot.yrange)-0.48*(MAX(yRange)/5.0)^1.6,0]
+              IF KEYWORD_SET(ALT_R_E_POS) THEN BEGIN
+                 REaxPos = [0,MAX(contPlot.yrange)+0.48*(MAX(yRange)/5.0)^1.6,0]
+              ENDIF
+
+              R_Eaxis    = AXIS('X', $
+                                TARGET=contPlot, $
+                                ;; LOCATION="bottom", $
+                                LOCATION=REaxPos, $
+                                TITLE='R!DE!N', $
+                                SUBTICKLEN=0.0, $
+                                TICKLEN=0.015, $
+                                TICKFONT_SIZE=defMidFontSize, $
+                                TICKVALUES=R_B_axis_vals, $
+                                TICKNAME=R_E_axis_names) ;, $
+              ;; AXIS_RANGE=MINMAX(R_E_axis_vals))
+           ENDIF
+
+        ENDIF ELSE BEGIN
+
+           contPlot = CONTOUR(zVar, $
+                              xVar, $
+                              yVar, $
+                              NAME=contChiPlotName, $
+                              XRANGE=MINMAX(mMagDat.K.magRat), $
+                              YLOG=map2D__log_kappa OR instead_q, $
+                              C_VALUE=c_values, $
+                              YRANGE=yRange, $
+                              FILL=fill, $
+                              RGB_TABLE=hammerCT, $
+                              POSITION=contPos, $
+                              /OVERPLOT, $
+                              TRANSPARENCY=transparency, $
+                              /CURRENT)
+
+        ENDELSE
 
         checkMe = mMagDat.K.chi2
         checkMeG = mMagDat.G.chi2
@@ -348,19 +462,11 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
               winKClose.chi2,winKClose.magRat,winKClose.R_E,winKClose.yVar
         PRINT,''
 
-        addWinSym = 1
         IF KEYWORD_SET(addWinSym) THEN BEGIN
 
-           ;; winX = [winK.magRat,winG.magRat,winKClose.magRat] > (MIN(mMagDat.K.magRat)*1.01) < (MAX(mMagDat.K.magRat)*0.88)
-           ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar] < (MAX(yRange)*0.99) > (MIN(yRange)*1.01)
-           ;; winX = [winK.magRat,winG.magRat,winKClose.magRat]
-           ;; winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange),winKClose.yVar]
            winX = [winK.magRat,winG.magRat]
            winY = [winK.yVar,KEYWORD_SET(instead_q) ? MIN(yRange) : MAX(yRange)+0.08*(MAX(yRange)/5.0)^1.5]
 
-           ;; labels = 'Min $\chi$!U2!N!Dred,' + ['K','M'] + '!N'
-           ;; labels = 'Min $\chi$!U2!N!Dred!N,' + ['$\kappa$','M'] + '!N'
-           ;; labels = 'Min $\chi$!U2!N!Dred!N (' + ['Kappa','Maxwellian'] + ')'
            labels = 'Min $\chi$!U2!N!Dred,' + ['Kappa','Maxwellian ($\kappa \rightarrow \infty$)'] + '!N'
 
            ;;For not-local analysis
@@ -405,19 +511,15 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                             SYM_SIZE=symSize[k], $
                             SYM_THICK=N_ELEMENTS(symThick) GT 0 ? symThick[k] : !NULL, $
                             LABEL_FONT_SIZE=labelFontSize, $
-                            ;; LABEL_FONT_STYLE=N_ELEMENTS(labFontStyle) GT 0 ? labFontStyle[k] : !NULL, $
                             CLIP=0)
 
            ENDFOR
 
         ENDIF
 
-
      END
      ELSE: BEGIN
 
-        ;; nPoints     = N_ELEMENTS(mMagDat.K.magRat)
-        
         p1pos            = [0.10,0.08,0.95,0.50]
         p2pos            = [0.10,0.53,0.95,0.94]
         cbpos            = [0.10,0.97,0.95,0.99]
@@ -435,7 +537,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                                        SYM_SIZE=3.0, $
                                        /SYM_FILLED, $
                                        RGB_TABLE=hammerCT, $
-                                       MAGNITUDE=mMagDat.K.chi2, $
+                                       MAGNITUDE=zVar, $
                                        XGRIDSTYLE=xGridStyle, $
                                        YGRIDSTYLE=yGridStyle, $
                                        XTICKLEN=xTickLen, $
@@ -446,7 +548,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
                                        POSITION=p1pos)
 
         plot_2            = SCATTERPLOT(mMagDat.K.magRat, $
-                                        mMagDat.K.chi2, $
+                                        zVar, $
                                         XTICKFORMAT="(A1)", $
                                         ;; XTITLE="Mirror ratio", $
                                         YTITLE="$\Chi$!U2!Dred!N", $
@@ -466,9 +568,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
 
         ;; cb_i        = (INDGEN(nCBTicks)*nPoints)/(nCBTicks-1)
         ;; IF cb_i[-1] EQ nPoints THEN cb_i[-1] -= 1
-        ;; tickValues  = (mMagDat.K.chi2[SORT(mMagDat.K.chi2)])[cb_i]
+        ;; tickValues  = (zVar[SORT(zVar)])[cb_i]
         ;; tickName    = STRING(FORMAT='(F0.2)',tickValues)
-        ;; tMagRange   = ALOG10(MINMAX(mMagDat.K.chi2))
+        ;; tMagRange   = ALOG10(MINMAX(zVar))
         ;; tickValues  = FINDGEN(nCBTicks+1)/nCBTicks*(tMagRange[1]-tMagRange[0])+tMagRange[0]
         ;; tickName    = STRING(FORMAT='(F0.2)',10.^tickValues)
 
@@ -535,4 +637,3 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N__OVERPLOT_VERSION,mMagDat,jvPlotD
   ENDIF
 
 END
-
