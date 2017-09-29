@@ -311,6 +311,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      ;; ENDIF
 
+     add_orig = 1
+     IF KEYWORD_SET(add_orig) THEN BEGIN
+        orig           = CREATE_STRUCT(orig,'energy_inds',energy_inds)
+        kappaFit       = CREATE_STRUCT(kappaFit,"orig",orig)
+     ENDIF
+
      IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
         ;; weights                  = 1./ABS(Y)^2
         ;; fixMe                       = WHERE(~FINITE(weights),nFixMe)

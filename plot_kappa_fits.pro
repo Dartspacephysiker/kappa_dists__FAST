@@ -38,14 +38,14 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      'EFLUX': BEGIN
         pPref          = '-eFlux_fit'
         unitTitle      = "e!E-!N energy flux"
-        yTitle         = "Differential Energy Flux (eV/cm$^2$-sr-s)"
+        yTitle         = "Differential Energy Flux (eV/cm$^2$-s-sr-eV)"
         lowerBound     = 1.0e5
         upperBound     = 1.0e10
      END
      'FLUX':BEGIN
         pPref          = '-nFlux_fit'
         unitTitle      = "e!E-!N # flux"
-        yTitle         = "Differential Number Flux (#/cm$^2$-sr-s)"        
+        yTitle         = "Differential Number Flux (#/cm$^2$-s-sr-eV)"      
         lowerBound     = 1.0e1
         upperBound     = 1.0e7
      END
