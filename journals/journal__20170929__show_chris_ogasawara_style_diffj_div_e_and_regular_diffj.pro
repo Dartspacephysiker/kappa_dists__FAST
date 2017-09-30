@@ -14,6 +14,7 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
    DISTFRANGE=distFRange, $
    DKFIG1=DKFig1, $
    LOGDKFIG1=LogDKFig1, $
+   OGASAWARADKFIG1=OgasawaraDKFig1, $
    ;; YLOG=yLog, $
    ENERGYRANGE=eRange, $
    NORM_E_BY_T=norm_E_by_T
@@ -48,9 +49,22 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
         distFRange = [1.D-30,1.D-15]
         energyLog = 1
      END
+     KEYWORD_SET(OgasawaraDKFig1): BEGIN
+        N            = 0.6D         ;cm^-3
+        T            = 1400         ;eV
+        ;; E_b          = 0.D          ;Bulk energy
+        E_b          = 8.3D3        ;Bulk energy
+
+        units        = 'FLUX'     
+        divideByE    = 1
+        ;; norm_E_by_T  = 1
+        eRange       = [1D3,1D5]
+        distFRange   = [1.D,1.D8]
+        energyLog    = 1
+     END
      ELSE: 
   ENDCASE
-  DKFiggin = KEYWORD_SET(DKFig1) OR KEYWORD_SET(LogDKFig1)
+  DKFiggin = KEYWORD_SET(DKFig1) OR KEYWORD_SET(LogDKFig1) OR KEYWORD_SET(OgasawaraDKFig1)
   ;; E_b      = 0                ;Bulk energy
 
   ;; R_B      = 15
@@ -125,6 +139,10 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
         tmpDistF /= pot
      ENDIF
 
+     IF KEYWORD_SET(OgasawaraDKFig1) THEN BEGIN
+        tmpDistF *= 1D3
+     ENDIF
+
      curArr   = [curArr,TRANSPOSE(tmpCur)]
      distFArr = [distFArr,TRANSPOSE(tmpDistF)]
 
@@ -146,13 +164,7 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
      distFPeakVal    = MAX(distFArr)
      distFRange      = N_ELEMENTS(distFRange) GT 0 ? distFRange : [10.D^(ALOG10(distFPeakVal)-7D),10.D^(ALOG10(distFPeakVal)+0.2D)]
 
-     ;; energyRange  = [1,MAX(pot)]
-     ;; energyRange     = [1,4D4]
      energyRange     = KEYWORD_SET(eRange) ? eRange : [1,1D5]
-
-
-
-
 
      potLog          = N_ELEMENTS(potLog) GT 0 ? potLog : 1
      eLog            = N_ELEMENTS(energyLog) GT 0 ? energyLog : 1
@@ -174,7 +186,7 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
            pPref          = '-eFlux_fit'
            unitTitle      = "e!U-!N energy flux"
            IF KEYWORD_SET(divideByE) THEN BEGIN
-              fluxTitle   = "(dJ_E/dE)/E ( ( eV/cm!U2!N-sr-s) / E)"
+              fluxTitle   = "(dJ_E/dE)/E ( ( eV/cm!U2!N-sr-s-eV) / eV)"
            ENDIF ELSE BEGIN
               fluxTitle   = "Differential Energy Flux (eV/cm!U2!N-s-sr-eV)"
            ENDELSE
@@ -185,18 +197,29 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
            pPref          = '-nFlux_fit'
            unitTitle      = "e!U-!N # flux"
            IF KEYWORD_SET(divideByE) THEN BEGIN
-              fluxTitle   = "(dJ/dE)/E ( ( #/cm!U2!N-sr-s) / E)"
+              fluxTitle   = "(dJ/dE)/E ( ( #/cm!U2!N-sr-s-eV) / eV)"
            ENDIF ELSE BEGIN
               fluxTitle   = "Differential Number Flux (#/cm!U2!N-s-sr-eV)"        
            ENDELSE
            lowerBound     = 1.0e1
            upperBound     = 1.0e7
+
+           IF KEYWORD_SET(OgasawaraDKFig1) THEN BEGIN
+
+              IF KEYWORD_SET(divideByE) THEN BEGIN
+                 fluxTitle   = "(dJ/dE)/E ( ( #/cm!U2!N-sr-s-keV) / keV)"
+              ENDIF ELSE BEGIN
+                 fluxTitle   = "Differential Number Flux (#/cm!U2!N-s-sr-keV)"        
+              ENDELSE
+
+           ENDIF
+
         END
         'DFSTD':BEGIN
            pPref          = '-dfStd_fit'
            unitTitle      = "e!U-!N # flux"
            IF KEYWORD_SET(divideByE) THEN BEGIN
-              fluxTitle   = "(df)/E ( ( #/cm!U2!N-sr-s) / E)"
+              fluxTitle   = "df/E ( (s!U3!Nm!U-6!N) / eV)"
            ENDIF ELSE BEGIN
               fluxTitle   = "Phase space density (s!U3!Nm!U-6!N)"
            ENDELSE
@@ -216,8 +239,10 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
      ;;distF curves
      FOR k=0,(nKappa < truncate_at)-1 DO BEGIN
 
-        x = KEYWORD_SET(norm_E_by_T) ? pot/T[0] : pot
-        xTitle = KEYWORD_SET(norm_E_by_T) ? 'E / (k!DB!NT)' : 'Energy (eV)'
+        x      = KEYWORD_SET(norm_E_by_T) ? pot/T[0]        : (KEYWORD_SET(OgasawaraDKFig1) ? pot/1D3 : pot)
+        xTitle = KEYWORD_SET(norm_E_by_T) ? 'E / (k!DB!NT)' : (KEYWORD_SET(OgasawaraDKFig1) ? 'Energy (keV)' : 'Energy (eV)')
+
+        IF KEYWORD_SET(OgasawaraDKFig1) THEN energyRange /= 1D3
 
         CASE k OF
            0: BEGIN
