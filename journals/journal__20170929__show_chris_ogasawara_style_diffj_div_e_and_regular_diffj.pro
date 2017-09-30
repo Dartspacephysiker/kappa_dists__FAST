@@ -13,6 +13,7 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
    DISTFLOG=distFLog, $
    DISTFRANGE=distFRange, $
    DKFIG1=DKFig1, $
+   LOGDKFIG1=LogDKFig1, $
    ;; YLOG=yLog, $
    ENERGYRANGE=eRange, $
    NORM_E_BY_T=norm_E_by_T
@@ -24,17 +25,32 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
   T        = 500                ;eV
   E_b      = 1D3                ;Bulk energy
 
-  IF KEYWORD_SET(DKFig1) THEN BEGIN
-     N        = 1.0D ;cm^-3
-     T        = 500  ;eV
-     E_b      = 0.D  ;Bulk energy
+  CASE 1 OF
+     KEYWORD_SET(DKFig1): BEGIN
+        N        = 1.0D         ;cm^-3
+        T        = 500          ;eV
+        E_b      = 0.D          ;Bulk energy
 
-     units    = 'DFSTD'     
-     norm_E_by_T = 1
-     eRange   = [0,10]
-     distFRange = [1.D-21,1.D-15]
-     energyLog = 0
-  ENDIF
+        units    = 'DFSTD'     
+        norm_E_by_T = 1
+        eRange   = [0,10]
+        distFRange = [1.D-21,1.D-15]
+        energyLog = 0
+     END
+     KEYWORD_SET(LogDKFig1): BEGIN
+        N        = 1.0D         ;cm^-3
+        T        = 500          ;eV
+        E_b      = 0.D          ;Bulk energy
+
+        units    = 'DFSTD'     
+        norm_E_by_T = 1
+        eRange   = [0.01,1E3]
+        distFRange = [1.D-30,1.D-15]
+        energyLog = 1
+     END
+     ELSE: 
+  ENDCASE
+  DKFiggin = KEYWORD_SET(DKFig1) OR KEYWORD_SET(LogDKFig1)
   ;; E_b      = 0                ;Bulk energy
 
   ;; R_B      = 15
@@ -114,7 +130,7 @@ PRO JOURNAL__20170929__SHOW_CHRIS_OGASAWARA_STYLE_DIFFJ_DIV_E_AND_REGULAR_DIFFJ,
 
   ENDFOR
 
-  IF KEYWORD_SET(DKFig1) THEN BEGIN
+  IF KEYWORD_SET(DKFiggin) THEN BEGIN
 
      nCol            = 1
      nRow            = 1
