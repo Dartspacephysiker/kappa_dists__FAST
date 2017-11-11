@@ -15,7 +15,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    USE_MAGNETOMETER_CURRENT=use_mag_current, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
-   ADD_UPGOING_ION_POT=add_iu_pot, $
+   ;; ADD_UPGOING_ION_POT=add_iu_pot, $
+   ADD_IU_POT=add_iu_pot, $
    T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
    PLOT_TIMES=plot_times, $
    IN_BONUSPREF=in_bonusPref, $

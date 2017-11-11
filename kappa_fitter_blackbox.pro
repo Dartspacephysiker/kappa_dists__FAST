@@ -186,7 +186,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
               ;; just_diff_eFlux  = 1B
 
               ;;And diff eFlux
-              RESTORE,outDir+diff_eFlux_file
+              ;; RESTORE,outDir+'/diff_eFlux/'+diff_eFlux_file
 
            ENDIF ELSE BEGIN
               ;; PRINT,"Couldn't get file!"
@@ -446,7 +446,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         USE_MAGNETOMETER_CURRENT=cAP_use_mag_current, $
         USE_CHAR_EN_FOR_DOWNPOT=cAP_use_charE_for_downPot, $
         USE_PEAK_EN_FOR_DOWNPOT=cAP_use_peakE_for_downPot, $
-        ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
+        ;; ADD_UPGOING_ION_POT=cAP_add_iu_pot, $
+        ADD_IU_POT=cAP_add_iu_pot, $
         PLOT_TIMES=plot_times, $
         IN_BONUSPREF=bonusPref, $
         USEI__RELCHANGE=useInds__relChange, $
