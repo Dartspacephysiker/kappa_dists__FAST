@@ -25,13 +25,14 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   ;; ;;And don't let DENSITY get out of hand!
   ;; AMaxStep[3]     = 0.5
   AMaxStep        = DOUBLE([50., $   ; A[0]: E_b,       
-                            50., $   ; A[1]: T,         
+                            ;; 50., $   ; A[1]: T,         
+                            0., $  ; A[1]: T,         
                             0.5, $  ; A[2]: kappa,     
                             0.30, $   ; A[3]: n,         
                             0.])     ; A[4]: bulkAngle, 
 
   Alimited         = [[1,1], $
-                      [1,1], $
+                      [1,0], $
                       [1,1], $
                       [1,1], $
                       ;; [0,0], $
@@ -39,7 +40,7 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
                       [0,0]]
   
   Alimits         = [[100.,3.0D4]    , $ ;E_b
-                     [10,2D4]     , $ ;Temp
+                     [10,2D5]     , $ ;Temp
                      [1.501D,100]  , $ ;kappa 
                      [1D-4,100]     , $ ;N
                      [-180,180]]       ;Bulk Angle

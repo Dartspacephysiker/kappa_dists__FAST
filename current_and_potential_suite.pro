@@ -658,7 +658,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   IN_MMAGDAT=mMagDat, $
                                   _EXTRA=e
 
-     STOP
+     ;; STOP
      
   ENDIF
 
