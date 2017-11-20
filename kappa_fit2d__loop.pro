@@ -163,6 +163,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   nEnergies                         = N_ELEMENTS(diff_eFlux.energy[*,0,0])
   nTotAngles                        = N_ELEMENTS(diff_eFlux.theta[0,*,0])
 
+  dont_print_fitInfo                = 0
+
   ;;Gotta do this up front, or it plagues everyone
   ;; IF KEYWORD_SET(KF2D__SDTData_opt.manual_angle_correction) THEN BEGIN
   ;;    MANUALLY_CORRECT_DIFF_EFLUX_ANGLE,diff_eFlux,KF2D__SDTData_opt.manual_angle_correction

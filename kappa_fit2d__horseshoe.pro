@@ -32,8 +32,18 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   IF KEYWORD_SET(fit2D__save_all_plots) THEN finish_and_save_all = 1
 
-  OKStatus     = [1,2,3,4]      ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
-  shiftTheta   = -1             ;Not currently clear why the shift is necessary, but it makes things come out right
+  IF kFitParamStruct[1].limited[1] EQ 0 THEN BEGIN
+     ;; When the upperbound of T is not limited, xTol will become irreducible in
+     ;; the course of the fit and status 7 will be reported. To avoid this, we
+     ;; allow xTol = unminimizable to be an allowable outcome
+     ;;See INIT_KAPPA_FITPARAM_INFO<f> for more informaciones
+
+     OKStatus  = [1,2,3,4,7] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+
+  ENDIF ELSE BEGIN
+     OKStatus  = [1,2,3,4]
+  ENDELSE
+  shiftTheta   = 0             ;Not currently clear why the shift is necessary, but it makes things come out right
 
   eRange_peak  = out_eRange_peak[*,-1]
 
@@ -100,7 +110,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                             NFEV=nfev, $
                             ;; FTOL=KF2D__curveFit_opt.fit2d_tol, $
                             FTOL=KF2D__curveFit_opt.fit2D_tol, $
-                            GTOL=1e-13, $
+                            GTOL=1e-10, $
                             STATUS=status, $
                             BEST_RESID=best_resid, $
                             PFREE_INDEX=iFree, $
@@ -132,7 +142,7 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
 
-        PRINT,fitString + ' 2DFit failure ...'
+        PRINT,fitString + STRING(FORMAT='(A0,I0,A0)',' 2DFit failure (',status,') ...')
 
      ENDIF
 
