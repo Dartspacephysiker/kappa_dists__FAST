@@ -90,14 +90,14 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
   ;; kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3,", N=",G0.3,", T=",G0.3)',A[0],A[3],A[2],A[1])
   ;; gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3,", N=",G0.3,", T=",G0.3)',AGauss[3],AGauss[2],AGauss[1])
   ;; dataName         = 'Data'
-  Nstring          = 'N' + (KEYWORD_SET(pData.is_sourceDens) ? '!Dsource!N' : '')
+  Nstring          = 'n' + (KEYWORD_SET(pData.is_sourceDens) ? '!Dm!N' : '')
 
   msec             = 0
   t1Str            = (STRSPLIT(TIME_TO_STR(MIN(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
   t2Str            = (STRSPLIT(TIME_TO_STR(MAX(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
   dataName         = STRING(FORMAT='(A0,"–",A0)',t1Str,t2Str)
-  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3,", ",A0,"=",G0.3," cm!U-3!N")',A[0],A[3],Nstring,A[2])
-  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3,", ",A0,"=",G0.3," cm!U-3!N")',AGauss[3],Nstring,AGauss[2])
+  kappaName        = STRING(FORMAT='("$\kappa$=",F0.2,", R!DB!N=",G0.3,", ",A0,"=",G0.2," cm!U-3!N")',A[0],A[3],Nstring,A[2])
+  gaussName        = STRING(FORMAT='("Maxwell, R!DB!N=",G0.3,", ",A0,"=",G0.2," cm!U-3!N")',AGauss[3],Nstring,AGauss[2])
 
   window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 
@@ -121,7 +121,8 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                NAME=dataName, $
                                TITLE=titleStr, $
                                XTITLE='$\Phi$ (V)', $
-                               YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
+                               ;; YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
+                               YTITLE='$j_{\parallel,i}$ ($\mu$A/m!U2!N)', $
                                ;; XRANGE=xRange, $
                                XSTYLE=2, $
                                SYM_THICK=sym_thick, $

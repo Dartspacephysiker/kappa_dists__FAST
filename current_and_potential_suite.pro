@@ -626,7 +626,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
                                            MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
                                            MAP__2D=map__2D, $
-                                           ITERATIVE_GAME__TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                           JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
                                            OUT_GAUSS_A=AGauss, $
@@ -658,7 +658,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   IN_MMAGDAT=mMagDat, $
                                   _EXTRA=e
 
-     ;; STOP
+     STOP
      
   ENDIF
 
