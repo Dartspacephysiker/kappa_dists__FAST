@@ -14,7 +14,9 @@ PRO KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
                                         OBSERVED_DIST=observed_dist, $
                                         BOOTSTRAP_MODE=bootstrap, $
                                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
-                                        MASS=mass
+                                        MASS=mass, $
+                                        SAVEFILE=saveFile, $
+                                        SAVEDIR=saveDir
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -135,14 +137,22 @@ PRO KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
      
      IF k EQ 0 THEN BEGIN
         kappaFits = REPLICATE(kappaFit,Nsim)
-        gaussFits = REPLICATE(gaussFit,Nsim)
-     ENDIF
+        IF KEYWORD_SET(add_gaussian_estimate) THEN gaussFits = REPLICATE(gaussFit,Nsim)
+     ENDIF                      ;
 
      kappaFits[k] = kappaFit
-     gaussFits[k] = gaussFit
+     IF KEYWORD_SET(add_gaussian_estimate) THEN gaussFits[k] = gaussFit
 
   ENDFOR
 
-  STOP
+  IF KEYWORD_SET(saveFile) THEN BEGIN
+     PRINT,"Saving param ests to " + saveFile + " ..."
+     IF N_ELEMENTS(saveDir) EQ 0 THEN saveDir = './'
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+        SAVE,kappaFits,gaussFits,FILENAME=saveDir+saveFile
+     ENDIF ELSE BEGIN
+        SAVE,kappaFits,FILENAME=saveDir+saveFile
+     ENDELSE
+  ENDIF
 
 END

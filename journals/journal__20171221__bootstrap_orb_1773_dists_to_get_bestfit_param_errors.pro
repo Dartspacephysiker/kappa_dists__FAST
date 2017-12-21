@@ -7,10 +7,16 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
   fil = '20171124-orb_1773-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-classics-3-Elphic_et_al_1998-only_fit_peak_eRange-avg_itvl2.sav'
 
-  use_mpFit1D = 1               ;Alltid. It's all I use nowadays
-  
+  ;; use_mpFit1D = 1               ;Alltid. It's all I use nowadays
+  observed_dist  = 1
+
+  saveSuff = 'orb1773_1DMCarlo_ests__'
+  saveDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
+
   ;; carloTime = '09:27:01.57'     ;Time shown in Figure 2a title
   carloTime = '09:27:01.261'    ;The correct time, since the average of this time and the next time (09:27:01.893) gives 09:27:01.57
+  carloTimeStart = '09:26:53'
+  carloTimeStop  = '09:27:03'
 
   RESTORE,dir+fil
 
@@ -22,7 +28,7 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                           CHI2=chi2, $
                           PVAL=pVal, $
                           FITSTATUS=fitStatus, $
-                          USE_MPFIT1D=use_mpFit1D
+                          /USE_MPFIT1D
   
 
   nFits = N_ELEMENTS(kappaFits)
@@ -31,37 +37,53 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      tid[k] = kappafits[k].orig.name
   ENDFOR
   
-  match_i = WHERE(STRMATCH(tid, '*' + carloTime + '*', /FOLD_CASE))
+  match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
+  match_iStart = WHERE(STRMATCH(tid, '*' + carloTimeStart + '*', /FOLD_CASE))
+  match_iStop  = WHERE(STRMATCH(tid, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
-  observed_dist  = 1
+  inds = [match_iStart[0]:match_iStop[0]]
+  nHjar = N_ELEMENTS(inds)
+  FOR k=0,nHjar-1 DO BEGIN
 
-  ;; Now get the data
-  IF observed_dist THEN BEGIN
-     data           = kappaFits[match_i[0]].orig
-  ENDIF ELSE BEGIN
-     ;; WAIT! Use best-fit param data, but experimental error!
-     observed_dist = 0
-     data = {x      : kappaFits[match_i[0]].x, $
-             y      : kappaFits[match_i[0]].y, $
-             yerror : kappaFits[match_i[0]].orig.yerror[data.energy_inds[0]:data.energy_inds[1]]}
-  ENDELSE
+     match_i = inds[k]
 
-  ;; Params
-  Pkappa         = kappaFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
-  Pgauss         = gaussFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
-  Pobs           = kappaFits[match_i[0]].a_sdt ;initial (or estimated?) bulk E, T, kappa [meaningless], density
+     ;; Now get the data
+     IF observed_dist THEN BEGIN
+        data           = kappaFits[match_i[0]].orig
+     ENDIF ELSE BEGIN
+        ;; WAIT! Use best-fit param data, but experimental error!
+        observed_dist = 0
+        data = {x      : kappaFits[match_i[0]].x, $
+                y      : kappaFits[match_i[0]].y, $
+                yerror : kappaFits[match_i[0]].orig.yerror[data.energy_inds[0]:data.energy_inds[1]]}
+     ENDELSE
 
-  mass           = fit2DGauss_inf_list[match_i[0]].sdt.mass
+     ;; Params
+     Pkappa         = kappaFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
+     Pgauss         = gaussFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
+     Pobs           = kappaFits[match_i[0]].a_sdt ;initial (or estimated?) bulk E, T, kappa [meaningless], density
 
-  ;; PRINT,data.x[data.energy_inds[0]:data.energy_inds[1]] ;Range of energies used
+     mass           = fit2DGauss_inf_list[match_i[0]].sdt.mass
 
-  KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
-                                      NROLLS=nRolls, $
-                                      NOT_MPFIT1D=not_mpFit1D, $
-                                      KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
-                                      OBSERVED_DIST=observed_dist, $
-                                      BOOTSTRAP_MODE=bootstrap, $
-                                      MASS=mass
+     ;; PRINT,data.x[data.energy_inds[0]:data.energy_inds[1]] ;Range of energies used
+
+     PRINT,tid[match_i]
+     gaussString = KEYWORD_SET(add_gaussian_estimate) ? '_wGauss' : ''
+     utFil = saveSuff + STRJOIN(STRSPLIT(tid[match_i],':',/EXTRACT),'_')+gaussString
+     utFil = STRJOIN(STRSPLIT(utFil,'.',/EXTRACT),'__')+'.sav'
+
+     KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
+                                         NROLLS=nRolls, $
+                                         NOT_MPFIT1D=not_mpFit1D, $
+                                         KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
+                                         OBSERVED_DIST=observed_dist, $
+                                         BOOTSTRAP_MODE=bootstrap, $
+                                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+                                         MASS=mass, $
+                                         SAVEFILE=utFil, $
+                                         SAVEDIR=saveDir
+
+  ENDFOR
 
 
 END
