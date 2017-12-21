@@ -1,16 +1,17 @@
 ;2017/12/21
 ;Time to Monte Carlo it up so that we can respond to the referee reports on our kappa paper
-PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
+PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
+
+  @common__kappa_fit2d_structs.pro
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
   fil = '20171124-orb_1773-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-classics-3-Elphic_et_al_1998-only_fit_peak_eRange-avg_itvl2.sav'
 
-  ;; use_mpFit1D = 1               ;Alltid. It's all I use nowadays
   observed_dist  = 0
 
-  saveSuff = 'orb1773_1DMCarlo_ests__'
+  saveSuff = 'orb1773_2DMCarlo_ests__'
   saveDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
 
   ;; carloTime = '09:27:01.57'     ;Time shown in Figure 2a title
@@ -54,9 +55,45 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
         data           = kappaFits[match_i[0]].orig
      ENDIF ELSE BEGIN
         ;; WAIT! Use best-fit param data, but experimental error!
-        data = {x      : kappaFits[match_i[0]].x, $
-                y      : kappaFits[match_i[0]].y, $
-                yerror : kappaFits[match_i[0]].orig.yerror[kappaFits[match_i[0]].orig.energy_inds[0]:kappaFits[match_i[0]].orig.energy_inds[1]]}
+        energy_inds = WHERE(synthPackage[1,match_i].energy[*,0] LE 34120.)
+
+        data = synthPackage[1,match_i]
+
+        nEnergies = N_ELEMENTS(energy_inds)
+        nAngles = data.nBins
+
+        data = { $
+               data_name        : data.data_name, $
+               valid            : data.valid, $
+               project_name     : data.project_name, $
+               units_name       : data.units_name, $
+               units_procedure  : data.units_procedure, $
+               time             : data.time, $
+               end_time         : data.end_time, $
+               integ_t          : data.integ_t, $
+               nbins            : data.nbins, $
+               nenergy          : nEnergies, $
+               data             : data.data[energy_inds, *], $
+               ddata            : data.ddata[energy_inds, *], $
+               energy           : data.energy[energy_inds, *], $
+               theta            : data.theta[energy_inds, *], $
+               geom             : data.geom[energy_inds, *], $
+               denergy          : data.denergy[energy_inds, *], $
+               dtheta           : data.dtheta, $
+               eff              : data.eff[energy_inds], $
+               mass             : data.mass, $
+               geomfactor       : data.geomfactor, $
+               header_bytes     : data.header_bytes, $
+               st_index         : data.st_index, $
+               en_index         : data.en_index, $
+               npts             : data.npts, $
+               index            : data.index}
+
+        data.ddata = synthPackage[0,match_i].ddata
+
+        ;; data = {x      : kappaFits[match_i[0]].x, $
+        ;;         y      : kappaFits[match_i[0]].y, $
+        ;;         yerror : kappaFits[match_i[0]].orig.yerror[kappaFits[match_i[0]].orig.energy_inds[0]:kappaFits[match_i[0]].orig.energy_inds[1]]}
      ENDELSE
 
      ;; Params
@@ -73,7 +110,7 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      utFil = saveSuff + STRJOIN(STRSPLIT(tid[match_i],':',/EXTRACT),'_')+obsString+gaussString
      utFil = STRJOIN(STRSPLIT(utFil,'.',/EXTRACT),'__')+'.sav'
 
-     KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
+     KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
                                          NROLLS=nRolls, $
                                          NOT_MPFIT1D=not_mpFit1D, $
                                          KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
@@ -88,3 +125,4 @@ PRO JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
 
 END
+

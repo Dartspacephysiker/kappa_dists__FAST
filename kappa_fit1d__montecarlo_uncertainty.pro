@@ -63,7 +63,9 @@ PRO KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
   Nsim = N_ELEMENTS(nRolls) GT 0 ? nRolls : default_Nsim
 
   ;; Generate random inds, kappas 'twixt 1.5 and 35 for data
-  randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig,Nsim))
+  IF KEYWORD_SET(bootstrap) THEN BEGIN
+     randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig,Nsim))
+  ENDIF
   simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,Nsim))
   data_gaussError = RANDOMN(seed__data_error,Norig,Nsim) ;RANDOMN gives rGaussian num, mean=0 & stdev=1
   error_gaussEror = RANDOMN(seed__error_error,Norig,Nsim)
@@ -98,7 +100,7 @@ PRO KAPPA_FIT1D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
      ;; Update kappa
      A[2] = simKappas[k]
 
-     PRINT,FORMAT='(A0,I05)',"iter_",k
+     IF ((k MOD 100) EQ 0) THEN PRINT,FORMAT='(A0,I05)',"iter_",k
 
      KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               orig,kappaFit,gaussFit, $

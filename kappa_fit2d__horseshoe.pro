@@ -23,7 +23,9 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                            IN_ESTIMATED_LC=estimated_lc, $
                            EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                            UNITS=units, $
-                           EPS=eps
+                           EPS=eps, $
+                           MONTE_CARLO_MODE=monte_carlo_mode, $
+                           MC__OKSTATUS=MC__OKStatus
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -32,18 +34,25 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   IF KEYWORD_SET(fit2D__save_all_plots) THEN finish_and_save_all = 1
 
-  IF kFitParamStruct[1].limited[1] EQ 0 THEN BEGIN
-     ;; When the upperbound of T is not limited, xTol will become irreducible in
-     ;; the course of the fit and status 7 will be reported. To avoid this, we
-     ;; allow xTol = unminimizable to be an allowable outcome
-     ;;See INIT_KAPPA_FITPARAM_INFO<f> for more informaciones
-
-     OKStatus  = [1,2,3,4,7] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
-
+  IF KEYWORD_SET(monte_carlo_mode) THEN BEGIN
+     OKStatus = MC__OKStatus
   ENDIF ELSE BEGIN
-     OKStatus  = [1,2,3,4]
+
+     IF kFitParamStruct[1].limited[1] EQ 0 THEN BEGIN
+        ;; When the upperbound of T is not limited, xTol will become irreducible in
+        ;; the course of the fit and status 7 will be reported. To avoid this, we
+        ;; allow xTol = unminimizable to be an allowable outcome
+        ;;See INIT_KAPPA_FITPARAM_INFO<f> for more informaciones
+
+        OKStatus  = [1,2,3,4,7] ;These are all acceptable outcomes of fitting with MPFIT2DFUN
+
+     ENDIF ELSE BEGIN
+        OKStatus  = [1,2,3,4]
+     ENDELSE
+
   ENDELSE
-  shiftTheta   = 0             ;Not currently clear why the shift is necessary, but it makes things come out right
+
+  shiftTheta   = 0 ;Not clear why the shift is necessary, but it makes things come out right
 
   eRange_peak  = out_eRange_peak[*,-1]
 
@@ -99,8 +108,6 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
      END
   ENDCASE
 
-
-  ;; FOR kDog=0,N_ELEMENTS(kFitParamStruct)-1 DO BEGIN
 
   fit2DParams  = MPFIT2DFUN(func,X2D,Y2D,dataToFit, $
                             err, $
@@ -177,7 +184,6 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
 
   CASE 1 OF
      KEYWORD_SET(kF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
-        ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(fit2DStr.energy,fit2DStr.theta,fit2DParams)
         fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON(fit2DStr.energy, $
                                                                            SHIFT(fit2DStr.theta,0,shiftTheta), $
                                                                            fit2DParams, $
@@ -207,9 +213,6 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
   ENDIF ELSE BEGIN
      tmpSourceConeRange= LONG(KF2D__SDTData_opt.fit2D_dens_aRange)
   ENDELSE
-
-  ;; tmpSourceConeRange= [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
-  ;;                      MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
 
   fit_scDens         = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
@@ -243,42 +246,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
                       ENERGY=eRange_peak, $
                       ANGLE=tmpSourceConeRange)
-  ;; IF iTime GE 14 THEN BEGIN
-
-
-  ;; ENDIF
 
   IF KEYWORD_SET(show_and_prompt) AND ~KEYWORD_SET(fit2D__show_only_data) THEN BEGIN
-     ;; densEst        = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
-     ;;                                ENERGY=KF2D__SDTData_opt.energy_electrons, $
-     ;;                                ANGLE=tmpSourceConeRange)
-
-     ;; CASE 1 OF
-        ;; KEYWORD_SET(fit2D__show_only_data): BEGIN
-        ;;       ;; tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
-        ;;       ;;                    bestFit1DParams :fit2DParams  , $
-        ;;       ;;                    fitAngle_i      :fitAngle_i   , $
-        ;;       ;;                    bestDens        :obs_scDens    , $
-        ;;       ;;                    bestChi2        :bestNorm/(dof-nPegged), $
-        ;;       ;;                    eRange_peak     :eRange_peak[*,-1]}
-
-        ;;       KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr, $
-        ;;          tmp2DInfoStruct, $
-        ;;          iWin, $
-        ;;          iTime, $
-        ;;          /FOR_HORSESHOE_FIT, $
-        ;;          /ONLY_DATA, $
-        ;;          IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
-        ;;          PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
-        ;;          PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
-        ;;          FINISH_AND_SAVE_ALL=finish_and_save_all, $
-        ;;          KAPPA_FIT__SHOW__QUIT=show__quit, $
-        ;;          FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-        ;;          EPS=eps
-
-
-        ;; END
-        ;; ELSE: BEGIN
            IF nSuccess GT 0 THEN BEGIN
               tmp2DInfoStruct = {bestFitStr      :fit2DStr     , $
                                  bestFit1DParams :fit2DParams  , $
@@ -301,19 +270,8 @@ PRO KAPPA_FIT2D__HORSESHOE,keep_iTime,iTime, $
                  EPS=eps
 
            ENDIF
-     ;;    END
-     ;; ENDCASE
 
   ENDIF
-
-  ;; ENDFOR
-
-  ;;Now decide who is most awesome
-  ;; success_i   = WHERE(statusArray EQ 1 OR $
-  ;;                     statusArray EQ 2 OR $ 
-  ;;                     statusArray EQ 3 OR $
-  ;;                     statusArray EQ 4, $
-  ;;                     nSuccess)
 
   IF nSuccess GT 0 THEN BEGIN
      
