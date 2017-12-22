@@ -5,6 +5,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
+   PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    ONECOUNT_STR=oneCurve
 
@@ -26,6 +27,8 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
      minFlux            = yOrig
   ENDELSE
   
+  inds                  = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0,nInds)
+  whichWy               = FIX(ABS((Xorig[inds[0]]-Xorig[inds[-1]]))/(Xorig[inds[0]]-Xorig[inds[-1]]))
 
   CASE 1 OF
      KEYWORD_SET(check_for_higher_flux_peaks): BEGIN
@@ -52,7 +55,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
 
      END
      KEYWORD_SET(peak_energy__start_at_highE): BEGIN
-        inds            = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0,nInds)
+        ;; inds            = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0,nInds)
         IF (inds[0] EQ -1) THEN BEGIN
            peak_ind     = -1
            peak_energy  = -1
@@ -132,6 +135,14 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            peak_energy  = Xorig[peak_ind]
      END
   ENDCASE
+
+  IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
+
+     peak_energy = Xorig[peak_ind+whichWy]
+     peak_ind   += whichWy
+
+  ENDIF
+
   ;; IF KEYWORD_SET(check_for_higher_flux_peaks) THEN BEGIN
   ;;    ;;Figure out where most energetic maximum is
   ;;    max_ys             = GET_N_MAXIMA_IN_ARRAY(Yorig,N=3,OUT_I=maxima_i)

@@ -714,7 +714,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         OUT_ERR_T=TErr, $
                         OUT_ERR_CURRENT=curErr, $
                         OUT_ERR_CHARE=charEErr, $
-                        OUT_MAPRATIO=mapRatio, $
+                        INOUT_MAPRATIO=mapRatio, $
                         OUT_STRUCT=momStruct
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
@@ -746,7 +746,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_ERR_T=T1Err, $
                            OUT_ERR_CURRENT=cur1Err, $
                            OUT_ERR_CHARE=charE1Err, $
-                           OUT_MAPRATIO=mapRatio;; , $
+                           INOUT_MAPRATIO=mapRatio;; , $
                            ;; OUT_STRUCT=oneStruct
 
         ENDIF
