@@ -1,5 +1,5 @@
 ;2017/04/12
-PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+PRO PLOT_EFLUX_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                  ;; USE_SOURCE_AVGS=use_source_avgs, $
                                  KAPPA_A=A, $
                                  GAUSS_A=AGauss, $
@@ -121,7 +121,6 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                NAME=dataName, $
                                TITLE=titleStr, $
                                XTITLE='$\Phi$ (V)', $
-                               ;; YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
                                YTITLE=pData.yTitle, $
                                ;; XRANGE=xRange, $
                                XSTYLE=2, $

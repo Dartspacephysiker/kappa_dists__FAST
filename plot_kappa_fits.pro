@@ -46,8 +46,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         pPref          = '-nFlux_fit'
         unitTitle      = "e!E-!N # flux"
         yTitle         = "Differential Number Flux (#/cm$^2$-s-sr-eV)"      
-        lowerBound     = 1.0e3
-        upperBound     = 1.0e9
+        lowerBound     = 1.0e1
+        upperBound     = 1.0e8
      END
   ENDCASE
   ;;Need to know if OMNI2D is responsible for this, or something else

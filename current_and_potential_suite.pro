@@ -99,6 +99,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
    JV_THEOR__ITERGAME__DENSFAC=jv_theor__itergame_densFac, $
    JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   JV_THEOR__ALSO_EFLUX=jv_theor__also_eFlux, $
+   JV_THEOR__ONLY_EFLUX=jv_theor__only_eFlux, $
    ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
@@ -616,47 +618,203 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         map__multi_kappa_array = [map__multi_kappa_array,LINDGEN(100) + 9]
      ENDIF
      
-     ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
-                                           A_IN=A_in, $
-                                           KAPPALIMS=kappaLims, $   
-                                           TEMPLIMS=TempLims, $    
-                                           DENSLIMS=DensLims, $    
-                                           MAGRATIOLIMS=magRatioLims, $
-                                           /MULTI_MAGRATIO_MODE, $
-                                           MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
-                                           MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
-                                           MAP__2D=map__2D, $
-                                           JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
-                                           ORIGINATING_ROUTINE=routName, $
-                                           OUT_KAPPA_A=A, $
-                                           OUT_GAUSS_A=AGauss, $
-                                           OUT_PLOTDATA=pData, $
-                                           OUT_MULTI_MAGRATIO=mMagDat, $
-                                           _EXTRA=e
+     CASE 1 OF
+        KEYWORD_SET(jv_theor__also_eFlux): BEGIN
 
-     PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
-        MAP__2D=map__2D, $
-        MAP2D__LOG_KAPPA=map2D__log_kappa, $
-        ORBIT=orbit, $
-        IN_KAPPA_A=A, $
-        IN_GAUSS_A=AGauss, $
-        SAVEPLOT=savePlot, $
-        _EXTRA=e
+           ;; first current and voltage
+           ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                                 A_IN=A_in, $
+                                                 KAPPALIMS=kappaLims, $   
+                                                 TEMPLIMS=TempLims, $    
+                                                 DENSLIMS=DensLims, $    
+                                                 MAGRATIOLIMS=magRatioLims, $
+                                                 /MULTI_MAGRATIO_MODE, $
+                                                 MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+                                                 MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+                                                 MAP__2D=map__2D, $
+                                                 JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                                 /EFLUX_NOT_NFLUX, $
+                                                 ORIGINATING_ROUTINE=routName, $
+                                                 OUT_KAPPA_A=A, $
+                                                 OUT_GAUSS_A=AGauss, $
+                                                 OUT_PLOTDATA=pData, $
+                                                 OUT_MULTI_MAGRATIO=mMagDat, $
+                                                 _EXTRA=e
 
-     PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
-                                  KAPPA_A=A, $
-                                  GAUSS_A=AGauss, $
-                                  ORIGINATING_ROUTINE=routName, $
-                                  ORBIT=orbit, $
-                                  SAVEPLOT=savePlot, $
-                                  SPNAME=j_v__fixTandN__spName, $
-                                  J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
-                                  J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
-                                  ;; SAVEDATA=j_v__fixTandN__savePlotData, $
-                                  ;; SDNAME=j_v__fixTandN__dataFilename, $
-                                  /NO_TITLE, $
-                                  IN_MMAGDAT=mMagDat, $
-                                  _EXTRA=e
+           ;;now eFlux and voltage
+           ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                                 A_IN=A_in, $
+                                                 KAPPALIMS=kappaLims, $   
+                                                 TEMPLIMS=TempLims, $    
+                                                 DENSLIMS=DensLims, $    
+                                                 MAGRATIOLIMS=magRatioLims, $
+                                                 /MULTI_MAGRATIO_MODE, $
+                                                 MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+                                                 MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+                                                 MAP__2D=map__2D, $
+                                                 JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                                 /EFLUX_NOT_NFLUX, $
+                                                 ORIGINATING_ROUTINE=routName, $
+                                                 OUT_KAPPA_A=A, $
+                                                 OUT_GAUSS_A=AGauss, $
+                                                 OUT_PLOTDATA=pData_eFlux, $
+                                                 OUT_MULTI_MAGRATIO=mMagDat_eFlux, $
+                                                 _EXTRA=e
+
+        END
+        KEYWORD_SET(jv_theor__only_eFlux): BEGIN
+
+           ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                                 A_IN=A_in, $
+                                                 KAPPALIMS=kappaLims, $   
+                                                 TEMPLIMS=TempLims, $    
+                                                 DENSLIMS=DensLims, $    
+                                                 MAGRATIOLIMS=magRatioLims, $
+                                                 /MULTI_MAGRATIO_MODE, $
+                                                 MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+                                                 MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+                                                 MAP__2D=map__2D, $
+                                                 JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                                 /EFLUX_NOT_NFLUX, $
+                                                 ORIGINATING_ROUTINE=routName, $
+                                                 OUT_KAPPA_A=A, $
+                                                 OUT_GAUSS_A=AGauss, $
+                                                 OUT_PLOTDATA=pData, $
+                                                 OUT_MULTI_MAGRATIO=mMagDat, $
+                                                 _EXTRA=e
+
+        END
+        ELSE: BEGIN
+
+           ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS,jvPlotData,avgs_JVfit, $
+                                                 A_IN=A_in, $
+                                                 KAPPALIMS=kappaLims, $   
+                                                 TEMPLIMS=TempLims, $    
+                                                 DENSLIMS=DensLims, $    
+                                                 MAGRATIOLIMS=magRatioLims, $
+                                                 /MULTI_MAGRATIO_MODE, $
+                                                 MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
+                                                 MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
+                                                 MAP__2D=map__2D, $
+                                                 JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                                 ORIGINATING_ROUTINE=routName, $
+                                                 OUT_KAPPA_A=A, $
+                                                 OUT_GAUSS_A=AGauss, $
+                                                 OUT_PLOTDATA=pData, $
+                                                 OUT_MULTI_MAGRATIO=mMagDat, $
+                                                 _EXTRA=e
+
+        END
+     ENDCASE
+
+     CASE 1 OF
+        KEYWORD_SET(jv_theor__also_eFlux): BEGIN
+
+           PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
+              MAP__2D=map__2D, $
+              MAP2D__LOG_KAPPA=map2D__log_kappa, $
+              ORBIT=orbit, $
+              IN_KAPPA_A=A, $
+              IN_GAUSS_A=AGauss, $
+              SAVEPLOT=savePlot, $
+              _EXTRA=e
+
+           PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat_eFlux,jvPlotData,avgs_JVFit, $
+              MAP__2D=map__2D, $
+              MAP2D__LOG_KAPPA=map2D__log_kappa, $
+              ORBIT=orbit, $
+              IN_KAPPA_A=A, $
+              IN_GAUSS_A=AGauss, $
+              SAVEPLOT=savePlot, $
+              _EXTRA=e
+
+        END
+        ;; This case is irrelevant, because there's only one mMagDat if we don't set jv_theor__also_eFlux
+        ;; KEYWORD_SET(jv_theor__only_eFlux): BEGIN 
+
+        ;;    ;; PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
+        ;;    ;;    MAP__2D=map__2D, $
+        ;;    ;;    MAP2D__LOG_KAPPA=map2D__log_kappa, $
+        ;;    ;;    ORBIT=orbit, $
+        ;;    ;;    IN_KAPPA_A=A, $
+        ;;    ;;    IN_GAUSS_A=AGauss, $
+        ;;    ;;    SAVEPLOT=savePlot, $
+        ;;    ;;    _EXTRA=e
+
+        ;; END
+        ELSE: BEGIN
+
+           PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
+              MAP__2D=map__2D, $
+              MAP2D__LOG_KAPPA=map2D__log_kappa, $
+              ORBIT=orbit, $
+              IN_KAPPA_A=A, $
+              IN_GAUSS_A=AGauss, $
+              SAVEPLOT=savePlot, $
+              _EXTRA=e
+
+        END
+     ENDCASE
+
+     CASE 1 OF
+        KEYWORD_SET(jv_theor__also_eFlux): BEGIN
+
+           PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+                                        KAPPA_A=A, $
+                                        GAUSS_A=AGauss, $
+                                        ORIGINATING_ROUTINE=routName, $
+                                        ORBIT=orbit, $
+                                        SAVEPLOT=savePlot, $
+                                        SPNAME=j_v__fixTandN__spName, $
+                                        J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                        J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                        ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                        ;; SDNAME=j_v__fixTandN__dataFilename, $
+                                        /NO_TITLE, $
+                                        IN_MMAGDAT=mMagDat, $
+                                        _EXTRA=e
+
+
+           STOP
+           PLOT_EFLUX_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData_eFlux, $
+                                            KAPPA_A=A, $
+                                            GAUSS_A=AGauss, $
+                                            ORIGINATING_ROUTINE=routName, $
+                                            ORBIT=orbit, $
+                                            SAVEPLOT=savePlot, $
+                                            SPNAME=j_v__fixTandN__spName, $
+                                            ;; J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                            ;; J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                            ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                            ;; SDNAME=j_v__fixTandN__dataFilename, $
+                                            /NO_TITLE, $
+                                            IN_MMAGDAT=mMagDat_eFlux, $
+                                            _EXTRA=e
+
+        END
+        KEYWORD_SET(jv_theor__only_eFlux): BEGIN
+
+        END
+        ELSE: BEGIN
+
+           PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+                                        KAPPA_A=A, $
+                                        GAUSS_A=AGauss, $
+                                        ORIGINATING_ROUTINE=routName, $
+                                        ORBIT=orbit, $
+                                        SAVEPLOT=savePlot, $
+                                        SPNAME=j_v__fixTandN__spName, $
+                                        J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                        J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                        ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                        ;; SDNAME=j_v__fixTandN__dataFilename, $
+                                        /NO_TITLE, $
+                                        IN_MMAGDAT=mMagDat, $
+                                        _EXTRA=e
+
+        END
+     ENDCASE
+
 
      STOP
      
