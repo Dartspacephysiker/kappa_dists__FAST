@@ -90,6 +90,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
    PLOTDIR=plotDir, $
    ORBIT=orbit, $
    OUT_ESTIMATED_LC=estimated_lc, $
+   MAKE_PLOTS=make_plots, $
    SAVE_PLOTS=save_plots, $
    EPS=eps
    
@@ -119,12 +120,22 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
      minEnStr           = KEYWORD_SET(minEn)  ? STRING(FORMAT='("--minEn_",I0)',minEn)  : ''
 
      plotNames = {plotDir : plotDir ,$
-                  bFuncSPName      : 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+fExt, $
-                  bFuncPolarSPName :'kappa_anisotropy--bFunc_polar'+orbStr+timeStr+minEnStr+fExt, $
-                  gFuncSPName      : 'kappa_anisotropy--gFunc'      +orbStr+timeStr+minEnStr+fExt}
+                  bFuncSPName      : 'kappa_anisotropy-bFunc'     +orbStr+timeStr+minEnStr+fExt, $
+                  bFuncModelSPName : 'kappa_anisotropy-bFuncModel'+orbStr+timeStr+minEnStr+fExt, $
+                  bFuncPolarSPName :'kappa_anisotropy-bFunc_polar'+orbStr+timeStr+minEnStr+fExt, $
+                  gFuncSPName      : 'kappa_anisotropy-gFunc'     +orbStr+timeStr+minEnStr+fExt, $
+                  bulkVDataSPName  : 'bulkV-data_comparison'      +orbStr+timeStr+minEnStr+fExt}
 
   ENDIF
 
+
+  IF KEYWORD_SET(make_plots) THEN BEGIN
+     plot_bulke_model = 1
+     polarPlot_bulke_factor = 1
+     plot_bulke_factor = 1
+     plot_flux_peaks = 1
+     buffer = 1
+  ENDIF
 
   junk =  KAPPA_EFLUX__ANISOTROPY_DIST( $
           curDataStr.energy, $
@@ -143,6 +154,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
           PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
           PLOT_FLUX_PEAKS=plot_flux_peaks, $
+          BUFFER=buffer, $
           OUT_PEAK_ENERGIES=peak_en, $
           OUT_PEAK_FLUXES=peak_flux, $
           OUT_ANGLES=peak_angle, $

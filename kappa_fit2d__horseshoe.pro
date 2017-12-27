@@ -10,6 +10,8 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            PRINT_2DWININFO=print_2DWinInfo, $
                            IN_ESTIMATED_LC=estimated_lc, $
                            UNITS=units, $
+                           OUT_FIT2DPARAMS=fit2DParams, $
+                           OUT_FIT2D_FITINFO=fit2D_info, $
                            EPS=eps, $
                            MONTE_CARLO_MODE=monte_carlo_mode, $
                            MC__OKSTATUS=MC__OKStatus
@@ -133,5 +135,19 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      hadSuccess     = 0
 
   ENDELSE
+
+  fit2D_info = {chi2         : bestNorm   , $
+                errMsg       : errMsg     , $
+                status       : status     , $
+                nfEv         : nfEv       , $
+                best_resid   : best_resid , $
+                pFree_index  : iFree      , $
+                best_fJac    : best_fJac  , $
+                nPegged      : nPegged    , $
+                nFree        : nFree      , $
+                dof          : dof        , $
+                covar        : covar      , $
+                pError       : pError     , $
+                nIter        : nIter      }
 
 END

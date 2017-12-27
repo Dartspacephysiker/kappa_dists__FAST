@@ -14,6 +14,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
    PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
    PLOT_FLUX_PEAKS=plot_flux_peaks, $
+   BUFFER=buffer, $
    OUT_PEAK_ENERGIES=peak_en, $
    OUT_PEAK_FLUXES=peak_flux, $
    OUT_ANGLES=peak_angle, $
@@ -134,10 +135,9 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   sort_i              = SORT(peak_angle)
 
-
   IF KEYWORD_SET(plot_bulke_model) THEN BEGIN
 
-     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
+     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800],BUFFER=buffer)
 
      those = PLOT(peak_angle,factor, $
                   NAME='Model function', $
@@ -150,8 +150,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
                   CURRENT=window)
 
      IF KEYWORD_SET(save_plots) THEN BEGIN
-        PRINT,'Saving bFunc plot: ' + plotNames.bFuncSPName
-        window.Save,plotNames.plotDir+plotNames.bFuncSPName
+        PRINT,'Saving bFuncModel plot: ' + plotNames.bFuncModelSPName
+        window.Save,plotNames.plotDir+plotNames.bFuncModelSPName
 
         window.Close
         window = !NULL
@@ -162,7 +162,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   IF KEYWORD_SET(plot_bulke_factor) THEN BEGIN
 
-     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
+     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800],BUFFER=buffer)
 
      xTickValues = [-180,-90,0,90,180]
      xTickName   = STRING(FORMAT='(I0)',xTickValues)
@@ -198,7 +198,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   IF KEYWORD_SET(polarPlot_bulke_factor) THEN BEGIN
 
-     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
+     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800],BUFFER=buffer)
 
      yVals = KEYWORD_SET(normalize_to_fitAngle_vals) ? ALOG10(peak_en[sort_i])/ALOG10(peak_en[fitAngle_ii]) : $
              ALOG10(peak_en[sort_i])
@@ -230,7 +230,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   IF KEYWORD_SET(plot_comparison) THEN BEGIN
 
-     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
+     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800],BUFFER=buffer)
 
      yVals        = KEYWORD_SET(normalize_to_fitAngle_vals) ? $
                     peak_en[sort_i]/peak_en[fitAngle_ii] : $
@@ -274,12 +274,21 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
               POSITION=[0.35,0.8], $
               /NORMAL)
 
+     IF KEYWORD_SET(save_plots) THEN BEGIN
+        PRINT,'Saving bulkV_data_comparison plot: ' + plotNames.bulkVDataSPName
+        window.Save,plotNames.plotDir+plotNames.bulkVDataSPName
+
+        window.Close
+        window = !NULL
+     ENDIF ELSE BEGIN
+        STOP
+     ENDELSE
 
   ENDIF
 
   IF KEYWORD_SET(plot_flux_peaks) THEN BEGIN
 
-     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800])
+     IF ~ISA(window) THEN window = WINDOW(DIMENSIONS=[1200,800],BUFFER=buffer)
 
      sort_i       = SORT(peak_angle)
 

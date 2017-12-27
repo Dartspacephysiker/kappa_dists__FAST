@@ -14,9 +14,14 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   saveSuff = 'orb1773_2DMCarlo_ests__'
   saveDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
 
+  make_bFunc_gFunc_plots = 0
+  save_bFunc_gFunc_plots = 0
+
+  print_2DFitInfo = 1
+  ;; print_2DWinInfo = 1
   ;; carloTime = '09:27:01.57'     ;Time shown in Figure 2a title
-  carloTime = '09:27:01.261'    ;The correct time, since the average of this time and the next time (09:27:01.893) gives 09:27:01.57
-  carloTimeStart = '09:26:53'
+  ;; carloTime = '09:27:01.261'    ;The correct time, since the average of this time and the next time (09:27:01.893) gives 09:27:01.57
+  carloTimeStart = '09:26:56'
   carloTimeStop  = '09:27:03'
 
   RESTORE,dir+fil
@@ -37,7 +42,7 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      tid[k] = kappafits[k].orig.name
   ENDFOR
   
-  match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
+  ;; match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
   match_iStart = WHERE(STRMATCH(tid, '*' + carloTimeStart + '*', /FOLD_CASE))
   match_iStop  = WHERE(STRMATCH(tid, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
@@ -52,54 +57,68 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
      ;; Now get the data
      IF observed_dist THEN BEGIN
-        data           = kappaFits[match_i].orig
+        data = synthPackage[0,match_i]
      ENDIF ELSE BEGIN
-        ;; WAIT! Use best-fit param data, but experimental error!
-        energy_inds = WHERE(synthPackage[1,match_i].energy[*,0] LE 34120.)
-
         data = synthPackage[1,match_i]
 
-        nEnergies = N_ELEMENTS(energy_inds)
-        nAngles = data.nBins
+        shiftTheta = 0
+        data.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
+                        data.energy, $
+                        SHIFT(data.theta,0,shiftTheta), $
+                        fit2DKappa_inf_list[match_i].fitParams, $
+                        UNITS=units, $
+                        MASS=data.mass)
 
-        data = { $
-               data_name        : data.data_name, $
-               valid            : data.valid, $
-               project_name     : data.project_name, $
-               units_name       : data.units_name, $
-               units_procedure  : data.units_procedure, $
-               time             : data.time, $
-               end_time         : data.end_time, $
-               integ_t          : data.integ_t, $
-               nbins            : data.nbins, $
-               nenergy          : nEnergies, $
-               data             : data.data[energy_inds, *], $
-               ddata            : data.ddata[energy_inds, *], $
-               energy           : data.energy[energy_inds, *], $
-               theta            : data.theta[energy_inds, *], $
-               geom             : data.geom[energy_inds, *], $
-               denergy          : data.denergy[energy_inds, *], $
-               dtheta           : data.dtheta, $
-               eff              : data.eff[energy_inds], $
-               mass             : data.mass, $
-               geomfactor       : data.geomfactor, $
-               header_bytes     : data.header_bytes, $
-               st_index         : data.st_index, $
-               en_index         : data.en_index, $
-               npts             : data.npts, $
-               index            : data.index}
+        ;; WAIT! Use best-fit param data, but experimental error!
+        ;; tmpStr          = CONV_UNITS(data,'counts')
+        ;; tmpStr.ddata    = (tmp3d.data)^.5
+        ;; data            = CONV_UNITS(TEMPORARY(tmpStr),units)
 
-        data.ddata = synthPackage[0,match_i].ddata
-
-        ;; data = {x      : kappaFits[match_i[0]].x, $
-        ;;         y      : kappaFits[match_i[0]].y, $
-        ;;         yerror : kappaFits[match_i[0]].orig.yerror[kappaFits[match_i[0]].orig.energy_inds[0]:kappaFits[match_i[0]].orig.energy_inds[1]]}
      ENDELSE
 
+     energy_inds = WHERE(data.energy[*,0] LE 34120.)
+
+     nEnergies = N_ELEMENTS(energy_inds)
+     nAngles = data.nBins
+
+     data = { $
+            data_name        : data.data_name, $
+            valid            : data.valid, $
+            project_name     : data.project_name, $
+            units_name       : data.units_name, $
+            units_procedure  : data.units_procedure, $
+            time             : data.time, $
+            end_time         : data.end_time, $
+            integ_t          : data.integ_t, $
+            nbins            : data.nbins, $
+            nenergy          : nEnergies, $
+            data             : data.data[energy_inds, *], $
+            ddata            : data.ddata[energy_inds, *], $
+            energy           : data.energy[energy_inds, *], $
+            theta            : data.theta[energy_inds, *], $
+            geom             : data.geom[energy_inds, *], $
+            denergy          : data.denergy[energy_inds, *], $
+            dtheta           : data.dtheta, $
+            eff              : data.eff[energy_inds], $
+            mass             : data.mass, $
+            geomfactor       : data.geomfactor, $
+            header_bytes     : data.header_bytes, $
+            st_index         : data.st_index, $
+            en_index         : data.en_index, $
+            npts             : data.npts, $
+            index            : data.index}
+
+     ;; Whatever the case, use observed uncertainties
+     data.ddata = synthPackage[0,match_i].ddata
+
+     ;; data = {x      : kappaFits[match_i[0]].x, $
+     ;;         y      : kappaFits[match_i[0]].y, $
+     ;;         yerror : kappaFits[match_i[0]].orig.yerror[kappaFits[match_i[0]].orig.energy_inds[0]:kappaFits[match_i[0]].orig.energy_inds[1]]}
+
      ;; Params
-     Pkappa         = kappaFits[match_i].a     ;Best-fit bulk E, T, kappa [meaningless], density
-     Pgauss         = gaussFits[match_i].a     ;Best-fit bulk E, T, kappa [meaningless], density
-     Pobs           = kappaFits[match_i].a_sdt ;initial (or estimated?) bulk E, T, kappa [meaningless], density
+     Pkappa         = fit2DKappa_inf_list[match_i].fitParams
+     Pgauss         = fit2DGauss_inf_list[match_i].fitParams
+     Pobs           = kappaFits[match_i].A ;initial (from 1D fit) bulk E, T, kappa [meaningless], density
 
      mass           = fit2DKappa_inf_list[match_i].sdt.mass
 
@@ -123,8 +142,12 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                                          ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                          MASS=mass, $
                                          FIT2DKAPPA_INFO=fit2DKappa_inf_list[match_i], $
+                                         MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
+                                         SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                          SAVEFILE=utFil, $
-                                         SAVEDIR=saveDir
+                                         SAVEDIR=saveDir, $
+                                         PRINT_2DFITINFO=print_2DFitInfo, $
+                                         PRINT_2DWININFO=print_2DWinInfo
 
   ENDFOR
 

@@ -13,6 +13,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                PEAK_ENERGY=peak_energy, $
                                TIMEFNSTR=timeFNStr, $
                                UNITS=units, $
+                               MAKE_FIT2D_INFO=make_fit2D_info, $
                                EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                                BF_GF__NORMALIZE_TO_VALS_AT_FITTED_ANGLE=bF_gF__normalize_to_vals_at_fitted_angle, $
                                BF_GF__LOGSCALE_REDUCENEGFAC=bF_gF__logScale_reduceNegFac, $
@@ -33,6 +34,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                                PRINT_2DFITINFO=print_2DFitInfo, $
                                PRINT_2DWININFO=print_2DWinInfo, $
+                               MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
                                SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                EPS=eps, $
                                MONTE_CARLO_MODE=monte_carlo_mode, $
@@ -71,59 +73,84 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
      PLOTDIR=plotDir, $
      ORBIT=orbit, $
      OUT_ESTIMATED_LC=estimated_lc, $
+     MAKE_PLOTS=make_bFunc_gFunc_plots, $
      SAVE_PLOTS=save_bFunc_gFunc_plots, $
      EPS=eps
 
   KAPPA_FIT2D__HORSESHOE,curDataStr, $
-     hadSuccessK, $
-     ERANGE_PEAK=eRange_peak, $
-     KFITPARAMSTRUCT=kappaParamStruct, $
-     KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-     IN_ESTIMATED_LC=estimated_lc, $
-     UNITS=units, $
-     PRINT_2DFITINFO=print_2DFitInfo, $
-     PRINT_2DWININFO=print_2DWinInfo, $
-     EPS=eps
+                         hadSuccessK, $
+                         ERANGE_PEAK=eRange_peak, $
+                         KFITPARAMSTRUCT=kappaParamStruct, $
+                         KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
+                         IN_ESTIMATED_LC=estimated_lc, $
+                         UNITS=units, $
+                         OUT_FIT2DPARAMS=kappaFit2DParams, $
+                         OUT_FIT2D_FITINFO=kappaFit2D_info, $
+                         PRINT_2DFITINFO=print_2DFitInfo, $
+                         PRINT_2DWININFO=print_2DWinInfo, $
+                         EPS=eps
 
-  IF N_ELEMENTS(fit2DKappa_inf_list) GT 0 THEN BEGIN
+  IF make_fit2D_info THEN BEGIN
 
-     KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr, $
+     KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr,hadSuccessK, $
+                              IN_FIT2D_PARAMS=kappaFit2DParams, $
+                              FIT2D_FITINFO=kappaFit2D_info, $
+                              ERANGE_PEAK=eRange_peak, $
                               SHIFTTHETA=shiftTheta, $
+                              FITANGLE_I=kappaFitAngle_index, $
                               EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
+                              UNITS=units, $
                               FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
                               FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                               FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                               FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                               FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
-                              FIT2D__SHOW__FITSTRING='Kappa'
+                              FIT2D__SHOW__FITSTRING='Kappa', $
+                              PRINT_2DFITINFO=print_2DFitInfo, $
+                              PRINT_2DWININFO=print_2DWinInfo
+
+                              
+
+     IF N_ELEMENTS(fit2DKappa_inf_list) GT 0 THEN fit2DKappa_inf_list.Add,TEMPORARY(kappaFit2D_info)
 
   ENDIF
 
   IF hadSuccessK AND KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
 
      KAPPA_FIT2D__HORSESHOE,curDataStr, $
-        hadSuccessG, $
-        /IS_MAXWELLIAN_FIT, $
-        ERANGE_PEAK=eRange_peak, $
-        KFITPARAMSTRUCT=gaussParamStruct, $
-        KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-        IN_ESTIMATED_LC=estimated_lc, $
-        UNITS=units, $
-        PRINT_2DFITINFO=print_2DFitInfo, $
-        PRINT_2DWININFO=print_2DWinInfo, $
-        EPS=eps
+                            hadSuccessG, $
+                            /IS_MAXWELLIAN_FIT, $
+                            ERANGE_PEAK=eRange_peak, $
+                            KFITPARAMSTRUCT=gaussParamStruct, $
+                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
+                            IN_ESTIMATED_LC=estimated_lc, $
+                            UNITS=units, $
+                            OUT_FIT2DPARAMS=gaussFit2DParams, $
+                            OUT_FIT2D_FITINFO=gaussFit2D_info, $
+                            PRINT_2DFITINFO=print_2DFitInfo, $
+                            PRINT_2DWININFO=print_2DWinInfo, $
+                            EPS=eps
      
-     IF N_ELEMENTS(fit2DGauss_inf_list) GT 0 THEN BEGIN
+     IF make_fit2D_info THEN BEGIN
 
-        KAPPA_FIT2D__FIRE_EXTRAS,curGaussStr,curDataStr, $
+        KAPPA_FIT2D__FIRE_EXTRAS,curGaussStr,curDataStr,hadSuccessG, $
+                                 IN_FIT2D_PARAMS=gaussFit2DParams, $
+                                 IN_FIT2D_FITINFO=gaussFit2D_info, $
+                                 ERANGE_PEAK=eRange_peak, $
                                  SHIFTTHETA=shiftTheta, $
+                                 FITANGLE_I=gaussFitAngle_index, $
                                  EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
+                                 UNITS=units, $
                                  FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=show_and_prompt, $
                                  FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                                  FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
                                  FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                                  /FIT2D__SHOW__IS_MAXWELLIAN_FIT, $
-                                 FIT2D__SHOW__FITSTRING='Maxwell'
+                                 FIT2D__SHOW__FITSTRING='Maxwell', $
+                                 PRINT_2DFITINFO=print_2DFitInfo, $
+                                 PRINT_2DWININFO=print_2DWinInfo
+
+        IF N_ELEMENTS(fit2DGauss_inf_list) GT 0 THEN fit2DGauss_inf_list.ADD,TEMPORARY(gaussFit2D_info)
 
      ENDIF
 
