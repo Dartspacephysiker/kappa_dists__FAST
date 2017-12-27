@@ -8,22 +8,20 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    MIN_ENERGY=min_energy, $
    REDUCENEGFAC=reduceNegFac, $
    LOGSCALE_REDUCENEGFAC=logScale, $
+   DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=dont_allow_shift_in_peak_energy, $
    PLOT_BULKE_MODEL=plot_bulke_model, $
    PLOT_BULKE_FACTOR=plot_bulke_factor, $
    POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
    PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
    PLOT_FLUX_PEAKS=plot_flux_peaks, $
-   PLOTDIR=plotDir, $
-   ORBIT=orbit, $
-   TIME=time, $
-   SAVE_PLOTS=save_plots, $
-   DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=dont_allow_shift_in_peak_energy, $
    OUT_PEAK_ENERGIES=peak_en, $
    OUT_PEAK_FLUXES=peak_flux, $
    OUT_ANGLES=peak_angle, $
    OUT_ANGLE_I=peak_angle_i, $
    OUT_FITANGLE_II=fitAngle_ii, $
    PRINT=print, $
+   SAVE_PLOTS=save_plots, $
+   PLOTNAMES=plotNames, $
    EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -39,32 +37,6 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   fitAngle_ii           = (WHERE(fitAngle_i EQ aBin_i,haveFitAngle))[0]
   IF haveFitAngle LT 1 THEN STOP
-
-  IF KEYWORD_SET(save_plots) THEN BEGIN
-     IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
-
-     fExt               = KEYWORD_SET(eps) ? '.eps' : '.png'
-
-     orbStr             = KEYWORD_SET(orbit)  ? STRING(FORMAT='("--",I0)',orbit) : ''
-     IF KEYWORD_SET(time) THEN BEGIN
-
-        CASE SIZE(time,/TYPE) OF
-           7: BEGIN
-              timeStr   = time
-           END
-           ELSE: BEGIN
-              timeStr   = STRING(FORMAT='("--",A0)',TIME_TO_STR(time,/MS))
-           END
-        ENDCASE
-     ENDIF
-
-     minEnStr           = KEYWORD_SET(minEn)  ? STRING(FORMAT='("--minEn_",I0)',minEn)  : ''
-
-     bFuncSPName        = 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+fExt
-     bFuncPolarSPName   = 'kappa_anisotropy--bFunc_polar'+orbStr+timeStr+minEnStr+fExt
-     gFuncSPName        = 'kappa_anisotropy--gFunc'      +orbStr+timeStr+minEnStr+fExt
-
-  ENDIF
 
   ;;Initialize
   angles                = Y[0,aBin_i]
@@ -178,8 +150,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
                   CURRENT=window)
 
      IF KEYWORD_SET(save_plots) THEN BEGIN
-        PRINT,'Saving bFunc plot: ' + bFuncSPName
-        window.Save,plotDir+bFuncSPName
+        PRINT,'Saving bFunc plot: ' + plotNames.bFuncSPName
+        window.Save,plotNames.plotDir+plotNames.bFuncSPName
 
         window.Close
         window = !NULL
@@ -214,8 +186,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
                   CURRENT=window)
 
      IF KEYWORD_SET(save_plots) THEN BEGIN
-        PRINT,'Saving bFunc plot: ' + bFuncSPName
-        window.Save,plotDir+bFuncSPName
+        PRINT,'Saving bFunc plot: ' + plotNames.bFuncSPName
+        window.Save,plotNames.plotDir+plotNames.bFuncSPName
 
         window.Close
         window = !NULL
@@ -246,8 +218,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
                        CURRENT=window)
 
      IF KEYWORD_SET(save_plots) THEN BEGIN
-        PRINT,'Saving bFunc polarPlot: ' + bFuncPolarSPName
-        window.Save,plotDir+bFuncPolarSPName
+        PRINT,'Saving bFunc polarPlot: ' + plotNames.bFuncPolarSPName
+        window.Save,plotNames.plotDir+plotNames.bFuncPolarSPName
 
         window.Close
         window = !NULL
@@ -355,8 +327,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
                  CURRENT=window)
 
      IF KEYWORD_SET(save_plots) THEN BEGIN
-        PRINT,'Saving gFunc plot: ' + gFuncSPName
-        window.Save,plotDir+gFuncSPName
+        PRINT,'Saving gFunc plot: ' + plotNames.gFuncSPName
+        window.Save,plotNames.plotDir+plotNames.gFuncSPName
 
         window.Close
         window = !NULL

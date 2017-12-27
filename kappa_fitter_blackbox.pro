@@ -36,6 +36,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                           FIT2D__N_BELOW_PEAK=n_below_peak2D, $
                           FIT2D__N_ABOVE_PEAK=n_above_peak2D, $
+                          FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
+                          FIT2D__NFLUX=fit2D__nFlux, $
                           FIT2D__WEIGHTING=fit2D__weighting, $
                           FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
                           FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
@@ -241,6 +243,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
         FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
         FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
+        FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
+        FIT2D__NFLUX=fit2D__nFlux, $
         FIT2D__WEIGHTING=fit2D__weighting, $
         FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
         FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
@@ -294,8 +298,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         EPS=eps
 
      IF KEYWORD_SET(saveData) THEN BEGIN
-
-        ;; SAVE,
 
         saveStr  = 'SAVE,'
 

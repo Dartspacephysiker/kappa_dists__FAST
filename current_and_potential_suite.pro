@@ -464,6 +464,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            Temperature, $ ;Temp
                                            Density, $ ;Dens
                                            R_B_init]           ;R_B
+
   IF KEYWORD_SET(plot_j_v_and_theory) THEN BEGIN
 
      PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $

@@ -1,12 +1,9 @@
-PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
+PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
    eRange_peak, $
-   nEnergies, $
-   nTotAngles, $
-   curFitStr,curDataStr, $
+   curDataStr, $
    wtsForFit,X2D,Y2D,dataToFit, $
    fa, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-   ITIME=iTime, $
    UNITS=units, $
    ;; MASS=mass, $
    IN_ESTIMATED_LC=estimated_lc, $
@@ -32,17 +29,17 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
-        eRange_i        = WHERE((curDataStr.energy[*,nTotAngles/2] GE eRange_peak[0]) AND $
-                                (curDataStr.energy[*,nTotAngles/2] LE eRange_peak[1]),nEnKeep)
+        eRange_i        = WHERE((curDataStr.energy[*,curDataStr.nBins/2] GE eRange_peak[0]) AND $
+                                (curDataStr.energy[*,curDataStr.nBins/2] LE eRange_peak[1]),nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
-        eRange_i        = WHERE(curDataStr.energy[*,nTotAngles/2] GE $
+        eRange_i        = WHERE(curDataStr.energy[*,curDataStr.nBins/2] GE $
                                 KF2D__curveFit_opt.min_peak_energy,nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      ELSE: BEGIN
-        nEnKeep         = N_ELEMENTS(curDataStr.energy[*,nTotAngles/2])
+        nEnKeep         = N_ELEMENTS(curDataStr.energy[*,curDataStr.nBins/2])
         eRange_i        = INDGEN(nEnKeep)
      END
   ENDCASE
@@ -50,28 +47,28 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
         bro         = KF2D__SDTData_opt.electron_angleRange
-        aRange_i    = WHERE((curDataStr.theta[nEnergies/2,*] GE bro[0]) AND $
-                            (curDataStr.theta[nEnergies/2,*] LE bro[1]),nAnKeep)
+        aRange_i    = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[0]) AND $
+                            (curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[1]),nAnKeep)
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
      ;;    bro         = KF2D__SDTData_opt.electron_lca
      ;;    IF bro[0] LT bro[1] THEN BEGIN
-     ;;       aRange_i = WHERE((curDataStr.theta[nEnergies/2,*] LE bro[0]) OR $
-     ;;                        (curDataStr.theta[nEnergies/2,*] GE bro[1]),nAnKeep)
+     ;;       aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[0]) OR $
+     ;;                        (curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[1]),nAnKeep)
      ;;    ENDIF ELSE BEGIN
-     ;;       aRange_i = WHERE((curDataStr.theta[nEnergies/2,*] LE bro[0]) AND $
-     ;;                        (curDataStr.theta[nEnergies/2,*] GE bro[1]),nAnKeep)
+     ;;       aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[0]) AND $
+     ;;                        (curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[1]),nAnKeep)
      ;;    ENDELSE
-     ;;    ;; PRINT,"Angles for 2D fit: ",curDataStr.theta[nEnergies/2,aRange_i]
+     ;;    ;; PRINT,"Angles for 2D fit: ",curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
      ;;    IF nAnKeep EQ 0 THEN STOP
      ;; END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
-     ;;    aRange_i        = WHERE(curDataStr.energy[*,nTotAngles/2] GE $
+     ;;    aRange_i        = WHERE(curDataStr.energy[*,curDataStr.nBins/2] GE $
      ;;                            KF2D__curveFit_opt.min_peak_energy,nEnKeep)
      ;;    IF nEnKeep EQ 0 THEN STOP
      ;; END
      ELSE: BEGIN
-        nAnKeep         = N_ELEMENTS(curDataStr.theta[nEnergies/2,*])
+        nAnKeep         = N_ELEMENTS(curDataStr.theta[curDataStr.nEnergy/2,*])
         aRange_i        = INDGEN(nAnKeep)
         ;; PRINT,'Angles for 2D fit: ALL'
      END
@@ -89,7 +86,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE_TEST, $
   dataToFit          = dataToFit[*,aRange_i]
   wtsForFit          = wtsForFit[*,aRange_i]
 
-  ;; angle_i            = INDGEN(nTotAngles)
+  ;; angle_i            = INDGEN(curDataStr.nBins)
 
   fit2D_dens_angleInfo = {angle_i:aRange_i, $
                           ;; nAKeep:nAKeep, $

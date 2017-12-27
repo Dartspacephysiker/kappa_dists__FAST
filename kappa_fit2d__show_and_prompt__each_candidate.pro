@@ -1,12 +1,12 @@
 ;2016/08/06
 PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
-   nTot2DFits, $
-   iTime, $
+   TIMEFNSTR=timeFNStr, $
    ONLY_DATA=only_data, $ 
    FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    PROMPT__CONT_TO_NEXT_FIT=prompt__cont_to_next_fit, $
    PROMPT__CONT_UNTIL_FIT_EQ=prompt__cont_until_fit_eq, $
+   PROMPT__NTOT2DFITS=nTot2DFits, $
    FINISH_AND_SAVE_ALL=finish_and_save_all, $
    KAPPA_FIT__SHOW__QUIT=show__quit, $
    FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -98,14 +98,14 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
                            KF2D__strings.eeb_or_ees, $
                            KF2D__Plot_opt.plotNamePref EQ '' ? '' : '-' + KF2D__Plot_opt.plotNamePref, $
                            'Data', $
-                           KF2D__strings.timeFNStrs[iTime])
+                           timeFNStr)
         END
         ELSE: BEGIN
            tempFN = STRING(FORMAT='("orb_",A0,A0,"-",A0,"_fit-",A0,A0)', $
                            KF2D__strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
                            fitString, $
-                           KF2D__strings.timeFNStrs[iTime], $
+                           timeFNStr, $
                            (KEYWORD_SET(KF2D__Curvefit_opt.fit2D__clampTemperature) ? '-clampT' : ''))
         END
      ENDCASE
@@ -189,7 +189,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("spec2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
                            KF2D__strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
-                           fitString,KF2D__strings.timeFNStrs[iTime])
+                           fitString,timeFNStr)
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
@@ -254,7 +254,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("contour2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
                            KF2D__strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
-                           fitString,KF2D__strings.timeFNStrs[iTime])
+                           fitString,timeFNStr)
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $
@@ -276,7 +276,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            tempFN = STRING(FORMAT='("contour2d--orb_",A0,A0,"--data_and_",A0,"_fit--",A0)', $
                            strings.orbStr, $
                            KF2D__Plot_opt.plotNamePref, $
-                           fitString,strings.timeFNStrs[iTime])
+                           fitString,timeFNStr)
            POPEN,(KEYWORD_SET(PAPlotDir) ? PAPlotDir : './') + tempFN, $
                  XSIZE=xSize, $
                  YSIZE=ySize, $

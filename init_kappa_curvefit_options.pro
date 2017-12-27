@@ -27,6 +27,8 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
+   FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
+   FIT2D__NFLUX=fit2D__nFlux, $
    FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
    FIT2D__WEIGHTING=fit2D__weighting, $
    FIT2D__CLAMPTEMPERATURE=fit2D__clampTemperature, $
@@ -53,60 +55,61 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    ;; UNITS=units, $
    _EXTRA=e
 
-
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  defFit_tol                                 = 1.e-3
-  defFit2D_tol                               = 1.e-3
-  defMax_iter                                = 1000
-  defFit2D_max_iter                          = 1000
-  defNEn_below_peak                          = 2
-  defNEn_above_peak                          = 7
-  defMin_peak_energy                         = 300
-  defAdd_gaussian_estimate                   = 1
+  defFit_tol                = 1.e-3
+  defFit2D_tol              = 1.e-3
+  defMax_iter               = 1000
+  defFit2D_max_iter         = 1000
+  defNEn_below_peak         = 2
+  defNEn_above_peak         = 7
+  defMin_peak_energy        = 300
+  defAdd_gaussian_estimate  = 1
 
   ;;default mass given in eV/(km/s)^2, per SDT
-  defKappaFitA                               = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
+  defKappaFitA              = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
 
-  kCurvefit_opt                              = {only_1D_fits                : 0B, $
-                                                fit_tol                     : defFit_tol, $
-                                                fit2D_tol                   : defFit2D_tol, $
-                                                fit2D_only_dens_angles      : 0B, $
-                                                fit2D_only_eAngles          : 0B, $
-                                                fit2D_just_eRange_peak      : 0B, $
-                                                fit2D_fit_above_minE        : 0B, $
-                                                fit2D__bulk_e_anisotropy    : 0B, $
-                                                fit2D__bulk_e_anis_factor   : 0., $
-                                                fit2D__exclude_lca_from_densCalc :  0B, $
-                                                fit2D__disable_bFunc        : 0B, $
-                                                fit2D__keep_wholeFit        : 0B, $
-                                                fit2D__weighting            : 1B, $
-                                                fit2D__clampTemperature     : 0B, $
-                                                fit2D__clampDensity         : 0B, $
-                                                max_iter                    : defMax_iter, $
-                                                fit2D_max_iter              : defFit2D_max_iter, $
-                                                fita                        : defKappaFitA, $
-                                                fit1D_dens__each_angle      : 0B, $
-                                                fit1D__sc_eSpec             : 0B, $
-                                                fit1D__nFlux                : 0B, $
-                                                fit1D__weighting            : 1B, $
-                                                fit1D__clampTemperature     : 0B, $
-                                                fit1D__clampDensity         : 0B, $
-                                                n_below_peak                : defNEn_below_peak, $
-                                                n_above_peak                : defNEn_above_peak, $
-                                                n_below_peak2D              : defNEn_below_peak, $
-                                                n_above_peak2D              : defNEn_above_peak, $
-                                                trim_energies_below_peak    : 1, $
-                                                min_peak_energy             : defMin_peak_energy, $
-                                                peak_energy__start_at_highE : 0B, $
-                                                phi__use_energy_before_peak : 0B, $
-                                                thresh_eFlux                : 0.0D, $
-                                                estimate_A_from_data        : 1, $
-                                                add_gaussian_estimate       : defAdd_gaussian_estimate, $
-                                                use_SDT_Gaussian_fit        :  0B, $
-                                                use_mpFit1D                 :  0B, $
-                                                bulk_offset                 :  0.0};; , $
-                                                ;; units                       : 'eFlux'}
+  kCurvefit_opt             = {only_1D_fits                      : 0B, $
+                               fit_tol                           : defFit_tol, $
+                               fit2D_tol                         : defFit2D_tol, $
+                               fit2D_only_dens_angles            : 0B, $
+                               fit2D_only_eAngles                : 0B, $
+                               fit2D_just_eRange_peak            : 0B, $
+                               fit2D_fit_above_minE              : 0B, $
+                               fit2D__bulk_e_anisotropy          : 0B, $
+                               fit2D__bulk_e_anis_factor         : 0., $
+                               fit2D__exclude_lca_from_densCalc  : 0B, $
+                               fit2D__disable_bFunc              : 0B, $
+                               fit2D__extend_fitStruct_eRange    : 0B, $
+                               fit2D__keep_wholeFit              : 0B, $
+                               fit2D__nFlux                      : 0B, $
+                               fit2D__weighting                  : 1B, $
+                               fit2D__clampTemperature           : 0B, $
+                               fit2D__clampDensity               : 0B, $
+                               max_iter                          : defMax_iter, $
+                               fit2D_max_iter                    : defFit2D_max_iter, $
+                               fita                              : defKappaFitA, $
+                               fit1D_dens__each_angle            : 0B, $
+                               fit1D__sc_eSpec                   : 0B, $
+                               fit1D__nFlux                      : 0B, $
+                               fit1D__weighting                  : 1B, $
+                               fit1D__clampTemperature           : 0B, $
+                               fit1D__clampDensity               : 0B, $
+                               n_below_peak                      : defNEn_below_peak, $
+                               n_above_peak                      : defNEn_above_peak, $
+                               n_below_peak2D                    : defNEn_below_peak, $
+                               n_above_peak2D                    : defNEn_above_peak, $
+                               trim_energies_below_peak          : 1, $
+                               min_peak_energy                   : defMin_peak_energy, $
+                               peak_energy__start_at_highE       : 0B, $
+                               phi__use_energy_before_peak       : 0B, $
+                               thresh_eFlux                      : 0.0D, $
+                               estimate_A_from_data              : 1, $
+                               add_gaussian_estimate             : defAdd_gaussian_estimate, $
+                               use_SDT_Gaussian_fit              :  0B, $
+                               use_mpFit1D                       :  0B, $
+                               bulk_offset                       :  0.0} ;; , $
+  ;; units                                                       : 'eFlux'}
 
 
   IF N_ELEMENTS(only_1D_fits) GT 0 THEN BEGIN
@@ -319,6 +322,16 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
      kCurvefit_opt.bulk_offset
   ENDIF
 
+  IF N_ELEMENTS(fit2D__nFlux) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D__nFlux               = fit2D__nFlux
+     IF KEYWORD_SET(fit2D__nFlux) THEN BEGIN
+        ;; kCurvefit_opt.units                   = 'flux'
+     ENDIF
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__nFlux",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D__nFlux
+  ENDIF
+
   IF N_ELEMENTS(fit2D__only_fit_densAngles) GT 0 THEN BEGIN
      kCurvefit_opt.fit2D_only_dens_angles    = fit2D__only_fit_densAngles
 
@@ -373,6 +386,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
      PRINT,FORMAT='("kCurvefit_opt.fit2D__disable_bFunc",T45,":",T48,I0)', $
      kCurvefit_opt.fit2D__disable_bFunc
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__extend_fitStruct_eRange) GT 0 THEN BEGIN
+     kCurvefit_opt.fit2D__extend_fitStruct_eRange = fit2D__extend_fitStruct_eRange
+
+     PRINT,FORMAT='("kCurvefit_opt.fit2D__extend_fitStruct_eRange",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D__extend_fitStruct_eRange
   ENDIF
 
   IF N_ELEMENTS(fit2D__keep_wholeFit) GT 0 THEN BEGIN

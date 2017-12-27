@@ -80,7 +80,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
    ESTIMATE_LOSSCONE=estimate_lossCone, $
    PEAK_ENERGY=peak_energy, $
    NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
-   ITIME=iTime, $
+   TIME=time, $
    LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
    PLOT_BULKE_MODEL=plot_bulke_model, $
    PLOT_BULKE_FACTOR=plot_bulke_factor, $
@@ -98,6 +98,34 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro
 
+  IF KEYWORD_SET(save_plots) THEN BEGIN
+     IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
+
+     fExt               = KEYWORD_SET(eps) ? '.eps' : '.png'
+
+     orbStr             = KEYWORD_SET(orbit)  ? STRING(FORMAT='("--",I0)',orbit) : ''
+     IF KEYWORD_SET(time) THEN BEGIN
+
+        CASE SIZE(time,/TYPE) OF
+           7: BEGIN
+              timeStr   = time
+           END
+           ELSE: BEGIN
+              timeStr   = STRING(FORMAT='("--",A0)',TIME_TO_STR(time,/MS))
+           END
+        ENDCASE
+     ENDIF
+
+     minEnStr           = KEYWORD_SET(minEn)  ? STRING(FORMAT='("--minEn_",I0)',minEn)  : ''
+
+     plotNames = {plotDir : plotDir ,$
+                  bFuncSPName      : 'kappa_anisotropy--bFunc'      +orbStr+timeStr+minEnStr+fExt, $
+                  bFuncPolarSPName :'kappa_anisotropy--bFunc_polar'+orbStr+timeStr+minEnStr+fExt, $
+                  gFuncSPName      : 'kappa_anisotropy--gFunc'      +orbStr+timeStr+minEnStr+fExt}
+
+  ENDIF
+
+
   junk =  KAPPA_EFLUX__ANISOTROPY_DIST( $
           curDataStr.energy, $
           curDataStr.theta, $
@@ -109,22 +137,20 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           MIN_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
           REDUCENEGFAC=KF2D__Curvefit_opt.fit2D__bulk_e_anis_factor, $
           LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
+          DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc), $
           PLOT_BULKE_MODEL=plot_bulke_model, $
           PLOT_BULKE_FACTOR=plot_bulke_factor, $
           POLARPLOT_BULKE_FACTOR=polarPlot_bulke_factor, $
           PLOT_MODEL_BULKE_V_DATA_COMPARISON=plot_comparison, $
           PLOT_FLUX_PEAKS=plot_flux_peaks, $
-          PLOTDIR=plotDir, $
-          ORBIT=orbit, $
-          TIME=KF2D__strings.timeFNStrs[iTime], $
-          SAVE_PLOTS=save_plots, $
-          DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc), $
           OUT_PEAK_ENERGIES=peak_en, $
           OUT_PEAK_FLUXES=peak_flux, $
           OUT_ANGLES=peak_angle, $
           OUT_ANGLE_I=peak_angle_i, $
           OUT_FITANGLE_II=fitAngle_ii, $
           PRINT=print, $
+          SAVE_PLOTS=save_plots, $
+          PLOTNAMES=plotNames, $
           EPS=eps)
 
   K_EA__bFunc   = peak_en   / peak_en[fitAngle_ii]

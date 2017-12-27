@@ -48,11 +48,11 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   nHjar = N_ELEMENTS(inds)
   FOR k=0,nHjar-1 DO BEGIN
 
-     match_i = inds[k]
+     match_i = (inds[k])[0]
 
      ;; Now get the data
      IF observed_dist THEN BEGIN
-        data           = kappaFits[match_i[0]].orig
+        data           = kappaFits[match_i].orig
      ENDIF ELSE BEGIN
         ;; WAIT! Use best-fit param data, but experimental error!
         energy_inds = WHERE(synthPackage[1,match_i].energy[*,0] LE 34120.)
@@ -97,20 +97,24 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      ENDELSE
 
      ;; Params
-     Pkappa         = kappaFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
-     Pgauss         = gaussFits[match_i[0]].a     ;Best-fit bulk E, T, kappa [meaningless], density
-     Pobs           = kappaFits[match_i[0]].a_sdt ;initial (or estimated?) bulk E, T, kappa [meaningless], density
+     Pkappa         = kappaFits[match_i].a     ;Best-fit bulk E, T, kappa [meaningless], density
+     Pgauss         = gaussFits[match_i].a     ;Best-fit bulk E, T, kappa [meaningless], density
+     Pobs           = kappaFits[match_i].a_sdt ;initial (or estimated?) bulk E, T, kappa [meaningless], density
 
-     mass           = fit2DGauss_inf_list[match_i[0]].sdt.mass
+     mass           = fit2DKappa_inf_list[match_i].sdt.mass
 
      ;; PRINT,data.x[data.energy_inds[0]:data.energy_inds[1]] ;Range of energies used
 
      PRINT,FORMAT='(I05,T10,A0)',k,tid[match_i]
 
-     utFil = saveSuff + STRJOIN(STRSPLIT(tid[match_i],':',/EXTRACT),'_')+obsString+gaussString
-     utFil = STRJOIN(STRSPLIT(utFil,'.',/EXTRACT),'__')+'.sav'
+     tidFNStr = STRJOIN(STRSPLIT(tid[match_i],':',/EXTRACT),'_')
+     tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
+
+     utFil = saveSuff + tidFNStr +obsString+gaussString
+     utFil = utFil+'.sav'
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,data,Pkappa,Pgauss,Pobs, $
+                                         TIDFNSTR=tidFNStr, $
                                          NROLLS=nRolls, $
                                          NOT_MPFIT1D=not_mpFit1D, $
                                          KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
@@ -118,6 +122,7 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                                          BOOTSTRAP_MODE=bootstrap, $
                                          ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                          MASS=mass, $
+                                         FIT2DKAPPA_INFO=fit2DKappa_inf_list[match_i], $
                                          SAVEFILE=utFil, $
                                          SAVEDIR=saveDir
 

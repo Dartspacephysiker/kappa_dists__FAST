@@ -67,6 +67,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
+   FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
+   FIT2D__NFLUX=fit2D__nFlux, $
    FIT2D__PRINT_FITINFO=print_2DFitInfo, $
    ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
    USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
@@ -141,6 +143,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
      ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
+     FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
+     FIT2D__NFLUX=fit2D__nFlux, $
      N_ENERGIES_BELOW_PEAK=n_below_peak, $
      N_ENERGIES_ABOVE_PEAK=n_above_peak, $
      N_BELOW_PEAK2D=n_below_peak2D, $
