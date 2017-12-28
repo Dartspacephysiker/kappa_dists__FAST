@@ -357,28 +357,29 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDELSE
 
-  PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
-                          A=a, $
-                          STRUCT_A=Astruct, $
-                          TIME=time, $
-                          NAMES_A=A_names, $
-                          CHI2=chi2, $
-                          PVAL=pVal, $
-                          FITSTATUS=fitStatus, $
-                          USE_MPFIT1D=use_mpFit1D
+  ;; PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
+  ;;                         A=a, $
+  ;;                         STRUCT_A=Astruct, $
+  ;;                         TIME=time, $
+  ;;                         NAMES_A=A_names, $
+  ;;                         CHI2=chi2, $
+  ;;                         PVAL=pVal, $
+  ;;                         FITSTATUS=fitStatus, $
+  ;;                         USE_MPFIT1D=use_mpFit1D
 
-  PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
-                          A=AGauss, $
-                          STRUCT_A=AStructGauss, $
-                          TIME=time, $
-                          NAMES_A=AGauss_names, $
-                          CHI2=chi2Gauss, $
-                          PVAL=pValGauss, $
-                          FITSTATUS=gaussfitStatus, $
-                          USE_MPFIT1D=use_mpFit1D
+  ;; PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
+  ;;                         A=AGauss, $
+  ;;                         STRUCT_A=AStructGauss, $
+  ;;                         TIME=time, $
+  ;;                         NAMES_A=AGauss_names, $
+  ;;                         CHI2=chi2Gauss, $
+  ;;                         PVAL=pValGauss, $
+  ;;                         FITSTATUS=gaussfitStatus, $
+  ;;                         USE_MPFIT1D=use_mpFit1D
 
-  PRINT_KAPPA_LOOP_FIT_SUMMARY,fitStatus,gaussfitStatus
-
+  STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'fitStatus',VALUE=kappaFitStatus
+  STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'fitStatus',VALUE=gaussFitStatus
+  PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFitStatus,gaussFitStatus
 
   IF ISA(KF2D__SDTData_opt) THEN BEGIN
      electron_angleRange = KF2D__SDTData_opt.electron_angleRange
@@ -471,6 +472,37 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   IF canDo2D THEN BEGIN
 
      ;;Proof that it's better with Papa John's
+
+     ;; Shrink these fools?
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time_index',VALUE=k1DFitsTimeInd
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'time_index',VALUE=g1DFitsTimeInd
+     junk1DTimeInds = CGSETINTERSECTION(k1DFitsTimeInd,g1DFitsTimeInd, $
+                                        POSITIONS=k1DTInds)
+     junk1DTimeInds = CGSETINTERSECTION(g1DFitsTimeInd,k1DFitsTimeInd, $
+                                        POSITIONS=g1DTInds)
+     kappaFits = kappaFits[k1DTInds]
+     gaussFits = gaussFits[g1DTInds]
+
+     PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
+                             A=a, $
+                             STRUCT_A=Astruct, $
+                             TIME=kappaTime, $
+                             NAMES_A=A_names, $
+                             CHI2=chi2, $
+                             PVAL=pVal, $
+                             FITSTATUS=fitStatus, $
+                             USE_MPFIT1D=use_mpFit1D
+
+     PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
+                             A=AGauss, $
+                             STRUCT_A=AStructGauss, $
+                             TIME=gaussTime, $
+                             NAMES_A=AGauss_names, $
+                             CHI2=chi2Gauss, $
+                             PVAL=pValGauss, $
+                             FITSTATUS=gaussfitStatus, $
+                             USE_MPFIT1D=use_mpFit1D
+
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=As
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,GaussFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=GaussAs
      ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2dkappa_inf_list,'fitdens',VALUE=fitDens
@@ -482,8 +514,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      betterDensK = As[*,3]
      betterDensG = GaussAs[*,3]
 
-     kFitParam_struct = 1
-     gFitParam_struct = 1
+     kFit2DParam_struct = 1
+     gFit2DParam_struct = 1
 
      fit2DK = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DKappa_inf_list, $
                                              SOUTH=south, $
@@ -495,7 +527,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                                              N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                              OUT_GOOD_I=includeK_i, $
-                                             OUT_FITPARAM_STRUCT=kFitParam_struct, $
+                                             OUT_FITPARAM_STRUCT=kFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT)
 
      fit2DG = PARSE_KAPPA_FIT2D_INFO_LIST_V2(fit2DGauss_inf_list, $
@@ -509,13 +541,13 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                                              IN_GOOD_I=includeK_i, $
                                              OUT_GOOD_I=includeG_i, $
-                                             OUT_FITPARAM_STRUCT=gFitParam_struct, $
+                                             OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
      ;; fit2DK.obs_scDens = betterDensK
      ;; fit2DG.obs_scDens = betterDensG
-     ;; kFitParam_struct.N = betterDensK
-     ;; gFitParam_struct.N = betterDensG
+     ;; kFit2DParam_struct.N = betterDensK
+     ;; gFit2DParam_struct.N = betterDensG
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
@@ -571,9 +603,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         fit2DKappa_inf_list = fit2DKappa_inf_list[include_i]
         fit2DGauss_inf_list = fit2DGauss_inf_list[include_i]
 
-        kappaFits = kappaFits[include_i]
-        gaussFits = gaussFits[include_i]
-
         AStruct      = {bulk_energy : AStruct.bulk_energy[include_i], $
                         temperature : AStruct.temperature[include_i], $
                         kappa       : AStruct.kappa[include_i], $
@@ -586,18 +615,16 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                         N           : AStructGauss.N[include_i], $
                         bulk_angle  : AStructGauss.bulk_angle[include_i]}
 
-        kFitParam_struct = {bulk_energy  : kFitParam_struct.bulk_energy[include_i], $
-                            temperature  : kFitParam_struct.temperature[include_i], $
-                            kappa        : kFitParam_struct.kappa      [include_i], $
-                            n            : kFitParam_struct.n          [include_i]}
+        kFit2DParam_struct = {bulk_energy  : kFit2DParam_struct.bulk_energy[include_i], $
+                              temperature  : kFit2DParam_struct.temperature[include_i], $
+                              kappa        : kFit2DParam_struct.kappa      [include_i], $
+                              n            : kFit2DParam_struct.n          [include_i]}
 
-        gFitParam_struct = {bulk_energy  : gFitParam_struct.bulk_energy[include_i], $
-                            temperature  : gFitParam_struct.temperature[include_i], $
-                            kappa        : gFitParam_struct.kappa      [include_i], $
-                            n            : gFitParam_struct.n          [include_i]}
+        gFit2DParam_struct = {bulk_energy  : gFit2DParam_struct.bulk_energy[include_i], $
+                              temperature  : gFit2DParam_struct.temperature[include_i], $
+                              kappa        : gFit2DParam_struct.kappa      [include_i], $
+                              n            : gFit2DParam_struct.n          [include_i]}
 
-
-        
      ENDIF
 
      DAT_EFLUX_TO_DIFF_EFLUX,fit2DK.SDT[*],kappa_eFlux, $
@@ -688,8 +715,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PRINT,"Avg kappa value: ",MEAN(fit2DK.fitParams[2,theseInds])
      ENDIF
 
-
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
+
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
                            TPLT_VARS=tPlt_vars, $
                            EEB_OR_EES=eeb_or_ees, $
@@ -746,8 +773,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
                              KAPPA2D=fit2DK, $
                              GAUSS2D=fit2DG, $
-                             KAPPA_FITPARAM_STRUCT=kFitParam_struct, $
-                             GAUSS_FITPARAM_STRUCT=gFitParam_struct, $
+                             KAPPA_FITPARAM_STRUCT=kFit2DParam_struct, $
+                             GAUSS_FITPARAM_STRUCT=gFit2DParam_struct, $
                              KAPPAFITS=kappaFits, $
                              GAUSSFITS=gaussFits, $
                              DIFF_EFLUX=diff_eFlux, $

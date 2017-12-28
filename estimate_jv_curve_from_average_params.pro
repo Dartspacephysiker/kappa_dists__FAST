@@ -80,7 +80,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         Y           = jvPlotData.je[avgs_JVfit.useInds]
         YError      = jvPlotData.jeErr[avgs_JVfit.useInds]
         weights     = 1./ABS(jvPlotData.jeErr[avgs_JVfit.useInds])^2
-        yTitle      = '$j_{E \parallel,i}$ (mW/m!U2!N)'
+        yTitle      = '$j_{E \parallel ,i}$ (mW/m!U2!N)'
      END
      ELSE: BEGIN
         Y           = jvPlotData.cur[avgs_JVfit.useInds]*(-1D)

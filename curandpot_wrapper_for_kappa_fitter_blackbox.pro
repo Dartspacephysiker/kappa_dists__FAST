@@ -136,10 +136,10 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   a_la_Elphic_spName      = bonusPref + fExt
   jvpotBar_spName         = bonusPref + '_j_vs_potBar__downgoing_e' + savePSuff + fExt
   TN_spName               = bonusPref + '_T_and_N__downgoing_e' + savePSuff + fExt
-  JV_theor_spName         = bonusPref + '_j_v_data_n_theory__' + savePSuff + fExt
-  j_v__fixTandN__spName   = bonusPref + '_j_v_fixTandN__' + savePSuff + fExt
-  en_spec__spName         = bonusPref + '_en_specs__' + savePSuff + fExt
-  J_V__RB_and_kappa_map__SPName = bonusPref + '_rbKappaMap_' + savePSuff + fExt
+  JV_theor_spName         = bonusPref + '_j_v_data_n_theory' + savePSuff + fExt
+  j_v__fixTandN__spName   = bonusPref + '_j_v_fixTandN' + savePSuff + fExt
+  en_spec__spName         = bonusPref + '_en_specs' + savePSuff + fExt
+  J_V__RB_and_kappa_map__SPName = bonusPref + '_rbKappaMap' + savePSuff + fExt
   ;;Options for j_v_potBar plot
   jvpotBar__j_on_yAxis    = 1
 

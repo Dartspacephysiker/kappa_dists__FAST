@@ -544,15 +544,18 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
      filNavn = KEYWORD_SET(SPName) ? SPName : 'kappa_rB_map' + $
                (KEYWORD_SET(is_eFlux) ? '-eFlux' : '') + '.png'
-     filPref = (STRSPLIT(filNavn,'.',/EXTRACT))[0]
+     filTmp  = STRSPLIT(filNavn,'.',/EXTRACT)
+     filPref = (filTmp)[0]
+     filSuff = N_ELEMENTS(filTmp) GT 1 ? '.' + filTmp[1] : '.png'
+     IF KEYWORD_SET(is_eFlux) THEN filPref += '-eFlux'
+
      count = 0
      WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
         count++
-        filNavn = STRING(FORMAT='(A0,I02,A0,A0)', $
+        filNavn = STRING(FORMAT='(A0,I02,A0)', $
                          filPref, $
                          count, $
-                         (KEYWORD_SET(is_eFlux) ? '-eFlux' : ''), $
-                         '.png')
+                         filSuff)
      ENDWHILE
 
      PRINT,"Saving " + filNavn + ' ...'

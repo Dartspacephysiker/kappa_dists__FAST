@@ -165,17 +165,19 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
         plotDir = './'
      ENDIF
 
-     filNavn = (KEYWORD_SET(SPName) ? SPName : (routName + '-JV_fixedTandN') ) + $
-               (KEYWORD_SET(is_eFlux) ? '-eFlux' : '') + '.png'
-     filPref = (STRSPLIT(filNavn,'.',/EXTRACT))[0]
+     filNavn = KEYWORD_SET(SPName) ? SPName : (routName + '-JV_fixedTandN')
+     filTmp  = STRSPLIT(filNavn,'.',/EXTRACT)
+     filPref = (filTmp)[0]
+     filSuff = N_ELEMENTS(filTmp) GT 1 ? '.' + filTmp[1] : '.png'
+     IF KEYWORD_SET(is_eFlux) THEN filPref += '-eFlux'
+
      count = 0
      WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
         count++
-        filNavn = STRING(FORMAT='(A0,I02,A0,A0)', $
+        filNavn = STRING(FORMAT='(A0,I02,A0)', $
                          filPref, $
-                         (KEYWORD_SET(is_eFlux) ? '-eFlux' : ''), $
                          count, $
-                         '.png')
+                         filSuff)
      ENDWHILE
 
      PRINT,"Saving to " + filNavn + ' ...'
