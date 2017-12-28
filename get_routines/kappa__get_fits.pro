@@ -20,8 +20,8 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     TRIM_ENERGIES_BELOW_PEAK=trim_energies_below_peak, $
                     OUT_FITTED_PARAMS=out_kappaParams, $
                     OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                    ;; OUT_KAPPA_FIT_STRUCTS=kappaFits, $
+                    ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                     ADD_FULL_FITS=add_full_fits, $
                     ADD_ANGLESTR=add_angleStr, $
                     OUT_ERANGE_PEAK=out_eRange_peak, $
@@ -162,11 +162,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
   ENDIF
 
   ;; IF fitStatus EQ 0 THEN BEGIN
-     IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
-        kappaFits    = LIST(kappaFit)
-     ENDIF ELSE BEGIN
-        kappaFits.Add,kappaFit
-     ENDELSE
+     ;; IF N_ELEMENTS(kappaFits) EQ 0 THEN BEGIN
+     ;;    kappaFits    = LIST(kappaFit)
+     ;; ENDIF ELSE BEGIN
+     ;;    kappaFits.Add,kappaFit
+     ;; ENDELSE
   ;; ENDIF
 
   IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
@@ -299,11 +299,11 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
      ;; gaussFits    = N_ELEMENTS(gaussFits) EQ 0 ? gaussFit : [gaussFits,gaussFit]
      ;; IF gaussFitStatus EQ 0 AND fitStatus EQ 0 THEN BEGIN
-        IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
-           gaussFits    = LIST(gaussFit)
-        ENDIF ELSE BEGIN
-           gaussFits.Add,gaussFit
-        ENDELSE
+        ;; IF N_ELEMENTS(gaussFits) EQ 0 THEN BEGIN
+        ;;    gaussFits    = LIST(gaussFit)
+        ;; ENDIF ELSE BEGIN
+        ;;    gaussFits.Add,gaussFit
+        ;; ENDELSE
      ;; ENDIF
 
      out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $

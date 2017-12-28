@@ -165,7 +165,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
         plotDir = './'
      ENDIF
 
-     filNavn = KEYWORD_SET(SPName) ? SPName : routName + '-JV_fixedTandN' + $
+     filNavn = (KEYWORD_SET(SPName) ? SPName : (routName + '-JV_fixedTandN') ) + $
                (KEYWORD_SET(is_eFlux) ? '-eFlux' : '') + '.png'
      filPref = (STRSPLIT(filNavn,'.',/EXTRACT))[0]
      count = 0
@@ -173,8 +173,8 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
         count++
         filNavn = STRING(FORMAT='(A0,I02,A0,A0)', $
                          filPref, $
-                         count, $
                          (KEYWORD_SET(is_eFlux) ? '-eFlux' : ''), $
+                         count, $
                          '.png')
      ENDWHILE
 

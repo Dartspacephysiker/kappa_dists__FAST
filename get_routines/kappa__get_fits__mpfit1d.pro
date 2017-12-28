@@ -19,8 +19,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              GAUSS_FIXA=gauss_fixA, $
                              YMAX=yMax, $
                              STRINGS=strings, $
-                             OUT_FITTED_PARAMS=out_kappaParams, $
-                             OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                             ;; OUT_FITTED_PARAMS=out_kappaParams, $
+                             ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                              ADD_FULL_FITS=add_full_fits, $
                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                              ADD_ANGLESTR=add_angleStr, $
@@ -263,8 +263,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   ENDWHILE
 
-  out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
-                              [[out_kappaParams],[A]] : A
+  ;; out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
+  ;;                             [[out_kappaParams],[A]] : A
   IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
      out_eRange_peak        = N_ELEMENTS(out_eRange_peak) GT 0 ? $
                               [[out_eRange_peak],[eRange_peak]] : eRange_peak
@@ -279,17 +279,17 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                      strings.orbDate)
   ENDIF
 
-  kappaFit                    = {x:X, $
-                                 y:yFit, $
-                                 ;; NAME:"Kappa distribution", $
-                                 NAME:STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",A[2]), $
-                                 A:A, $
-                                 time:timeStr, $
-                                 time_index:bounds_i, $
-                                 fitStatus:fitStatus, $
-                                 chi2:chi2, $
-                                 pVal:pVal, $
-                                 A_SDT:Aorig}
+  kappaFit                    = {x           : X, $
+                                 y           : yFit, $
+                                 ;; NAME     : "Kappa distribution", $
+                                 NAME        : STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",A[2]), $
+                                 A           : A, $
+                                 A_initGuess : TEMPORARY(Aorig), $
+                                 time        : timeStr, $
+                                 time_index  : bounds_i, $
+                                 fitStatus   : TEMPORARY(fitStatus), $
+                                 chi2        : TEMPORARY(chi2), $
+                                 pVal        : TEMPORARY(pVal)}
 
   IF KEYWORD_SET(add_full_fits) THEN BEGIN
      ;; xFull = add_full_fits
@@ -430,19 +430,18 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ENDIF
      ENDELSE
 
-
-     gaussFit              = {x:KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
-                              y:yGaussFit, $
-                              ;; NAME:"Maxwellian distribution" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
-                              NAME:"Maxwellian" + (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
-                              A:AGauss, $
-                              time:timeStr, $
-                              time_index:bounds_i, $
-                              fitStatus:gaussFitStatus, $
-                              chi2:chi2, $
-                              pVal:pValGauss, $
-                              A_SDT:AGaussOrig, $
-                              is_sdt_fit:KEYWORD_SET(use_SDT_Gaussian_fit)}
+     gaussFit              = {x           : KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
+                              y           : yGaussFit, $
+                              name        : "Maxwellian" + $
+                                            (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
+                              A           : AGauss, $
+                              A_initGuess : TEMPORARY(AGaussOrig), $
+                              time        : timeStr, $
+                              time_index  : bounds_i, $
+                              fitStatus   : TEMPORARY(gaussFitStatus), $
+                              chi2        : TEMPORARY(chi2), $
+                              pVal        : TEMPORARY(pValGauss), $
+                              is_sdt_fit  : KEYWORD_SET(use_SDT_Gaussian_fit)}
 
      IF KEYWORD_SET(add_full_fits) THEN BEGIN
         CASE 1 OF
@@ -477,4 +476,5 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      ;; ENDIF
 
   ENDIF
+
 END

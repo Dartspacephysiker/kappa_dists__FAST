@@ -44,7 +44,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /LABEL
      END
      ELSE: BEGIN
-        CONTOUR2D,fit2DStruct.bestFitStr, $
+        CONTOUR2D,fit2DStruct.SDT, $
                   ;; ANGLE=angle, $
                   /POLAR, $
                   /FILL, $
@@ -71,11 +71,11 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
               END
               KEYWORD_SET(KF2D__curveFit_opt.fit2D_just_eRange_peak): BEGIN
                  plotme1      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-                 plotme1[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.eRange_peak[0]) ;*K_EA__bFunc)
-                 plotme1[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme1[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme1[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
                  plotme2      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-                 plotme2[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.eRange_peak[1]) ;*K_EA__bFunc)
-                 plotme2[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.eRange_peak[1]) ;*K_EA__bFunc)
+                 plotme2[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+                 plotme2[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
                  PLOTS,plotme1,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize
                  PLOTS,plotme2,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
@@ -85,8 +85,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
         ENDIF
 
         ;;    CONTOUR2D,curDataStr,/POLAR
-        junk        = MAX(fit2DStruct.bestFitStr.data[*,fit2DStruct.fitAngle_i],edgery_i)
-        peak_energy = (fit2DStruct.bestFitStr.energy[edgery_i,fit2DStruct.fitAngle_i])[0]
+        junk        = MAX(fit2DStruct.SDT.data[*,fit2DStruct.extra_info.fitAngle_i],edgery_i)
+        peak_energy = (fit2DStruct.SDT.energy[edgery_i,fit2DStruct.extra_info.fitAngle_i])[0]
         plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
         plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
         plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
@@ -97,8 +97,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
 
         IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
            
-           tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.bestFit1DParams : $
-                         fit2DStruct.bestFit1DParams.A
+           tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.fit1D.A : $
+                         fit2DStruct.fitParams
            fitTitle    = ["Bulk energy  (eV)", $
                           (is_kappa ? $
                            "Plasma temp. (core) (eV)" : $
@@ -112,9 +112,9 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                            STRING(FORMAT='(F-10.2,T11,"(",F-7.2,")")',tmpA[1],tmpA[1]*(tmpA[2]-1.5D)/tmpA[2]) : $
                            STRING(FORMAT='(F-15.2)',tmpA[1])), $
                           STRING(FORMAT='(F-7.3)',tmpA[2]), $
-                          STRING(FORMAT='(F-8.4)',fit2DStruct.bestDens), $
+                          STRING(FORMAT='(F-8.4)',fit2DStruct.fitMoms.scDens), $
                           ;; STRING(FORMAT='(F-8.4)',tmpA[3]), $
-                          STRING(FORMAT='(G-9.4)',fit2DStruct.bestChi2)]
+                          STRING(FORMAT='(G-9.4)',fit2DStruct.chi2/(fit2DStruct.dof-fit2DStruct.nPegged))]
 
            theString   = STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
                          STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $

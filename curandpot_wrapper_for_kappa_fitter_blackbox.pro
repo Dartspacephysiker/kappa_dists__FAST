@@ -52,6 +52,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
    JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
    JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+   JV_THEOR__ALSO_EFLUX=jv_theor__also_eFlux, $
+   JV_THEOR__ONLY_EFLUX=jv_theor__only_eFlux, $
    J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
    J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
    ALL_PITCHANGLES=all_pitchAngles, $
@@ -63,6 +65,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    PLOTPREF=plotPref, $
+   PLOTS_IN_BUFFER=plots_in_buffer, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
@@ -136,7 +139,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   JV_theor_spName         = bonusPref + '_j_v_data_n_theory__' + savePSuff + fExt
   j_v__fixTandN__spName   = bonusPref + '_j_v_fixTandN__' + savePSuff + fExt
   en_spec__spName         = bonusPref + '_en_specs__' + savePSuff + fExt
-
+  J_V__RB_and_kappa_map__SPName = bonusPref + '_rbKappaMap_' + savePSuff + fExt
   ;;Options for j_v_potBar plot
   jvpotBar__j_on_yAxis    = 1
 
@@ -366,6 +369,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__ITERATIVE_RBDENS_GAME=jv_theor__iterative_RBDens_game, $
      JV_THEOR__ITERGAME_DENSFAC=jv_theor__itergame_densFac, $
      JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+     JV_THEOR__ALSO_EFLUX=jv_theor__also_eFlux, $
+     JV_THEOR__ONLY_EFLUX=jv_theor__only_eFlux, $
      MAP__MULTI_MAGRATIO_ARRAY=map__multi_magRatio_array, $
      MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
      MAP__2D=map__2D, $
@@ -380,6 +385,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N=plot_j_v_map__r_b_and_kappa__fixed_t_and_n, $
      PLOT_MAGCURRENT_VS_CURRENT=plot_magCurrent_vs_current, $
      PLOT_EN_SPECS=plot_en_specs, $
+     PLOTS_IN_BUFFER=plots_in_buffer, $
      EN_SPECS__MOVIE=en_specs__movie, $
      A_LA_ELPHIC_SPNAME=a_la_Elphic_spName, $
      JVPOTBAR_SPNAME=jvpotBar_spName, $

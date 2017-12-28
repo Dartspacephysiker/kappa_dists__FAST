@@ -6,7 +6,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
    IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
    UNITS=units, $
    ;; MASS=mass, $
-   IN_ESTIMATED_LC=estimated_lc, $
+   ;; IN_ESTIMATED_LC=estimated_lc, $
    OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
   
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -49,6 +49,8 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
         bro         = KF2D__SDTData_opt.electron_angleRange
         aRange_i    = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[0]) AND $
                             (curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[1]),nAnKeep)
+        aRange      = [MIN(curDataStr.theta[curDataStr.nEnergy/2,aRange_i]), $
+                       MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
      ;;    bro         = KF2D__SDTData_opt.electron_lca
@@ -70,6 +72,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
      ELSE: BEGIN
         nAnKeep         = N_ELEMENTS(curDataStr.theta[curDataStr.nEnergy/2,*])
         aRange_i        = INDGEN(nAnKeep)
+        aRange          = curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
         ;; PRINT,'Angles for 2D fit: ALL'
      END
   ENDCASE
@@ -88,7 +91,8 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
 
   ;; angle_i            = INDGEN(curDataStr.nBins)
 
-  fit2D_dens_angleInfo = {angle_i:aRange_i, $
+  fit2D_dens_angleInfo = {angle_i:TEMPORARY(aRange_i), $
+                          aRange:TEMPORARY(aRange), $
                           ;; nAKeep:nAKeep, $
                           ;; remAngle_i:remAngle_i, $
                           ;; nARem:nARem, $
@@ -104,7 +108,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
   ENDELSE
   
   fa  = {mu_0              : COS(angler/180.*!PI), $
-         Bingham_style     : 1, $
+         ;; Bingham_style     : 1, $ ;not being used as of 2017/12/28 in KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON
          is_maxwellian_fit : KEYWORD_SET(is_maxwellian_fit), $
          units             : units, $
          mass              : curDataStr.mass}

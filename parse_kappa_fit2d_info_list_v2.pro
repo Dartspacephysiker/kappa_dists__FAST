@@ -42,8 +42,20 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                          scTemp : 0. , $
                          scFAConduct : 0.D}
 
+  tmpArr       = MAKE_ARRAY((fit2D_inf_list[0].SDT).NBins,VALUE=-1987.1987,/FLOAT)
+  anisotropy   = {gFunc   : tmpArr, $
+                  bFunc   : tmpArr, $
+                  angles  : tmpArr, $
+                  angle_i : tmpArr, $
+                  N       : 0L}
+
   momInfoTmplt        = {estimated_sc : [0L,0L], $
-                         obs_eRange   : [0.,0.]}
+                         anisotropy   : TEMPORARY(anisotropy), $
+                         fitAngle_i   : 0L, $
+                         eRange_peak  : [0.,0.], $
+                         energy       : {fit_above_minE   : 0B, $
+                                         just_eRange_peak : 0B, $
+                                         only_electrAngles: 0B}}
 
   nFitParams          = N_ELEMENTS(fit2D_inf_list[0].fitParams)
   nPFree_index        = N_ELEMENTS(fit2D_inf_list[0].pFree_index)
@@ -63,18 +75,19 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   ;; fit_scFAConduct     = MAKE_ARRAY(nFits,                        VALUE=0.0,/FLOAT    )
   ;; estimated_sc        = MAKE_ARRAY(2,nFits,                      VALUE=0.0,/FLOAT    )
   errMsg              = MAKE_ARRAY(nFits,                                  /STRING   )
-  chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/FLOAT   )
-  status              = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
-  nfEv                = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
+  chi2                = MAKE_ARRAY(nFits,                        VALUE=0.0 ,/FLOAT   )
+  status              = MAKE_ARRAY(nFits,                        VALUE=0   ,/INTEGER )
+  nfEv                = MAKE_ARRAY(nFits,                        VALUE=0   ,/INTEGER )
   ;; best_resid          = MAKE_ARRAY(nFitPoints,nFits,             VALUE=0.0D,/FLOAT   )
-  pFree_index         = MAKE_ARRAY(nPFree_index,nFits,           VALUE=0.0D,/INTEGER )
+  pFree_index         = MAKE_ARRAY(nPFree_index,nFits,           VALUE=0   ,/INTEGER )
   ;; best_fJac           = MAKE_ARRAY(nFitPoints,nPFree_index,nFits,VALUE=0.0D,/FLOAT   )
-  nPegged             = MAKE_ARRAY(nFits,                        VALUE=0.0D,/BYTE    )
-  nFree               = MAKE_ARRAY(nFits,                        VALUE=0.0D,/BYTE    )
-  dof                 = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
-  covar               = MAKE_ARRAY(nFitParams,nFitParams,nFits,  VALUE=0.0D,/FLOAT   )
-  pError              = MAKE_ARRAY(nFitParams,nFits,             VALUE=0.0D,/FLOAT   )
-  nIter               = MAKE_ARRAY(nFits,                        VALUE=0.0D,/INTEGER )
+  nPegged             = MAKE_ARRAY(nFits,                        VALUE=0   ,/BYTE    )
+  nFree               = MAKE_ARRAY(nFits,                        VALUE=0   ,/BYTE    )
+  dof                 = MAKE_ARRAY(nFits,                        VALUE=0   ,/INTEGER )
+  covar               = MAKE_ARRAY(nFitParams,nFitParams,nFits,  VALUE=0.0 ,/FLOAT   )
+  pError              = MAKE_ARRAY(nFitParams,nFits,             VALUE=0.0 ,/FLOAT   )
+  nIter               = MAKE_ARRAY(nFits,                        VALUE=0   ,/INTEGER )
+  angleRange          = MAKE_ARRAY(2,nFits,                      VALUE=0.0 ,/FLOAT )
 
   nExcluded_highDens  = 0
   nExcluded_lowDens   = 0
@@ -168,31 +181,32 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         ENDIF
      ENDIF
 
-  SDTStr[k]         = fit2D_inf_list[k].SDT
-  fitParams[*,k]    = fit2D_inf_list[k].fitParams
-  ;; obs_scDens[k]     = fit2D_inf_list[k].obsMoms.scDens
-  ;; obs_scTemp[k]     = fit2D_inf_list[k].obsMoms.scTemp
-  ;; obs_scFAConduct[k]= fit2D_inf_list[k].obsMoms.scFAConduct
-  obsMoms[k]        = fit2D_inf_list[k].obsMoms
-  fitMoms[k]        = fit2D_inf_list[k].fitMoms
-  ;; moment_info[k]    = fit2D_inf_list[k].moment_info
-  ;; fit_scDens[k]     = fit2D_inf_list[k].fitMoms.scDens
-  ;; fit_scTemp[k]     = fit2D_inf_list[k].fitMoms.scTemp
-  ;; fit_scFAConduct[k]= fit2D_inf_list[k].fitMoms.scFAConduct
-  ;; estimated_sc[*,k] = fit2D_inf_list[k].estimated_sc
-  errMsg[k]         = fit2D_inf_list[k].errMsg
-  chi2[k]           = fit2D_inf_list[k].chi2
-  status[k]         = fit2D_inf_list[k].status
-  nfEv[k]           = fit2D_inf_list[k].nfEv
-  ;; best_resid[*,k]   = fit2D_inf_list[k].best_resid
-  pFree_index[*,k]  = fit2D_inf_list[k].pFree_index
-  ;; best_fJac[*,*,k]  = fit2D_inf_list[k].best_fJac
-  nPegged[k]        = fit2D_inf_list[k].nPegged
-  nFree[k]          = fit2D_inf_list[k].nFree
-  dof[k]            = fit2D_inf_list[k].dof
-  covar[*,*,k]      = fit2D_inf_list[k].covar
-  pError[*,k]       = fit2D_inf_list[k].pError
-  nIter[k]          = fit2D_inf_list[k].nIter
+     SDTStr[k]         = fit2D_inf_list[k].SDT
+     fitParams[*,k]    = fit2D_inf_list[k].fitParams
+     ;; obs_scDens[k]     = fit2D_inf_list[k].obsMoms.scDens
+     ;; obs_scTemp[k]     = fit2D_inf_list[k].obsMoms.scTemp
+     ;; obs_scFAConduct[k]= fit2D_inf_list[k].obsMoms.scFAConduct
+     obsMoms[k]        = fit2D_inf_list[k].obsMoms
+     fitMoms[k]        = fit2D_inf_list[k].fitMoms
+     moment_info[k]    = fit2D_inf_list[k].extra_info
+     ;; fit_scDens[k]     = fit2D_inf_list[k].fitMoms.scDens
+     ;; fit_scTemp[k]     = fit2D_inf_list[k].fitMoms.scTemp
+     ;; fit_scFAConduct[k]= fit2D_inf_list[k].fitMoms.scFAConduct
+     ;; estimated_sc[*,k] = fit2D_inf_list[k].estimated_sc
+     errMsg[k]         = fit2D_inf_list[k].errMsg
+     chi2[k]           = fit2D_inf_list[k].chi2
+     status[k]         = fit2D_inf_list[k].status
+     nfEv[k]           = fit2D_inf_list[k].nfEv
+     ;; best_resid[*,k]   = fit2D_inf_list[k].best_resid
+     pFree_index[*,k]  = fit2D_inf_list[k].pFree_index
+     ;; best_fJac[*,*,k]  = fit2D_inf_list[k].best_fJac
+     nPegged[k]        = fit2D_inf_list[k].nPegged
+     nFree[k]          = fit2D_inf_list[k].nFree
+     dof[k]            = fit2D_inf_list[k].dof
+     covar[*,*,k]      = fit2D_inf_list[k].covar
+     pError[*,k]       = fit2D_inf_list[k].pError
+     nIter[k]          = fit2D_inf_list[k].nIter
+     angleRange[*,k]   = fit2D_inf_list[k].angleRange
 
   ENDFOR
 
@@ -304,7 +318,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                        dof          : dof        [keep_i], $
                        covar        : covar  [*,*,keep_i], $
                        pError       : pError   [*,keep_i], $
-                       nIter        : nIter      [keep_i]}
+                       nIter        : nIter      [keep_i], $
+                       angleRange   : angleRange[*,keep_i]}
 
 
   IF KEYWORD_SET(fit_type) THEN BEGIN

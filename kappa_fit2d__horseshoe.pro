@@ -4,11 +4,11 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
                            TIMEFNSTR=timeFNStr, $
                            ERANGE_PEAK=eRange_peak, $
-                           KFITPARAMSTRUCT=kFitParamStruct, $
-                           KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
+                           FITPARAMSTRUCT=fitParamStruct, $
+                           ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
                            FITSTRING=fitString, $
-                           IN_ESTIMATED_LC=estimated_lc, $
+                           ;; IN_ESTIMATED_LC=estimated_lc, $
                            UNITS=units, $
                            OUT_FIT2DPARAMS=fit2DParams, $
                            OUT_FIT2D_FITINFO=fit2D_info, $
@@ -28,7 +28,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      OKStatus = MC__OKStatus
   ENDIF ELSE BEGIN
 
-     IF kFitParamStruct[1].limited[1] EQ 0 THEN BEGIN
+     IF fitParamStruct[1].limited[1] EQ 0 THEN BEGIN
         ;; When the upperbound of T is not limited, xTol will become irreducible in
         ;; the course of the fit and status 7 will be reported. To avoid this, we
         ;; allow xTol = unminimizable to be an allowable outcome
@@ -49,12 +49,12 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      fa, $
      IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
      UNITS=units, $
-     IN_ESTIMATED_LC=estimated_lc, $
+     ;; IN_ESTIMATED_LC=estimated_lc, $
      OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
   
-  IF STRUPCASE(kFitParamStruct[1].parName) EQ 'T' THEN BEGIN
-     kFitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
-     kFitParamStruct[3].fixed = KF2D__curveFit_opt.fit2D__clampDensity
+  IF STRUPCASE(fitParamStruct[1].parName) EQ 'T' THEN BEGIN
+     fitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
+     fitParamStruct[3].fixed = KF2D__curveFit_opt.fit2D__clampDensity
   ENDIF ELSE BEGIN
      STOP
   ENDELSE
@@ -72,7 +72,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
         ;;            curDataStr.theta, $
         ;;            curDataStr.data, $
         ;;            fitAngle_i, $
-        ;;            BULK_ENERGY=kFitParamStruct[0].value, $
+        ;;            BULK_ENERGY=fitParamStruct[0].value, $
         ;;            MIN_ENERGY=KF2D__curveFit_opt.min_peak_energy, $
         ;;            REDUCENEGFAC=KF2D__curveFit_opt.fit2D__bulk_e_anis_factor, $
         ;;            LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
@@ -104,8 +104,8 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                             PFREE_INDEX=iFree, $
                             /CALC_FJAC, $
                             BEST_FJAC=best_fJac, $
-                            ;; PARINFO=kFit2DParamStruct, $
-                            PARINFO=kFitParamStruct, $
+                            ;; PARINFO=fit2DParamStruct, $
+                            PARINFO=fitParamStruct, $
                             QUERY=query, $
                             NPEGGED=nPegged, $
                             NFREE=nFree, $
@@ -119,22 +119,13 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                             ERRMSG=errMsg, $
                             _EXTRA=extra)
 
-  IF (WHERE(status EQ OKStatus))[0] NE -1 THEN BEGIN
+  hadSuccess = (WHERE(status EQ OKStatus))[0] NE -1 
 
-     ;;Info?
-     hadSuccess     = 1
-
-  ENDIF ELSE BEGIN
-
-     IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+  IF ~hadSuccess AND KEYWORD_SET(print_2DFitInfo) THEN BEGIN
 
         PRINT,fitString + STRING(FORMAT='(A0,I0,A0)',' 2DFit failure (',status,') ...')
 
-     ENDIF
-
-     hadSuccess     = 0
-
-  ENDELSE
+  ENDIF
 
   fit2D_info = {chi2         : bestNorm   , $
                 errMsg       : errMsg     , $
@@ -148,6 +139,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                 dof          : dof        , $
                 covar        : covar      , $
                 pError       : pError     , $
-                nIter        : nIter      }
+                nIter        : nIter      , $
+                angleRange   : fit2D_dens_angleInfo.aRange}
 
 END

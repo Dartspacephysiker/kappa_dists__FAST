@@ -125,8 +125,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
    J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
    J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
-   PLOTS_IN_BUFFER=plots_in_buffer, $
    EN_SPEC__SPNAME=en_spec__spName, $
+   PLOTS_IN_BUFFER=plots_in_buffer, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
@@ -245,6 +245,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       _EXTRA=e
+
+  savePlot = KEYWORD_SET(plots_in_buffer)
 
   ;; dir         = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
 
@@ -583,7 +585,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
      ;;Options for R_B map
      map__2D = 1B
-     savePlot = KEYWORD_SET(plots_in_buffer)
      IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
         GET_FA_FIELD_LINE,jvPlotData.time, $
                           USEINDS=avgs_JVFit.useInds, $
@@ -795,23 +796,22 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                         IN_MMAGDAT=mMagDat, $
                                         _EXTRA=e
 
-           STOP
-           PLOT_EFLUX_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData_eFlux, $
-                                            KAPPA_A=A, $
-                                            GAUSS_A=AGauss, $
-                                            ORIGINATING_ROUTINE=routName, $
-                                            ORBIT=orbit, $
-                                            SAVEPLOT=savePlot, $
-                                            SPNAME=j_v__fixTandN__spName, $
-                                            PLOTDIR=plotDir, $
-                                            ;; J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
-                                            ;; J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
-                                            ;; SAVEDATA=j_v__fixTandN__savePlotData, $
-                                            ;; SDNAME=j_v__fixTandN__dataFilename, $
-                                            /NO_TITLE, $
-                                            IN_MMAGDAT=mMagDat_eFlux, $
-                                            /IS_EFLUX, $
-                                            _EXTRA=e
+           PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
+                                        KAPPA_A=A, $
+                                        GAUSS_A=AGauss, $
+                                        ORIGINATING_ROUTINE=routName, $
+                                        ORBIT=orbit, $
+                                        SAVEPLOT=savePlot, $
+                                        SPNAME=j_v__fixTandN__spName, $
+                                        PLOTDIR=plotDir, $
+                                        J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                        J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                        ;; SAVEDATA=j_v__fixTandN__savePlotData, $
+                                        ;; SDNAME=j_v__fixTandN__dataFilename, $
+                                        /NO_TITLE, $
+                                        IN_MMAGDAT=mMagDat_eFlux, $
+                                        /IS_EFLUX, $
+                                        _EXTRA=e
 
         END
         ;; KEYWORD_SET(jv_theor__only_eFlux): BEGIN

@@ -89,7 +89,7 @@
 
   ENDELSE
   
-  synthPackage                  = 1
+  synthPackage                  = 0
   average_over_angleRange       = 1
 
   estimate_A_from_data          = 1

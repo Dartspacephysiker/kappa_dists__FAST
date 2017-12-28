@@ -203,8 +203,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     DONT_PRINT_FITINFO=dont_print_fitInfo, $
                     ;; E_ANGLE=e_angle, $
                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
-                    OUT_FITTED_PARAMS=out_kappaParams, $
-                    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                    ;; OUT_FITTED_PARAMS=out_kappaParams, $
+                    ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                     OUT_KAPPA_FIT_STRUCTS=kappaFits, $
                     OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                     OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
