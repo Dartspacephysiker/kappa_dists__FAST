@@ -7,7 +7,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            KFITPARAMSTRUCT=kFitParamStruct, $
                            KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
-                           PRINT_2DWININFO=print_2DWinInfo, $
+                           FITSTRING=fitString, $
                            IN_ESTIMATED_LC=estimated_lc, $
                            UNITS=units, $
                            OUT_FIT2DPARAMS=fit2DParams, $

@@ -13,8 +13,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                              FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
                              FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
                              FIT2D__SHOW__FITSTRING=fitString, $
-                             PRINT_2DFITINFO=print_2DFitInfo, $
-                             PRINT_2DWININFO=print_2DWinInfo
+                             PRINT_2DFITINFO=print_2DFitInfo
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -57,8 +56,16 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                         MASS=curDataStr.mass)
 
         tmpStr          = CONV_UNITS(fit2DStr,'counts')
-        tmpStr.ddata    = (tmp3d.data)^.5
+        tmpStr.ddata    = (tmpStr.data)^.5
         fit2DStr        = CONV_UNITS(tmpStr,units)
+
+        ;; A means of checking what we go
+        FOR k=0,fit2DStr.nenergy-1 DO BEGIN
+           PRINT,FORMAT='(A0,F0.2,A0)','*********** ',fit2DStr.energy[k,0],' eV *************'
+           PRINT,fit2DStr.data[k,*]
+           PRINT,''
+        ENDFOR
+
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
      ;;    oldfit2DStr = fit2DStr
@@ -129,24 +136,28 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                     'fitMoms',{scDens   : TEMPORARY(fit_scDens), $
                                scTemp   : TEMPORARY(fit_scTemp), $
                                SCFAConduct : fFAConduct}, $
-                    'moment_info',{estimated_sc : tmpSourceConeRange, $
-                                   fitAngle_i   : fitAngle_i, $
-                                   eRange_peak  : eRange_peak, $
-                                   energy       :  $
-                                   {fit_above_minE   : KF2D__curveFit_opt.fit2D_fit_above_minE, $
-                                    just_eRange_peak : KF2D__curveFit_opt.fit2d_just_eRange_peak, $
-                                    only_electrAngles: KF2D__curveFit_opt.fit2D_only_eAngles}})
+                    'extra_info',{estimated_sc : tmpSourceConeRange, $
+                                  anisotropy   : {gFunc : K_EA__gFunc, $
+                                                  bFunc : K_EA__bFunc, $
+                                                  angles : K_EA__angles, $
+                                                  angle_i : K_EA__angle_i}, $
+                                  fitAngle_i   : fitAngle_i, $
+                                  eRange_peak  : eRange_peak, $
+                                  energy       :  $
+                                  {fit_above_minE   : KF2D__curveFit_opt.fit2D_fit_above_minE, $
+                                   just_eRange_peak : KF2D__curveFit_opt.fit2d_just_eRange_peak, $
+                                   only_electrAngles: KF2D__curveFit_opt.fit2D_only_eAngles}})
 
-     IF KEYWORD_SET(print_2DWinInfo) THEN BEGIN
+     ;; IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
 
-        PRINT,''
-        PRINT,'******************************'
-        PRINT,FORMAT='("WINNER ",A0)',fitString
-        PRINT,''
-        PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,fit2D_info.chi2/(fit2D_info.dof-fit2D_info.nPegged)
-        PRINT,'******************************'
+     ;;    PRINT,''
+     ;;    PRINT,'******************************'
+     ;;    PRINT,FORMAT='("WINNER ",A0)',fitString
+     ;;    PRINT,''
+     ;;    PRINT_KAPPA_FLUX2D_HORSESHOE_PARAMS,fit2DParams,fit2D_info.chi2/(fit2D_info.dof-fit2D_info.nPegged)
+     ;;    PRINT,'******************************'
 
-     ENDIF
+     ;; ENDIF
 
      IF KEYWORD_SET(print_2DFitInfo) THEN BEGIN
 

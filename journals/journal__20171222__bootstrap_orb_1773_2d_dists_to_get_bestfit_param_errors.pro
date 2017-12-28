@@ -7,7 +7,9 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   @common__kappa_fit2d_structs.pro
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
+
   fil = '20171124-orb_1773-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-classics-3-Elphic_et_al_1998-only_fit_peak_eRange-avg_itvl2.sav'
+  ;; fil = '20171227-orb_1773-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-classics-3-Elphic_et_al_1998-noFitBelowPeak-shiftT3-2avg-only_fit_peak_eRange-avg_itvl2.sav'
 
   observed_dist  = 0
 
@@ -36,10 +38,13 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                           FITSTATUS=fitStatus, $
                           /USE_MPFIT1D
 
-  nFits = N_ELEMENTS(kappaFits)
+  PRINT,"You know that 'observed' and 'synthetic' are discrepant because synthPackage and fit2DKappa_inf_list are discrepant, right?"
+  WAIT,1
+
+  nFits = N_ELEMENTS(fit2DKappa_inf_list)
   tid = MAKE_ARRAY(nFits,/STRING)
   FOR k=0,nFits-1 DO BEGIN
-     tid[k] = kappafits[k].orig.name
+     tid[k] = T2S((fit2DKappa_inf_list[k]).sdt.time)
   ENDFOR
   
   ;; match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
@@ -59,15 +64,16 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      IF observed_dist THEN BEGIN
         data = synthPackage[0,match_i]
      ENDIF ELSE BEGIN
-        data = synthPackage[1,match_i]
+        data = fit2DKappa_inf_list[match_i].sdt
+        ;; data = synthPackage[1,match_i]
 
-        shiftTheta = 0
-        data.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
-                        data.energy, $
-                        SHIFT(data.theta,0,shiftTheta), $
-                        fit2DKappa_inf_list[match_i].fitParams, $
-                        UNITS=units, $
-                        MASS=data.mass)
+        ;; shiftTheta = 0
+        ;; data.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
+        ;;                 data.energy, $
+        ;;                 SHIFT(data.theta,0,shiftTheta), $
+        ;;                 fit2DKappa_inf_list[match_i].fitParams, $
+        ;;                 UNITS=units, $
+        ;;                 MASS=data.mass)
 
         ;; WAIT! Use best-fit param data, but experimental error!
         ;; tmpStr          = CONV_UNITS(data,'counts')
