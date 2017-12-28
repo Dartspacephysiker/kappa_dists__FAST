@@ -169,6 +169,12 @@ PRO PLOT_EFLUX_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
 
      PRINT,"Saving to " + sPName + ' ...'
 
+     count = 0
+     WHILE FILE_TEST(plotDir+sPName) DO BEGIN
+        pref = (STRSPLIT(sPName,'.',/EXTRACT))[0]
+        count++
+        sPName = STRING(FORMAT='(A0,I02,A0)',pref,count,'.png')
+     ENDWHILE
      window1.Save,plotDir+sPName
 
      window1.Close

@@ -7,6 +7,8 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                  ORIGINATING_ROUTINE=routName, $
                                  SAVEPLOT=savePlot, $
                                  SPNAME=sPName, $
+                                 PLOTDIR=plotDir, $
+                                 IS_EFLUX=is_eFlux, $
                                  J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
                                  J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                  NO_TITLE=no_title, $
@@ -159,18 +161,26 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
-     IF ~KEYWORD_SET(sPName) THEN BEGIN
-        sPName     = routName + '-JV_fixedTandN.png'
-     ENDIF
-
      IF ~KEYWORD_SET(plotDir) THEN BEGIN
-        pDirSuff   = '/cur_and_pot_analysis'
-        SET_PLOT_DIR,plotDir,/FOR_SDT,ADD_SUFF=pDirSuff
+        plotDir = './'
      ENDIF
 
-     PRINT,"Saving to " + sPName + ' ...'
+     filNavn = KEYWORD_SET(SPName) ? SPName : routName + '-JV_fixedTandN' + $
+               (KEYWORD_SET(is_eFlux) ? '-eFlux' : '') + '.png'
+     filPref = (STRSPLIT(filNavn,'.',/EXTRACT))[0]
+     count = 0
+     WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
+        count++
+        filNavn = STRING(FORMAT='(A0,I02,A0,A0)', $
+                         filPref, $
+                         count, $
+                         (KEYWORD_SET(is_eFlux) ? '-eFlux' : ''), $
+                         '.png')
+     ENDWHILE
 
-     window1.Save,plotDir+sPName
+     PRINT,"Saving to " + filNavn + ' ...'
+
+     window1.Save,plotDir+filNavn
 
      window1.Close
      window1=!NULL

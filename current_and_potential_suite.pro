@@ -124,6 +124,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
    J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
    J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+   J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
+   PLOTS_IN_BUFFER=plots_in_buffer, $
    EN_SPEC__SPNAME=en_spec__spName, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
@@ -156,6 +158,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
      ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+     ARANGE__DENS_E_UP=aRange__dens_e_up, $
+     ARANGE__DENS_I_UP=aRange__dens_i_up, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -177,6 +181,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ARANGE__MOMENTS_LIST=aRange__moments_list, $
      ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
      ARANGE__CHARE_LIST=aRange__charE_list, $
+     ARANGE__DENS_LIST=aRange__dens_list, $
      ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
      MIN_PEAK_ENERGYARR=min_peak_energyArr, $
      MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -412,6 +417,12 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ;; ENDIF
 
+  IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
+     pDirSuff      = '/cur_and_pot_analysis'
+     ;; SET_PLOT_DIR,plotDir,/FOR_SDT,ADD_SUFF=pDirSuff
+     SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
+  ENDIF
+  
   IF KEYWORD_SET(plot_jv_a_la_Elphic) THEN BEGIN
      PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
         ORIGINAL_PLOTIDEE=orig_plotIdee, $
@@ -572,7 +583,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
      ;;Options for R_B map
      map__2D = 1B
-
+     savePlot = KEYWORD_SET(plots_in_buffer)
      IF KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens) THEN BEGIN
         GET_FA_FIELD_LINE,jvPlotData.time, $
                           USEINDS=avgs_JVFit.useInds, $
@@ -718,6 +729,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               IN_KAPPA_A=A, $
               IN_GAUSS_A=AGauss, $
               SAVEPLOT=savePlot, $
+              SPNAME=J_V__RB_and_kappa_map__SPName, $
+              PLOTDIR=plotDir, $
               _EXTRA=e
 
            PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat_eFlux,jvPlotData,avgs_JVFit, $
@@ -727,6 +740,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               IN_KAPPA_A=A, $
               IN_GAUSS_A=AGauss, $
               SAVEPLOT=savePlot, $
+              SPNAME=J_V__RB_and_kappa_map__SPName, $
+              PLOTDIR=plotDir, $
+              /IS_EFLUX, $
               _EXTRA=e
 
         END
@@ -752,6 +768,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               IN_KAPPA_A=A, $
               IN_GAUSS_A=AGauss, $
               SAVEPLOT=savePlot, $
+              SPNAME=J_V__RB_and_kappa_map__SPName, $
+              PLOTDIR=plotDir, $
+              IS_EFLUX=jv_theor__only_eFlux, $
               _EXTRA=e
 
         END
@@ -767,6 +786,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                         ORBIT=orbit, $
                                         SAVEPLOT=savePlot, $
                                         SPNAME=j_v__fixTandN__spName, $
+                                        PLOTDIR=plotDir, $
                                         J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
                                         J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                         ;; SAVEDATA=j_v__fixTandN__savePlotData, $
@@ -774,7 +794,6 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                         /NO_TITLE, $
                                         IN_MMAGDAT=mMagDat, $
                                         _EXTRA=e
-
 
            STOP
            PLOT_EFLUX_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData_eFlux, $
@@ -784,18 +803,20 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                             ORBIT=orbit, $
                                             SAVEPLOT=savePlot, $
                                             SPNAME=j_v__fixTandN__spName, $
+                                            PLOTDIR=plotDir, $
                                             ;; J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
                                             ;; J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                             ;; SAVEDATA=j_v__fixTandN__savePlotData, $
                                             ;; SDNAME=j_v__fixTandN__dataFilename, $
                                             /NO_TITLE, $
                                             IN_MMAGDAT=mMagDat_eFlux, $
+                                            /IS_EFLUX, $
                                             _EXTRA=e
 
         END
-        KEYWORD_SET(jv_theor__only_eFlux): BEGIN
+        ;; KEYWORD_SET(jv_theor__only_eFlux): BEGIN
 
-        END
+        ;; END
         ELSE: BEGIN
 
            PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
@@ -805,12 +826,14 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                         ORBIT=orbit, $
                                         SAVEPLOT=savePlot, $
                                         SPNAME=j_v__fixTandN__spName, $
+                                        PLOTDIR=plotDir, $
                                         J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
                                         J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                         ;; SAVEDATA=j_v__fixTandN__savePlotData, $
                                         ;; SDNAME=j_v__fixTandN__dataFilename, $
                                         /NO_TITLE, $
                                         IN_MMAGDAT=mMagDat, $
+                                        IS_EFLUX=jv_theor__only_eFlux, $
                                         _EXTRA=e
 
         END
@@ -892,7 +915,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   IF KEYWORD_SET(plot_en_specs) THEN BEGIN
 
-     plotDir = '~/Desktop/test/'
+     ;; plotDir = '~/Desktop/test/'
 
      PLOT_EN_SPECS__DIFF_EFLUX,diff_eFlux_files, $
                                PLOT_T1=plot_t1, $

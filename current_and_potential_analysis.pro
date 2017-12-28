@@ -20,6 +20,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+   ARANGE__DENS_E_UP=aRange__dens_e_up, $
+   ARANGE__DENS_I_UP=aRange__dens_i_up, $
    ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
    ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
@@ -45,6 +47,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
+   ARANGE__DENS_LIST=aRange__dens_list, $
    ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
    MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -134,6 +137,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange__charE_e_up      = KEYWORD_SET(aRange__charE_e_up    ) ? aRange__charE_e_up     : !NULL
      aRange__charE_i_up      = KEYWORD_SET(aRange__charE_i_up    ) ? aRange__charE_i_up     : !NULL
 
+     aRange__dens_e_down    = KEYWORD_SET(aRange__dens_e_down  ) ? aRange__dens_e_down   : !NULL
+     aRange__dens_e_up      = KEYWORD_SET(aRange__dens_e_up    ) ? aRange__dens_e_up     : !NULL
+     aRange__dens_i_up      = KEYWORD_SET(aRange__dens_i_up    ) ? aRange__dens_i_up     : !NULL
+
      ;; aRange__moments_e_down  = [330.,30.]
      ;; aRange__moments_i_up    = [150.,210.]
      ;; aRange__moments_e_up    = [150.,210.]
@@ -142,6 +149,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;; aRange__peakEn_list     = LIST(!NULL,!NULL,[150,210])
      aRange__peakEn_list     = LIST(aRange__peakEn_e_down,aRange__peakEn_e_up,aRange__peakEn_i_up)
      aRange__charE_list      = LIST(aRange__charE_e_down,aRange__charE_e_up,aRange__charE_i_up)
+     aRange__dens_list       = LIST(aRange__dens_e_down,aRange__dens_e_up,aRange__dens_i_up)
 
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
@@ -408,7 +416,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         @kappa_fitter__defaults.pro
 
         tmpTimes                     = LIST_TO_1DARRAY(timesList[t_k])
-        GET_FA_ORBIT,tmpTimes,/TIME_ARRAY,/NO_STORE,STRUC=struc
+        GET_FA_ORBIT,tmpTimes,/TIME_ARRAY,/ALL,/NO_STORE,STRUC=struc
         ;; GET_DATA,'ILAT',DATA=ilat
         ;; north_southArr               = ABS(ilat.y)/ilat.y
         north_southArr               = ABS(struc.ilat)/struc.ilat
@@ -425,6 +433,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
            OUT_E_ANGLE=e_angle, $
            ANGLESTR=angleStr, $
+           SDTSTRUCT=struc, $
            /JUST_ONE
 
         CASE upgoing OF
@@ -447,7 +456,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;; IF KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
         ;;    aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
         ;; ENDIF
-        aRange__dens    = KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) ? 'source' : !NULL
+        IF KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
+           aRange__dens    = 'source'
+        ENDIF ELSE IF N_ELEMENTS(aRange__dens_list[k]) GT 0 THEN BEGIN
+           aRange__dens = aRange__dens_list[k]
+        ENDIF
+        
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange

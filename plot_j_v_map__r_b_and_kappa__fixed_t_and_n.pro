@@ -7,6 +7,9 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    IN_GAUSS_A=AGauss, $
    OUT_YBEST=out_yBest, $
    SAVEPLOT=savePlot, $
+   SPNAME=SPName, $
+   PLOTDIR=plotDir, $
+   IS_EFLUX=is_eFlux, $
    ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
    _EXTRA=e
 
@@ -128,6 +131,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;; IF include_BTaper THEN tickName = ['bro',tickName]
 
   ;;Winder
+  savePlot = 1
   winDim           = [900,600]
   window1          = WINDOW(DIMENSIONS=winDim, $
                             BUFFER=savePlot)
@@ -533,8 +537,29 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
-     
+     IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
+        ;; SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
+        plotDir = './'
+     ENDIF
 
+     filNavn = KEYWORD_SET(SPName) ? SPName : 'kappa_rB_map' + $
+               (KEYWORD_SET(is_eFlux) ? '-eFlux' : '') + '.png'
+     filPref = (STRSPLIT(filNavn,'.',/EXTRACT))[0]
+     count = 0
+     WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
+        count++
+        filNavn = STRING(FORMAT='(A0,I02,A0,A0)', $
+                         filPref, $
+                         count, $
+                         (KEYWORD_SET(is_eFlux) ? '-eFlux' : ''), $
+                         '.png')
+     ENDWHILE
+
+     PRINT,"Saving " + filNavn + ' ...'
+     window1.Save,plotDir + filNavn
+
+     window1.Close
+     window1 = !NULL
   ENDIF
 
 END

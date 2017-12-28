@@ -175,7 +175,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   ;; obs_scFAConduct[k]= fit2D_inf_list[k].obsMoms.scFAConduct
   obsMoms[k]        = fit2D_inf_list[k].obsMoms
   fitMoms[k]        = fit2D_inf_list[k].fitMoms
-  moment_info[k]    = fit2D_inf_list[k].moment_info
+  ;; moment_info[k]    = fit2D_inf_list[k].moment_info
   ;; fit_scDens[k]     = fit2D_inf_list[k].fitMoms.scDens
   ;; fit_scTemp[k]     = fit2D_inf_list[k].fitMoms.scTemp
   ;; fit_scFAConduct[k]= fit2D_inf_list[k].fitMoms.scFAConduct

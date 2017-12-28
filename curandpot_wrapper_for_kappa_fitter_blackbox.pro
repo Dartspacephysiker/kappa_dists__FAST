@@ -41,6 +41,9 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+   ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+   ARANGE__DENS_E_UP=aRange__dens_e_up, $
+   ARANGE__DENS_I_UP=aRange__dens_i_up, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
    JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
@@ -59,6 +62,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   PLOTPREF=plotPref, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
@@ -275,6 +279,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      LABEL=label, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
+     ARANGE__DENS_E_UP=aRange__dens_e_up, $
+     ARANGE__DENS_I_UP=aRange__dens_i_up, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
      ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
      ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
@@ -296,6 +302,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ARANGE__MOMENTS_LIST=aRange__moments_list, $
      ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
      ARANGE__CHARE_LIST=aRange__charE_list, $
+     ARANGE__DENS_LIST=aRange__dens_list, $
      ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
      MIN_PEAK_ENERGYARR=min_peak_energyArr, $
      MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -381,6 +388,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
      J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
      J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+     J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
      EN_SPEC__SPNAME=en_spec__spName, $
      ORIGINAL_PLOTIDEE=orig_plotIdee, $
      ORIGINATING_ROUTINE=routName, $

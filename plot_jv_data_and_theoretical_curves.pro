@@ -309,8 +309,7 @@ PRO PLOT_JV_DATA_AND_THEORETICAL_CURVES,jvPlotData, $
      ENDIF
 
      IF ~KEYWORD_SET(plotDir) THEN BEGIN
-        pDirSuff      = '/cur_and_pot_analysis'
-        SET_PLOT_DIR,plotDir,/FOR_SDT,ADD_SUFF=pDirSuff
+        plotDir = './'
      ENDIF
 
      PRINT,"Saving to " + sPName + ' ...'

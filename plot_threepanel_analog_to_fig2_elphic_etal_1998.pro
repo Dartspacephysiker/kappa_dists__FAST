@@ -142,8 +142,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
   orig_cbPos       = [0.1,0.96,0.95,0.98]
 
   IF ~KEYWORD_SET(plotDir) THEN BEGIN
-     pDirSuff      = '/cur_and_pot_analysis'
-     SET_PLOT_DIR,plotDir,/FOR_SDT,ADD_SUFF=pDirSuff
+     plotDir       = './'
   ENDIF
 
   timeTitle        = 'Seconds since ' + TIME_TO_STR(jvPlotData.time[0])

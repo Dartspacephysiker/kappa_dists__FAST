@@ -84,7 +84,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
      ;; END
   ENDCASE
 
-  IF hadSuccess THEN BEGIN
+  ;; IF hadSuccess THEN BEGIN
      
      IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN
         tmpSourceConeRange= LONG([MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
@@ -196,6 +196,6 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
 
      ENDIF
 
-  ENDIF
+  ;; ENDIF
 
 END
