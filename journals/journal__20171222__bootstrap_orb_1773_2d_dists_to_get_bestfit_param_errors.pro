@@ -130,9 +130,11 @@ PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
      ;; PRINT,data.x[data.energy_inds[0]:data.energy_inds[1]] ;Range of energies used
 
-     PRINT,FORMAT='(I05,T10,A0)',k,tid[match_i]
+     tmpTid = STRSPLIT(tid[match_i],'/',/EXTRACT)
+     IF N_ELEMENTS(tmpTid) GT 0 THEN tmpTid = tmpTid[1] ELSE tmpTid = tmpTid[0]
+     PRINT,FORMAT='(I05,T10,A0)',k,tmpTid
 
-     tidFNStr = STRJOIN(STRSPLIT(tid[match_i],':',/EXTRACT),'_')
+     tidFNStr = STRJOIN(STRSPLIT(tmpTid,':',/EXTRACT),'_')
      tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
 
      utFil = saveSuff + tidFNStr +obsString+gaussString

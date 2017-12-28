@@ -61,7 +61,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
      MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
      PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
      PHI__USE_ENERGY_BEFORE_PEAK=TAG_EXIST(KF2D__Curvefit_opt,'phi__use_energy_before_peak') ? KF2D__Curvefit_opt.phi__use_energy_before_peak : !NULL, $
-     /CONTINUE_IF_NOMATCH
+     /CONTINUE_IF_NOMATCH, $
+     ONECOUNT_STR=oneCurve     
 
   ;; Get the data we want
   ;; energy_inds = data.energy_inds
@@ -257,7 +258,6 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
         FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
         FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
         PRINT_2DFITINFO=print_2DFitInfo, $
-        PRINT_2DWININFO=print_2DWinInfo, $
         EPS=eps, $
         /MONTE_CARLO_MODE, $
         MC__OKSTATUS=MC__OKStatus

@@ -6,7 +6,8 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
    PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
-   CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings
+   CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
+   ONECOUNT_STR=oneCurve
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 

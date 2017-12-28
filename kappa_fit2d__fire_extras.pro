@@ -60,11 +60,11 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
         fit2DStr        = CONV_UNITS(tmpStr,units)
 
         ;; A means of checking what we go
-        FOR k=0,fit2DStr.nenergy-1 DO BEGIN
-           PRINT,FORMAT='(A0,F0.2,A0)','*********** ',fit2DStr.energy[k,0],' eV *************'
-           PRINT,fit2DStr.data[k,*]
-           PRINT,''
-        ENDFOR
+        ;; FOR k=0,fit2DStr.nenergy-1 DO BEGIN
+        ;;    PRINT,FORMAT='(A0,F0.2,A0)','*********** ',fit2DStr.energy[k,0],' eV *************'
+        ;;    PRINT,fit2DStr.data[k,*]
+        ;;    PRINT,''
+        ;; ENDFOR
 
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
