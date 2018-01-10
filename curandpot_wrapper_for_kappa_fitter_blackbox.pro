@@ -41,6 +41,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+   MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
    ARANGE__DENS_E_UP=aRange__dens_e_up, $
    ARANGE__DENS_I_UP=aRange__dens_i_up, $
@@ -362,6 +363,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      JV_THEOR__FIT_BOTH=jv_theor__fit_both, $
      USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+     MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
      JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
      JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $

@@ -74,6 +74,7 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                            USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                            ESTFACS=estFacs, $
+                           PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
                            A_OUT=A, $
                            AGAUSS_OUT=AGauss, $
                            DONT_PRINT_ESTIMATES=dont_print_estimates, $
@@ -116,7 +117,17 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
   eRange_peak     = [min_energy,max_energy]
 
-  bulk_energy     = peak_energy*estFacs.B_E
+  IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
+
+     bulk_energy = (Xorig[peak_ind+1] LT peak_energy ? $
+                    Xorig[peak_ind+1] : $
+                    Xorig[peak_ind-1]) * estFacs.B_E
+
+  ENDIF ELSE BEGIN
+
+     bulk_energy = peak_energy*estFacs.B_E
+
+  ENDELSE
 
   ;;So we estimate the temperature and density based on the full range of angles being considered 
   T               = (T_2D_FS(dat,ENERGY=eRange_peak, $

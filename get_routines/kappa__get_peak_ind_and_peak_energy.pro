@@ -5,7 +5,6 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
-   PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    ONECOUNT_STR=oneCurve
 
@@ -134,13 +133,6 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            peak_energy  = Xorig[peak_ind]
      END
   ENDCASE
-
-  IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
-
-     peak_energy = Xorig[peak_ind+whichWy]
-     peak_ind   += whichWy
-
-  ENDIF
 
   ;; IF KEYWORD_SET(check_for_higher_flux_peaks) THEN BEGIN
   ;;    ;;Figure out where most energetic maximum is

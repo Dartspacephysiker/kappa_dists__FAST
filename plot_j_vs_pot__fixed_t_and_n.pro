@@ -94,7 +94,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
   ;; dataName         = 'Data'
   Nstring          = 'n' + (KEYWORD_SET(pData.is_sourceDens) ? '!Dm!N' : '')
 
-  msec             = 0
+  msec             = 1
   t1Str            = (STRSPLIT(TIME_TO_STR(MIN(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
   t2Str            = (STRSPLIT(TIME_TO_STR(MAX(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
   dataName         = STRING(FORMAT='(A0,"–",A0)',t1Str,t2Str)

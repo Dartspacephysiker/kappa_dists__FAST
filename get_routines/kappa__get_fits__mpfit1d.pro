@@ -51,8 +51,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   fa         = {units : units, $
                 mass  : mass   }
 
-  timeStr                     = KEYWORD_SET(monte_carlo_mode) ? STRING(FORMAT='("iter_",I02)',bounds_i): $
-                                STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i])
+  timeStr    = KEYWORD_SET(monte_carlo_mode) ? STRING(FORMAT='("iter_",I02)',bounds_i): $
+               STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i])
 
   IF ~KEYWORD_SET(no_orig) THEN BEGIN
      orig    = {x:Xorig, $

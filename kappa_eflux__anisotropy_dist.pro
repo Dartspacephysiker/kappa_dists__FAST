@@ -6,6 +6,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
    NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
    BULK_ENERGY=bulk_energy, $
    MIN_ENERGY=min_energy, $
+   NENERGY=nEnergy, $
    REDUCENEGFAC=reduceNegFac, $
    LOGSCALE_REDUCENEGFAC=logScale, $
    DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=dont_allow_shift_in_peak_energy, $
@@ -29,7 +30,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
 
   CASE N_ELEMENTS(angleBin_i) OF
      0: BEGIN
-        aBin_i          = INDGEN(N_ELEMENTS(Y[0,*]))
+        aBin_i          = INDGEN(N_ELEMENTS(Y[nEnergy/2,*]))
      END
      ELSE: BEGIN
         aBin_i          = angleBin_i
@@ -40,7 +41,7 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   IF haveFitAngle LT 1 THEN STOP
 
   ;;Initialize
-  angles                = Y[0,aBin_i]
+  angles                = Y[nEnergy/2,aBin_i]
   nAngles               = N_ELEMENTS(angles)
 
   peak_en               = MAKE_ARRAY(nAngles,/DOUBLE )
@@ -48,8 +49,8 @@ FUNCTION KAPPA_EFLUX__ANISOTROPY_DIST, $
   peak_angle            = MAKE_ARRAY(nAngles,/FLOAT  )
   peak_angle_i          = MAKE_ARRAY(nAngles,/INTEGER)
 
-  allEn_i               = INDGEN(N_ELEMENTS(X[*,0]))
-  energyMin             = MIN(ABS(X[*,fitAngle_i]-bulk_energy),energy_i)
+  allEn_i               = INDGEN(N_ELEMENTS(X[0:nEnergy-1,0]))
+  energyMin             = MIN(ABS(X[0:nEnergy-1,fitAngle_i]-bulk_energy),energy_i)
 
   peak_en[fitAngle_ii]  = X[energy_i,fitAngle_i]
 

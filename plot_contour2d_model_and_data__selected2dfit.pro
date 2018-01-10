@@ -60,36 +60,96 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /LABEL
 
         IF KEYWORD_SET(KF2D__plot_opt.fit2D__add_boundaries) THEN BEGIN
+
+           ;; Do the angles
            CASE 1 OF
               KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
+
+                 ;; Need this later
+                 eBounds = [fit2DStruct.extra_info.eRange_peak[0], $
+                            MAX(fit2DStruct.SDT.energy)]
+
                  ;;plot min peak energy
-                 plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-                 plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
-                 plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
+
+                 ;;This chunk does ALL angles
+                 ;; plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
+                 ;; plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
+                 ;; plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
+
+                 ;; This chunk does only angles that we fit
+                 plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
+                 plotme[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
+                 plotme[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(KF2D__curveFit_opt.min_peak_energy) ;*K_EA__bFunc)
+
                  PLOTS,plotme,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize
               END
               KEYWORD_SET(KF2D__curveFit_opt.fit2D_just_eRange_peak): BEGIN
+
+                 eBounds  = fit2DStruct.extra_info.eRange_peak
+
+                 ;; This chunk does ALL angles
                  plotme1      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
                  plotme1[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
                  plotme1[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
                  plotme2      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
                  plotme2[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
                  plotme2[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+
+                 ;; This chunk does only angles that we fit
+                 plotme1      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
+                 plotme1[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme1[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme2      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
+                 plotme2[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+                 plotme2[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+
                  PLOTS,plotme1,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize
                  PLOTS,plotme2,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize
               END
            ENDCASE
+
+           ;; Now do the energies at the boundary
+           minAngle  = MIN(K_EA__fitAngles)
+           maxAngle  = MAX(K_EA__fitAngles)
+           minCosSin = [COS(minAngle*!PI/180.),SIN(minAngle*!PI/180.)]
+           maxCosSin = [COS(maxAngle*!PI/180.),SIN(maxAngle*!PI/180.)]
+
+           energy_i = WHERE(fit2DStruct.SDT.energy[*,0] GE eBounds[0] AND $
+                            fit2DStruct.SDT.energy[*,0] LE eBounds[1],nEnergy)
+           energies = fit2DStruct.SDT.energy[energy_i,0]
+           plotme1 = MAKE_ARRAY(2,nEnergy)
+           plotme2 = MAKE_ARRAY(2,nEnergy)
+
+           plotme1[0,*] = minCosSin[0]*ALOG10(energies) ;*K_EA__bFunc)
+           plotme1[1,*] = minCosSin[1]*ALOG10(energies) ;*K_EA__bFunc)
+           plotme2[0,*] = maxCosSin[0]*ALOG10(energies) ;*K_EA__bFunc)
+           plotme2[1,*] = maxCosSin[1]*ALOG10(energies) ;*K_EA__bFunc)
+
+           PLOTS,plotme1,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
+                 SYMSIZE=symSize
+           PLOTS,plotme2,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
+                 SYMSIZE=symSize
+
         ENDIF
 
         ;;    CONTOUR2D,curDataStr,/POLAR
         junk        = MAX(fit2DStruct.SDT.data[*,fit2DStruct.extra_info.fitAngle_i],edgery_i)
         peak_energy = (fit2DStruct.SDT.energy[edgery_i,fit2DStruct.extra_info.fitAngle_i])[0]
-        plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-        plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
-        plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
+
+        ;; This chunk does ALL angles
+        ;; plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
+        ;; plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
+        ;; plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
+
+        ;; This chunk does only angles that we fit
+        plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
+        plotme[0,*] = COS(K_EA__fitAngles*!PI/180.)* $
+                      ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
+        plotme[1,*] = SIN(K_EA__fitAngles*!PI/180.)* $
+                      ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
         PLOTS,plotme,/DATA,PSYM=bFuncSym, $
               SYMSIZE=symSize
 

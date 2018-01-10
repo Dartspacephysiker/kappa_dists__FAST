@@ -146,6 +146,7 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
           BULK_ENERGY=peak_energy, $
           MIN_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
+          NENERGY=curDataStr.nEnergy, $
           REDUCENEGFAC=KF2D__Curvefit_opt.fit2D__bulk_e_anis_factor, $
           LOGSCALE_REDUCENEGFAC=logScale_reduceNegFac, $
           DONT_ALLOW_SHIFT_IN_PEAK_ENERGY=KEYWORD_SET(KF2D__Curvefit_opt.fit2D__disable_bFunc), $
@@ -170,6 +171,40 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
 
   K_EA__angles  = peak_angle  
   K_EA__angle_i = peak_angle_i
+
+  CASE 1 OF
+     KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
+        bro              = KF2D__SDTData_opt.electron_angleRange
+        K_EA__fitAngle_i = WHERE((K_EA__angles GE bro[0]) AND $
+                                 (K_EA__angles LE bro[1]),nAnKeep)
+        ;; K_EA__fitAngles  = [MIN(K_EA__angles[K_EA__fitAngle_i]), $
+        ;;                     MAX(K_EA__angles[K_EA__fitAngle_i])]
+        K_EA__fitAngles  = K_EA__angles[K_EA__fitAngle_i]
+     END
+     ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
+     ;;    bro         = KF2D__SDTData_opt.electron_lca
+     ;;    IF bro[0] LT bro[1] THEN BEGIN
+     ;;       aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[0]) OR $
+     ;;                        (curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[1]),nAnKeep)
+     ;;    ENDIF ELSE BEGIN
+     ;;       aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] LE bro[0]) AND $
+     ;;                        (curDataStr.theta[curDataStr.nEnergy/2,*] GE bro[1]),nAnKeep)
+     ;;    ENDELSE
+     ;;    ;; PRINT,"Angles for 2D fit: ",curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
+     ;;    IF nAnKeep EQ 0 THEN STOP
+     ;; END
+     ;; KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
+     ;;    aRange_i        = WHERE(curDataStr.energy[*,curDataStr.nBins/2] GE $
+     ;;                            KF2D__curveFit_opt.min_peak_energy,nEnKeep)
+     ;;    IF nEnKeep EQ 0 THEN STOP
+     ;; END
+     ELSE: BEGIN
+        nAnKeep          = N_ELEMENTS(K_EA__angles)
+        K_EA__fitAngle_i = INDGEN(nAnKeep)
+        K_EA__fitAngles  = [curDataStr.nEnergy/2,aRange_i]
+        ;; PRINT,'Angles for 2D fit: ALL'
+     END
+  ENDCASE
 
   IF KEYWORD_SET(estimate_lossCone) THEN BEGIN
 

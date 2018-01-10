@@ -26,7 +26,7 @@
   do_all_times                  = 1
   add_full_fits                 = 1
   fit2D__only_fit_peak_eRange   = 1
-  fit2D__only_fit_aboveMin      = 1
+  fit2D__only_fit_aboveMin      = 0
   fit2D__only_fit_eAngles       = 1
   fit2D__keep_wholeFit          = 1
   fit2D__bulk_e_anisotropy      = 1
@@ -75,10 +75,14 @@
         END
      ENDCASE
      
-     n_below_peak               = 2
-     n_above_peak               = 20
-     n_below_peak2D             = 2
-     n_above_peak2D             = 20
+     n_below_peak               = N_ELEMENTS(n_below_peak1D) GT 0 ? n_below_peak1D : 3
+     n_above_peak               = N_ELEMENTS(n_above_peak1D) GT 0 ? n_above_peak1D : 20
+     n_below_peak2D             = N_ELEMENTS(n_below_peak2D) GT 0 ? n_below_peak2D : 3
+     n_above_peak2D             = N_ELEMENTS(n_above_peak2D) GT 0 ? n_above_peak2D : 20
+     ;; n_below_peak               = 2
+     ;; n_above_peak               = 20
+     ;; n_below_peak2D             = 2
+     ;; n_above_peak2D             = 20
 
   ENDIF ELSE BEGIN
 
@@ -90,7 +94,7 @@
   ENDELSE
   
   synthPackage                  = 0
-  average_over_angleRange       = 1
+  average_over_angleRange       = ~KEYWORD_SET(fit1D__sourceCone_energy_spectrum)
 
   estimate_A_from_data          = 1
   dont_print_estimates          = 1

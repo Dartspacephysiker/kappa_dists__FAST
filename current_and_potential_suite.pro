@@ -33,11 +33,11 @@ PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
 
   
 
-  PRINT,FORMAT='(A0,T5,A0,T30,A0,T40,A0,T50,A0,T60,A0,T70,A0,T80,A0,T90,A0)', $
-        'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr'
+  PRINT,FORMAT='(A0,T5,A0,T30,A0,T40,A0,T50,A0,T60,A0,T70,A0,T80,A0,T90,A0,T100,A0)', $
+        'i','Time','Temp','N','Pot','Current','TFracErr','NFracErr','JFracErr','potBar'
   FOR k=0,nUsers-1 DO BEGIN
 
-     PRINT,FORMAT='(I0,T5,A0,T30,F-8.1,T40,F-8.3,T50,F-8.1,T60,F-8.3,T70,F-8.1,T80,F-8.3,T90,F-8.3)', $
+     PRINT,FORMAT='(I0,T5,A0,T30,F-8.1,T40,F-8.3,T50,F-8.1,T60,F-8.3,T70,F-8.1,T80,F-8.3,T90,F-8.3,T100,F-8.3)', $
            k, $
            TIME_TO_STR(JVPlotData.time[useInds[k]],/MS), $
            Temperature[useInds[k]], $
@@ -46,7 +46,8 @@ PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
            JVPlotData.cur[useInds[k]], $
            TemperatureErr[useInds[k]]/Temperature[useInds[k]], $
            DensityErr[useInds[k]]/Density[useInds[k]], $
-           ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]])
+           ABS(JVPlotData.curErr[useInds[k]]/JVPlotData.cur[useInds[k]]), $
+           JVPlotData.pot[useInds[k]]/Temperature[useInds[k]]
      
   ENDFOR
   PRINT,FORMAT='(A0,T30,F-8.3,T40,F-8.3,T50,F-8.3,T60,G-8.3)', $
@@ -156,6 +157,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+     MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
      ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
      ARANGE__DENS_E_UP=aRange__dens_e_up, $
@@ -697,8 +699,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
               /EFLUX_NOT_NFLUX, $
               ORIGINATING_ROUTINE=routName, $
-              OUT_KAPPA_A=A, $
-              OUT_GAUSS_A=AGauss, $
+              OUT_KAPPA_A=A_eFlux, $
+              OUT_GAUSS_A=AGauss_eFlux, $
               OUT_PLOTDATA=pData_eFlux, $
               OUT_MULTI_MAGRATIO=mMagDat_eFlux, $
               _EXTRA=e
@@ -707,8 +709,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               MAP__2D=map__2D, $
               MAP2D__LOG_KAPPA=map2D__log_kappa, $
               ORBIT=orbit, $
-              IN_KAPPA_A=A, $
-              IN_GAUSS_A=AGauss, $
+              IN_KAPPA_A=A_eFlux, $
+              IN_GAUSS_A=AGauss_eFlux, $
               SAVEPLOT=savePlot, $
               SPNAME=J_V__RB_and_kappa_map__SPName, $
               PLOTDIR=plotDir, $
@@ -718,8 +720,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
            ;;Now eFlux
            PLOT_J_VS_POT__FIXED_T_AND_N, $
               jvPlotData,avgs_JVfit,pData_eFlux, $
-              KAPPA_A=A, $
-              GAUSS_A=AGauss, $
+              KAPPA_A=A_eFlux, $
+              GAUSS_A=AGauss_eFlux, $
               ORIGINATING_ROUTINE=routName, $
               ORBIT=orbit, $
               SAVEPLOT=savePlot, $

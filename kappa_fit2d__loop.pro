@@ -51,6 +51,9 @@ PRO KAPPA_LOOP__GET_ANGLES,AorigArr, $
 
         ;;2016/09/02 What on earth am I doing here?
         ;;Oh yeah, making sure that we have enough angles to do stuff
+
+        ;;2017/12/30 Also, don't worry that the CASE statement below is running
+        ;;even when sc__eSpec is set. That KW sets nAngles&nReqSCAngles=1
         CASE 1 OF
            nAngles LT nReqSCAngles: BEGIN
 
@@ -473,7 +476,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
            MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
            PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
-           PHI__USE_ENERGY_BEFORE_PEAK=TAG_EXIST(KF2D__Curvefit_opt,'phi__use_energy_before_peak') ? KF2D__Curvefit_opt.phi__use_energy_before_peak : !NULL, $
            /CONTINUE_IF_NOMATCH, $
            ONECOUNT_STR=oneCurve
         
@@ -485,7 +487,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
         ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
         ;;  for fitting—namely, n_below_peak and n_above_peak
-        maxEInd           = (peak_ind + KF2D__Curvefit_opt.n_below_peak) < nEnergies-1
+        maxEInd           = (peak_ind + KF2D__Curvefit_opt.n_below_peak) < (nEnergies-1)
         minEInd           = (peak_ind - KF2D__Curvefit_opt.n_above_peak) > 0
 
         ;; IF KEYWORD_SET(KF2D__Curvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
@@ -513,6 +515,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $
                                   USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                                   ESTFACS=estFacs, $
+                                  PHI__USE_ENERGY_BEFORE_PEAK=TAG_EXIST(KF2D__Curvefit_opt,'phi__use_energy_before_peak') ? KF2D__Curvefit_opt.phi__use_energy_before_peak : !NULL, $
                                   A_OUT=A, $
                                   AGAUSS_OUT=AGauss, $
                                   DONT_PRINT_ESTIMATES=dont_print_estimates, $
@@ -757,6 +760,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
            shiftTheta   = 0 ;Not clear why shift is necessary, but makes things come out right
                                 ;2017/12/27 Not sure why I thought this
+           hadSuccessK  = 0
+           hadSuccessG  = 0
            KAPPA_FIT2D__FIREINTHEHOLE, $
               curDataStr, $
               hadSuccessK, $

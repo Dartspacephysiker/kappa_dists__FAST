@@ -108,6 +108,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   
   ;;... And strings!!!!
   KAPPA_FITTER__FSTRINGS, $
+     T1=t1, $
+     T2=t2, $
      ORBIT=orbit, $
      EEB_OR_EES=eeb_or_ees, $
      ELECTRON_ANGLERANGE=electron_angleRange ,$

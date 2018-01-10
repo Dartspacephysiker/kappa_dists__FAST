@@ -19,6 +19,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+   MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
    ARANGE__DENS_E_UP=aRange__dens_e_up, $
    ARANGE__DENS_I_UP=aRange__dens_i_up, $
@@ -269,6 +270,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;;... And strings!!!!
         KAPPA_FITTER__FSTRINGS, $
+           T1=t1, $
+           T2=t2, $
            ORBIT=orbit, $
            EEB_OR_EES=eeb_or_ees, $
            ELECTRON_ANGLERANGE=electron_angleRange ,$
@@ -471,7 +474,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            CASE 1 OF
               STRMATCH(STRUPCASE(aRange__dens[0]),'SOURCE'): BEGIN
 
-                 scw = 150
+                 ;; scw = 150
+                 scw = N_ELEMENTS(msph_sourcecone_halfWidth) GT 0 ? msph_sourcecone_halfWidth : 150
 
                  IF north_south[0] EQ -1 THEN BEGIN
                     aRange__dens = [180.-scw,180+scw]
@@ -677,7 +681,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
            ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
            ;;  for fitting—namely, n_below_peak and n_above_peak
-           maxEInd                   = (peak_ind + n_below_peak) < nEnergies-1
+           maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
            minEInd                   = (peak_ind - n_above_peak) > 0
 
            peak_dEArr[iTime]         = eSpec.vErr[iTime,peak_ind]

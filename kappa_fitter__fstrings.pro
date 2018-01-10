@@ -1,5 +1,7 @@
 ;;2017/02/22
 PRO KAPPA_FITTER__FSTRINGS, $
+   T1=t1, $
+   T2=t2, $
    ORBIT=orbit, $
    EEB_OR_EES=eeb_or_ees, $
    ELECTRON_ANGLERANGE=electron_angleRange ,$
@@ -96,13 +98,15 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ;;    plotNamePref    += '-dens_w_LCA'
   ;; ENDIF
 
+  avgItvlStr       = ''
   IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
-     plotNamePref    += '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
+     avgItvlStr    = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
+     plotNamePref += avgItvlStr
   ENDIF
 
-  fitAngleStr         = ''
+  fitAngleStr      = ''
   ;; dEFAngleStr         = '-allAngles'
-  dEFAngleStr         = ''
+  dEFAngleStr      = ''
   ;; CASE 1 OF
   ;; (N_ELEMENTS(electron_angleRange) EQ 2): BEGIN
   CASE SIZE(electron_angleRange,/TYPE) OF
@@ -131,10 +135,47 @@ PRO KAPPA_FITTER__FSTRINGS, $
      dEFAngleStr = fitAngleStr
   ENDIF
 
+  ;; tString files
+  t1Str = 'unspecified'
+  t2Str = ''
+  
+  IF N_ELEMENTS(t1) GT 0 THEN BEGIN
+     CASE SIZE(t1,/TYPE) OF
+        5: BEGIN
+           t1Str = T2S(t1,/MS)
+        END
+        7: BEGIN
+           t1Str = t1
+        END
+        ELSE: BEGIN
+           STOP
+        END
+     ENDCASE
 
+     CASE SIZE(t2,/TYPE) OF
+        5: BEGIN
+           t2Str = T2S(t2,/MS)
+        END
+        7: BEGIN
+           t2Str = t2
+        END
+        ELSE: BEGIN
+           STOP
+        END
+     ENDCASE
+
+     t1Str = '-' + (STRSPLIT(t1Str,'/',/EXTRACT))[1]
+     t1Str = STRJOIN(STRSPLIT(t1Str,':',/EXTRACT),'_')
+     t1Str = STRJOIN(STRSPLIT(t1Str,'.',/EXTRACT),'__')
+
+     t2Str = '-' + (STRSPLIT(t2Str,'/',/EXTRACT))[1]
+     t2Str = STRJOIN(STRSPLIT(t2Str,':',/EXTRACT),'_')
+     t2Str = STRJOIN(STRSPLIT(t2Str,'.',/EXTRACT),'__')
+
+  ENDIF
+  
   defEFluxFile = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + $
-                 eeb_or_ees + dEFAngleStr + $
-                 plotNamePref + '.sav'
+                 eeb_or_ees + avgItvlStr + dEFAngleStr + t1Str + t2Str + '.sav'
 
   IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
      CASE SIZE(save_diff_eFlux_file,/TYPE) OF

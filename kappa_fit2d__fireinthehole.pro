@@ -94,6 +94,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
   IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 
+     ;; IF STRMATCH(timeFNStr,'*09_26_57*') THEN STOP
+
      KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr,hadSuccessK, $
                               IN_FIT2D_PARAMS=kappaFit2DParams, $
                               FIT2D_FITINFO=kappaFit2D_info, $

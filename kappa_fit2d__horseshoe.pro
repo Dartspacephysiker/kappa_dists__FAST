@@ -2,7 +2,7 @@
 PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            hadSuccess, $
                            IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-                           TIMEFNSTR=timeFNStr, $
+                           ;; TIMEFNSTR=timeFNStr, $
                            ERANGE_PEAK=eRange_peak, $
                            FITPARAMSTRUCT=fitParamStruct, $
                            ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
