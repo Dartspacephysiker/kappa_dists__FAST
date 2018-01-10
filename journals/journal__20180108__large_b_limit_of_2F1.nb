@@ -1,0 +1,117 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3267,        109]
+NotebookOptionsPosition[      2629,         89]
+NotebookOutlinePosition[      2968,        104]
+CellTagsIndexPosition[      2925,        101]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[TextData[{
+ "Find limit ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"b", "\[Rule]", " ", "\[Infinity]"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b4ed9867-7c2c-4844-a237-d2cdeff97187"],
+ " for Gaussian hypergeometric function ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"2", 
+    RowBox[{
+     SubscriptBox["F", "1"], "(", 
+     RowBox[{
+      RowBox[{"1", "/", "2"}], ";", "b", ";", 
+      RowBox[{"3", "/", "2"}], ";", 
+      RowBox[{
+       RowBox[{"-", 
+        SubscriptBox["z", 
+         SuperscriptBox["0", "2"]]}], "/", "b"}]}], ")"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3a397448-6553-4231-b288-b1392ff0b38c"]
+}], "Subsection",
+ CellChangeTimes->{{3.7244182541655407`*^9, 
+  3.7244183395252857`*^9}},ExpressionUUID->"89c4c518-a5f3-4789-b43c-\
+f9d7901aee25"],
+
+Cell["\<\
+No need! Plainly stated on Wikipedia page that for b \[Rule] \[Infinity], \
+2F1(a;b;c;z/b) \[Rule] M(a;c;z). (M(a;c;z is known as \
+Kummer\[CloseCurlyQuote]s function.)\
+\>", "Text",
+ CellChangeTimes->{{3.724421049878573*^9, 
+  3.724421131102359*^9}},ExpressionUUID->"bbc10b5d-a879-40de-938e-\
+4a7406551e1c"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Limit", "[", 
+  RowBox[{
+   RowBox[{"z", " ", 
+    RowBox[{"Hypergeometric2F1", "[", 
+     RowBox[{
+      RowBox[{"1", "/", "2"}], ",", "b", ",", 
+      RowBox[{"3", "/", "2"}], ",", 
+      FractionBox[
+       RowBox[{"-", 
+        SuperscriptBox["z", "2"]}], "b"]}], "]"}]}], ",", 
+   RowBox[{"b", "\[Rule]", "\[Infinity]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.724418362572073*^9, 3.7244184235385942`*^9}, {
+  3.72441849984951*^9, 
+  3.724418505233307*^9}},ExpressionUUID->"bce453aa-d88a-47ae-a17e-\
+75d51d9f0350"],
+
+Cell[BoxData[
+ RowBox[{"z", " ", 
+  RowBox[{"Hypergeometric2F1", "[", 
+   RowBox[{
+    FractionBox["1", "2"], ",", "\[Infinity]", ",", 
+    FractionBox["3", "2"], ",", "0"}], "]"}]}]], "Output",
+ CellChangeTimes->{
+  3.724418505983358*^9},ExpressionUUID->"44d46d8b-42ae-460b-b6d6-\
+4b94f1d465d3"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1600, 405},
+WindowMargins->{{0, Automatic}, {Automatic, 32}},
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 831, 25, 57, "Subsection",ExpressionUUID->"89c4c518-a5f3-4789-b43c-f9d7901aee25"],
+Cell[1414, 49, 318, 7, 35, "Text",ExpressionUUID->"bbc10b5d-a879-40de-938e-4a7406551e1c"],
+Cell[CellGroupData[{
+Cell[1757, 60, 545, 15, 54, "Input",ExpressionUUID->"bce453aa-d88a-47ae-a17e-75d51d9f0350"],
+Cell[2305, 77, 296, 8, 53, "Output",ExpressionUUID->"44d46d8b-42ae-460b-b6d6-4b94f1d465d3"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
