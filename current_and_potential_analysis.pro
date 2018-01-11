@@ -20,6 +20,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
    MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
+   TEMPERATURE_TYPE_INDEX=tTypeInd, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
    ARANGE__DENS_E_UP=aRange__dens_e_up, $
    ARANGE__DENS_I_UP=aRange__dens_i_up, $
@@ -106,7 +107,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF ELSE BEGIN
      msph_sc_temp       = [0,0,0]
   ENDELSE
-
+  
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
 
@@ -710,6 +711,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         ARANGE__DENS=aRange__dens, $
                         ARANGE__MOMENTS=aRange__moments, $
                         ARANGE__CHARE=aRange__charE, $
+                        TEMPERATURE_TYPE_INDEX=tTypeInd, $
                         SC_POT=sc_pot, $
                         EEB_OR_EES=eeb_OR_ees, $
                         ERROR_ESTIMATES=error_estimates, $
@@ -742,6 +744,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ARANGE__DENS=aRange__dens, $
                            ARANGE__MOMENTS=aRange__moments, $
                            ARANGE__CHARE=aRange__charE, $
+                           TEMPERATURE_TYPE_INDEX=tTypeInd, $
                            SC_POT=sc_pot, $
                            EEB_OR_EES=eeb_or_ees, $
                            ERROR_ESTIMATES=error_estimates, $

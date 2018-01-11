@@ -137,6 +137,20 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  tTypeInd = 2 ;;Assume parallel is desired
+  IF N_ELEMENTS(temperature_type) GT 0 THEN BEGIN
+
+     CASE STRUPCASE(temperature_type) OF
+        'PAR': BEGIN
+           tTypeInd = 2
+        END
+        'AVG': BEGIN
+           tTypeInd = 3
+        END
+     ENDCASE
+
+  ENDIF
+
   CURRENT_AND_POTENTIAL_ANALYSIS, $
      ORBIT=orbit, $
      ORBTIMES=orbTimes, $
@@ -158,6 +172,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
      MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
+     TEMPERATURE_TYPE_INDEX=tTypeInd, $
      ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
      ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
      ARANGE__DENS_E_UP=aRange__dens_e_up, $
@@ -201,6 +216,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_LOSSCONE=out_losscone, $
      _EXTRA=e
 
+  PRINT,"PRESUMABLY YOU NEED TO SPECIFY WHICH TEMPERATURE TO USE SOMEWHERE AROUND HERE--PARALLEL OR PERP"
+  STOP
+  
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       T1=plot_t1, $
                                       T2=plot_t2, $
@@ -213,6 +231,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
                                       T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
+                                      TEMPERATURE_TYPE_INDEX=tTypeInd, $
                                       ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
                                       ;; USE_MSPH_SOURCE=jv_theor__use_msph_source, $
                                       USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $

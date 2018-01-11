@@ -29,6 +29,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
                                         T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
+                                        TEMPERATURE_TYPE_INDEX=TTypeInd, $
                                         ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
                                         ;; USE_MSPH_SOURCE=use_msph_source, $
                                         USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
@@ -313,8 +314,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ENDIF
 
   ;;Calculate phiBar and phiBarError for upgoing and downgoing electrons
-  phiBar_ed             = pot/curPotList[edind].T[3,*]
-  phiBar_eu             = curPotList[euind].peakE/curPotList[euind].T[3,*]
+  phiBar_ed             = pot/curPotList[edind].T[TTypeInd,*]
+  phiBar_eu             = curPotList[euind].peakE/curPotList[euind].T[TTypeInd,*]
 
   ERROR_PHIBAR,pot,curPotList[edind].T,curPotList[edind].N,potErr,curPotList[edind].errors,phiBarErr_ed
   ERROR_PHIBAR,pot,curPotList[euind].T,curPotList[euind].N,curPotList[euind].peakErr,curPotList[euind].errors,phiBarErr_eu
@@ -378,7 +379,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                          euErr : phiBarErr_eu[safe_i]}, $
                            NDown      : curPotList[edind].N[safe_i], $
                            NDownErr   : curPotList[edind].Nerr[safe_i], $
-                           TDown      : REFORM(curPotList[edind].T[3,safe_i]), $
+                           TDown      : REFORM(curPotList[edind].T[TTypeInd,safe_i]), $
                            TDownErr   : curPotList[edind].Terr[safe_i], $
                            info       : {cur          : {ed         : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
                                                          eu         : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
@@ -400,7 +401,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                           jeErr      : curPotList[edind].source.jeErr  [safe_i] , $
                           NDown      : curPotList[edind].source.N      [safe_i], $
                           NDownErr   : curPotList[edind].source.Nerr   [safe_i], $
-                          TDown      : REFORM(curPotList[edind].source.T[3,safe_i]), $
+                          TDown      : REFORM(curPotList[edind].source.T[TTypeInd,safe_i]), $
                           TDownErr   : curPotList[edind].source.Terr   [safe_i]}
 
      IF KEYWORD_SET(map_to_100km) THEN BEGIN
