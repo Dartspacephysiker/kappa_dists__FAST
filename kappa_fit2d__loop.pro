@@ -522,6 +522,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   /TEST_NOREV, $
                                   UNITS=units1D
 
+           ;; 2018/01/10 Use bulk energy (set by PHI__USE_ENERGY_BEFORE_PEAK) for 2D bulkE initial estimate
+           bulkEOrigEstimate = A[0]
+
         ENDIF ELSE BEGIN
            A           = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
         ENDELSE
@@ -762,6 +765,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                 ;2017/12/27 Not sure why I thought this
            hadSuccessK  = 0
            hadSuccessG  = 0
+
+           ;;2018/01/10 Try the whole "energy right below peak" thing
+           kappaParamStruct[0].value = bulkEOrigEstimate
+           kappaParamStruct[0].limits[0] = bulkEOrigEstimate
+
            KAPPA_FIT2D__FIREINTHEHOLE, $
               curDataStr, $
               hadSuccessK, $

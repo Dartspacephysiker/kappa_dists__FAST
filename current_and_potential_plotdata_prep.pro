@@ -389,8 +389,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                                          peak_en    : KEYWORD_SET(use_peakE_for_downPot), $
                                                          add_iu_pot : KEYWORD_SET(add_iu_pot), $
                                                          T_PMFac    : KEYWORD_SET(T_plusMinusFac_for_pot) ? T_plusMinusFac_for_pot : 0B}}, $
-                           use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens) AND have_sourceCone, $
-                           use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp) AND have_sourceCone}
+                           use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens[0]) AND have_sourceCone, $
+                           use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp[0]) AND have_sourceCone}
 
   IF have_sourceCone THEN BEGIN
 

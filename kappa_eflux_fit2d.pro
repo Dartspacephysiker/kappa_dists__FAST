@@ -64,6 +64,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
    FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
    FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+   FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
+   FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
    FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
@@ -171,6 +173,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
      FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+     FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
+     FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
      FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
      NO_PLOTS=no_plots, $
      SAVE_FITPLOTS=save_fitplots, $

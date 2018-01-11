@@ -6,6 +6,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                                     ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
                                     FIT2D__DENSITY_ANGLERANGE=fit2D__density_angleRange, $
+                                    FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
+                                    FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
                                     FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
                                     _EXTRA=e
 
@@ -18,6 +20,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ;; defElectron_angleRange       = [150,-150]
   defElectron_angleRange       = 'lc'
   defFit2D_dens_angleRange     = [-150,150]
+  defFit2D_faCond_angleRange   = [-150,150]
+  defFit2D_temp_angleRange     = 'lc'
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
                    spec_avg_intvl      :defSpectra_average_interval, $
@@ -28,6 +32,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    manual_angle_correction : 0, $
                    ;; electron_lca        :[-180.,180.], $
                    fit2D_dens_aRange   :defFit2D_dens_angleRange, $
+                   fit2D_temp_aRange   :defFit2D_temp_angleRange, $ 
+                   fit2D_faCond_aRange :defFit2D_faCond_angleRange, $ 
                    estimate_sourceCone_from_dist : 0B, $
                    densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
@@ -130,12 +136,42 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
      ENDCASE
   ENDIF
 
+  IF N_ELEMENTS(fit2D__temperature_angleRange) GT 0 THEN BEGIN
+     ;; kSDTData_opt.fit2D_temp_aRange      = fit2D__temperature_angleRange
+     STR_ELEMENT,kSDTData_opt,'fit2D_temp_aRange',fit2D__temperature_angleRange,/ADD_REPLACE
+     ;; PRINT,FORMAT='("SDT electron angle range",T45,":",T48,2(F0.2))', $
+     CASE SIZE(fit2D__temperature_angleRange,/TYPE) OF
+        7: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_temp_aRange",T45,":",T48,A0)', $
+                 kSDTData_opt.fit2D_temp_aRange
+        END
+        ELSE: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_temp_aRange",T45,":",T48,2(F0.2,:,", "))', $
+                 kSDTData_opt.fit2D_temp_aRange
+        END
+     ENDCASE
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__faConductance_angleRange) GT 0 THEN BEGIN
+     ;; kSDTData_opt.fit2D_faCond_aRange      = fit2D__faConductance_angleRange
+     STR_ELEMENT,kSDTData_opt,'fit2D_faCond_aRange',fit2D__faConductance_angleRange,/ADD_REPLACE
+     ;; PRINT,FORMAT='("SDT electron angle range",T45,":",T48,2(F0.2))', $
+     CASE SIZE(fit2D__faConductance_angleRange,/TYPE) OF
+        7: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_faCond_aRange",T45,":",T48,A0)', $
+                 kSDTData_opt.fit2D_faCond_aRange
+        END
+        ELSE: BEGIN
+           PRINT,FORMAT='("kSDTData_opt.fit2D_faCond_aRange",T45,":",T48,2(F0.2,:,", "))', $
+                 kSDTData_opt.fit2D_faCond_aRange
+        END
+     ENDCASE
+  ENDIF
+
   IF N_ELEMENTS(fit2D__estimate_sourceCone_from_dist) GT 0 THEN BEGIN
      kSDTData_opt.estimate_sourceCone_from_dist  = fit2D__estimate_sourceCone_from_dist
 
   ENDIF
-
-
 
   PRINT,''
 

@@ -40,7 +40,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
 
   momTmplt            = {scDens : 0. , $
                          scTemp : 0. , $
-                         scFAConduct : 0.D}
+                         scFAConduct : 0.}
 
   tmpArr       = MAKE_ARRAY((fit2D_inf_list[0].SDT).NBins,VALUE=-1987.1987,/FLOAT)
   anisotropy   = {gFunc   : tmpArr, $
@@ -49,7 +49,9 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                   angle_i : tmpArr, $
                   N       : 0L}
 
-  momInfoTmplt        = {estimated_sc : [0L,0L], $
+  momInfoTmplt        = {estimated_sc : {dens  : [0.,0.], $
+                                         temp  : [0.,0.], $
+                                         faCond: [0.,0.]}, $
                          anisotropy   : TEMPORARY(anisotropy), $
                          fitAngle_i   : 0L, $
                          eRange_peak  : [0.,0.], $

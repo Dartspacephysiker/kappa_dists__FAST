@@ -848,7 +848,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; ENDCASE
 
 
-     STOP
+     ;; STOP
      
   ENDIF
 
