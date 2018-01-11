@@ -84,6 +84,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
                      FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
                      FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
+                     FIT2D__TEMPERATURE_TYPE=fit2D__temperature_type, $
                      _EXTRA=e)
 
   ;;Plot options

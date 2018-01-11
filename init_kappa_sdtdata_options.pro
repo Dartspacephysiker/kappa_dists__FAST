@@ -9,6 +9,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
                                     FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
                                     FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
+                                    FIT2D__TEMPERATURE_TYPE=fit2D__temperature_type, $
                                     _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -22,6 +23,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   defFit2D_dens_angleRange     = [-150,150]
   defFit2D_faCond_angleRange   = [-150,150]
   defFit2D_temp_angleRange     = 'lc'
+  defTempType                  = 'PAR'
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
                    spec_avg_intvl      :defSpectra_average_interval, $
@@ -35,6 +37,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    fit2D_temp_aRange   :defFit2D_temp_angleRange, $ 
                    fit2D_faCond_aRange :defFit2D_faCond_angleRange, $ 
                    estimate_sourceCone_from_dist : 0B, $
+                   fit2D__temperature_type : defTempType, $
                    densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation
 
 
@@ -170,6 +173,27 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
 
   IF N_ELEMENTS(fit2D__estimate_sourceCone_from_dist) GT 0 THEN BEGIN
      kSDTData_opt.estimate_sourceCone_from_dist  = fit2D__estimate_sourceCone_from_dist
+
+  ENDIF
+
+  IF N_ELEMENTS(fit2D__temperature_type) GT 0 THEN BEGIN
+
+     IF SIZE(fit2D__temperature_type,/TYPE) NE 7 THEN STOP
+     IF (WHERE(STRMATCH(['par','avg'],fit2D__temperature_type,/FOLD_CASE)))[0] EQ -1 THEN STOP
+     
+     kSDTData_opt.fit2D__temperature_type  = fit2D__temperature_type
+
+     PRINT,FORMAT='("kSDTData_opt.fit2D__temperature_type",T45,":",T48,A3)', $
+                 kSDTData_opt.fit2D__temperature_type
+
+     CASE STRUPCASE(kSDTData_opt.fit2D__temperature_type) OF
+        'PAR': BEGIN
+           STR_ELEMENT,kSDTData_opt,'fit2D__temperature_type',2L,/ADD_REPLACE
+        END
+        'AVG': BEGIN
+           STR_ELEMENT,kSDTData_opt,'fit2D__temperature_type',3L,/ADD_REPLACE
+        END
+     ENDCASE
 
   ENDIF
 

@@ -79,6 +79,7 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            AGAUSS_OUT=AGauss, $
                            DONT_PRINT_ESTIMATES=dont_print_estimates, $
                            TEST_NOREV=test_noRev, $
+                           TEMPERATURE_TYPE=temperature_type, $
                            UNITS=units
 
 
@@ -129,9 +130,13 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
   ENDELSE
 
+  ;; parallel temperature for temperature_type = 2
+  ;; perpendicular temperature for temperature_type = 0,1
+  ;; average temperature for temperature_type = 3
+
   ;;So we estimate the temperature and density based on the full range of angles being considered 
   T               = (T_2D_FS(dat,ENERGY=eRange_peak, $
-                             ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[3]*estFacs.T ;T_avg
+                             ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[temperature_type]*estFacs.T ;T_avg
   n_est           = N_2D_FS(dat,ENERGY=eRange_peak, $
                             ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range)*estFacs.N
 
@@ -187,7 +192,7 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
         bulk_EGauss  = peak_energy*estFacs.B_EGauss
 
-        TGauss       = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[3]*estFacs.TGauss
+        TGauss       = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[temperature_type]*estFacs.TGauss
         n_estGauss   = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range)*estFacs.NGauss
         
         kappaGauss   = 100

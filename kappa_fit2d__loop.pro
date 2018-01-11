@@ -520,6 +520,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   AGAUSS_OUT=AGauss, $
                                   DONT_PRINT_ESTIMATES=dont_print_estimates, $
                                   /TEST_NOREV, $
+                                  TEMPERATURE_TYPE=KF2D__SDTData_opt.fit2D__temperature_type, $
                                   UNITS=units1D
 
            ;; 2018/01/10 Use bulk energy (set by PHI__USE_ENERGY_BEFORE_PEAK) for 2D bulkE initial estimate

@@ -67,6 +67,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
    FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
    FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
+   FIT2D__TEMPERATURE_TYPE=fit2D__temperature_type, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc, $
    FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
@@ -176,6 +177,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      FIT2D__TEMPERATURE_ANGLERANGE=fit2D__temperature_angleRange, $
      FIT2D__FACONDUCTANCE_ANGLERANGE=fit2D__faConductance_angleRange, $
      FIT2D__ESTIMATE_DENS_ARANGE_FROM_DIST=fit2D__estimate_sourceCone_from_dist, $
+     FIT2D__TEMPERATURE_TYPE=fit2D__temperature_type, $
      NO_PLOTS=no_plots, $
      SAVE_FITPLOTS=save_fitplots, $
      PLOT_FULL_FIT=plot_full_fit, $
