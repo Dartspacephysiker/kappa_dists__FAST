@@ -467,7 +467,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
         OUT_SC_POT=sc_pot, $
         EPS=eps, $
-        _EXTRA=cAP_struct
+        CAP_STRUCT=cAP_struct
 
   ENDIF
 

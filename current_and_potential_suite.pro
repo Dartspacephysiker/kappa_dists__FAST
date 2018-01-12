@@ -58,6 +58,23 @@ PRO PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
         MEAN(JVPlotData.cur[useInds])
 END
 PRO CURRENT_AND_POTENTIAL_SUITE, $
+   ORBIT=orbit, $
+   ORBTIMES=orbTimes, $
+   ORBBURSTTIMES=orbBurstTimes, $
+   BONUSPREF=bonusPref, $
+   DOWNTIMESSTR=downTimesStr, $
+   UPTIMESSTR=upTimesStr, $
+   TIMESLIST=timesList, $
+   UNITS=units, $
+   OUTDIR=outDir, $
+   MASTERFILE=masterFile, $
+   REMAKE_MASTERFILE=remake_masterFile, $
+   SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
+   LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
+   EEB_OR_EESARR=eeb_or_eesArr, $
+   ORDER=order, $
+   LABEL=label, $
+   ADD_ONECOUNT_STATS=add_oneCount_stats, $
    PLOT_T1=plot_t1, $
    PLOT_T2=plot_t2, $
    USE_ALL_CURRENTS=use_all_currents, $
@@ -128,12 +145,36 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
    EN_SPEC__SPNAME=en_spec__spName, $
    PLOTS_IN_BUFFER=plots_in_buffer, $
+   WHICH_EEB__LABEL=label__which_eeb, $
+   WHICH_TIMES__LABEL=label__which_times, $
+   MOMENT_ENERGYARR=moment_energyArr, $
+   USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
+   POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
+   POT__CHASTON_STYLE=pot__Chaston_style, $
+   POT__FROM_FILE=pot__from_file, $
+   POT__SAVE_FILE=pot__save_file, $
+   ARANGE__MOMENTS_LIST=aRange__moments_list, $
+   ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
+   ARANGE__CHARE_LIST=aRange__charE_list, $
+   ARANGE__DENS_LIST=aRange__dens_list, $
+   ;; ARANGE__TEMP_LIST=aRange__temp_list, $
+   ;; ERANGE__TEMP_LIST=eRange__temp_list, $
+   ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
+   MIN_PEAK_ENERGYARR=min_peak_energyArr, $
+   MAX_PEAK_ENERGYARR=max_peak_energyArr, $
+   PEAK_ENERGY__START_AT_HIGHEARR=peak_energy__start_at_highEArr, $
+   UPGOINGARR=upgoingArr, $
+   ERROR_ESTIMATES=error_estimates, $
+   SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   MAP_TO_100KM=map_to_100km, $
+   SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
    OUT_SC_POT=out_sc_pot, $
    PLOTDIR=plotDir, $
-   _REF_EXTRA=e
+   CAP_STRUCT=cAP_struct, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -150,6 +191,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ENDCASE
 
   ENDIF
+
+  ;; aRange__temp_e_down = 'lc'
 
   CURRENT_AND_POTENTIAL_ANALYSIS, $
      ORBIT=orbit, $
@@ -171,6 +214,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
      USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+     USE_ENERGIES_ABOVE_PEAK_FOR_TEMP=use_energies_above_peak_for_temp, $
      MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
      TEMPERATURE_TYPE_INDEX=tTypeInd, $
      ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
@@ -186,6 +230,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
      ARANGE__CHARE_E_UP=aRange__charE_e_up, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+     ARANGE__TEMP_E_DOWN=aRange__temp_e_down, $
+     ;; ARANGE__TEMP_E_UP=aRange__temp_e_up, $
+     ;; ARANGE__TEMP_I_UP=aRange__temp_i_up, $
      MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
@@ -199,6 +246,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
      ARANGE__CHARE_LIST=aRange__charE_list, $
      ARANGE__DENS_LIST=aRange__dens_list, $
+     ;; ARANGE__TEMP_LIST=aRange__temp_list, $
+     ;; ERANGE__TEMP_LIST=eRange__temp_list, $
      ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
      MIN_PEAK_ENERGYARR=min_peak_energyArr, $
      MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -214,10 +263,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $
-     _EXTRA=e
+     _EXTRA=cAP_struct
 
-  PRINT,"PRESUMABLY YOU NEED TO SPECIFY WHICH TEMPERATURE TO USE SOMEWHERE AROUND HERE--PARALLEL OR PERP"
-  STOP
+  ;; PRINT,"PRESUMABLY YOU NEED TO SPECIFY WHICH TEMPERATURE TO USE SOMEWHERE AROUND HERE--PARALLEL OR PERP"
+  ;; STOP
   
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       T1=plot_t1, $

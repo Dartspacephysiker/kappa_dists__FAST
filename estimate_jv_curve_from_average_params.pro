@@ -161,6 +161,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               fastR_BFac= jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0]
 
+              potBarArrK = MAKE_ARRAY(N_ELEMENTS(X),nKappa,nMagRatio,/DOUBLE)
+              potBarArrG = MAKE_ARRAY(N_ELEMENTS(X),nMagRatio,/DOUBLE)
+
               ;;Reclaim
               A         = kappaParamStruct[*].value
               AGauss    = kappaParamStruct[*].value
@@ -248,14 +251,18 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                           END
                           ELSE: BEGIN
 
+                             IF kappaArr[j,k] GT 3 THEN STOP
+
                              yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
                                                                       A[1], $
                                                                       densArr[k], $
                                                                       X, $
                                                                       magRatArr[j,k], $
                                                                       ;; IN_POTBAR=in_potBar, $
-                                                                      ;; OUT_POTBAR=potBar, $
+                                                                      OUT_POTBAR=potBar, $
                                                                       /NO_MULT_BY_CHARGE)*1D6
+                             potBarArrK[*,j,k] = TEMPORARY(potBar)
+
                           END
                        ENDCASE
 
@@ -298,7 +305,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                      X, $
                                                                      multi_magRatio_array[k], $
                                                                      ;; IN_POTBAR=in_potBar, $
-                                                                     ;; OUT_POTBAR=potBar, $
+                                                                     OUT_POTBAR=potBar, $
                                                                      /NO_MULT_BY_CHARGE)*1D6
 
                           END
@@ -314,9 +321,12 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                     X, $
                                     multi_magRatio_array[k], $
                                     ;; IN_POTBAR=in_potBar, $
-                                    ;; OUT_POTBAR=potBar, $
+                                    OUT_POTBAR=potBar, $
                                     ;; POT_IN_JOULES=pot_in_joules, $
                                     MASS=mass)
+
+                             potBarArrG[*,k] = TEMPORARY(potBar)
+
 
                           END
                           ELSE: BEGIN
@@ -326,8 +336,10 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                      X, $
                                                                      multi_magRatio_array[k], $
                                                                      ;; IN_POTBAR=in_potBar, $
-                                                                     ;; OUT_POTBAR=potBar, $
+                                                                     OUT_POTBAR=potBar, $
                                                                      /NO_MULT_BY_CHARGE)*1D6
+
+                             potBarArrG[*,k] = TEMPORARY(potBar)
 
                           END
                        ENDCASE

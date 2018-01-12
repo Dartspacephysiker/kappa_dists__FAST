@@ -19,11 +19,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    USE_MSPH_SOURCECONE_FOR_DENS=use_msph_sourcecone_for_dens, $
    USE_MSPH_SOURCECONE_FOR_TEMP=use_msph_sourcecone_for_temp, $
+   USE_ENERGIES_ABOVE_PEAK_FOR_TEMP=use_energies_above_peak_for_temp, $
    MSPH_SOURCECONE_HALFWIDTH=msph_sourcecone_halfWidth, $
    TEMPERATURE_TYPE_INDEX=tTypeInd, $
    ARANGE__DENS_E_DOWN=aRange__dens_e_down, $
    ARANGE__DENS_E_UP=aRange__dens_e_up, $
    ARANGE__DENS_I_UP=aRange__dens_i_up, $
+   ARANGE__TEMP_E_DOWN=aRange__temp_e_down, $
+   ;; ARANGE__TEMP_E_UP=aRange__temp_e_up, $
+   ;; ARANGE__TEMP_I_UP=aRange__temp_i_up, $
+   ERANGE__TEMP_E_DOWN=eRange__temp_e_down, $
+   ;; ERANGE__TEMP_E_UP=eRange__temp_e_up, $
+   ;; ERANGE__TEMP_I_UP=eRange__temp_i_up, $
    ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
    ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
    ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
@@ -50,6 +57,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
    ARANGE__DENS_LIST=aRange__dens_list, $
+   ARANGE__TEMP_LIST=aRange__temp_list, $
+   ERANGE__TEMP_LIST=eRange__temp_list, $
    ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
    MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -108,6 +117,22 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      msph_sc_temp       = [0,0,0]
   ENDELSE
   
+  IF N_ELEMENTS(use_energies_above_peak_for_temp) GT 0 THEN BEGIN
+     CASE N_ELEMENTS(use_energies_above_peak_for_temp) OF
+        1: BEGIN
+           e_above_peak_temp = [use_energies_above_peak_for_temp,0,0]
+        END
+        2: BEGIN
+           e_above_peak_temp = [use_energies_above_peak_for_temp,0]
+        END
+        3: BEGIN
+           e_above_peak_temp = use_energies_above_peak_for_temp
+        END
+     ENDCASE        
+  ENDIF ELSE BEGIN
+     e_above_peak_temp       = [0,0,0]
+  ENDELSE
+  
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
 
@@ -143,6 +168,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange__dens_e_up      = KEYWORD_SET(aRange__dens_e_up    ) ? aRange__dens_e_up     : !NULL
      aRange__dens_i_up      = KEYWORD_SET(aRange__dens_i_up    ) ? aRange__dens_i_up     : !NULL
 
+     aRange__temp_e_down    = KEYWORD_SET(aRange__temp_e_down  ) ? aRange__temp_e_down   : !NULL
+     aRange__temp_e_up      = KEYWORD_SET(aRange__temp_e_up    ) ? aRange__temp_e_up     : !NULL
+     aRange__temp_i_up      = KEYWORD_SET(aRange__temp_i_up    ) ? aRange__temp_i_up     : !NULL
+
+     eRange__temp_e_down    = KEYWORD_SET(eRange__temp_e_down  ) ? eRange__temp_e_down   : !NULL
+     eRange__temp_e_up      = KEYWORD_SET(eRange__temp_e_up    ) ? eRange__temp_e_up     : !NULL
+     eRange__temp_i_up      = KEYWORD_SET(eRange__temp_i_up    ) ? eRange__temp_i_up     : !NULL
+
      ;; aRange__moments_e_down  = [330.,30.]
      ;; aRange__moments_i_up    = [150.,210.]
      ;; aRange__moments_e_up    = [150.,210.]
@@ -152,6 +185,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange__peakEn_list     = LIST(aRange__peakEn_e_down,aRange__peakEn_e_up,aRange__peakEn_i_up)
      aRange__charE_list      = LIST(aRange__charE_e_down,aRange__charE_e_up,aRange__charE_i_up)
      aRange__dens_list       = LIST(aRange__dens_e_down,aRange__dens_e_up,aRange__dens_i_up)
+     aRange__temp_list       = LIST(aRange__temp_e_down,aRange__temp_e_up,aRange__temp_i_up)
+     eRange__temp_list       = LIST(eRange__temp_e_down,eRange__temp_e_up,eRange__temp_i_up)
 
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
@@ -251,6 +286,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange_oMoments_list  = LIST()
      aRange_oPeakEn_list   = LIST()
      aRange_oCharE_list    = LIST()
+     aRange_oTemp_list     = LIST()
 
      FOR k=0,nDEFLoop-1 DO BEGIN
 
@@ -410,6 +446,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                                           ENERGY=moment_energyArr[*,k], $
                                                                           SC_POT=sc_pot, $
                                                                           EEB_OR_EES=eeb_or_ees)
+        IF KEYWORD_SET(e_above_peak_temp[k]) THEN BEGIN
+           energyArr_forTemp         = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
+                                                                          ENERGY=moment_energyArr[*,k], $
+                                                                          SC_POT=sc_pot, $
+                                                                          EEB_OR_EES=eeb_or_ees)
+        ENDIF
 
         min_peak_energy              = min_peak_energyArr[k]
         max_peak_energy              = max_peak_energyArr[k]
@@ -432,6 +474,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            lc_angleRange, $
            i_angle,i_angle_up, $
            north_south, $
+           ALLEXCLATM_ARANGE=allExclAtm_aRange, $
            OUT_LCW=lcw, $
            ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
            CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
@@ -456,6 +499,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDCASE
 
         aRange__dens = !NULL
+        aRange__temp = !NULL
+        eRange__temp = !NULL
         ;; IF N_ELEMENTS(also_msph_sourcecone) GT 0 THEN BEGIN
         ;; IF KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
         ;;    aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
@@ -466,6 +511,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            aRange__dens = aRange__dens_list[k]
         ENDIF
         
+        IF KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
+           aRange__temp = 'source'
+        ENDIF ELSE IF N_ELEMENTS(aRange__temp_list[k]) GT 0 THEN BEGIN
+           aRange__temp = aRange__temp_list[k]
+        ENDIF
+
         aRange__moments = N_ELEMENTS(aRange__moments_list[k]) GT 0 ? aRange__moments_list[k] : angleRange
         aRange__peakEn  = N_ELEMENTS(aRange__peakEn_list[k] ) GT 0 ? aRange__peakEn_list[k]  : angleRange
         aRange__charE   = N_ELEMENTS(aRange__charE_list[k]  ) GT 0 ? aRange__charE_list[k]   : angleRange
@@ -482,6 +533,69 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                     aRange__dens = [180.-scw,180+scw]
                  ENDIF ELSE BEGIN
                     aRange__dens = [360.-scw,scw]
+                 ENDELSE
+
+              END
+              ELSE: STOP
+           ENDCASE
+
+        ENDIF
+        
+        IF SIZE(aRange__temp,/TYPE) EQ 7 THEN BEGIN
+
+           CASE 1 OF
+              STRMATCH(STRUPCASE(aRange__temp[0]),'*LC'): BEGIN
+
+                 IF STRLEN(aRange__temp[0]) GT 2 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__temp[0]),'LC',/EXTRACT))
+                    IF north_south[0] EQ -1 THEN BEGIN
+                       aRange__temp = [180.-factor*lcw,180+factor*lcw]
+                    ENDIF ELSE BEGIN
+                       aRange__temp = [360.-factor*lcw,factor*lcw]
+                    ENDELSE
+                 ENDIF ELSE BEGIN
+                    aRange__temp = lc_angleRange
+                 ENDELSE
+
+                 IF upgoing THEN aRange__temp = (360.*((aRange__temp-180)/360.-FLOOR((aRange__temp-180)/360.)))
+
+              END
+              STRMATCH(STRUPCASE(aRange__temp[0]),'*ALL__EXCL_ATM'): BEGIN
+
+                 IF STRLEN(aRange__temp[0]) GT 12 THEN BEGIN
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__temp[0]),'ALL__EXCL_ATM',/EXTRACT))
+                 ENDIF ELSE BEGIN
+                    factor = 1
+                 ENDELSE
+                 
+                 ;; OLD 2018/01/12
+                 ;; IF north_south[0] EQ -1 THEN BEGIN
+                 ;;    ;; aRange__temp = [180.-factor*lcw,180+factor*lcw]
+                 ;;    aRange__temp = [factor*lcw,360.-factor*lcw]
+                 ;; ENDIF ELSE BEGIN
+                 ;;    ;; aRange__temp = [(-180.)+factor*lcw,180.-factor*lcw]
+                 ;;    aRange__temp = [180.+factor*lcw,180.-factor*lcw]
+                 ;; ENDELSE
+
+                 ;;NEW 2018/01/12
+                 aRange__temp = allExclAtm_aRange
+
+                 ;; ENDIF ELSE BEGIN
+                 ;;    ;;you're getting the loss cone, not the whole thing excluding the loss cone
+                 ;;    STOP
+                 ;;    aRange__temp = lc_angleRange
+                 ;; ENDELSE
+
+              END
+              STRMATCH(STRUPCASE(aRange__temp[0]),'SOURCE'): BEGIN
+
+                 ;; scw = 150
+                 scw = N_ELEMENTS(msph_sourcecone_halfWidth) GT 0 ? msph_sourcecone_halfWidth : 150
+
+                 IF north_south[0] EQ -1 THEN BEGIN
+                    aRange__temp = [180.-scw,180+scw]
+                 ENDIF ELSE BEGIN
+                    aRange__temp = [360.-scw,scw]
                  ENDELSE
 
               END
@@ -509,21 +623,25 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                  IF upgoing THEN aRange__moments = (360.*((aRange__moments-180)/360.-FLOOR((aRange__moments-180)/360.)))
 
               END
-              STRMATCH(STRUPCASE(aRange__moments[0]),'LC__EXCL_ATM'): BEGIN
+              STRMATCH(STRUPCASE(aRange__moments[0]),'*ALL__EXCL_ATM'): BEGIN
 
                  IF STRLEN(aRange__moments[0]) GT 12 THEN BEGIN
-                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'LC__EXCL_ATM',/EXTRACT))
+                    factor = FLOAT(STRSPLIT(STRUPCASE(aRange__moments[0]),'ALL__EXCL_ATM',/EXTRACT))
                  ENDIF ELSE BEGIN
                     factor = 1
                  ENDELSE
                  
-                 IF north_south[0] EQ -1 THEN BEGIN
-                    ;; aRange__moments = [180.-factor*lcw,180+factor*lcw]
-                    aRange__moments = [factor*lcw,360.-factor*lcw]
-                 ENDIF ELSE BEGIN
-                    ;; aRange__moments = [(-180.)+factor*lcw,180.-factor*lcw]
-                    aRange__moments = [180.+factor*lcw,180.-factor*lcw]
-                 ENDELSE
+                 ;; OLD 2018/01/12
+                 ;; IF north_south[0] EQ -1 THEN BEGIN
+                 ;;    ;; aRange__moments = [180.-factor*lcw,180+factor*lcw]
+                 ;;    aRange__moments = [factor*lcw,360.-factor*lcw]
+                 ;; ENDIF ELSE BEGIN
+                 ;;    ;; aRange__moments = [(-180.)+factor*lcw,180.-factor*lcw]
+                 ;;    aRange__moments = [180.+factor*lcw,180.-factor*lcw]
+                 ;; ENDELSE
+
+                 ;;NEW 2018/01/12
+                 aRange__moments = allExclAtm_aRange
 
                  ;; ENDIF ELSE BEGIN
                  ;;    ;;you're getting the loss cone, not the whole thing excluding the loss cone
@@ -594,6 +712,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         aRange_oMoments_list.Add,aRange__moments
         aRange_oPeakEn_list.Add,aRange__peakEn
         aRange_oCharE_list.Add,aRange__charE
+        aRange_oTemp_list.Add,aRange__temp
 
         ;;Summary kind
         PRINT,FORMAT='("*****",A0,"*****")',STRUPCASE(label[k])
@@ -603,6 +722,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__moments",aRange__moments
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__peakEn",aRange__peakEn
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__charE",aRange__charE
+        IF KEYWORD_SET(aRange__temp) THEN BEGIN
+           PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"aRange__temp",aRange__temp
+        ENDIF
+        IF KEYWORD_SET(eRange__temp) THEN BEGIN
+           PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"eRange__temp",eRange__temp
+        ENDIF
         ;; PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"angleRange",angleRange
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"energy",MEAN(energy,DIMENSION=2)
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"min_peak_energy",min_peak_energy
@@ -682,13 +807,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
            ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
            ;;  for fitting—namely, n_below_peak and n_above_peak
+           
+           ;; OLD 2018/01/12
            maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
            minEInd                   = (peak_ind - n_above_peak) > 0
+
+           ;; NEW 2018/01/12; use as many as possible above peak
+           maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
+           minEInd                   = (peak_ind - 47          ) > 0
 
            peak_dEArr[iTime]         = eSpec.vErr[iTime,peak_ind]
            peak_energyArr[iTime]     = TEMPORARY(peak_energy)
            peak_indArr[iTime]        = TEMPORARY(peak_ind)
-           peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(minEInd)],Xorig[TEMPORARY(maxEInd)]]
+           peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(maxEInd)],Xorig[TEMPORARY(minEInd)]]
         ENDFOR
 
         peak_ind_list.Add,TEMPORARY(peak_indArr)
@@ -700,18 +831,21 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            energy[1,*]               = peak_EBoundsArr[1,*] < energy[1,*]
         ENDIF
 
-        ;; en_arr   = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
-        ;;                                               ENERGY=energy, $
-        ;;                                               SC_POT=sc_pot, $
-        ;;                                               EEB_OR_EES=eeb_or_ees)
-        ;; energy   = TEMPORARY(en_arr)
+        IF KEYWORD_SET(e_above_peak_temp[k]) THEN BEGIN
+           energyArr_forTemp[0,*]    = peak_EBoundsArr[0,*] > energy[0,*]
+           energyArr_forTemp[1,*]    = peak_EBoundsArr[1,*] > energy[1,*]
+           eRange__temp              = TEMPORARY(energyArr_forTemp)
+        ENDIF ELSE IF N_ELEMENTS(eRange__temp_list[k]) GT 0 THEN BEGIN
+           eRange__temp              = eRange__temp_list[k]
+        ENDIF
 
         MOMENT_SUITE_2D,diff_eFlux, $
                         ENERGY=energy, $
                         ARANGE__DENS=aRange__dens, $
                         ARANGE__MOMENTS=aRange__moments, $
                         ARANGE__CHARE=aRange__charE, $
-                        TEMPERATURE_TYPE_INDEX=tTypeInd, $
+                        ARANGE__TEMP=aRange__temp, $
+                        ERANGE__TEMP=eRange__temp, $
                         SC_POT=sc_pot, $
                         EEB_OR_EES=eeb_OR_ees, $
                         ERROR_ESTIMATES=error_estimates, $
@@ -744,7 +878,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ARANGE__DENS=aRange__dens, $
                            ARANGE__MOMENTS=aRange__moments, $
                            ARANGE__CHARE=aRange__charE, $
-                           TEMPERATURE_TYPE_INDEX=tTypeInd, $
+                           ARANGE__TEMP=aRange__temp, $
+                           ERANGE__TEMP=eRange__temp, $
                            SC_POT=sc_pot, $
                            EEB_OR_EES=eeb_or_ees, $
                            ERROR_ESTIMATES=error_estimates, $
@@ -1070,7 +1205,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            tmpJeErr         = (jeErr_list[k])[theseInds]
            tmpCurErr        = (curErr_list[k])[theseInds]
            tmpcharEErr      = (charEErr_list[k])[theseInds]
-           tmpTerr          = (Terr_list[k])[theseInds]
+           tmpTerr          = (Terr_list[k])[*,theseInds]
            ;; SHRINK_GERSHMAN_ERROR_STRUCT,err_list[k],theseInds,tmpErrors
 
            IF KEYWORD_SET(also_oneCount) THEN BEGIN
@@ -1079,7 +1214,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               tmpJe1Err     = (je1Err_list[k])[theseInds]
               tmpCur1Err    = (cur1Err_list[k])[theseInds]
               tmpcharE1Err  = (charE1Err_list[k])[theseInds]
-              tmpT1err      = (T1err_list[k])[theseInds]
+              tmpT1err      = (T1err_list[k])[*,theseInds]
               ;; SHRINK_GERSHMAN_ERROR_STRUCT,err1_list[k],theseInds,tmpErrors1
            ENDIF
         ENDIF

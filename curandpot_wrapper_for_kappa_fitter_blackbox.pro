@@ -73,6 +73,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
    OUT_SC_POT=out_sc_pot, $
    EPS=eps, $
+   CAP_STRUCT=cAP_struct, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -295,6 +296,12 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
      ARANGE__CHARE_E_UP=aRange__charE_e_up, $
      ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+     ARANGE__TEMP_E_DOWN=aRange__temp_e_down, $
+     ARANGE__TEMP_E_UP=aRange__temp_e_up, $
+     ARANGE__TEMP_I_UP=aRange__temp_i_up, $
+     ERANGE__TEMP_E_DOWN=eRange__temp_e_down, $
+     ERANGE__TEMP_E_UP=eRange__temp_e_up, $
+     ERANGE__TEMP_I_UP=eRange__temp_i_up, $
      MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      WHICH_EEB__LABEL=label__which_eeb, $
      WHICH_TIMES__LABEL=label__which_times, $
@@ -308,6 +315,8 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
      ARANGE__CHARE_LIST=aRange__charE_list, $
      ARANGE__DENS_LIST=aRange__dens_list, $
+     ARANGE__TEMP_LIST=aRange__temp_list, $
+     ERANGE__TEMP_LIST=aRange__temp_list, $
      ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
      MIN_PEAK_ENERGYARR=min_peak_energyArr, $
      MAX_PEAK_ENERGYARR=max_peak_energyArr, $
@@ -409,6 +418,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      OUT_AVGS_FOR_FITTING=avgs_JVfit, $
      OUT_SC_POT=out_sc_pot, $
      EPS=eps, $
-     _REF_EXTRA=e
+     CAP_STRUCT=cAP_struct, $
+     _EXTRA=cAP_struct
 
 END
