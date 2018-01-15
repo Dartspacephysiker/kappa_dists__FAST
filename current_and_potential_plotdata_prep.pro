@@ -341,10 +341,18 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;                               (curPotList[euind].peakE GE 0.) OR  $
   ;;                               (curPotList[euind].peakE GE 0.),    $
   ;;                               nSafe)
+
+  ;; 2018/01/15 What are you THINKING, bro? Get rid of that curErr check thing!
+  ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
+  ;;                               (curPotList[euind].peakE GE 0.) AND  $
+  ;;                               (curPotList[euind].peakE GE 0.) AND  $
+  ;;                               ABS(curErr/cur) LE 5,     $
+  ;;                               nSafe)
+
   safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
                                 (curPotList[euind].peakE GE 0.) AND  $
-                                (curPotList[euind].peakE GE 0.) AND  $
-                                ABS(curErr/cur) LE 5,     $
+                                (curPotList[euind].peakE GE 0.)  $
+                                ;; ABS(curErr/cur) LE 5,     $
                                 nSafe)
 
   ;; IF nSafe LT 3 THEN STOP
@@ -361,37 +369,40 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   
   IF nSafe LT 3 THEN STOP
 
-  jvPlotData            = {time       : time      [safe_i] , $
-                           cur        : cur       [safe_i] , $
-                           je         : je        [safe_i] , $
-                           pot        : pot       [safe_i] , $
-                           curErr     : curErr    [safe_i] , $
-                           jeErr      : jeErr     [safe_i] , $
-                           potErr     : potErr    [safe_i] , $
-                           magCur     : magCurrent[safe_i] , $
-                           tMag       : tMag      [safe_i] , $
-                           tDiff      : tDiff     [safe_i] , $
-                           phiBar     : phiBar    [safe_i] , $
-                           phiBarErr  : phiBarErr [safe_i] , $
-                           pBarAll    : {ed    : phiBar_ed[safe_i], $
-                                         eu    : phiBar_eu[safe_i], $
-                                         edErr : phiBarErr_ed[safe_i], $
-                                         euErr : phiBarErr_eu[safe_i]}, $
-                           NDown      : curPotList[edind].N[safe_i], $
-                           NDownErr   : curPotList[edind].Nerr[safe_i], $
-                           TDown      : REFORM(curPotList[edind].T[TTypeInd,safe_i]), $
-                           TDownErr   : curPotList[edind].Terr[safe_i], $
-                           info       : {cur          : {ed         : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
-                                                         eu         : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
-                                                         iu         : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $
-                                                         mag        : KEYWORD_SET(use_mag_current), $
-                                                         is_mapped  : KEYWORD_SET(map_to_100km)}, $
-                                         pot          : {chare      : KEYWORD_SET(use_charE_for_downPot), $
-                                                         peak_en    : KEYWORD_SET(use_peakE_for_downPot), $
-                                                         add_iu_pot : KEYWORD_SET(add_iu_pot), $
-                                                         T_PMFac    : KEYWORD_SET(T_plusMinusFac_for_pot) ? T_plusMinusFac_for_pot : 0B}}, $
-                           use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens[0]) AND have_sourceCone, $
-                           use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp[0]) AND have_sourceCone}
+  jvPlotData = {time       : time      [safe_i] , $
+                cur        : cur       [safe_i] , $
+                je         : je        [safe_i] , $
+                pot        : pot       [safe_i] , $
+                only_downE_pot : curPotList[edind].charE[safe_i], $
+                curErr     : curErr    [safe_i] , $
+                jeErr      : jeErr     [safe_i] , $
+                potErr     : potErr    [safe_i] , $
+                magCur     : magCurrent[safe_i] , $
+                tMag       : tMag      [safe_i] , $
+                tDiff      : tDiff     [safe_i] , $
+                phiBar     : phiBar    [safe_i] , $
+                phiBarErr  : phiBarErr [safe_i] , $
+                pBarAll    : {ed    : phiBar_ed[safe_i], $
+                              eu    : phiBar_eu[safe_i], $
+                              edErr : phiBarErr_ed[safe_i], $
+                              euErr : phiBarErr_eu[safe_i]}, $
+                NDown      : curPotList[edind].N[safe_i], $
+                NDownErr   : curPotList[edind].Nerr[safe_i], $
+                TDown      : REFORM(curPotList[edind].T[TTypeInd,safe_i]), $
+                TDownErr   : curPotList[edind].Terr[safe_i], $
+                info       : {cur   : {ed        : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
+                                       eu        : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
+                                       iu        : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $
+                                       mag       : KEYWORD_SET(use_mag_current), $
+                                       is_mapped : KEYWORD_SET(map_to_100km)}, $
+                              pot   : {chare      : KEYWORD_SET(use_charE_for_downPot), $
+                                       peak_en    : KEYWORD_SET(use_peakE_for_downPot), $
+                                       add_iu_pot : KEYWORD_SET(add_iu_pot), $
+                                       T_PMFac    : (KEYWORD_SET(T_plusMinusFac_for_pot) ? $
+                                                     T_plusMinusFac_for_pot              : $
+                                                     0B                                  )}}, $
+                use_source_dens : KEYWORD_SET(use_msph_sourcecone_for_dens[0]) AND have_sourceCone, $
+                use_source_temp : KEYWORD_SET(use_msph_sourcecone_for_temp[0]) AND have_sourceCone}
 
   IF have_sourceCone THEN BEGIN
 

@@ -126,11 +126,12 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
   CASE 1 OF
      KEYWORD_SET(multi_magRatio_mode): BEGIN
 
-        IF KEYWORD_SET(all_temps) THEN BEGIN
-           meanPot   = X
-        ENDIF ELSE BEGIN
-           meanPot   = 10.^(MEAN(ALOG10(X)))
-        ENDELSE
+        ;; 2018/01/15 Don't want meanPot!! Want to be TRUE, baby
+        ;; IF KEYWORD_SET(all_temps) THEN BEGIN
+        ;;    meanPot   = X
+        ;; ENDIF ELSE BEGIN
+        ;;    meanPot   = 10.^(MEAN(ALOG10(X)))
+        ;; ENDELSE
 
         CASE 1 OF
            KEYWORD_SET(map__2D): BEGIN
@@ -161,8 +162,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               fastR_BFac= jvPlotData.mRatio.R_B.FAST[0]/jvPlotData.mRatio.R_B.ionos[0]
 
-              potBarArrK = MAKE_ARRAY(N_ELEMENTS(X),nKappa,nMagRatio,/DOUBLE)
-              potBarArrG = MAKE_ARRAY(N_ELEMENTS(X),nMagRatio,/DOUBLE)
+              ;; potBarArrK = MAKE_ARRAY(N_ELEMENTS(X),nKappa,nMagRatio,/DOUBLE)
+              ;; potBarArrG = MAKE_ARRAY(N_ELEMENTS(X),nMagRatio,/DOUBLE)
 
               ;;Reclaim
               A         = kappaParamStruct[*].value
@@ -173,20 +174,27 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               IF KEYWORD_SET(all_temps) THEN BEGIN
                  FOR k=0,nMagRatio-1 DO BEGIN
 
-                    densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-                                                                     tRB_TFAST, $
-                                                                     0, $
-                                                                     tRB_nFAST, $
-                                                                     multi_magRatio_array[k]*fastR_BFac)
+                    densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(X, $
+                                                                tRB_TFAST, $
+                                                                0, $
+                                                                tRB_nFAST, $
+                                                                multi_magRatio_array[k]*fastR_BFac)
                  ENDFOR
               ENDIF ELSE BEGIN
                  FOR k=0,nMagRatio-1 DO BEGIN
 
-                    densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-                                                                   A[1], $
-                                                                   0, $
-                                                                   avgs_JVfit.N_SC.avg, $
-                                                                   multi_magRatio_array[k]*fastR_BFac))
+                    ;; 2018/01/15 Goodness no! (Think shoes-wearin' cat)
+                    ;; densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(X, $
+                    ;;                                                A[1], $
+                    ;;                                                0, $
+                    ;;                                                avgs_JVfit.N_SC.avg, $
+                    ;;                                                multi_magRatio_array[k]*fastR_BFac))
+                    densArr[k] = DENSITY_FACTOR__BARBOSA_1977(X, $
+                                                              A[1], $
+                                                              0, $
+                                                              avgs_JVfit.N_SC.avg, $
+                                                              multi_magRatio_array[k]*fastR_BFac)
+
                  ENDFOR
               ENDELSE
 
@@ -261,7 +269,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                       ;; IN_POTBAR=in_potBar, $
                                                                       OUT_POTBAR=potBar, $
                                                                       /NO_MULT_BY_CHARGE)*1D6
-                             potBarArrK[*,j,k] = TEMPORARY(potBar)
+                             ;; potBarArrK[*,j,k] = TEMPORARY(potBar)
 
                           END
                        ENDCASE
@@ -325,7 +333,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                     ;; POT_IN_JOULES=pot_in_joules, $
                                     MASS=mass)
 
-                             potBarArrG[*,k] = TEMPORARY(potBar)
+                             ;; potBarArrG[*,k] = TEMPORARY(potBar)
 
 
                           END
@@ -339,7 +347,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                      OUT_POTBAR=potBar, $
                                                                      /NO_MULT_BY_CHARGE)*1D6
 
-                             potBarArrG[*,k] = TEMPORARY(potBar)
+                             ;; potBarArrG[*,k] = TEMPORARY(potBar)
 
                           END
                        ENDCASE
@@ -382,7 +390,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               FOR k=0,nMagRatio-1 DO BEGIN
 
-                 kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
+                 kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(X, $
                                                                               kappaParamStruct[1].value, $
                                                                               0, $
                                                                               tRB_nFAST, $
@@ -431,8 +439,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
            END
         ENDCASE
-        ;;Kappa
 
+        ;;Kappa
         junk      = MIN(chi2ArrK,indK)
         indK2D    = ARRAY_INDICES(chi2ArrK,indK)
 
@@ -441,17 +449,10 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         potVals   = X;        potVals   = jvPlotData.pot[avgs_jvFit.useinds]
 
         IF KEYWORD_SET(all_temps) THEN BEGIN
-           ;; bestDensK = MEAN(densArr[*,indK2D[1]])
            bestDensK = densArr[*,indK2D[1]]
         ENDIF ELSE BEGIN
            bestDensK = densArr[indK2D[1]]
         ENDELSE
-
-        ;; plotDens = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-        ;;                                         A[1], $
-        ;;                                         0, $
-        ;;                                         avgs_JVfit.N_SC.avg, $
-        ;;                                         bestRB)
 
         yFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $
                                                  A[1], $
@@ -466,9 +467,6 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         A[3]      = bestRBK
 
         ;;Gauss
-
-        ;; junkGauss = MIN(mMagDat.chi2[WHERE(mMagDat.kappa GE 8)],indG)
-        ;; indG      = (WHERE(mMagDat.kappa GE 8))[indG]
         junkGauss = MIN(chi2ArrG,indG)
         bestRBG   = multi_magRatio_array[indG]
         IF KEYWORD_SET(all_temps) THEN BEGIN
@@ -476,12 +474,6 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         ENDIF ELSE BEGIN
            bestDensG = densArr[indG]
         ENDELSE
-
-        ;; plotDensG = DENSITY_FACTOR__BARBOSA_1977(meanPot, $
-        ;;                                         Temperature, $
-        ;;                                         0, $
-        ;;                                         avgs_JVfit.N_SC.avg, $
-        ;;                                         bestRBG)
 
         YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
                                                      bestDensG, $
@@ -564,15 +556,6 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                    IS_MAXWELLIAN_FIT=fa_Gauss.is_Maxwellian_fit, $
                                    NO_MULT_BY_CHARGE=fa_Gauss.no_mult_by_charge)
 
-
-        ;; pData = {X         : X      , $
-        ;;          Y         : Y      , $
-        ;;          Yerror    : Yerror , $
-        ;;          YFit      : Yfit   , $
-        ;;          YGaussFit : YGaussfit, $
-        ;;          AKappa    : A, $
-        ;;          AGauss    : AGauss}
-
      END
      ELSE: BEGIN
 
@@ -647,28 +630,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
            A[2]       = JV_CURVE_FIT__TIE_R_B_AND_DENS__GET_DENS(X,A[1],A[3])
            AGauss[2]  = JV_CURVE_FIT__TIE_R_B_AND_DENS__GET_DENS(X,AGauss[1],AGauss[3])
 
-           ;; A[2]       = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(X))), $
-           ;;                                           ;; tRB_nFLine = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(pot))), $
-           ;;                                           A[1], $
-           ;;                                           0, $
-           ;;                                           tRB_nFAST, $
-           ;;                                           R_B_FAST)
-
-           ;; R_B_ionos  = tRB_RBpairs[1,VALUE_CLOSEST2(tRB_RBpairs[1,*],AGauss[3],/CONSTRAINED)]
-           ;; IF ABS(R_B_ionos - AGauss[3])/R_B_ionos GT 0.2 THEN STOP
-
-           ;; R_B_FAST   = tRB_RBpairs[0,VALUE_CLOSEST2(tRB_RBpairs[1,*],AGauss[3],/CONSTRAINED)]
-           ;; AGauss[2]  = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(X))), $
-           ;;                                           ;; tRB_nFLine = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(pot))), $
-           ;;                                           AGauss[1], $
-           ;;                                           0, $
-           ;;                                           tRB_nFAST, $
-           ;;                                           R_B_FAST)
         ENDIF
-
-           ;; tRB_RBpairs[1,*])
-
-
 
         PRINT,"Kappa fitparams: "
         PRINT_JV_FIT_PARAMS,A
