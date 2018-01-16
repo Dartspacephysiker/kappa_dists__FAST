@@ -60,13 +60,13 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
 
               END
               ELSE: BEGIN
-                 Density        = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                 Density        = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.only_downE_pot[useInds], $
                                                                Temperature, $
                                                                0, $
                                                                jvPlotData.source.NDown[useInds], $
                                                                jvPlotData.mRatio.R_B.FAST[useInds])
 
-                 DensityErr     = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.pot[useInds], $
+                 DensityErr     = DENSITY_FACTOR__BARBOSA_1977(jvPlotData.only_downE_pot[useInds], $
                                                                Temperature, $
                                                                0, $
                                                                jvPlotData.source.NDownErr[useInds], $
@@ -99,7 +99,8 @@ PRO CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
            END
            ELSE: BEGIN
               
-              Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+              ;; Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.pot[useInds]))), $
+              Density     = DENSITY_FACTOR__BARBOSA_1977(10.D^(MEAN(ALOG10(jvPlotData.only_downE_pot[useInds]))), $
                                                          Temperature, $
                                                          0, $
                                                          avgs_JVfit.N_SC.avg, $

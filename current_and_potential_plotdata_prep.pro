@@ -178,6 +178,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      jeErr    = MAKE_ARRAY(nHere,nListMem,/DOUBLE,VALUE=0.D) ;You'll see why
      jeErr_i  = 0
 
+     blankArr = MAKE_ARRAY(nHere,/DOUBLE,VALUE=0.D)
      CASE 1 OF
         KEYWORD_SET(use_mag_current): BEGIN
            ;; cur                  += (TEMPORARY(magCurrent)).y
@@ -283,10 +284,21 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
         IF KEYWORD_SET(add_iu_pot) THEN BEGIN
 
-           pot        += curPotList[iuind].charE
+           ;; pot        += curPotList[iuind].charE
 
-           ;; potErr[*,1] = curPotList[iuind].peakErr
-           potErr[*,1] = curPotList[iuind].charEErr
+           ;; ;; potErr[*,1] = curPotList[iuind].peakErr
+           ;; potErr[*,1] = curPotList[iuind].charEErr
+
+           ;; Neue as of 2018/01/15
+           iuPot = blankArr
+           iuPotErr = blankArr
+           inds  = WHERE(curPotList[iuind].charE GT 62.5,nIUPot)
+           IF nIUPot GT 0 THEN BEGIN
+              iuPot[inds]    = curPotList[iuind].charE[inds]
+              iuPotErr[inds] = curPotList[iuind].charEErr[inds]
+              pot += TEMPORARY(iuPot)
+              potErr[*,1] = TEMPORARY(iuPotErr)
+           ENDIF
 
         ENDIF
 
@@ -298,9 +310,16 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
         potErr[*,0] = curPotList[edind].peakErr
 
         IF KEYWORD_SET(add_iu_pot) THEN BEGIN
-           pot += curPotList[iuind].peakE
 
-           potErr[*,1] = curPotList[iuind].peakErr
+           iuPot = blankArr
+           iuPotErr = blankArr
+           inds  = WHERE(curPotList[iuind].peakE GT 62.5,nIUPot)
+           IF nIUPot GT 0 THEN BEGIN
+              iuPot[inds]    = curPotList[iuind].peakE[inds]
+              iuPotErr[inds] = curPotList[iuind].peakErr[inds]
+              pot += TEMPORARY(iuPot)
+              potErr[*,1] = TEMPORARY(iuPotErr)
+           ENDIF
         ENDIF
 
      END
@@ -343,17 +362,18 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;                               nSafe)
 
   ;; 2018/01/15 What are you THINKING, bro? Get rid of that curErr check thing!
-  ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
-  ;;                               (curPotList[euind].peakE GE 0.) AND  $
-  ;;                               (curPotList[euind].peakE GE 0.) AND  $
-  ;;                               ABS(curErr/cur) LE 5,     $
-  ;;                               nSafe)
-
   safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
-                                (curPotList[euind].peakE GE 0.) AND  $
-                                (curPotList[euind].peakE GE 0.)  $
-                                ;; ABS(curErr/cur) LE 5,     $
+                                (curPotList[iuind].peakE GE 0.) AND  $
+                                ;; (curPotList[euind].peakE GE 0.) AND  $
+                                ABS(curErr/cur) LE 5,     $
                                 nSafe)
+
+  ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.), $
+  ;; ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
+  ;;                               ;; (curPotList[iuind].peakE GE 0.) AND  $
+  ;;                               ;; (curPotList[euind].peakE GE 0.),  $
+  ;;                               ;; ABS(curErr/cur) LE 5,     $
+  ;;                               nSafe)
 
   ;; IF nSafe LT 3 THEN STOP
 
@@ -368,6 +388,16 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   safe_i                = CGSETINTERSECTION(safe_i,time_i,COUNT=nSafe,NORESULT=-1)
   
   IF nSafe LT 3 THEN STOP
+
+  momsForT = !NULL
+  STR_ELEMENT,curPotList[edind],'momsForT',VALUE=momsForT
+  IF SIZE(momsForT,/TYPE) NE 0 THEN BEGIN
+     T    = momsForT.T[TTypeInd,safe_i]
+     TErr = momsForT.Terr[TTypeInd,safe_i]
+  ENDIF ELSE BEGIN
+     T    = REFORM(curPotList[edind].T[TTypeInd,safe_i])
+     TErr = REFORM(curPotList[edind].Terr[TTypeInd,safe_i])
+  ENDELSE
 
   jvPlotData = {time       : time      [safe_i] , $
                 cur        : cur       [safe_i] , $
@@ -388,8 +418,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                               euErr : phiBarErr_eu[safe_i]}, $
                 NDown      : curPotList[edind].N[safe_i], $
                 NDownErr   : curPotList[edind].Nerr[safe_i], $
-                TDown      : REFORM(curPotList[edind].T[TTypeInd,safe_i]), $
-                TDownErr   : curPotList[edind].Terr[safe_i], $
+                TDown      : TEMPORARY(T), $
+                TDownErr   : TEMPORARY(Terr), $
                 info       : {cur   : {ed        : KEYWORD_SET(use_ed_current) OR KEYWORD_SET(use_all_currents), $
                                        eu        : KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_all_currents), $
                                        iu        : KEYWORD_SET(use_iu_current) OR KEYWORD_SET(use_all_currents), $

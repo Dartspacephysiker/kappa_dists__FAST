@@ -242,6 +242,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      Terr_list             = LIST()
 
      source_list           = LIST()
+     momsforT_list         = LIST()
 
      j_list                = LIST()
      je_list               = LIST()
@@ -809,8 +810,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;;  for fitting—namely, n_below_peak and n_above_peak
            
            ;; OLD 2018/01/12
-           maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
-           minEInd                   = (peak_ind - n_above_peak) > 0
+           ;; maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
+           ;; minEInd                   = (peak_ind - n_above_peak) > 0
 
            ;; NEW 2018/01/12; use as many as possible above peak
            maxEInd                   = (peak_ind + n_below_peak) < (nEnergies-1)
@@ -950,6 +951,17 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ENDIF
 
+        momsforTStruct = !NULL
+        STR_ELEMENT,momStruct,'moments_forT',momsforTStruct
+        IF SIZE(momsforTStruct,/TYPE) EQ 8 THEN BEGIN
+           ;;If k isn't 0, this isn't curPotList[edind]
+           IF k NE 0 THEN STOP ELSE BEGIN
+              momsforT_list.Add,TEMPORARY(momsforTStruct)
+              momsforT_ind = k
+           ENDELSE
+
+        ENDIF
+
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            err1_list.Add,TEMPORARY(errors1)
            time1_list.Add,TEMPORARY(time1)
@@ -1030,6 +1042,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           charEErr_list, $
           source_list, $
           source_ind, $
+          momsforT_list, $
+          momsforT_ind, $
           Terr_list, $
           time1_list, $
           n1_list, $
@@ -1197,6 +1211,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ENDIF
         ENDIF
         
+
+        IF N_ELEMENTS(momsforT_ind) GT 0 THEN BEGIN
+           IF k EQ momsforT_ind THEN BEGIN
+              momsForT_inds = theseInds
+           ENDIF
+        ENDIF
+        
         ;; IF KEYWORD_SET(error_estimates) AND KEYWORD_SET(dens_errors) THEN BEGIN
         IF KEYWORD_SET(error_estimates) THEN BEGIN
 
@@ -1361,10 +1382,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            
            IF N_ELEMENTS(source_ind) GT 0 THEN BEGIN
               IF k EQ source_ind THEN BEGIN
-                 source_struct = {source : source_list[0], $
-                                  inds   : TEMPORARY(itvlInds)}
+                 source_struct = {source      : source_list[0], $
+                                  source_inds : TEMPORARY(itvlInds)}
 
                  tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(source_struct))
+              ENDIF
+           ENDIF
+
+           IF N_ELEMENTS(momsforT_ind) GT 0 THEN BEGIN
+              IF k EQ momsforT_ind THEN BEGIN
+                 momsforT_struct = {momsForT : momsforT_list[0], $
+                                    momsForT_inds : TEMPORARY(momsForT_inds)}
+
+                 tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(momsforT_struct))
               ENDIF
            ENDIF
 

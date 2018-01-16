@@ -6,7 +6,7 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
                     ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                     USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                     ENERGY_INDS=energy_inds, $
-                    ERANGE_PEAK=eRange_peak, $
+                    ;; ERANGE_PEAK=eRange_peak, $
                     PEAK_IND=peak_ind, $
                     BOUNDS_I=bounds_i, $
                     KAPPA_A=A, $
@@ -127,8 +127,6 @@ PRO KAPPA__GET_FITS,Xorig,Yorig, $
 
   out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
                                 [[out_kappaParams],[A]] : A
-  out_eRange_peak             = N_ELEMENTS(out_eRange_peak) GT 0 ? $
-                                [[out_eRange_peak],[eRange_peak]] : eRange_peak
   out_paramStr                = STRING(FORMAT='(A0,"--",A0,A0,"--orb_",A0,"__",A0,"--",I0,"-",I0,".txt")', $
                                        strings.timeFNStrs[bounds_i], $
                                        strings.eeb_or_ees, $

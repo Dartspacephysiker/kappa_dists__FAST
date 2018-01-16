@@ -216,6 +216,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
         ENDIF ELSE BEGIN
            yRange  = MINMAX(yVar)
            yRange  = [yRange[0],KEYWORD_SET(zoom_on_extreme_kappa) ? 1.8 : 3.0]
+           ;; yRange  = [yRange[0],KEYWORD_SET(zoom_on_extreme_kappa) ? 1.8 : 100] ;2018/01/15 Checkit with Jim
            ySRange = surfKappaRange
         ENDELSE
 

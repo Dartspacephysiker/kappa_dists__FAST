@@ -153,6 +153,16 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    POT__CHASTON_STYLE=pot__Chaston_style, $
    POT__FROM_FILE=pot__from_file, $
    POT__SAVE_FILE=pot__save_file, $
+   ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
+   ARANGE__MOMENTS_E_UP=aRange__moments_e_up, $
+   ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
+   ARANGE__PEAKEN_E_DOWN=aRange__peakEn_e_down, $
+   ARANGE__PEAKEN_E_UP=aRange__peakEn_e_up, $
+   ARANGE__PEAKEN_I_UP=aRange__peakEn_i_up, $
+   ARANGE__CHARE_E_DOWN=aRange__charE_e_down, $
+   ARANGE__CHARE_E_UP=aRange__charE_e_up, $
+   ARANGE__CHARE_I_UP=aRange__charE_i_up, $
+   ARANGE__TEMP_E_DOWN=aRange__temp_e_down, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
    ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    ARANGE__CHARE_LIST=aRange__charE_list, $
@@ -536,7 +546,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   CURANDPOT__SELECT_T_AND_N,jvPlotData,avgs_JVfit, $
                             TEMPERATURE=Temperature, $
-                            DENSITY=Density ;, $
+                            DENSITY=Density, $
+                            /DONT_MAP_SOURCEDENS ;, $
                             ;;ARRAYS=arrays
 
                              ;;            kappa,       Temp,   Dens, R_B
@@ -669,8 +680,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; map__multi_magRatio_array = INDGEN(nR_B)*dR_B+minR_B
 
      minR_B  = 5
-     maxR_B  = 1D3
-     dR_B    = 1.03D
+     maxR_B  = 1D4
+     dR_B    = 1.05D
      ;; nR_B    = ALOG10(maxR_B/minR_B)/ALOG10(dR_B)
      ;; map__multi_magRatio_array = minR_B*dR_B^(INDGEN(nR_B+1))
      map__multi_magRatio_array = POWGEN(minR_B,maxR_B,dR_B)
@@ -695,6 +706,26 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   6.0D + helper2, $
                                   7.0D + helper2, $
                                   8.0]
+
+     ;; 2018/01/15 Checkitout with Jim
+     ;; map__multi_kappa_array    = [1.5 + helper[1:-1], $
+     ;;                              1.6 + helper, $
+     ;;                              1.7 + helper, $
+     ;;                              1.8 + helper, $
+     ;;                              1.9 + helper, $
+     ;;                              2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9, $
+     ;;                              3.0D + helper2, $
+     ;;                              4.0D + helper2, $
+     ;;                              5.0D + helper2, $
+     ;;                              6.0D + helper2, $
+     ;;                              7.0D + helper2, $
+     ;;                              8.0D + helper2] ;, $
+     ;;                              10.0D + helper2, $
+     ;;                              15.0D + helper2, $
+     ;;                              25.0D + helper2, $
+     ;;                              35.0D + helper2, $
+     ;;                              50.0D + helper2, $
+     ;;                             100.0D + helper2]
 
      map2D__log_kappa          = 0
      IF KEYWORD_SET(map2D__logkappa) THEN BEGIN

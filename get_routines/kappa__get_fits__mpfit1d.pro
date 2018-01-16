@@ -24,7 +24,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              ADD_FULL_FITS=add_full_fits, $
                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                              ADD_ANGLESTR=add_angleStr, $
-                             OUT_ERANGE_PEAK=out_eRange_peak, $
+                             ;; OUT_ERANGE_PEAK=out_eRange_peak, $
                              OUT_PARAMSTR=out_paramStr, $
                              ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                              DONT_PRINT_FITINFO=dont_print_fitinfo, $
@@ -265,10 +265,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   ;; out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
   ;;                             [[out_kappaParams],[A]] : A
-  IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
-     out_eRange_peak        = N_ELEMENTS(out_eRange_peak) GT 0 ? $
-                              [[out_eRange_peak],[eRange_peak]] : eRange_peak
-  ENDIF
+  ;; IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
+  ;;    out_eRange_peak        = N_ELEMENTS(out_eRange_peak) GT 0 ? $
+  ;;                             [[out_eRange_peak],[eRange_peak]] : eRange_peak
+  ;; ENDIF
 
   IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
      out_paramStr           = STRING(FORMAT='(A0,"--",A0,A0,"--orb_",A0,"__",A0,"--",I0,"-",I0,".txt")', $

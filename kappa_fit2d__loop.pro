@@ -568,7 +568,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                                        ADD_FULL_FITS=fit1Denergies, $
                                        ADD_ANGLESTR=angleStr, $
-                                       OUT_ERANGE_PEAK=eRange_peakArr, $
+                                       ;; OUT_ERANGE_PEAK=eRange_peakArr, $
                                        OUT_PARAMSTR=out_paramStr, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
@@ -584,7 +584,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                               USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                               BOUNDS_I=iTime, $
                               ENERGY_INDS=energy_inds, $
-                              ERANGE_PEAK=eRange_peak, $
+                              ;; ERANGE_PEAK=eRange_peak, $
                               PEAK_IND=peak_ind, $
                               KAPPA_A=A, $
                               GAUSS_A=AGauss, $
@@ -601,15 +601,18 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                               ;; OUT_GAUSS_FIT_STRUCTS=gaussFits, $
                               /ADD_FULL_FITS, $
                               ADD_ANGLESTR=angleStr, $
-                              OUT_ERANGE_PEAK=eRange_peakArr, $
+                              ;; OUT_ERANGE_PEAK=eRange_peakArr, $
                               OUT_PARAMSTR=out_paramStr, $
                               ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                               DONT_PRINT_FITINFO=dont_print_fitInfo, $
                               FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
                               UNITS=units1D
-
+              
            END
         ENDCASE
+
+        eRange_peakArr = N_ELEMENTS(eRange_peakArr) GT 0 ? $
+                         [[eRange_peakArr],[eRange_peak]] : eRange_peak
 
         ;;Now handle the adding of kappa/gaussFit structs to ze lists
         ;; IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
