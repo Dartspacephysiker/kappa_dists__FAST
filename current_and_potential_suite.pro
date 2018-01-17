@@ -946,7 +946,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ENDCASE
 
      STOP
-     ;check out JOURNAL__20180116__TRY_FITTING_JV_CURVE_WITH_LINFIT for some fitting action
+
   ENDIF
 
   ;; plot_magCurrent_vs_current = 1

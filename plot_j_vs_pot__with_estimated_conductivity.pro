@@ -54,8 +54,7 @@ PRO PLOT_J_VS_POT__WITH_ESTIMATED_CONDUCTIVITY,jvPlotData,avgs_JVfit,pData, $
 pot = jvplotdata.pot[avgs_jvfit.useinds]
 cur = jvplotdata.cur[avgs_jvfit.useinds]
 curerr = jvplotdata.curerr[avgs_jvfit.useinds]
-FOR k=0,12 DO PRINT,FORMAT='(F0.2,TR10,F0.2,TR10,F0.2)',pot[k],cur[k],curerr[k]
-
+;; FOR k=0,12 DO PRINT,FORMAT='(F0.2,TR10,F0.2,TR10,F0.2)',pot[k],cur[k],curerr[k]
 
 ;; Fit 'em all! ('Tallica)
 
@@ -123,7 +122,7 @@ t1Str            = (STRSPLIT(TIME_TO_STR(MIN(jvPlotData.time[avgs_JVFit.useInds]
 t2Str            = (STRSPLIT(TIME_TO_STR(MAX(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
 dataName         = STRING(FORMAT='(A0,"–",A0)',t1Str,t2Str)
 ;; kappaName        = STRING(FORMAT='("j!D$\parallel$!N = ",G0.2," + ",G0.3," $\Delta \Phi$ $\mu$A m!U-2!N")',coeffs[0],coeffs[1])
-kappaName        = STRING(FORMAT='("j!D$\parallel$!N = ",G0.2," + ",G0.3," $\Delta \Phi$")',coeffs[0],coeffs[1])
+kappaName        = STRING(FORMAT='("j!D$\parallel$,i!N = ",G0.3," + ",G0.4," $\Delta \Phi$")',coeffs[0],coeffs[1])
 
 window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
 

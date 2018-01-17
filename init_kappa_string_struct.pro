@@ -6,7 +6,8 @@ FUNCTION INIT_KAPPA_STRING_STRUCT,diff_eFlux, $
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  times                              = (diff_eFlux.time+diff_eFlux.end_time)/2.D
+  ;; times                              = (diff_eFlux.time+diff_eFlux.end_time)/2.D
+  times                              = diff_eFlux.time
 
   kStrings                           = {today:GET_TODAY_STRING(/DO_YYYYMMDD_FMT), $
                                         eeb_or_ees:kSDTData_opt.eeb_or_ees, $
