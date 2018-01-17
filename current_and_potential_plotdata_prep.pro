@@ -362,18 +362,18 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;                               nSafe)
 
   ;; 2018/01/15 What are you THINKING, bro? Get rid of that curErr check thing!
-  safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
-                                (curPotList[iuind].peakE GE 0.) AND  $
-                                ;; (curPotList[euind].peakE GE 0.) AND  $
-                                ABS(curErr/cur) LE 5,     $
-                                nSafe)
+  ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
+  ;;                               (curPotList[iuind].peakE GE 0.) AND  $
+  ;;                               ;; (curPotList[euind].peakE GE 0.) AND  $
+  ;;                               ABS(curErr/cur) LE 5,     $
+  ;;                               nSafe)
 
-  ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.), $
+  safe_i                = WHERE((curPotList[edind].peakE GE 0.), $
   ;; ;; safe_i                = WHERE((curPotList[edind].peakE GE 0.) AND  $
   ;;                               ;; (curPotList[iuind].peakE GE 0.) AND  $
   ;;                               ;; (curPotList[euind].peakE GE 0.),  $
   ;;                               ;; ABS(curErr/cur) LE 5,     $
-  ;;                               nSafe)
+                                nSafe)
 
   ;; IF nSafe LT 3 THEN STOP
 

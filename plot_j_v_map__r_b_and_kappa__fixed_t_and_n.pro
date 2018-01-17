@@ -131,7 +131,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;; IF include_BTaper THEN tickName = ['bro',tickName]
 
   ;;Winder
-  savePlot = 1
+  ;; savePlot = 1
   winDim           = [900,600]
   window1          = WINDOW(DIMENSIONS=winDim, $
                             BUFFER=savePlot)

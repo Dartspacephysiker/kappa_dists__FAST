@@ -75,9 +75,9 @@
         END
      ENDCASE
      
-     n_below_peak               = N_ELEMENTS(n_below_peak1D) GT 0 ? n_below_peak1D : 1
+     n_below_peak               = N_ELEMENTS(n_below_peak1D) GT 0 ? n_below_peak1D : 0
      n_above_peak               = N_ELEMENTS(n_above_peak1D) GT 0 ? n_above_peak1D : 20
-     n_below_peak2D             = N_ELEMENTS(n_below_peak2D) GT 0 ? n_below_peak2D : 1
+     n_below_peak2D             = N_ELEMENTS(n_below_peak2D) GT 0 ? n_below_peak2D : 0
      n_above_peak2D             = N_ELEMENTS(n_above_peak2D) GT 0 ? n_above_peak2D : 20
      ;; n_below_peak               = 2
      ;; n_above_peak               = 20
@@ -86,9 +86,9 @@
 
   ENDIF ELSE BEGIN
 
-     n_below_peak               = N_ELEMENTS(n_below_peak1D) GT 0 ? n_below_peak1D : 1
+     n_below_peak               = N_ELEMENTS(n_below_peak1D) GT 0 ? n_below_peak1D : 0
      n_above_peak               = N_ELEMENTS(n_above_peak1D) GT 0 ? n_above_peak1D : 30
-     n_below_peak2D             = N_ELEMENTS(n_below_peak2D) GT 0 ? n_below_peak2D : 1
+     n_below_peak2D             = N_ELEMENTS(n_below_peak2D) GT 0 ? n_below_peak2D : 0
      n_above_peak2D             = N_ELEMENTS(n_above_peak2D) GT 0 ? n_above_peak2D : 30
 
   ENDELSE
