@@ -7,7 +7,7 @@
 ;; yerror: uncertainty derived from counting statistics, then converted to differential number flux (#/cm^2-s-sr-eV)
 ;; energy_inds: The indices of the high- and low-energy bins, in that order, that were used to do the initial fit
 ;; Foundations laid in JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
-PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
+PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
                                         TIDFNSTR=tidFNStr, $
                                         NROLLS=nRolls, $
                                         NOT_MPFIT1D=not_mpFit1D, $
@@ -28,7 +28,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
 
   @common__kappa_fit2d_structs.pro
 
-  eRange_peak    = fit2DKappa_info.moment_info.obs_eRange
+  nEnergies       = realDataStr.nEnergy
+  eRange_peak    = fit2DKappa_info.extra_info.eRange_peak
   make_fit2D_info = 1
 
   CASE 1 OF
@@ -36,13 +37,16 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
 
         ;;Get energy spectrum, if that's what you're into
         eSpec = GET_EN_SPEC__SINGLE_STRUCT( $
-                curDataStr, $
+                realDataStr, $
                 /RETRACE, $
                 ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                 UNITS=units1D, $
                 OUT_AVGFACTORARR=avgFactorArr, $
                 OUT_NORMARR=normArr)
 
+        Xorig    = eSpec.v
+        Yorig    = eSpec.y
+        worig    = eSpec.yerr
         ;; nAngles          = 1
         ;; nReqSCAngles     = 1
 
@@ -53,16 +57,52 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   ENDCASE  
 
   KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
-     eSpec.v,eSpec.y, $
+     Xorig,Yorig, $
      peak_ind,peak_energy, $
      BULK_OFFSET=KF2D__Curvefit_opt.bulk_offset, $
      CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
      MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
      MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
      PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
-     PHI__USE_ENERGY_BEFORE_PEAK=TAG_EXIST(KF2D__Curvefit_opt,'phi__use_energy_before_peak') ? KF2D__Curvefit_opt.phi__use_energy_before_peak : !NULL, $
      /CONTINUE_IF_NOMATCH, $
      ONECOUNT_STR=oneCurve     
+
+  IF peak_energy EQ -1 THEN STOP
+
+  maxEInd           = (peak_ind + KF2D__Curvefit_opt.n_below_peak) < (nEnergies-1)
+  minEInd           = (peak_ind - KF2D__Curvefit_opt.n_above_peak) > 0
+
+  IF KEYWORD_SET(KF2D__Curvefit_opt.estimate_A_from_data) THEN BEGIN 
+
+     KAPPA__GET_A_ESTIMATES,realDataStr,Xorig,Yorig, $
+                            minEInd,maxEInd,nEnergies, $
+                            peak_ind,peak_energy,eRange_peak, $
+                            KAPPA_EST=KF2D__Curvefit_opt.fitA[2], $
+                            ;; MASS=mass, $
+                            E_ANGLE=KF2D__SDTData_opt.electron_angleRange, $
+                            ANGLES=tempAngleEstRange, $
+                            N_ANGLES_IN_RANGE=nAngles, $
+                            ;; BULKANGLE_STRUCT=angleStr, $
+                            ;; DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
+                            ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $
+                            USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
+                            ESTFACS=estFacs, $
+                            PHI__USE_ENERGY_BEFORE_PEAK=TAG_EXIST(KF2D__Curvefit_opt,'phi__use_energy_before_peak') ? KF2D__Curvefit_opt.phi__use_energy_before_peak : !NULL, $
+                            A_OUT=A, $
+                            AGAUSS_OUT=AGauss, $
+                            DONT_PRINT_ESTIMATES=dont_print_estimates, $
+                            /TEST_NOREV, $
+                            TEMPERATURE_TYPE=KF2D__SDTData_opt.fit2D__temperature_type, $
+                            UNITS=units1D
+
+     ;; 2018/01/10 Use bulk energy (set by PHI__USE_ENERGY_BEFORE_PEAK) for 2D bulkE initial estimate
+     bulkEOrigEstimate = A[0]
+
+  ENDIF ELSE BEGIN
+     A           = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
+  ENDELSE
+  
+  energy_inds    = [minEInd,maxEInd]
 
   ;; Get the data we want
   ;; energy_inds = data.energy_inds
@@ -79,11 +119,27 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   ;; Norig     = N_ELEMENTS(Xin)
 
   ;; Init fitParam structs for MPFIT1D stuff
-  ATmp              = DOUBLE([1e3,100.,3.0,0.01,0]) ;bulk E, T, kappa, dens, angle (useless)
-  fixA              = [0,0,0,0,1]
-  kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,fixA)
+  kappa_fixA        = [0, $     ;Vary bulk E [0]                              
+                       KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)                         
+                       0, $                                          ;kappa       [2]
+                       KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not angle)
+                       1] 
+  
+  gauss_fixA        = [0, $                                                ;Vary bulk E [0]
+                       KF2D__Curvefit_opt.fit1D__clampTemperature, $       ;Temperature [1] (maybe)
+                       1, $
+                       KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not kappa or angle)
+                       1]
+  ATmp              = DOUBLE([1e3,100.,3.0,0.01,0])
+  kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,kappa_fixA)
 
-  gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),fixA)
+  gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),gauss_fixA)
+
+  ;; ATmp              = DOUBLE([1e3,100.,3.0,0.01,0]) ;bulk E, T, kappa, dens, angle (useless)
+  ;; fixA              = [0,0,0,0,1]
+  ;; kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,fixA)
+
+  ;; gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),fixA)
 
   IF kappaParamStruct[1].limited[1] EQ 0 THEN BEGIN
      ;; When the upperbound of T is not limited, xTol will become irreducible in
@@ -96,18 +152,50 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   ENDIF ELSE BEGIN
      MC__OKStatus  = [1,2,3,4]
   ENDELSE
+
+  KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,A,kappa_fixA
+  KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,AGauss,gauss_fixA
+
+  KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
+                           orig,kappaFit1D,gaussFit1D, $
+                           YORIG_ERROR=worig, $
+                           KCURVEFIT_OPT=KF2D__Curvefit_opt, $
+                           KFITPARAMSTRUCT=kappaParamStruct, $
+                           GFITPARAMSTRUCT=gaussParamStruct, $
+                           ENERGY_INDS=energy_inds, $
+                           ERANGE_PEAK=eRange_peak, $
+                           PEAK_IND=peak_ind, $
+                           BOUNDS_I=0, $
+                           KAPPA_A=A, $
+                           GAUSS_A=AGauss, $
+                           KAPPA_FIXA=kappa_fixA, $
+                           GAUSS_FIXA=gauss_fixA, $
+                           YMAX=yMax, $
+                           STRINGS=KF2D__strings, $
+                           ;; OUT_FITTED_PARAMS=out_kappaParams, $
+                           ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                           ;; OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
+                           ;; OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
+                           ADD_FULL_FITS=fit1Denergies, $
+                           ADD_ANGLESTR=angleStr, $
+                           ;; OUT_ERANGE_PEAK=eRange_peakArr, $
+                           OUT_PARAMSTR=out_paramStr, $
+                           DONT_PRINT_FITINFO=dont_print_fitInfo, $
+                           FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
+                           UNITS=units1D, $
+                           MASS=realDataStr.mass, $
+                           AVGFACTORARR=avgFactorArr, $
+                           /MONTE_CARLO_MODE
+
   ;; Copy best-fit params
 
   ;; A      = Pkappa
   ;; AGauss = Pgauss
 
-  FOR kk=0,4 DO BEGIN
-     kappaParamStruct[kk].value = Pkappa[kk]
-     gaussParamStruct[kk].value = Pgauss[kk]
-  ENDFOR
-
-  ;; A[1]   = Pobs[1]
-  ;; A[3]   = Pobs[3]
+  ;; FOR kk=0,4 DO BEGIN
+  ;;    kappaParamStruct[kk].value = Pkappa[kk]
+  ;;    gaussParamStruct[kk].value = Pgauss[kk]
+  ;; ENDFOR
 
   IF N_ELEMENTS(kCurvefit_opt) GT 0 THEN BEGIN
 
@@ -137,8 +225,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   ENDIF
   simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,Nsim))
 
-  data_gaussError = RANDOMN(seed__data_error,curDataStr.NEnergy,curDataStr.NBins,Nsim)
-  error_gaussEror = RANDOMN(seed__error_error,curDataStr.NEnergy,curDataStr.NBins,Nsim)
+  data_gaussError = RANDOMN(seed__data_error,realDataStr.NEnergy,realDataStr.NBins,Nsim)
+  error_gaussEror = RANDOMN(seed__error_error,realDataStr.NEnergy,realDataStr.NBins,Nsim)
 
   ;; If not bootstrapping, set X and Yerror once and for all
   ;; IF ~KEYWORD_SET(bootstrap) THEN BEGIN
@@ -147,7 +235,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   ;; ENDIF
 
   ;;Units for later
-  INIT_KAPPA_UNITCONV,curDataStr
+  INIT_KAPPA_UNITCONV,realDataStr
 
   angle = 0                     ;in degrees
   IF ~KEYWORD_SET(hemi) THEN BEGIN
@@ -173,23 +261,24 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
   CASE angle OF
      0: BEGIN
 
-        junk = MIN(ABS(curDataStr.theta[curDataStr.NEnergy/2,*]),angle_i)
+        junk = MIN(ABS(realDataStr.theta[realDataStr.NEnergy/2,*]),angle_i)
 
      END
      180: BEGIN
 
-        junk = MIN(ABS(curDataStr.theta[curDataStr.NEnergy/2,*])-180,angle_i)
+        junk = MIN(ABS(realDataStr.theta[realDataStr.NEnergy/2,*])-180,angle_i)
         
      END
   ENDCASE
 
-  PRINT,FORMAT='(A0,F0.2," (",I0,")")',"Min angle (ind): ",curDataStr.theta[angle_i],angle_i
+  PRINT,FORMAT='(A0,F0.2," (",I0,")")',"Min angle (ind): ", $
+        realDataStr.theta[realDataStr.NEnergy/2,angle_i],angle_i
 
   shiftTheta     = 0              ;Not clear why shift is necessary, but makes things come out right
   ;;2017/12/27 Not sure why I thought this should be the case
   units2D        = 'eFlux'
 
-  tmpDataStr     = curDataStr   ;Here's the one that gets thrown around
+  curDataStr     = realDataStr   ;Here's the one that gets thrown around
 
   keepK_iTime    = !NULL        ;Keep track of which fits get to come home with us
   keepG_iTime    = !NULL        ;Keep track of which fits get to come home with us
@@ -206,38 +295,43 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
      ;;generate synthetic data
      ;; simulated data set
      IF KEYWORD_SET(bootstrap) THEN BEGIN
-        tmpDataStr.energy = curDataStr.energy[randomInds[*,*,k]]
-        tmpDataStr.data = curDataStr.data[randomInds[*,*,k]] + curDataStr.ddata[randomInds[*,*,k]]*data_gaussError[*,*,k]
+        ;; curDataStr.energy = realDataStr.energy[randomInds[*,*,k]]
+        curDataStr.data = realDataStr.data[randomInds[*,*,k]] + realDataStr.ddata[randomInds[*,*,k]]*data_gaussError[*,*,k]
         Yorig_error = Yin_error[randomInds[*,*,k]]*error_gaussError[*,*,k]
      ENDIF ELSE BEGIN
-        tmpDataStr.data = curDataStr.data + curDataStr.ddata*data_gaussError[*,*,k]
+        curDataStr.data = realDataStr.data + realDataStr.ddata*data_gaussError[*,*,k] > 0.
      ENDELSE
 
-     ;; Update kappa
-     kappaParamStruct[2].value = simKappas[k]
+     ;;copy paramStruct
+     tmpKappaParamStruct          = kappaParamStruct
 
+     ;; Update kappa
+     tmpKappaParamStruct[2].value = simKappas[k]
+     
      IF ((k MOD 100) EQ 0) THEN PRINT,FORMAT='(A0,I05)',"iter_",k
 
-     tmpKappaStr = tmpDataStr
-     ;; tmpGaussStr = tmpDataStr
-     
+     curKappaStr = curDataStr
+     IF kCurvefit_opt.add_gaussian_estimate THEN BEGIN
+        tmpGaussStr = curDataStr
+     ENDIF
+
      KAPPA_FIT2D__FIREINTHEHOLE, $
-        tmpDataStr, $
+        curDataStr, $
         hadSuccessK, $
         hadSuccessG, $
-        CURKAPPASTR=tmpKappaStr, $
-        CURGAUSSSTR=tmpGaussStr, $
+        CURKAPPASTR=curKappaStr, $
+        CURGAUSSSTR=curGaussStr, $
         ;; KAPPAFITS=kappaFits, $
         ;; GAUSSFITS=gaussFits, $
         KAPPAFITANGLE_INDEX=angle_i, $
         GAUSSFITANGLE_INDEX=angle_i, $
         TIMEFNSTR=tidFNStr, $
         UNITS=units2D, $
-        MAKE_FIT2D_INFO=make_fit2D_info, $
         SHIFTTHETA=shiftTheta, $
         PEAK_ENERGY=peak_energy, $
         ERANGE_PEAK=eRange_peak, $
         EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
+        /MAKE_FIT2D_INFO, $
         /BF_GF__NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
         BF_GF__LOGSCALE_REDUCENEGFAC=bF_gF__logScale_reduceNegFac, $
         BF_GF__PLOT_BULKE_MODEL=bF_gF__plot_bulke_model, $
@@ -249,8 +343,6 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,curDataStr,Pkappa,Pgauss,Pobs, $
         OUT_ESTIMATED_LC=estimated_lc, $
         KAPPAPARAMSTRUCT=kappaParamStruct, $
         GAUSSPARAMSTRUCT=gaussParamStruct, $
-        KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
-        ;; KFIT2DPARAMSTRUCT=kFit2DParamStruct, $
         FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
         FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $

@@ -525,8 +525,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;; these = VALUE_CLOSEST2(jvPlotdata.time,tid)
      ;; PRINT,jvplotdata.ndown[these]/fitDens
      ;; PRINT,jvPlotData.nDown[these]/As[*,3]
-     betterDensK = As[*,3]
-     betterDensG = GaussAs[*,3]
 
      kFit2DParam_struct = 1
      gFit2DParam_struct = 1
@@ -558,11 +556,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
-     ;; fit2DK.obs_scDens = betterDensK
-     ;; fit2DG.obs_scDens = betterDensG
-     ;; kFit2DParam_struct.N = betterDensK
-     ;; gFit2DParam_struct.N = betterDensG
-
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
            (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(gaussFit1Ds)           ) AND $

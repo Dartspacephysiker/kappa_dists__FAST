@@ -338,7 +338,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ENDCASE
 
   ;;xRange (energy range)
-  defXRange = [0,(STRMATCH(KF2D__SDTData_opt.eeb_or_ees,'i*',/FOLD_CASE) ? 2.7D4 : 3.3D4)]
+  ;; defXRange = [0,(STRMATCH(KF2D__SDTData_opt.eeb_or_ees,'i*',/FOLD_CASE) ? 2.7D4 : 3.3D4)]
 
   ;;We won't want to use this anymore. We're outrightly fitting 2D, you know
   ;; INIT_KAPPA_FIT2DPARAMS_INFO,fit2DParamStruct
@@ -415,7 +415,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ;; ENDIF
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
-     dat                   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime);; , $
+     curDataStr            = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime);; , $
                                                                 ;; UNITS=units2D)
 
      nGoodFits_tempK       = 0
@@ -503,7 +503,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         ;;estimate from the data!
         IF KEYWORD_SET(KF2D__Curvefit_opt.estimate_A_from_data) THEN BEGIN 
 
-           KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
+           KAPPA__GET_A_ESTIMATES,curDataStr,Xorig,Yorig, $
                                   minEInd,maxEInd,nEnergies, $
                                   peak_ind,peak_energy,eRange_peak, $
                                   KAPPA_EST=KF2D__Curvefit_opt.fitA[2], $
@@ -574,7 +574,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
                                        UNITS=units1D, $
-                                       MASS=dat.mass, $
+                                       MASS=curDataStr.mass, $
                                        AVGFACTORARR=avgFactorArr
 
            END
@@ -746,7 +746,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         hadSuccessG  = KEYWORD_SET(gotGauss)
      ENDIF ELSE BEGIN
         ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
-        curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
+        ;; curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
         curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
         ;; curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
         curGaussStr  = curKappaStr

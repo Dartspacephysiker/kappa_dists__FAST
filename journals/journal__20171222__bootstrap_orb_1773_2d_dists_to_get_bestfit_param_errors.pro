@@ -1,5 +1,6 @@
 ;2017/12/21
 ;Time to Monte Carlo it up so that we can respond to the referee reports on our kappa paper
+;2018/01/17 NEVER FINISHED. See journal from 2018/01/17 to be welcomed to the new order.
 PRO JOURNAL__20171222__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
