@@ -142,6 +142,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
    J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
    J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+   J_V__WITHESTCOND__SPNAME=j_v__withEstCond__spName, $
+   J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
+   J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
    J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
    EN_SPEC__SPNAME=en_spec__spName, $
    PLOTS_IN_BUFFER=plots_in_buffer, $
@@ -921,6 +924,23 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                         IS_EFLUX=jv_theor__only_eFlux, $
                                         _EXTRA=e
 
+           PLOT_J_VS_POT__WITH_ESTIMATED_CONDUCTIVITY,jvPlotData,avgs_JVfit,pData, $
+              KAPPA_A=A, $
+              GAUSS_A=AGauss, $
+              ORIGINATING_ROUTINE=routName, $
+              ORBIT=orbit, $
+              SAVEPLOT=savePlot, $
+              SPNAME=j_v__withEstCond__spName, $
+              PLOTDIR=plotDir, $
+              J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
+              J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
+              ;; SAVEDATA=j_v__withEstCond__savePlotData, $
+              ;; SDNAME=j_v__withEstCond__dataFilename, $
+              /NO_TITLE, $
+              IN_MMAGDAT=mMagDat, $
+              IS_EFLUX=jv_theor__only_eFlux, $
+              _EXTRA=e
+           
 
         END
      ENDCASE

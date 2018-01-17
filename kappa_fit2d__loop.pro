@@ -176,7 +176,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ;; ENDIF
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
-  times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
+  ;; times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
+  times                             = diff_eFlux.time
   energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])
   data                              = TRANSPOSE(diff_eFlux.data,[1,0,2])
   ddata                             = TRANSPOSE(diff_eFlux.ddata,[1,0,2])

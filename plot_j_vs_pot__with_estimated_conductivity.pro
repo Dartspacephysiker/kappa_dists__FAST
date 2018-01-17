@@ -1,15 +1,56 @@
-;;2018/01/16
+;2018/01/17
+PRO PLOT_J_VS_POT__WITH_ESTIMATED_CONDUCTIVITY,jvPlotData,avgs_JVfit,pData, $
+                                 ;; USE_SOURCE_AVGS=use_source_avgs, $
+                                 KAPPA_A=A, $
+                                 GAUSS_A=AGauss, $
+                                 ORBIT=orbit, $
+                                 ORIGINATING_ROUTINE=routName, $
+                                 SAVEPLOT=savePlot, $
+                                 SPNAME=sPName, $
+                                 PLOTDIR=plotDir, $
+                                 J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
+                                 J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
+                                 NO_TITLE=no_title, $
+                                 IN_MMAGDAT=mMagDat, $
+                                 _EXTRA=e
 
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
-;; SAVE,jvplotdata,avgs_jvfit, $
-;;FILENAME='/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180116_jvplotdata_and_avgs_jv_fit__orb_1773.sav'
+  orbPref     = ''
+  IF KEYWORD_SET(orbit) THEN BEGIN
+     orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
+  ENDIF
 
-filDir  = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
-filNavn = '20180116_jvplotdata_and_avgs_jv_fit__orb_1773.sav'
+  ;; j_v__withEstCond__savePlotData = 1
+  ;; IF KEYWORD_SET(j_v__withEstCond__savePlotData) THEN BEGIN
 
-RESTORE,filDir+filNavn
+  ;;    @common__jv_curve_fit__tie_r_b_and_dens.pro
 
-;; Stopped at line 893 in CURRENT_AND_POTENTIAL_SUITE
+  ;;    dir   = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
+  ;;    fNamePref = KEYWORD_SET(j_v__withEstCond__dataFilename) ? j_v__withEstCond__dataFilename : 'withEstCond_plotData'
+  ;;    count = 0
+  ;;    fName = fNamePref + '.sav'
+  ;;    WHILE FILE_TEST(dir+fName) DO BEGIN
+  ;;       fName = STRING(FORMAT='(A0,"_",I02,".sav")',fNamePref,count+1)
+  ;;       count++
+  ;;    ENDWHILE
+
+  ;;    PRINT,"Saving withEstCond plotdata file: " + fName
+
+  ;;    SAVE,jvPlotData,avgs_JVfit,pData, $
+  ;;         A, $
+  ;;         AGauss, $
+  ;;         orbit, $
+  ;;         routName, $
+  ;;         mMagDat, $
+  ;;         tRB_RBpairs, $
+  ;;         tRB_fLine, $
+  ;;         tRB_nFAST, $
+  ;;         tRB_nFLine, $
+  ;;         tRB_fLineRE, $
+  ;;         FILENAME=dir+fName
+  ;; ENDIF
+  
 pot = jvplotdata.pot[avgs_jvfit.useinds]
 cur = jvplotdata.cur[avgs_jvfit.useinds]
 curerr = jvplotdata.curerr[avgs_jvfit.useinds]
@@ -30,23 +71,31 @@ normCondErr = condErr / conductivity
 ;; curerr = curerr/1.6D-9
 ;; coeffs = LINFIT(pot,cur*(-1.),MEASURE_ERRORS=curerr,SIGMA=sig,PROB=prob)
 
-
 charge = 1.6021766D-19          ;C
 mass   = 9.10938356D-31         ; kg
-prefactor = charge^2.D / SQRT(2.D * !DPI * mass)
-prefactor = charge^2.D / SQRT(2.D * !DPI * mass * charge) * 1D6
+
+;; prefactor = charge^2.D / SQRT(2.D * !DPI * mass) ;this is correct for n in m^-3 and T in joules
+prefactor = charge^2.D / SQRT(2.D * !DPI * mass * charge) * 1D6 ;this is correct for n in cm^-3 and T in eV
 
 ;; Here's an assay
-T_m = avgs_JVFit.T.Avg          ;Assume magnetospheric temperature is same as FAST temperature
+T_m = avgs_JVFit.T.Avg
 nFAST = avgs_jvfit.n_sc.avg
-
+;; T_m = 141                         ;eV
 predicted_n_m = conductivity/prefactor*SQRT(T_m)
 
 ;; Also, thermal mirror ratio
 E_p = MEAN(jvplotdata.only_downe_pot[avgs_jvfit.useinds])
+R_B_Thermal = 2 * (E_p / T_m ) +1
+thermAngle = ATAN(SQRT( T_m/ ( 2 * E_p ) ) )*180./!PI
 
-;; R_B_Thermal = 4 * (E_p / T_m )^2.D +1 ;Old, wrong way
-R_B_Thermal = 2 * E_p / T_m  +1
+PRINT,'******************************'
+PRINT,"CONDUCTIVITY ESTIMATE"
+PRINT,'******************************'
+PRINT,''
+PRINT,FORMAT='(A20,TR2,"(",A10,")",TR5,A20,TR5,A15,TR5,A15)', $
+      "Conductivity (mho/m^2)","normCondErr","Therm angle (deg)","Avg elec pot","RB_therm"
+PRINT,FORMAT='(G20.5,TR2,"(",F10.4,")",TR5,F20.3,TR5,F15.3,TR5,F15.3)', $
+      conductivity,normCondErr,thermAngle,E_p,R_B_Thermal
 
 ;; PROB
 ;; Set this keyword to a named variable that will contain the probability that
@@ -58,15 +107,14 @@ R_B_Thermal = 2 * E_p / T_m  +1
 ;; Set this keyword to a named variable that will contain the 1-sigma
 ;; uncertainty estimates for the returned parameters
 
-orbit = 1773
-orbPref  = 'Orbit ' + STRCOMPRESS(orbit,/REMOVE_ALL)
-
 ;; titleStr         = STRING(FORMAT='(A0," ($\langle$T!DFAST!N$\rangle$=",F0.1," eV, ' + $
 ;;                           'n!DFAST!N=",G0.3," cm!U-3!N)")', $
 ;;                           orbPref,T_m,nFAST)
 ;; titleStr         = STRING(FORMAT='(A0," $\langle$T!DFAST!N$\rangle$=",F0.1," eV, ' + $
 ;;                           '$\langle$n!DFAST!N$\rangle$=",G0.3," cm!U-3!N")', $
 ;;                           orbPref,T_m,nFAST)
+
+
 titleStr         = STRING(FORMAT='("$\langle$T!DFAST!N$\rangle$=",F0.1," eV;  ' + $
                           '$\langle$n!DFAST!N$\rangle$=",G0.3," cm!U-3!N")', $
                           T_m,nFAST)
@@ -134,7 +182,35 @@ this             = PLOT(potFit,yFit, $
                             POSITION=legPos, $
                             FONT_SIZE=legFont_size)
 
+  IF KEYWORD_SET(savePlot) THEN BEGIN
 
-;; this1 = errorplot(pot,cur*(-1.D),curerr,LINESTYLE='')
-;; this2 = plot(pot,coeffs[0]+coeffs[1]*pot,/OVERPLOT)
+     IF ~KEYWORD_SET(plotDir) THEN BEGIN
+        plotDir = './'
+     ENDIF
+
+     filNavn = KEYWORD_SET(SPName) ? SPName : (routName + '_JV_with_est_conductivity')
+     filTmp  = STRSPLIT(filNavn,'.',/EXTRACT)
+     filPref = (filTmp)[0]
+     filSuff = N_ELEMENTS(filTmp) GT 1 ? '.' + filTmp[1] : '.png'
+
+     count = 0
+     WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
+        count++
+        filNavn = STRING(FORMAT='(A0,I02,A0)', $
+                         filPref, $
+                         count, $
+                         filSuff)
+     ENDWHILE
+
+     PRINT,"Saving to " + filNavn + ' ...'
+
+     window1.Save,plotDir+filNavn
+
+     window1.Close
+     window1=!NULL
+
+  ENDIF
+
+
+END
 

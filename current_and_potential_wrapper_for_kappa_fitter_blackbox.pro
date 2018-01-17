@@ -143,6 +143,8 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   j_v__fixTandN__spName   = bonusPref + '_j_v_fixTandN' + savePSuff + fExt
   en_spec__spName         = bonusPref + '_en_specs' + savePSuff + fExt
   J_V__RB_and_kappa_map__SPName = bonusPref + '_rbKappaMap' + savePSuff + fExt
+  j_v__withEstCond__spName = bonusPref + '_JV_with_est_conductivity' + savePSuff + fExt
+
   ;;Options for j_v_potBar plot
   jvpotBar__j_on_yAxis    = 1
 
@@ -407,6 +409,9 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      J_V__FIXTANDN__SPNAME=j_v__fixTandN__spName, $
      J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
      J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+     J_V__WITHESTCOND__SPNAME=j_v__withEstCond__spName, $
+     J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
+     J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
      J_V__RB_AND_KAPPA_MAP__SPNAME=J_V__RB_and_kappa_map__SPName, $
      EN_SPEC__SPNAME=en_spec__spName, $
      ORIGINAL_PLOTIDEE=orig_plotIdee, $
