@@ -188,6 +188,29 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  have_cap_struct_t_type = 0
+  have_e_struct_t_type   = 0
+  IF N_ELEMENTS(cAP_struct) GT 0 THEN BEGIN
+     nuller = !NULL
+     STR_ELEMENT,cAP_struct,'temperature_type',VALUE=nuller
+     IF SIZE(nuller,/TYPE) NE 0 THEN BEGIN
+        have_cap_struct_t_type = 1
+        temperature_type = cAP_struct.temperature_type
+     ENDIF
+  ENDIF
+
+  IF N_ELEMENTS(e) GT 0 THEN BEGIN
+     nuller = !NULL
+     STR_ELEMENT,e,'temperature_type',VALUE=nuller
+     nuller = !NULL
+     STR_ELEMENT,cAP_struct,'temperature_type',VALUE=nuller
+     IF SIZE(nuller,/TYPE) NE 0 THEN BEGIN
+        have_e_struct_t_type = 1
+        IF have_cap_struct_t_type THEN IF temperature_type NE e.temperature_type THEN STOP ;should match, after all
+        temperature_type = e.temperature_type
+     ENDIF
+  ENDIF
+
   tTypeInd = 2 ;;Assume parallel is desired
   IF N_ELEMENTS(temperature_type) GT 0 THEN BEGIN
 
@@ -200,6 +223,18 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         END
      ENDCASE
 
+  ENDIF
+
+  IF have_cap_struct_t_type THEN BEGIN
+     nuller = !NULL
+     STR_ELEMENT,cAP_struct,'temperature_type',VALUE=nuller
+     IF SIZE(nuller,/TYPE) NE 0 THEN STR_ELEMENT,cAP_struct,'temperature_type',VALUE=tTypeInd,/ADD_REPLACE
+  ENDIF
+
+  IF have_e_struct_t_type THEN BEGIN
+     nuller = !NULL
+     STR_ELEMENT,e,'temperature_type',VALUE=nuller
+     IF SIZE(nuller,/TYPE) NE 0 THEN STR_ELEMENT,e,'temperature_type',VALUE=tTypeInd,/ADD_REPLACE
   ENDIF
 
   ;; aRange__temp_e_down = 'lc'

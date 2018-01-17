@@ -108,15 +108,16 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
                       ;; ENERGY=eRange_peak, $
                       ANGLE=tmpTempSourceConeRange))[KF2D__SDTData_opt.fit2D__temperature_type]
+  ;; fit_scTemp  = fit2DParams[1]
 
   obs_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,curDataStr, $
-                              ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                              ENERGY=eRange_peak, $
+                              ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                              ;; ENERGY=eRange_peak, $
                               ANGLE=tmpDensSourceConeRange)
 
   obs_scTemp  = (T_2D_FS(curDataStr, $
-                      ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                      ENERGY=eRange_peak, $
+                      ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                      ;; ENERGY=eRange_peak, $
                       ANGLE=tmpTempSourceConeRange))[KF2D__SDTData_opt.fit2D__temperature_type]
 
   ;;field-aligned conductances

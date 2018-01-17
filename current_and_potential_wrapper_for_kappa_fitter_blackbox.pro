@@ -1,5 +1,5 @@
 ;2017/03/22
-PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
+PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    ORBIT=orbit, $
    EEB_OR_EES=eeb_or_ees, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
@@ -121,7 +121,7 @@ PRO CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   interactive_overplot    = 0
   
-  savePlot                = 0
+  ;; savePlot                = 0
   savePSuff               = ''
 
   ;;Which plots?

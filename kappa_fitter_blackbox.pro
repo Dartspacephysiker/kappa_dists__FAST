@@ -75,8 +75,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
-                          OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                          OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                          OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
+                          OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
                           FIT2D_KAPPA_INF_LIST=fit2DKappa_inf_list, $
                           FIT2D_GAUSS_INF_LIST=fit2DGauss_inf_list, $
                           SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
@@ -291,8 +291,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PLOTDIR=plotDir, $
         OUT_FITTED_PARAMS=out_kappaParams, $
         OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-        OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-        OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+        OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
+        OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
         OUT_FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
         OUT_FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
         OUT_SYNTH_SDT_STRUCTS=synthPackage, $
@@ -326,12 +326,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
            saveStr += 'energy_electrons,'
         ENDIF
 
-        IF N_ELEMENTS(kappaFits) GT 0 THEN BEGIN
-           saveStr += 'kappaFits,'
+        IF N_ELEMENTS(kappaFit1Ds) GT 0 THEN BEGIN
+           saveStr += 'kappaFit1Ds,'
         ENDIF
 
-        IF N_ELEMENTS(gaussFits) GT 0 THEN BEGIN
-           saveStr += 'gaussFits,'
+        IF N_ELEMENTS(gaussFit1Ds) GT 0 THEN BEGIN
+           saveStr += 'gaussFit1Ds,'
         ENDIF
 
         IF N_ELEMENTS(synthPackage) GT 0 THEN BEGIN
@@ -365,7 +365,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDELSE
 
-  ;; PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
+  ;; PARSE_KAPPA_FIT_STRUCTS,kappaFit1Ds, $
   ;;                         A=a, $
   ;;                         STRUCT_A=Astruct, $
   ;;                         TIME=time, $
@@ -375,19 +375,22 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   ;;                         FITSTATUS=fitStatus, $
   ;;                         USE_MPFIT1D=use_mpFit1D
 
-  ;; PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
+  ;; PARSE_KAPPA_FIT_STRUCTS,gaussFit1Ds, $
   ;;                         A=AGauss, $
   ;;                         STRUCT_A=AStructGauss, $
   ;;                         TIME=time, $
   ;;                         NAMES_A=AGauss_names, $
   ;;                         CHI2=chi2Gauss, $
   ;;                         PVAL=pValGauss, $
-  ;;                         FITSTATUS=gaussfitStatus, $
+  ;;                         FITSTATUS=gaussFit1DStatus, $
   ;;                         USE_MPFIT1D=use_mpFit1D
 
-  STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'fitStatus',VALUE=kappaFitStatus
-  STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'fitStatus',VALUE=gaussFitStatus
-  PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFitStatus,gaussFitStatus
+  ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'fitStatus',VALUE=kappaFit1DStatus
+  ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFit1Ds,'fitStatus',VALUE=gaussFit1DStatus
+  ;; PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFit1DStatus,gaussFit1DStatus
+  STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DKappa_inf_list,'status',VALUE=kappaFit2DStatus
+  STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DGauss_inf_list,'status',VALUE=gaussFit2DStatus
+  PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFit2DStatus,gaussFit2DStatus,/IS2D
 
   IF ISA(KF2D__SDTData_opt) THEN BEGIN
      electron_angleRange = KF2D__SDTData_opt.electron_angleRange
@@ -405,7 +408,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         useInds__twoLumps = 1
      ENDIF
 
-     CURANDPOT_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
+     CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
         ORBIT=orbit, $
         EEB_OR_EES=eeb_or_ees, $
         ELECTRON_ANGLERANGE=electron_angleRange, $
@@ -482,16 +485,19 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;;Proof that it's better with Papa John's
 
      ;; Shrink these fools?
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time_index',VALUE=k1DFitsTimeInd
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'time_index',VALUE=g1DFitsTimeInd
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'time_index',VALUE=k1DFitsTimeInd
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFit1Ds,'time_index',VALUE=g1DFitsTimeInd
      junk1DTimeInds = CGSETINTERSECTION(k1DFitsTimeInd,g1DFitsTimeInd, $
                                         POSITIONS=k1DTInds)
      junk1DTimeInds = CGSETINTERSECTION(g1DFitsTimeInd,k1DFitsTimeInd, $
                                         POSITIONS=g1DTInds)
-     kappaFits = kappaFits[k1DTInds]
-     gaussFits = gaussFits[g1DTInds]
 
-     PARSE_KAPPA_FIT_STRUCTS,kappaFits, $
+     IF ~ARRAY_EQUAL(k1DTInds,g1DTInds) THEN STOP
+     
+     kappaFit1Ds = kappaFit1Ds[k1DTInds]
+     gaussFit1Ds = gaussFit1Ds[g1DTInds]
+
+     PARSE_KAPPA_FIT_STRUCTS,kappaFit1Ds, $
                              A=a, $
                              STRUCT_A=Astruct, $
                              TIME=kappaTime, $
@@ -501,18 +507,18 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              FITSTATUS=fitStatus, $
                              USE_MPFIT1D=use_mpFit1D
 
-     PARSE_KAPPA_FIT_STRUCTS,gaussFits, $
+     PARSE_KAPPA_FIT_STRUCTS,gaussFit1Ds, $
                              A=AGauss, $
                              STRUCT_A=AStructGauss, $
                              TIME=gaussTime, $
                              NAMES_A=AGauss_names, $
                              CHI2=chi2Gauss, $
                              PVAL=pValGauss, $
-                             FITSTATUS=gaussfitStatus, $
+                             FITSTATUS=gaussFit1DStatus, $
                              USE_MPFIT1D=use_mpFit1D
 
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=As
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,GaussFits,'A',/PRESERVE_DIMENSIONALITY,VALUE=GaussAs
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'A',/PRESERVE_DIMENSIONALITY,VALUE=As
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,GaussFit1Ds,'A',/PRESERVE_DIMENSIONALITY,VALUE=GaussAs
      ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2dkappa_inf_list,'fitdens',VALUE=fitDens
      ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2dkappa_inf_list,'SDT',VALUE=sdt
      ;; tid = SDT[*].time
@@ -559,13 +565,13 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
-           (N_ELEMENTS(kappaFits)  EQ N_ELEMENTS(gaussFits)           ) AND $
-           (N_ELEMENTS(kappaFits)  EQ N_ELEMENTS(fit2DKappa_inf_list) ) AND $
+           (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(gaussFit1Ds)           ) AND $
+           (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(fit2DKappa_inf_list) ) AND $
            (N_ELEMENTS(includeK_i) EQ N_ELEMENTS(fit2DKappa_inf_list) ) ) THEN BEGIN
 
-        IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(gaussFits) THEN STOP
+        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(gaussFit1Ds) THEN STOP
         IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN STOP
-        IF N_ELEMENTS(kappaFits) NE N_ELEMENTS(fit2DKappa_inf_list) THEN STOP
+        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(fit2DKappa_inf_list) THEN STOP
 
         include_i = CGSETINTERSECTION(includeK_i,includeG_i)
 
@@ -635,69 +641,69 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      ENDIF
 
-     DAT_EFLUX_TO_DIFF_EFLUX,fit2DK.SDT[*],kappa_eFlux, $
-                             ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                             FIT_EACH_ANGLE=fit_each_angle, $
-                             ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                             TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
-                             CALC_GEOM_FACTORS=calc_geom_factors
+     ;; DAT_EFLUX_TO_DIFF_EFLUX,fit2DK.SDT[*],kappa_eFlux, $
+     ;;                         ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+     ;;                         FIT_EACH_ANGLE=fit_each_angle, $
+     ;;                         ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ;;                         TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
+     ;;                         CALC_GEOM_FACTORS=calc_geom_factors
 
-     DAT_EFLUX_TO_DIFF_EFLUX,fit2DG.SDT[*],Gauss_eFlux, $
-                             ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                             FIT_EACH_ANGLE=fit_each_angle, $
-                             ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                             TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
-                             CALC_GEOM_FACTORS=calc_geom_factors
+     ;; DAT_EFLUX_TO_DIFF_EFLUX,fit2DG.SDT[*],Gauss_eFlux, $
+     ;;                         ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+     ;;                         FIT_EACH_ANGLE=fit_each_angle, $
+     ;;                         ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ;;                         TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
+     ;;                         CALC_GEOM_FACTORS=calc_geom_factors
 
-     MOMENT_SUITE_2D,kappa_eFlux, $
-                     ENERGY=energy, $
-                     ARANGE__MOMENTS=electron_angleRange, $
-                     ARANGE__CHARE=electron_angleRange, $
-                     SC_POT=sc_pot, $
-                     EEB_OR_EES=eeb_or_ees, $
-                     /ERROR_ESTIMATES, $
-                     /MAP_TO_100KM, $ 
-                     ORBIT=orbit, $
-                     QUIET=quiet, $
-                     OUT_N=nKappa, $
-                     OUT_J_=jKappa, $
-                     OUT_JE=jeKappa, $
-                     OUT_T=TKappa, $
-                     OUT_CHARE=charEKappa, $
-                     OUT_CURRENT=curKappa, $
-                     OUT_JJE_COVAR=jje_coVarKappa, $
-                     OUT_ERRORS=errorsKappa, $
-                     OUT_ERR_N=nErrKappa, $
-                     OUT_ERR_J_=jErrKappa, $
-                     OUT_ERR_JE=jeErrKappa, $
-                     OUT_ERR_T=TErrKappa, $
-                     OUT_ERR_CURRENT=curErrKappa, $
-                     OUT_ERR_CHARE=charEErrKappa
+     ;; MOMENT_SUITE_2D,kappa_eFlux, $
+     ;;                 ENERGY=energy, $
+     ;;                 ARANGE__MOMENTS=electron_angleRange, $
+     ;;                 ARANGE__CHARE=electron_angleRange, $
+     ;;                 SC_POT=sc_pot, $
+     ;;                 EEB_OR_EES=eeb_or_ees, $
+     ;;                 /ERROR_ESTIMATES, $
+     ;;                 /MAP_TO_100KM, $ 
+     ;;                 ORBIT=orbit, $
+     ;;                 QUIET=quiet, $
+     ;;                 OUT_N=nKappa, $
+     ;;                 OUT_J_=jKappa, $
+     ;;                 OUT_JE=jeKappa, $
+     ;;                 OUT_T=TKappa, $
+     ;;                 OUT_CHARE=charEKappa, $
+     ;;                 OUT_CURRENT=curKappa, $
+     ;;                 OUT_JJE_COVAR=jje_coVarKappa, $
+     ;;                 OUT_ERRORS=errorsKappa, $
+     ;;                 OUT_ERR_N=nErrKappa, $
+     ;;                 OUT_ERR_J_=jErrKappa, $
+     ;;                 OUT_ERR_JE=jeErrKappa, $
+     ;;                 OUT_ERR_T=TErrKappa, $
+     ;;                 OUT_ERR_CURRENT=curErrKappa, $
+     ;;                 OUT_ERR_CHARE=charEErrKappa
 
-     MOMENT_SUITE_2D,Gauss_eFlux, $
-                     ENERGY=energy, $
-                     ARANGE__MOMENTS=electron_angleRange, $
-                     ARANGE__CHARE=electron_angleRange, $
-                     SC_POT=sc_pot, $
-                     EEB_OR_EES=eeb_or_ees, $
-                     /ERROR_ESTIMATES, $
-                     /MAP_TO_100KM, $ 
-                     ORBIT=orbit, $
-                     QUIET=quiet, $
-                     OUT_N=nGauss, $
-                     OUT_J_=jGauss, $
-                     OUT_JE=jeGauss, $
-                     OUT_T=TGauss, $
-                     OUT_CHARE=charEGauss, $
-                     OUT_CURRENT=curGauss, $
-                     OUT_JJE_COVAR=jje_coVarGauss, $
-                     OUT_ERRORS=errorsGauss, $
-                     OUT_ERR_N=nErrGauss, $
-                     OUT_ERR_J_=jErrGauss, $
-                     OUT_ERR_JE=jeErrGauss, $
-                     OUT_ERR_T=TErrGauss, $
-                     OUT_ERR_CURRENT=curErrGauss, $
-                     OUT_ERR_CHARE=charEErrGauss
+     ;; MOMENT_SUITE_2D,Gauss_eFlux, $
+     ;;                 ENERGY=energy, $
+     ;;                 ARANGE__MOMENTS=electron_angleRange, $
+     ;;                 ARANGE__CHARE=electron_angleRange, $
+     ;;                 SC_POT=sc_pot, $
+     ;;                 EEB_OR_EES=eeb_or_ees, $
+     ;;                 /ERROR_ESTIMATES, $
+     ;;                 /MAP_TO_100KM, $ 
+     ;;                 ORBIT=orbit, $
+     ;;                 QUIET=quiet, $
+     ;;                 OUT_N=nGauss, $
+     ;;                 OUT_J_=jGauss, $
+     ;;                 OUT_JE=jeGauss, $
+     ;;                 OUT_T=TGauss, $
+     ;;                 OUT_CHARE=charEGauss, $
+     ;;                 OUT_CURRENT=curGauss, $
+     ;;                 OUT_JJE_COVAR=jje_coVarGauss, $
+     ;;                 OUT_ERRORS=errorsGauss, $
+     ;;                 OUT_ERR_N=nErrGauss, $
+     ;;                 OUT_ERR_J_=jErrGauss, $
+     ;;                 OUT_ERR_JE=jeErrGauss, $
+     ;;                 OUT_ERR_T=TErrGauss, $
+     ;;                 OUT_ERR_CURRENT=curErrGauss, $
+     ;;                 OUT_ERR_CHARE=charEErrGauss
 
 
      IF KEYWORD_SET(show_post_plots) THEN BEGIN
@@ -743,8 +749,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            NO_BLANK_PANELS=no_blank_panels, $
                            FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
                            FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
-                           KAPPAFITS=kappaFits, $
-                           GAUSSFITS=gaussFits, $
+                           KAPPAFIT1DS=kappaFit1Ds, $
+                           GAUSSFIT1DS=gaussFit1Ds, $
                            CHI2_THRESHOLD=chi2_thresh, $
                            CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
                            HIGHDENSITY_THRESHOLD=highDens_thresh, $
@@ -783,8 +789,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              GAUSS2D=fit2DG, $
                              KAPPA_FITPARAM_STRUCT=kFit2DParam_struct, $
                              GAUSS_FITPARAM_STRUCT=gFit2DParam_struct, $
-                             KAPPAFITS=kappaFits, $
-                             GAUSSFITS=gaussFits, $
+                             KAPPAFIT1DS=kappaFit1Ds, $
+                             GAUSSFIT1DS=gaussFit1Ds, $
                              DIFF_EFLUX=diff_eFlux, $
                              CURPOTLIST=curPotList, $
                              JVPLOTDATA=jvPlotData, $
@@ -832,8 +838,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;;                         ADD_CHI2_LINE=kSum__add_chi2_line, $
      ;;                         FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
      ;;                         FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
-     ;;                         KAPPAFITS=kappaFits, $
-     ;;                         GAUSSFITS=gaussFits, $
+     ;;                         KAPPAFIT1DS=kappaFit1Ds, $
+     ;;                         GAUSSFIT1DS=gaussFit1Ds, $
      ;;                         CHI2_THRESHOLD=chi2_thresh, $
      ;;                         CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
      ;;                         HIGHDENSITY_THRESHOLD=highDens_thresh, $
@@ -860,10 +866,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
   ;; IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
 
   ;;    ;;See if the time series align
-  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'time',VALUE=kTimes
-  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFits,'time',VALUE=gTimes
-  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=kChi2
-  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFits,'chi2',VALUE=gChi2
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'time',VALUE=kTimes
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFit1Ds,'time',VALUE=gTimes
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'chi2',VALUE=kChi2
+  ;;    STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'chi2',VALUE=gChi2
 
   ;;    sAIFac  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : 1
   ;;    maxDiff = (STRMATCH(STRUPCASE(eeb_or_ees),'*ES') ? 0.7 : 0.1) * sAIFac

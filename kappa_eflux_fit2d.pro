@@ -91,8 +91,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    PLOTDIR=plotDir, $
    OUT_FITTED_PARAMS=out_kappaParams, $
    OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-   OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-   OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+   OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
+   OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
    OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
    OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
    OUT_SYNTH_SDT_STRUCTS=synthPackage, $
@@ -211,8 +211,8 @@ PRO KAPPA_EFLUX_FIT2D, $
                     CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
                     ;; OUT_FITTED_PARAMS=out_kappaParams, $
                     ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
-                    OUT_KAPPA_FIT_STRUCTS=kappaFits, $
-                    OUT_GAUSS_FIT_STRUCTS=gaussFits, $
+                    OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
+                    OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
                     OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
                     OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
                     OUT_SYNTH_SDT_STRUCTS=synthPackage, $

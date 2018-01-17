@@ -172,9 +172,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange__temp_e_up      = KEYWORD_SET(aRange__temp_e_up    ) ? aRange__temp_e_up     : !NULL
      aRange__temp_i_up      = KEYWORD_SET(aRange__temp_i_up    ) ? aRange__temp_i_up     : !NULL
 
-     eRange__temp_e_down    = KEYWORD_SET(eRange__temp_e_down  ) ? eRange__temp_e_down   : !NULL
-     eRange__temp_e_up      = KEYWORD_SET(eRange__temp_e_up    ) ? eRange__temp_e_up     : !NULL
-     eRange__temp_i_up      = KEYWORD_SET(eRange__temp_i_up    ) ? eRange__temp_i_up     : !NULL
+     eRange__temp_e_down    = KEYWORD_SET(eRange__temp_e_down  ) ? eRange__temp_e_down   : moment_energyArr[*,0]
+     eRange__temp_e_up      = KEYWORD_SET(eRange__temp_e_up    ) ? eRange__temp_e_up     : !NULL ;moment_energyArr[*,1]
+     eRange__temp_i_up      = KEYWORD_SET(eRange__temp_i_up    ) ? eRange__temp_i_up     : !NULL ;moment_energyArr[*,2]
 
      ;; aRange__moments_e_down  = [330.,30.]
      ;; aRange__moments_i_up    = [150.,210.]
@@ -959,7 +959,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               momsforT_list.Add,TEMPORARY(momsforTStruct)
               momsforT_ind = k
            ENDELSE
-
         ENDIF
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN

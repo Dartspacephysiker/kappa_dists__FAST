@@ -157,8 +157,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
 
         IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
            
-           tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.fit1D.A : $
-                         fit2DStruct.fitParams
+           tmpA        = KEYWORD_SET(for_horseshoe_fit) ? fit2DStruct.fitParams : $
+                         fit2DStruct.fit1D.A
            fitTitle    = ["Bulk energy  (eV)", $
                           (is_kappa ? $
                            "Plasma temp. (core) (eV)" : $
@@ -176,29 +176,54 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                           ;; STRING(FORMAT='(F-8.4)',tmpA[3]), $
                           STRING(FORMAT='(G-9.4)',fit2DStruct.chi2/(fit2DStruct.dof-fit2DStruct.nPegged))]
 
-           theString   = STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
-                         STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
-                         STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
-                         STRING(FORMAT='(A0,T24,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
-                         STRING(FORMAT='(A0,T36,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C'
+           ;; theString   = STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
+           ;;               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $
+           ;;               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[2],fitInfoStr[2]) + '!C' + $
+           ;;               STRING(FORMAT='(A0,T24,": ",A0)',fitTitle[3],fitInfoStr[3]) + '!C' + $
+           ;;               STRING(FORMAT='(A0,T36,": ",A0)',fitTitle[4],fitInfoStr[4]) + '!C'
+           theString1  = STRING(FORMAT='(A0)',fitTitle[0]) + '!C' + $
+                         STRING(FORMAT='(A0)',fitTitle[1]) + '!C' + $
+                         STRING(FORMAT='(A0)',fitTitle[2]) + '!C' + $
+                         STRING(FORMAT='(A0)',fitTitle[3]) + '!C' + $
+                         STRING(FORMAT='(A0)',fitTitle[4]) + '!C'
+           theString2  = STRING(FORMAT='(": ",A0)',fitInfoStr[0]) + '!C' + $
+                         STRING(FORMAT='(": ",A0)',fitInfoStr[1]) + '!C' + $
+                         STRING(FORMAT='(": ",A0)',fitInfoStr[2]) + '!C' + $
+                         STRING(FORMAT='(": ",A0)',fitInfoStr[3]) + '!C' + $
+                         STRING(FORMAT='(": ",A0)',fitInfoStr[4]) + '!C'
            ;; STRING(FORMAT='("Fit success",T20,": ",A0)',(fit2DStruct.bestFit1DParams.fitStatus EQ 0 ? 'Y' : 'N')), $
 
            IF N_ELEMENTS(fitString) GT 0 THEN BEGIN
-              XYOUTS,0.19,0.27,fitString, $
+              XYOUTS,0.19,0.21,fitString, $
                      CHARSIZE=1.0, $
                      FONT=0, $
                      /NORMAL, $
                      /NOCLIP
            ENDIF
 
-           XYOUTS,0.19,0.25,'!11' + theString + '!X', $ ;+ $
+           ;; XYOUTS,0.19,0.25,'!11' + theString + '!X', $ ;+ $
+           ;;        ;; XYOUTS,0.12,0.28,theString, $ ;+ $
+           ;;        CHARSIZE=1.0, $
+           ;;        FONT=0, $
+           ;;        /NORMAL, $
+           ;;        /NOCLIP
+           ;; FONT_NAME='Courier', $
+           ;; /NORMAL)
+
+           XYOUTS,0.19,0.19,'!11' + theString1 + '!X', $ ;+ $
                   ;; XYOUTS,0.12,0.28,theString, $ ;+ $
                   CHARSIZE=1.0, $
                   FONT=0, $
                   /NORMAL, $
                   /NOCLIP
-           ;; FONT_NAME='Courier', $
-           ;; /NORMAL)
+
+           XYOUTS,0.46,0.19,'!11' + theString2 + '!X', $ ;+ $
+                  ;; XYOUTS,0.12,0.28,theString, $ ;+ $
+                  CHARSIZE=1.0, $
+                  FONT=0, $
+                  /NORMAL, $
+                  /NOCLIP
+
         ENDIF
 
 

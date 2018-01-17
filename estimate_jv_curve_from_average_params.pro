@@ -29,6 +29,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
   all_temps   = 0
 
+  individual_Barbosa_factors = 0
+
   maxIter     = 3000
   fTol        = 1D-15
   gTol        = 1D-15
@@ -131,11 +133,22 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
      KEYWORD_SET(multi_magRatio_mode): BEGIN
 
         ;; 2018/01/15 Don't want meanPot!! Want to be TRUE, baby
-        ;; IF KEYWORD_SET(all_temps) THEN BEGIN
-        ;;    meanPot   = X
-        ;; ENDIF ELSE BEGIN
-        ;;    meanPot   = 10.^(MEAN(ALOG10(X)))
-        ;; ENDELSE
+        CASE 1 OF
+           KEYWORD_SET(all_temps): BEGIN
+              barbosaPot   = electronPot
+           END
+           KEYWORD_SET(individual_Barbosa_factors): BEGIN
+
+              barbosaPot   = electronPot
+
+           END
+           ELSE: BEGIN
+
+              ;; barbosaPot   = 10.^(MEAN(ALOG10(electronPot)))
+              barbosaPot   = MEAN(electronPot)
+
+           END
+        ENDCASE
 
         CASE 1 OF
            KEYWORD_SET(map__2D): BEGIN
@@ -151,12 +164,12 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               nKappa    = N_ELEMENTS(multi_kappa_array)
 
               ;; 2018/01/15 Get real! Need to let dens vary with potential to be true to physics
-              ;; IF KEYWORD_SET(all_temps) THEN BEGIN
-              ;;    densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
-              ;; ENDIF ELSE BEGIN
-              ;;    densArr   = MAKE_ARRAY(nMagRatio,/DOUBLE)
-              ;; ENDELSE
-              densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
+              IF KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) THEN BEGIN
+                 densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
+              ENDIF ELSE BEGIN
+                 densArr   = MAKE_ARRAY(nMagRatio,/DOUBLE)
+              ENDELSE
+              ;; densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
 
               kappaArr  = multi_kappa_array                     # MAKE_ARRAY(nMagRatio,/DOUBLE,VALUE=1.0D)
               magRatArr = MAKE_ARRAY(nKappa,/DOUBLE,VALUE=1.0D) # multi_magRatio_array
@@ -177,113 +190,90 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               AGauss[0] = 10000.D
               
               ;;Get all dens values
-              IF KEYWORD_SET(all_temps) THEN BEGIN
-                 FOR k=0,nMagRatio-1 DO BEGIN
+              CASE 1 OF 
+                 KEYWORD_SET(all_temps): BEGIN
 
-                    densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(electronPot, $
-                                                                tRB_TFAST, $
-                                                                0, $
-                                                                tRB_nFAST, $
-                                                                multi_magRatio_array[k]*fastR_BFac)
-                 ENDFOR
-              ENDIF ELSE BEGIN
-                 FOR k=0,nMagRatio-1 DO BEGIN
+                    FOR k=0,nMagRatio-1 DO BEGIN
 
-                    ;; 2018/01/15 Goodness no! (Think shoes-wearin' cat)
-                    ;; densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(electronPot, $
-                    ;;                                                A[1], $
-                    ;;                                                0, $
-                    ;;                                                avgs_JVfit.N_SC.avg, $
-                    ;;                                                multi_magRatio_array[k]*fastR_BFac))
-                    densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(electronPot, $
-                                                              A[1], $
-                                                              0, $
-                                                              avgs_JVfit.N_SC.avg, $
-                                                              multi_magRatio_array[k]*fastR_BFac)
+                       densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                   tRB_TFAST, $
+                                                                   0, $
+                                                                   tRB_nFAST, $
+                                                                   multi_magRatio_array[k]*fastR_BFac)
+                    ENDFOR
 
-                 ENDFOR
-              ENDELSE
+                 END
+                 KEYWORD_SET(individual_Barbosa_factors): BEGIN
+
+                    FOR k=0,nMagRatio-1 DO BEGIN
+
+                       densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                   A[1], $
+                                                                   0, $
+                                                                   avgs_JVfit.N_SC.avg, $
+                                                                   multi_magRatio_array[k]*fastR_BFac)
+                    ENDFOR
+
+                 END
+                 ELSE: BEGIN
+                    FOR k=0,nMagRatio-1 DO BEGIN
+
+                       ;; 2018/01/15 Goodness no! (Think shoes-wearin' cat)
+                       ;; densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                       ;;                                                A[1], $
+                       ;;                                                0, $
+                       ;;                                                avgs_JVfit.N_SC.avg, $
+                       ;;                                                multi_magRatio_array[k]*fastR_BFac))
+                       densArr[k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                   A[1], $
+                                                                   0, $
+                                                                 avgs_JVfit.N_SC.avg, $
+                                                                   multi_magRatio_array[k]*fastR_BFac)
+
+                    ENDFOR
+                 END
+              ENDCASE
+
 
               ;;First kappa
+
+              T_thisRound = KEYWORD_SET(all_temps) ? tRB_TFAST : A[1]
+
               FOR j=0,nKappa-1 DO BEGIN
 
                  FOR k=0,nMagRatio-1 DO BEGIN
 
+                    N_thisRound = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ?  $
+                                  densArr[*,k] : $
+                                  densArr[k]
+
                     ;; PRINT,kappaArr[j,k],A[1],MEAN(dens),magRatArr[j,k]
                     ;; PRINT,kappaArr[j,k],A[1],densArr[k],magRatArr[j,k]
 
-                    IF KEYWORD_SET(all_temps) THEN BEGIN
-                       
-                       CASE 1 OF
-                          KEYWORD_SET(eFlux_not_nFlux): BEGIN
+                    CASE 1 OF
+                       KEYWORD_SET(eFlux_not_nFlux): BEGIN
 
-                             yFit = KAPPA_1__DORS_KLETZING_EQ_15__EFLUX(kappaArr[j,k], $
-                                                                         tRB_TFAST, $
-                                                                         densArr[*,k], $
-                                                                         X, $
-                                                                         magRatArr[j,k]);, $
-                                                                         ;; IN_POTBAR=in_potBar, $
-                                                                         ;; OUT_POTBAR=potBar, $
-                                                                         ;; OUT_P_OVER_K_TH=pot_over_K_th, $
-                                                                         ;; POT_IN_JOULES=pot_in_joules, $
-                                                                         ;; PLOT_TERMS=plot_terms, $
-                                                                         ;; MASS=mass)
+                          yFit = KAPPA_1__DORS_KLETZING_EQ_15__EFLUX(kappaArr[j,k], $
+                                                                     T_thisRound, $
+                                                                     N_thisRound, $
+                                                                     X, $
+                                                                     magRatArr[j,k])
 
-                          END
-                          ELSE: BEGIN
+                       END
+                       ELSE: BEGIN
 
-                             yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
-                                                                      tRB_TFAST, $
-                                                                      densArr[*,k], $
-                                                                      ;; A[2], $
-                                                                      X, $
-                                                                      magRatArr[j,k], $
-                                                                      ;; IN_POTBAR=in_potBar, $
-                                                                      ;; OUT_POTBAR=potBar, $
-                                                                      /NO_MULT_BY_CHARGE)*1D6
+                          yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
+                                                                   T_thisRound, $
+                                                                   N_thisRound, $
+                                                                   X, $
+                                                                   magRatArr[j,k], $
+                                                                   OUT_POTBAR=potBar, $
+                                                                   /NO_MULT_BY_CHARGE)*1D6
+                          ;; potBarArrK[*,j,k] = TEMPORARY(potBar)
 
-                          END
-                       ENDCASE
+                       END
+                    ENDCASE
 
-                    ENDIF ELSE BEGIN
-
-                       CASE 1 OF
-                          KEYWORD_SET(eFlux_not_nFlux): BEGIN
-
-                             yFit = KAPPA_1__DORS_KLETZING_EQ_15__EFLUX(kappaArr[j,k], $
-                                                                         A[1], $
-                                                                         ;; densArr[k], $ ;2018/01/15 comment out to be true to physics
-                                                                         densArr[*,k], $
-                                                                         X, $
-                                                                         magRatArr[j,k]);, $
-                                                                         ;; IN_POTBAR=in_potBar, $
-                                                                         ;; OUT_POTBAR=potBar, $
-                                                                         ;; OUT_P_OVER_K_TH=pot_over_K_th, $
-                                                                         ;; POT_IN_JOULES=pot_in_joules, $
-                                                                         ;; PLOT_TERMS=plot_terms, $
-                                                                         ;; MASS=mass)
-
-                          END
-                          ELSE: BEGIN
-
-                             ;; IF kappaArr[j,k] GT 3 THEN STOP
-
-                             yFit = KNIGHT_RELATION__DORS_KLETZING_11(kappaArr[j,k], $
-                                                                      A[1], $
-                                                                      ;; densArr[k], $ ;2018/01/15 comment out to be true to physics
-                                                                      densArr[*,k], $
-                                                                      X, $
-                                                                      magRatArr[j,k], $
-                                                                      ;; IN_POTBAR=in_potBar, $
-                                                                      OUT_POTBAR=potBar, $
-                                                                      /NO_MULT_BY_CHARGE)*1D6
-                             ;; potBarArrK[*,j,k] = TEMPORARY(potBar)
-
-                          END
-                       ENDCASE
-
-                    ENDELSE
-                    
                     ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
                     ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
                     wtSSRK[j,k]    = TOTAL( (Y-yFit)^2 * ABS(weights) )
@@ -297,80 +287,50 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               ;;Now Gauss
               PRINT,"Now Gauss 1-D map ..."
+              T_thisRound = KEYWORD_SET(all_temps) ? tRB_TFAST : AGauss[1]
+
               FOR k=0,nMagRatio-1 DO BEGIN
 
-                    IF KEYWORD_SET(all_temps) THEN BEGIN
-                       CASE 1 OF
-                          KEYWORD_SET(eFlux_not_nFlux): BEGIN
-                             
-                             yFit = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL( $
-                                    tRB_TFAST, $
-                                    densArr[*,k], $
-                                    X, $
-                                    multi_magRatio_array[k], $
-                                    ;; IN_POTBAR=in_potBar, $
-                                    ;; OUT_POTBAR=potBar, $
-                                    ;; POT_IN_JOULES=pot_in_joules, $
-                                    MASS=mass)
+                 N_thisRound = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ?  $
+                               densArr[*,k] : $
+                               densArr[k]
 
-                          END
-                          ELSE: BEGIN
 
-                             yFit = KNIGHT_RELATION__DORS_KLETZING_4(tRB_TFAST, $
-                                                                     ;; densArr[k], $
-                                                                     densArr[*,k], $
-                                                                     X, $
-                                                                     multi_magRatio_array[k], $
-                                                                     ;; IN_POTBAR=in_potBar, $
-                                                                     OUT_POTBAR=potBar, $
-                                                                     /NO_MULT_BY_CHARGE)*1D6
-
-                          END
-                       ENDCASE
+                 CASE 1 OF
+                    KEYWORD_SET(eFlux_not_nFlux): BEGIN
                        
-                    ENDIF ELSE BEGIN
-                       CASE 1 OF
-                          KEYWORD_SET(eFlux_not_nFlux): BEGIN
-                             
-                             yFit = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL( $
-                                    AGauss[1], $
-                                    densArr[k], $
-                                    X, $
-                                    multi_magRatio_array[k], $
-                                    ;; IN_POTBAR=in_potBar, $
-                                    OUT_POTBAR=potBar, $
-                                    ;; POT_IN_JOULES=pot_in_joules, $
-                                    MASS=mass)
+                       yFit = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL( $
+                              T_thisRound, $
+                              N_thisRound, $
+                              X, $
+                              multi_magRatio_array[k], $
+                              OUT_POTBAR=potBar, $
+                              MASS=mass)
 
-                             ;; potBarArrG[*,k] = TEMPORARY(potBar)
+                       ;; potBarArrG[*,k] = TEMPORARY(potBar)
 
+                    END
+                    ELSE: BEGIN
 
-                          END
-                          ELSE: BEGIN
+                       yFit = KNIGHT_RELATION__DORS_KLETZING_4(T_thisRound, $
+                                                               N_thisRound, $
+                                                               X, $
+                                                               multi_magRatio_array[k], $
+                                                               OUT_POTBAR=potBar, $
+                                                               /NO_MULT_BY_CHARGE)*1D6
 
-                             yFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
-                                                                     densArr[*,k], $
-                                                                     ;; densArr[k], $
-                                                                     X, $
-                                                                     multi_magRatio_array[k], $
-                                                                     ;; IN_POTBAR=in_potBar, $
-                                                                     OUT_POTBAR=potBar, $
-                                                                     /NO_MULT_BY_CHARGE)*1D6
+                       ;; potBarArrG[*,k] = TEMPORARY(potBar)
 
-                             ;; potBarArrG[*,k] = TEMPORARY(potBar)
-
-                          END
-                       ENDCASE
-
-                    ENDELSE
-                       
-                       ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
-                       ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
-                       ;; chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofG
-                       ;; chi2ArrG[k]    = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
-                       wtSSRG[k]      = TOTAL( (Y-yFit)^2 * ABS(weights) )
-                       chi2ArrG[k]    = wtSSRG[k] / dofG ;[chi2Arr,TEMPORARY(chi2)]
-                       ;; kappaArr[j,k] = A[0]
+                    END
+                 ENDCASE
+                 
+                 ;; chi2 = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (kCurvefit_opt.fit1D__weighting EQ 1) ? ABS(weights) : 1.D) )
+                 ;; chi2        = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                 ;; chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) ) / dofG
+                 ;; chi2ArrG[k]    = TEMPORARY(chi2) ;[chi2Arr,TEMPORARY(chi2)]
+                 wtSSRG[k]      = TOTAL( (Y-yFit)^2 * ABS(weights) )
+                 chi2ArrG[k]    = wtSSRG[k] / dofG ;[chi2Arr,TEMPORARY(chi2)]
+                 ;; kappaArr[j,k] = A[0]
               ENDFOR
 
            END
@@ -385,10 +345,10 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               chi2ArrK  = MAKE_ARRAY(nMagRatio,/FLOAT)
 
               IF KEYWORD_SET(all_temps) THEN BEGIN
-                 STR_ELEMENT,fa_kappa,'in_densities',jvPlotData.source.NDown,/ADD_REPLACE
-                 STR_ELEMENT,fa_gauss,'in_densities',jvPlotData.source.NDown,/ADD_REPLACE
-                 STR_ELEMENT,fa_kappa,'in_temperatures',jvPlotData.source.TDown,/ADD_REPLACE
-                 STR_ELEMENT,fa_gauss,'in_temperatures',jvPlotData.source.TDown,/ADD_REPLACE
+                 STR_ELEMENT,fa_kappa,'in_densities',jvPlotData.source.NDown[avgs_JVfit.useInds],/ADD_REPLACE
+                 STR_ELEMENT,fa_gauss,'in_densities',jvPlotData.source.NDown[avgs_JVfit.useInds],/ADD_REPLACE
+                 STR_ELEMENT,fa_kappa,'in_temperatures',jvPlotData.source.TDown[avgs_JVfit.useInds],/ADD_REPLACE
+                 STR_ELEMENT,fa_gauss,'in_temperatures',jvPlotData.source.TDown[avgs_JVfit.useInds],/ADD_REPLACE
 
                  kappaParamStruct[2].fixed = 1B
                  gaussParamStruct[2].fixed = 1B
@@ -400,7 +360,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               FOR k=0,nMagRatio-1 DO BEGIN
 
-                 kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(electronPot, $
+                 kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
                                                                               kappaParamStruct[1].value, $
                                                                               0, $
                                                                               tRB_nFAST, $
@@ -458,10 +418,10 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         bestRBK   = magRatArr[indK]
         potVals   = X;        potVals   = jvPlotData.pot[avgs_jvFit.useinds]
 
-        IF KEYWORD_SET(all_temps) THEN BEGIN
+        IF KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) THEN BEGIN
            bestDensK = densArr[*,indK2D[1]]
         ENDIF ELSE BEGIN
-           bestDensK = densArr[*,indK2D[1]] ;bestDensK = densArr[indK2D[1]]
+           bestDensK = densArr[indK2D[1]] ;bestDensK = densArr[indK2D[1]]
         ENDELSE
 
         yFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $
@@ -473,16 +433,16 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
         A[0]      = bestKappa
         ;; A[1]      = A[1]
-        A[2]      = KEYWORD_SET(all_temps) ? MEAN(bestDensK) : MEDIAN(bestDensK)
+        A[2]      = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ? MEAN(bestDensK) : bestDensK
         A[3]      = bestRBK
 
         ;;Gauss
         junkGauss = MIN(chi2ArrG,indG)
         bestRBG   = multi_magRatio_array[indG]
-        IF KEYWORD_SET(all_temps) THEN BEGIN
+        IF KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) THEN BEGIN
            bestDensG = densArr[*,indG]
         ENDIF ELSE BEGIN
-           bestDensG = densArr[*,indG] ; densArr[indG]
+           bestDensG = densArr[indG] ; densArr[indG]
         ENDELSE
 
         YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
@@ -492,13 +452,14 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                      /NO_MULT_BY_CHARGE, $
                                                      MASS=mass)*1D6
 
-        AGauss[2] = KEYWORD_SET(all_temps) ? MEAN(bestDensG) : MEDIAN(bestDensG)
+        AGauss[2] = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ? MEAN(bestDensG) : bestDensG
         AGauss[3] = bestRBG
 
 
         mMagDat = {K :    {kappa  : TEMPORARY(kappaArr), $
                            T      : A[1], $
-                           N      : MEDIAN(bestDensK), $
+                           ;; N      : MEDIAN(bestDensK), $
+                           N      : bestDensK, $
                            magRat : magRatArr, $
                            chi2   : TEMPORARY(chi2ArrK), $
                            nParms : 4, $
@@ -506,7 +467,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                            wtdSSR : TEMPORARY(wtSSRK), $
                            wts    : weights}, $
                    G :    {T      : AGauss[1], $
-                           N      : MEDIAN(bestDensG), $
+                           ;; N      : MEDIAN(bestDensG), $
+                           N      : bestDensG, $
                            magRat : multi_magRatio_array, $
                            chi2   : TEMPORARY(chi2ArrG), $
                            nParms : 3, $
