@@ -43,13 +43,9 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   ;; carloTimeStart = '09:26:11'
   ;; carloTimeStop  = '09:27:11'
 
-  carloTimeStart = '09:26:56'
-  carloTimeStop  = '09:27:05'
-
-
   ;; Some are already done
-  ;; carloTimeStart = '09:26:11'
-  ;; carloTimeStop  = '09:26:55'
+  carloTimeStart = '09:26:11'
+  carloTimeStop  = '09:26:55'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
