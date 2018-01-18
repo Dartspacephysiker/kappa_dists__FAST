@@ -12,6 +12,12 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
   diff_eFlux_fil = 'orb_1773-diff_eflux-ees-avg_itvl2-09_26_10__000-09_27_15__000.sav'
 
+  nRolls         = 1000
+
+  make_fit2D_info     = 0       ;Much more info than we need
+  make_fit2DParamArrs = 1       ;Juuust right
+  add_gaussian_estimate = 1
+
   observed_dist  = 0
 
   saveSuff = 'orb1773_2DMCarlo_ests__'
@@ -26,12 +32,15 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   make_bFunc_gFunc_plots = 0
   save_bFunc_gFunc_plots = 0
 
-  print_2DFitInfo = 1
+  print_2DFitInfo = 0
   ;; print_2DWinInfo = 1
   ;; carloTime = '09:27:01.57'     ;Time shown in Figure 2a title
   ;; carloTime = '09:27:01.261'    ;The correct time, since the average of this time and the next time (09:27:01.893) gives 09:27:01.57
-  carloTimeStart = '09:26:56'
-  carloTimeStop  = '09:27:03'
+  ;; carloTimeStart = '09:26:56'
+  ;; carloTimeStop  = '09:27:03'
+
+  carloTimeStart = '09:26:11'
+  carloTimeStop  = '09:27:11'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
@@ -74,8 +83,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                                           IN_GOOD_I=includeK_i, $
                                           OUT_GOOD_I=includeG_i, $
                                           OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
-                                          /DONT_SHRINK_PARSED_STRUCT) 
-  
+                                          /DONT_SHRINK_PARSED_STRUCT)
+
   ;;Now shrink everyone
   IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
         (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(gaussFit1Ds)           ) AND $
@@ -107,7 +116,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                           covar        : fit2DK.covar       [*,*,include_i], $
                           pError       : fit2DK.pError      [*,include_i], $
                           nIter        : fit2DK.nIter       [include_i]}
-     
+
      fit2DG            = {SDT          : fit2DG.SDT         [include_i], $
                           fitParams    : fit2DG.fitParams   [*,include_i], $
                           obsMoms      : fit2DG.obsMoms     [include_i], $
@@ -147,9 +156,9 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   tidString = MAKE_ARRAY(nFits,/STRING)
   FOR k=0,nFits-1 DO BEGIN
      tid[k]       = (fit2DKappa_inf_list[k]).sdt.time
-     tidString[k] = T2S(tid[k])
+     tidString[k] = T2S(tid[k],/MS)
   ENDFOR
-  
+
   ;; Now need to match diff_eFlux structs with majic fitStructs
   diff_eFlux_inds = VALUE_CLOSEST2(diff_eFlux.time,tid,/CONSTRAINED)
   badObsSynth_i   = WHERE(ABS(diff_eFlux.time[diff_eFlux_inds]-tid) GT 0.05,nBadObsSynth)
@@ -166,16 +175,16 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
   match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
-  gaussString = KEYWORD_SET(add_gaussian_estimate) ? '_wGauss' : ''
-  obsString   = observed_dist ? '_obs' : '_synthetic'
+  gaussString = KEYWORD_SET(add_gaussian_estimate) ? '_wGauss'      : ''
+  obsString   = observed_dist                      ? '_obs'         : '_synthetic'
+  saveInfStr  = KEYWORD_SET(make_fit2D_info      ) ? '-info_lists'  : ''
+  saveParmStr = KEYWORD_SET(make_fit2DParamArrs  ) ? '-fit2DParams' : ''
 
   inds = [match_iStart[0]:match_iStop[0]]
   nHjar = N_ELEMENTS(inds)
   FOR k=0,nHjar-1 DO BEGIN
 
      match_i = (inds[k])[0]
-
-
 
      ;; Now get the data
      IF observed_dist THEN BEGIN
@@ -254,7 +263,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      tidFNStr = STRJOIN(STRSPLIT(tmpTidString,':',/EXTRACT),'_')
      tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
 
-     utFil = saveSuff + tidFNStr +obsString+gaussString
+     utFil = saveSuff + tidFNStr +obsString+gaussString+saveInfStr+saveParmStr
      utFil = utFil+'.sav'
 
      fit2DKappa_info = fit2DKappa_inf_list[match_i]
@@ -269,6 +278,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                                          ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                          MASS=mass, $
                                          FIT2DKAPPA_INFO=fit2DKappa_info, $
+                                         MAKE_FIT2D_INFO=make_fit2D_info, $
+                                         MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
                                          MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
                                          SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                          SAVEFILE=utFil, $
@@ -280,5 +291,3 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
 
 END
-
-

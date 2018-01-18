@@ -11,6 +11,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            ;; IN_ESTIMATED_LC=estimated_lc, $
                            UNITS=units, $
                            OUT_FIT2DPARAMS=fit2DParams, $
+                           MAKE_FIT2D_INFO=make_fit2D_info, $
                            OUT_FIT2D_FITINFO=fit2D_info, $
                            EPS=eps, $
                            MONTE_CARLO_MODE=monte_carlo_mode, $
@@ -121,25 +122,31 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
   hadSuccess = (WHERE(status EQ OKStatus))[0] NE -1 
 
-  IF ~hadSuccess AND KEYWORD_SET(print_2DFitInfo) THEN BEGIN
+  IF ~hadSuccess THEN BEGIN
 
-        PRINT,fitString + STRING(FORMAT='(A0,I0,A0)',' 2DFit failure (',status,') ...')
+     IF KEYWORD_SET(print_2DFitInfo) THEN PRINT,fitString + $
+        STRING(FORMAT='(A0,I0,A0)',' 2DFit failure (',status,') ...')
+
+     pError = !VALUES.F_NaN
+     nIter  = -1
 
   ENDIF
 
-  fit2D_info = {chi2         : bestNorm   , $
-                errMsg       : errMsg     , $
-                status       : status     , $
-                nfEv         : nfEv       , $
-                best_resid   : best_resid , $
-                pFree_index  : iFree      , $
-                best_fJac    : best_fJac  , $
-                nPegged      : nPegged    , $
-                nFree        : nFree      , $
-                dof          : dof        , $
-                covar        : covar      , $
-                pError       : pError     , $
-                nIter        : nIter      , $
-                angleRange   : fit2D_dens_angleInfo.aRange}
+  IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
+     fit2D_info = {chi2         : bestNorm   , $
+                   errMsg       : errMsg     , $
+                   status       : status     , $
+                   nfEv         : nfEv       , $
+                   best_resid   : best_resid , $
+                   pFree_index  : iFree      , $
+                   best_fJac    : best_fJac  , $
+                   nPegged      : nPegged    , $
+                   nFree        : nFree      , $
+                   dof          : dof        , $
+                   covar        : covar      , $
+                   pError       : pError     , $
+                   nIter        : nIter      , $
+                   angleRange   : fit2D_dens_angleInfo.aRange}
+  ENDIF
 
 END

@@ -16,6 +16,9 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                TIMEFNSTR=timeFNStr, $
                                UNITS=units, $
                                MAKE_FIT2D_INFO=make_fit2D_info, $
+                               MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
+                               KAPPAFIT2DPARAMARR=kappaFit2DParamArr, $
+                               GAUSSFIT2DPARAMARR=gaussFit2DParamArr, $
                                EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                                BF_GF__NORMALIZE_TO_VALS_AT_FITTED_ANGLE=bF_gF__normalize_to_vals_at_fitted_angle, $
                                BF_GF__LOGSCALE_REDUCENEGFAC=bF_gF__logScale_reduceNegFac, $
@@ -87,6 +90,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                          ;; IN_ESTIMATED_LC=estimated_lc, $
                          UNITS=units, $
                          OUT_FIT2DPARAMS=kappaFit2DParams, $
+                         MAKE_FIT2D_INFO=make_fit2D_info, $
                          OUT_FIT2D_FITINFO=kappaFit2D_info, $
                          PRINT_2DFITINFO=print_2DFitInfo, $
                          FITSTRING='Kappa', $
@@ -121,6 +125,16 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
      IF SIZE(fit2DKappa_inf_list,/TYPE) NE 0 THEN $
         fit2DKappa_inf_list.Add,TEMPORARY(kappaFit2D_info)
+
+     IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+
+        IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
+           kappaFit2DParamArr = kappaFit2DParams
+        ENDIF ELSE BEGIN
+           kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
+        ENDELSE
+
+     ENDIF
 
      IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
         
@@ -160,6 +174,17 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
 
            IF hadSuccessG THEN $
+
+              IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+
+              IF N_ELEMENTS(gaussFit2DParamArr) EQ 0 THEN BEGIN
+                 gaussFit2DParamArr = gaussFit2DParams
+              ENDIF ELSE BEGIN
+                 gaussFit2DParamArr = [[gaussFit2DParamArr],[gaussFit2DParams]]
+              ENDELSE
+
+           ENDIF
+
               IF SIZE(fit2DGauss_inf_list,/TYPE) NE 0 THEN $
                  fit2DGauss_inf_list.ADD,TEMPORARY(gaussFit2D_info)
 

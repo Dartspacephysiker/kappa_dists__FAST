@@ -17,6 +17,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
                                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                         MASS=mass, $
                                         FIT2DKAPPA_INFO=fit2DKappa_info, $
+                                        MAKE_FIT2D_INFO=make_fit2D_info, $
+                                        MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
                                         MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
                                         SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                         SAVEFILE=saveFile, $
@@ -28,9 +30,14 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
 
   @common__kappa_fit2d_structs.pro
 
+  IF ~(KEYWORD_SET(make_fit2D_info) OR KEYWORD_SET(make_fit2DParamArrs)) THEN BEGIN
+     PRINT,"Why are we here, then?"
+     STOP
+  ENDIF
+
   nEnergies       = realDataStr.nEnergy
   eRange_peak    = fit2DKappa_info.extra_info.eRange_peak
-  make_fit2D_info = 1
+  ;; make_fit2D_info = 1
 
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
@@ -286,8 +293,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
   successesG     = 0
   totSuccessesK  = 0
   totSuccessesG  = 0
-  fit2DKappa_inf_list  = LIST()
-  fit2DGauss_inf_list  = LIST()
+  fit2DKappa_inf_list  = KEYWORD_SET(make_fit2D_info) ? LIST() : !NULL
+  fit2DGauss_inf_list  = KEYWORD_SET(make_fit2D_info) ? LIST() : !NULL
   FOR k=0,Nsim-1 DO BEGIN
 
      bounds_i = k
@@ -312,7 +319,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
 
      curKappaStr = curDataStr
      IF kCurvefit_opt.add_gaussian_estimate THEN BEGIN
-        tmpGaussStr = curDataStr
+        curGaussStr = curDataStr
      ENDIF
 
      KAPPA_FIT2D__FIREINTHEHOLE, $
@@ -331,7 +338,10 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
         PEAK_ENERGY=peak_energy, $
         ERANGE_PEAK=eRange_peak, $
         EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
-        /MAKE_FIT2D_INFO, $
+        MAKE_FIT2D_INFO=make_fit2D_info, $
+        MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
+        KAPPAFIT2DPARAMARR=kappaFit2DParamArr, $
+        GAUSSFIT2DPARAMARR=gaussFit2DParamArr, $
         /BF_GF__NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
         BF_GF__LOGSCALE_REDUCENEGFAC=bF_gF__logScale_reduceNegFac, $
         BF_GF__PLOT_BULKE_MODEL=bF_gF__plot_bulke_model, $
@@ -360,13 +370,37 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
   ENDFOR
 
   IF KEYWORD_SET(saveFile) THEN BEGIN
+
      PRINT,"Saving param ests to " + saveFile + " ..."
      IF N_ELEMENTS(saveDir) EQ 0 THEN saveDir = './'
-     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-        SAVE,fit2DKappa_inf_list,fit2DGauss_inf_list,FILENAME=saveDir+saveFile
-     ENDIF ELSE BEGIN
-        SAVE,fit2DKappa_inf_list,FILENAME=saveDir+saveFile
-     ENDELSE
+
+     saveStr = 'SAVE,'
+
+     IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+        saveStr += 'kappaFit2DParamArr,'
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           saveStr += 'gaussFit2DParamArr,'
+        ENDIF
+     ENDIF
+
+     IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
+        saveStr += 'fit2DKappa_inf_list,'
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           saveStr += 'fit2DGauss_inf_list,'
+        ENDIF
+     ENDIF
+
+     saveStr += 'FILENAME=saveDir+saveFile'
+
+     OK = EXECUTE(saveStr)
+     IF ~OK THEN STOP
+
+     ;; IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+     ;;    SAVE,fit2DKappa_inf_list,fit2DGauss_inf_list,FILENAME=saveDir+saveFile
+     ;; ENDIF ELSE BEGIN
+     ;;    SAVE,fit2DKappa_inf_list,FILENAME=saveDir+saveFile
+     ;; ENDELSE
+
   ENDIF
 
 END
