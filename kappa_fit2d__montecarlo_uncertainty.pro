@@ -228,18 +228,19 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
   Nsim = N_ELEMENTS(nRolls) GT 0 ? nRolls : default_Nsim
 
   extraFactor = 1.4             ;In case some fits fail
+  nMaxTry     = LONG(Nsim*extraFactor)
 
   ;; Generate random inds, kappas 'twixt 1.5 and 35 for data
   IF KEYWORD_SET(bootstrap) THEN BEGIN
      randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig, $
-                                      LONG(Nsim*extraFactor)))
+                                      nMaxTry))
   ENDIF
-  simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,LONG(Nsim*extraFactor)))
+  simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,nMaxTry))
 
   data_gaussError = RANDOMN(seed__data_error,realDataStr.NEnergy,realDataStr.NBins, $
-                            LONG(Nsim*extraFactor))
+                            nMaxTry)
   error_gaussEror = RANDOMN(seed__error_error,realDataStr.NEnergy,realDataStr.NBins, $
-                            LONG(Nsim*extraFactor))
+                            nMaxTry)
 
   ;; If not bootstrapping, set X and Yerror once and for all
   ;; IF ~KEYWORD_SET(bootstrap) THEN BEGIN
@@ -301,7 +302,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
   totSuccessesG  = 0
   fit2DKappa_inf_list  = KEYWORD_SET(make_fit2D_info) ? LIST() : !NULL
   fit2DGauss_inf_list  = KEYWORD_SET(make_fit2D_info) ? LIST() : !NULL
-  FOR k=0,Nsim-1 DO BEGIN
+  Nsim_canAlter  = Nsim
+  FOR k=0,nMaxTry-1 DO BEGIN
 
      bounds_i = k
 
@@ -374,15 +376,45 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
      ;; IF KEYWORD_SET(add_gaussian_estimate) THEN gaussFits[k] = gaussFit
 
      fail = KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) ? $
-            ~(hadSuccessK AND hadSuccessG)                   : $
+            ~(hadSuccessK AND KEYWORD_SET(hadSuccessG))      : $
             ~hadSuccessK
      IF fail THEN BEGIN
         PRINT,"Adding 'nother ..."
-        Nsim++
+        Nsim_canAlter++
+     ENDIF
+
+     ;; IF N_ELEMENTS(kappaFit2DParamArr[0,*]) GE 990 THEN STOP
+     
+     IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+
+        works = N_ELEMENTS(kappaFit2DParamArr[0,*]) EQ Nsim
+        
+        IF works AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+           works = N_ELEMENTS(gaussFit2DParamArr[0,*]) EQ Nsim
+
+           IF ~works THEN STOP  ;Stop us if kappa is OK but Maxwellian isn't---'cause that's garbage
+        ENDIF
+
+        IF works THEN BREAK
+
+     ENDIF
+
+     IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
+
+        works = N_ELEMENTS(fit2DKappa_inf_list) EQ Nsim
+        
+        IF works AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+           works = N_ELEMENTS(fit2DGauss_inf_list) EQ Nsim
+
+           IF ~works THEN STOP ;Stop us if kappa is OK but Maxwellian isn't---'cause that's garbage
+        ENDIF
+
+        IF works THEN BREAK
+
      ENDIF
 
   ENDFOR
-
+  
   IF KEYWORD_SET(saveFile) THEN BEGIN
 
      PRINT,"Saving param ests to " + saveFile + " ..."
