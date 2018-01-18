@@ -21,7 +21,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   observed_dist  = 0
 
   saveSuff = 'orb1773_2DMCarlo_ests__'
-  saveDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
+  saveDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/' + $
+            GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '/'
 
   ;; from JOURNAL__20171222__THE_CLASSICS__RESPOND_TO_REFEREE__NOFIT_BELOW_PEAK_ENERGY
   chi2_over_dof_thresh = 25

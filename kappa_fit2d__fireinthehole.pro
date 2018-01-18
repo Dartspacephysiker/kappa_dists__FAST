@@ -172,10 +172,14 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                     PRINT_2DFITINFO=print_2DFitInfo, $
                                     TIMEFNSTR=timeFNStr
 
+        ENDIF
 
-           IF hadSuccessG THEN $
+        IF hadSuccessG THEN BEGIN
 
-              IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+           IF SIZE(fit2DGauss_inf_list,/TYPE) NE 0 THEN $
+              fit2DGauss_inf_list.ADD,TEMPORARY(gaussFit2D_info)
+
+           IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
 
               IF N_ELEMENTS(gaussFit2DParamArr) EQ 0 THEN BEGIN
                  gaussFit2DParamArr = gaussFit2DParams
@@ -184,9 +188,6 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
               ENDELSE
 
            ENDIF
-
-              IF SIZE(fit2DGauss_inf_list,/TYPE) NE 0 THEN $
-                 fit2DGauss_inf_list.ADD,TEMPORARY(gaussFit2D_info)
 
         ENDIF
 
