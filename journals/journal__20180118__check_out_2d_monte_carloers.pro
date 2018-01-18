@@ -1,36 +1,49 @@
 ;2018/01/18
 ;; FRAC         : fraction of values needed
-FUNCTION GET_SPREAD_FOR_MC_PARMS,parmArr,parmStep,frac, $
+FUNCTION MOST_PROB_FOR_MC_PARMS,parmArr,parmStep,binSize
+
+  COMPILE_OPT IDL2,STRICTARRSUBS
+
+  mostProbVal  = MEDIAN(parmArr)
+
+  hist         = HISTOGRAM(parmArr,BINSIZE=binSize,LOCATIONS=bins)
+  junk         = MAX(hist,mostProbInd)
+  mostProbVal  = bins[mostProbInd]+binSize/2.
+
+  RETURN,mostProbVal
+  
+END
+FUNCTION GET_SPREAD_FOR_MC_PARMS,mostProbVal,parmArr,parmStep,parmMinVal,binSize,frac, $
                                  N=N
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  med = MEDIAN(parmArr)
-
   ;; initialize
-  boundStep = [-parmStep,parmStep]
-  tmpBound  = med + boundStep
+  boundStep    = [-parmStep,parmStep]
+  tmpBound     = mostProbVal + boundStep
 
-  captured  = N_ELEMENTS( WHERE((parmArr GE tmpBound[0]) AND (parmArr LE tmpBound[1]),/NULL) )/FLOAT(N)
+  captured     = N_ELEMENTS( WHERE((parmArr GE tmpBound[0]) AND (parmArr LE tmpBound[1]),/NULL) )/FLOAT(N)
 
   ;; Loop until we've got it
   nTry = 0
   WHILE captured LT frac DO BEGIN
 
-     tmpBound  = (tmpBound + boundStep) > 0.
+     tmpBound  = (tmpBound + boundStep) > parmMinVal
      captured  = N_ELEMENTS( WHERE((parmArr GE tmpBound[0]) AND (parmArr LE tmpBound[1]),/NULL) )/FLOAT(N)
 
      nTry++
 
-     IF nTry EQ 1000 THEN PRINT,"Hit 1000 ..."
-     IF nTry EQ 2000 THEN PRINT,"Hit 2000 ..."
-     IF nTry EQ 3000 THEN BEGIN
-        PRINT,"Hit 3000! STOP"
+     IF nTry EQ  1000 THEN PRINT,"Hit 1000 ..."
+     IF nTry EQ  2000 THEN PRINT,"Hit 2000 ..."
+     IF nTry EQ 30000 THEN BEGIN
+        PRINT,"Hit 30000! STOP"
         PRINT,"Parmbounds: ",tmpBound[0],", ",tmpBound[1]
         STOP
      ENDIF
 
   ENDWHILE
+
+  tmpBound -= mostProbVal
 
   RETURN,tmpBound
 
@@ -54,32 +67,40 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
   calcUncertaintyBars = 1
 
   ;; CAPTURE_FRAC is for a mode that I decided not to use
-  ;; it involves sweeping out from the median until CAPTURE_FRAC of
+  ;; it involves sweeping out from the most probable value until CAPTURE_FRAC of
   ;; param estimates are within the boundaries
   ;;
-  ;; capture_frac  = .90 
+  capture_frac  = .90 
 
-  make_2D_uncert = 0
+  make_2D_uncert = 1
   ;; make_1D_uncert = 1
 
 
   showPlots     = 0
 
-  outFil = fil.Replace(".sav",'-2DPARMERRORS.sav')
+  CASE 1 OF
+     KEYWORD_SET(make_2D_uncert): BEGIN
+        outSuff = '-2DPARMERRORS_TWOSIDED.sav'
+     END
+     ELSE: BEGIN
+        outSuff = '-2DPARMERRORS.sav'
+     END
+  ENDCASE
+  outFil = fil.Replace(".sav",outSuff)
 
   SPAWN,'cd ' + inDir + '; ls ' + filPref + '*' + filSuff,fileList
 
   ;; Histogram bin sizes
   kBinSize      = 0.05
-  TBinSize      = 5
-  BulkEBinSize  = 5
+  TBinSize      = 10
+  BulkEBinSize  = 10
   NBinSize      = 0.01
 
   ;; stepsizes for getting percentages
-  kStepSize     = 0.025
+  kStepSize     = 0.01
   TStepSize     = 2.5
   BulkEStepSize = 2.5
-  NStepSize     = 0.005
+  NStepSize     = 0.002
 
   ;; min set by physics
   kMin          = KEYWORD_SET(make_2D_uncert) ? 1.5 : 0.0
@@ -137,8 +158,11 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
 
         multFac = [-1.,1.]
 
-        fKSprArr = MAKE_ARRAY(2,4,nHere,/FLOAT)
-        fGSprArr = MAKE_ARRAY(2,3,nHere,/FLOAT)
+        fKMostProb = MAKE_ARRAY(4,nHere,/FLOAT)
+        fGMostProb = MAKE_ARRAY(3,nHere,/FLOAT)
+
+        fKSprArr   = MAKE_ARRAY(2,4,nHere,/FLOAT)
+        fGSprArr   = MAKE_ARRAY(2,3,nHere,/FLOAT)
 
      ENDIF ELSE BEGIN
 
@@ -193,17 +217,31 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
 
               FOR kk=0,3 DO BEGIN
                  
-                 ;; fKSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fKArr[kk,*],stepSizesK[kk],capture_frac,N=nRolls)
+                 fKMostProb[kk,k] = MOST_PROB_FOR_MC_PARMS(fKArr[kk,*],stepSizesK[kk],binSizesK[kk])
+                 fKSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fKMostProb[kk,k], $
+                                                            fKArr[kk,*], $
+                                                            stepSizesK[kk], $
+                                                            lowLimK[kk], $
+                                                            binSizesK[kk], $
+                                                            capture_frac, $
+                                                            N=nRolls)
                  ;; fKSprArr[*,kk,k] = REPLICATE(STDDEV(fKArr[kk,*]),2)
-                 fKSprArr[*,kk,k] = k2DParm[kk] + STDDEV(fKArr[kk,*]) * multFac > lowLimK[kk]
+                 ;; fKSprArr[*,kk,k] = k2DParm[kk] + STDDEV(fKArr[kk,*]) * multFac > lowLimK[kk]
 
               ENDFOR
 
               FOR kk=0,2 DO BEGIN
                  
-                 ;; fGSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fGArr[kk,*],stepSizesG[kk],capture_frac,N=nRolls)
+                 fGMostProb[kk,k] = MOST_PROB_FOR_MC_PARMS(fGArr[kk,*],stepSizesG[kk],binSizesG[kk])
+                 fGSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fGMostProb[kk,k], $
+                                                            fGArr[kk,*], $
+                                                            stepSizesG[kk], $
+                                                            lowLimG[kk], $
+                                                            binSizesG[kk], $
+                                                            capture_frac, $
+                                                            N=nRolls)
                  ;; fGSprArr[*,kk,k] = REPLICATE(STDDEV(fGArr[kk,*]),2)
-                 fGSprArr[*,kk,k] = g2DParm[kk] + STDDEV(fGArr[kk,*]) * multFac > lowLimG[kk]
+                 ;; fGSprArr[*,kk,k] = g2DParm[kk] + STDDEV(fGArr[kk,*]) * multFac > lowLimG[kk]
 
               ENDFOR
 
@@ -234,19 +272,41 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
      CASE 1 OF
         KEYWORD_SET(make_2D_uncert): BEGIN
 
+           mostProbK   = {bulk_energy : REFORM(fKMostProb[0,*]), $
+                          temperature : REFORM(fKMostProb[1,*]), $
+                          kappa       : REFORM(fKMostProb[2,*]), $
+                          N           : REFORM(fKMostProb[3,*])}
 
+           mostProbG   = {bulk_energy : REFORM(fGMostProb[0,*]), $
+                          temperature : REFORM(fGMostProb[1,*]), $
+                          N           : REFORM(fGMostProb[2,*])}
 
+           ;; k2DParmErr  = {time        : tidKArr, $
+           ;;                bulk_energy : REFORM(fKSprArr[*,0,*],2,nHere), $
+           ;;                temperature : REFORM(fKSprArr[*,1,*],2,nHere), $
+           ;;                kappa       : REFORM(fKSprArr[*,2,*],2,nHere), $
+           ;;                N           : REFORM(fKSprArr[*,3,*],2,nHere), $
+           ;;                mostProb    : mostProbK}
+
+           ;; g2DParmErr  = {time        : tidGArr, $
+           ;;                bulk_energy : REFORM(fGSprArr[*,0,*],2,nHere), $
+           ;;                temperature : REFORM(fGSprArr[*,1,*],2,nHere), $
+           ;;                N           : REFORM(fGSprArr[*,2,*],2,nHere), $
+           ;;                mostProb    : mostProbG}
+
+           ;; Abs vals
            k2DParmErr  = {time        : tidKArr, $
-                          bulk_energy : REFORM(fKSprArr[*,0,*],2,nHere), $
-                          temperature : REFORM(fKSprArr[*,1,*],2,nHere), $
-                          kappa       : REFORM(fKSprArr[*,2,*],2,nHere), $
-                          N           : REFORM(fKSprArr[*,3,*],2,nHere)}
+                          bulk_energy : ABS(REFORM(fKSprArr[*,0,*],2,nHere)), $
+                          temperature : ABS(REFORM(fKSprArr[*,1,*],2,nHere)), $
+                          kappa       : ABS(REFORM(fKSprArr[*,2,*],2,nHere)), $
+                          N           : ABS(REFORM(fKSprArr[*,3,*],2,nHere)), $
+                          mostProb    : mostProbK}
 
            g2DParmErr  = {time        : tidGArr, $
-                          bulk_energy : REFORM(fGSprArr[*,0,*],2,nHere), $
-                          temperature : REFORM(fGSprArr[*,1,*],2,nHere), $
-                          N           : REFORM(fGSprArr[*,2,*],2,nHere)}
-
+                          bulk_energy : ABS(REFORM(fGSprArr[*,0,*],2,nHere)), $
+                          temperature : ABS(REFORM(fGSprArr[*,1,*],2,nHere)), $
+                          N           : ABS(REFORM(fGSprArr[*,2,*],2,nHere)), $
+                          mostProb    : mostProbG}
 
         END
         ELSE: BEGIN
