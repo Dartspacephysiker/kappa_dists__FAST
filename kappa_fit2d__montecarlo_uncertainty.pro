@@ -227,14 +227,19 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
   default_Nsim = 200
   Nsim = N_ELEMENTS(nRolls) GT 0 ? nRolls : default_Nsim
 
+  extraFactor = 1.4             ;In case some fits fail
+
   ;; Generate random inds, kappas 'twixt 1.5 and 35 for data
   IF KEYWORD_SET(bootstrap) THEN BEGIN
-     randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig,Nsim))
+     randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig, $
+                                      LONG(Nsim*extraFactor)))
   ENDIF
-  simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,Nsim))
+  simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,LONG(Nsim*extraFactor)))
 
-  data_gaussError = RANDOMN(seed__data_error,realDataStr.NEnergy,realDataStr.NBins,Nsim)
-  error_gaussEror = RANDOMN(seed__error_error,realDataStr.NEnergy,realDataStr.NBins,Nsim)
+  data_gaussError = RANDOMN(seed__data_error,realDataStr.NEnergy,realDataStr.NBins, $
+                            LONG(Nsim*extraFactor))
+  error_gaussEror = RANDOMN(seed__error_error,realDataStr.NEnergy,realDataStr.NBins, $
+                            LONG(Nsim*extraFactor))
 
   ;; If not bootstrapping, set X and Yerror once and for all
   ;; IF ~KEYWORD_SET(bootstrap) THEN BEGIN
@@ -367,6 +372,14 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
 
      ;; kappaFits[k] = kappaFit
      ;; IF KEYWORD_SET(add_gaussian_estimate) THEN gaussFits[k] = gaussFit
+
+     fail = KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) ? $
+            ~(hadSuccessK AND hadSuccessG)                   : $
+            ~hadSuccessK
+     IF fail THEN BEGIN
+        PRINT,"Adding 'nother ..."
+        Nsim++
+     ENDIF
 
   ENDFOR
 

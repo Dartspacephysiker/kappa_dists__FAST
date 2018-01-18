@@ -130,11 +130,18 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
      IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
 
-        IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
-           kappaFit2DParamArr = kappaFit2DParams
-        ENDIF ELSE BEGIN
-           kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
-        ENDELSE
+        ;; The following IF statement ensures that we don't beef up the fit2dParamArr if
+        ;;the Gaussian fit turns out to be bad
+        IF ~(KEYWORD_SET(Monte_Carlo_mode) AND $
+             KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate)) THEN BEGIN
+
+           IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
+              kappaFit2DParamArr = kappaFit2DParams
+           ENDIF ELSE BEGIN
+              kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
+           ENDELSE
+
+        ENDIF
 
      ENDIF
 
@@ -190,6 +197,15 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
               ENDIF ELSE BEGIN
                  gaussFit2DParamArr = [[gaussFit2DParamArr],[gaussFit2DParams]]
               ENDELSE
+
+              ;; Pick up kappa params here because now we know both fits were good
+              IF KEYWORD_SET(Monte_Carlo_mode) THEN BEGIN
+                 IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
+                    kappaFit2DParamArr = kappaFit2DParams
+                 ENDIF ELSE BEGIN
+                    kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
+                 ENDELSE
+              ENDIF
 
            ENDIF
 
