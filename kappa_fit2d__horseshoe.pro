@@ -13,9 +13,9 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            OUT_FIT2DPARAMS=fit2DParams, $
                            MAKE_FIT2D_INFO=make_fit2D_info, $
                            OUT_FIT2D_FITINFO=fit2D_info, $
-                           EPS=eps, $
-                           MONTE_CARLO_MODE=monte_carlo_mode, $
-                           MC__OKSTATUS=MC__OKStatus
+                           MONTE_CARLO_MODE=Monte_Carlo_mode, $
+                           MC__OKSTATUS=MC__OKStatus, $
+                           MC__FITSTRUCT=fit2DStr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -133,6 +133,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
   ENDIF
 
   IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
+
      fit2D_info = {chi2         : bestNorm   , $
                    errMsg       : errMsg     , $
                    status       : status     , $
@@ -147,6 +148,46 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                    pError       : pError     , $
                    nIter        : nIter      , $
                    angleRange   : fit2D_dens_angleInfo.aRange}
+
+  ENDIF
+
+  ;; We still need a density estimate
+  IF KEYWORD_SET(Monte_Carlo_mode) THEN BEGIN
+     
+     ;; To calc dens, we first need a synthed fitStruct
+     CASE 1 OF
+        KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
+           fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
+                           fit2DStr.energy, $
+                           ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
+                           fit2DStr.theta, $ ;Assume shiftTheta isn't necessary
+                           fit2DParams, $
+                           UNITS=units, $
+                           MASS=curDataStr.mass)
+
+           ;; Not necessary for getting the density (but is used in KAPPA_FIT2D__FIRE_EXTRAS
+           ;; 
+           ;; tmpStr          = CONV_UNITS(fit2DStr,'counts')
+           ;; tmpStr.ddata    = (tmpStr.data)^.5
+           ;; fit2DStr        = CONV_UNITS(tmpStr,units)
+
+        END
+     ENDCASE
+
+     IF N_ELEMENTS(estimated_lc) GT 0 THEN BEGIN
+        tmpDensSourceConeRange    = [MIN([KF2D__SDTData_opt.fit2D_dens_aRange[0],estimated_lc[0]]), $
+                                     MAX([KF2D__SDTData_opt.fit2D_dens_aRange[1],estimated_lc[1]])]
+     ENDIF ELSE BEGIN
+        tmpDensSourceConeRange    = KF2D__SDTData_opt.fit2D_dens_aRange
+     ENDELSE
+
+     fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
+                                 ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                                 ;; ENERGY=eRange_peak, $
+                                 ANGLE=tmpDensSourceConeRange)
+
+     fit2DParams[3] = TEMPORARY(fit_scDens)
+
   ENDIF
 
 END

@@ -40,8 +40,12 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   ;; carloTimeStart = '09:26:56'
   ;; carloTimeStop  = '09:27:03'
 
+  ;; carloTimeStart = '09:26:11'
+  ;; carloTimeStop  = '09:27:11'
+
+  ;; Some are already done
   carloTimeStart = '09:26:11'
-  carloTimeStop  = '09:27:11'
+  carloTimeStop  = '09:26:55'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
@@ -176,6 +180,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
   match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
+  nRollStr    = STRING(FORMAT='("-",I0,"Rolls")',nRolls)
+
   gaussString = KEYWORD_SET(add_gaussian_estimate) ? '_wGauss'      : ''
   obsString   = observed_dist                      ? '_obs'         : '_synthetic'
   saveInfStr  = KEYWORD_SET(make_fit2D_info      ) ? '-info_lists'  : ''
@@ -264,7 +270,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      tidFNStr = STRJOIN(STRSPLIT(tmpTidString,':',/EXTRACT),'_')
      tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
 
-     utFil = saveSuff + tidFNStr +obsString+gaussString+saveInfStr+saveParmStr
+     utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr
      utFil = utFil+'.sav'
 
      fit2DKappa_info = fit2DKappa_inf_list[match_i]

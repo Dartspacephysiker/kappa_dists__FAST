@@ -376,6 +376,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
 
      saveStr = 'SAVE,'
 
+     saveStr += 'fit2DKappa_info,'
+
      IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
         saveStr += 'kappaFit2DParamArr,'
         IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN

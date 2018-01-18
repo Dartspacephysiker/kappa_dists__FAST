@@ -42,7 +42,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
                                SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                EPS=eps, $
-                               MONTE_CARLO_MODE=monte_carlo_mode, $
+                               MONTE_CARLO_MODE=Monte_Carlo_mode, $
                                MC__OKSTATUS=MC__OKStatus
   
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -94,7 +94,9 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                          OUT_FIT2D_FITINFO=kappaFit2D_info, $
                          PRINT_2DFITINFO=print_2DFitInfo, $
                          FITSTRING='Kappa', $
-                         EPS=eps
+                         MONTE_CARLO_MODE=Monte_Carlo_mode, $
+                         MC__OKSTATUS=MC__OKStatus, $
+                         MC__FITSTRUCT=curKappaStr
 
   IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 
@@ -150,7 +152,9 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                OUT_FIT2D_FITINFO=gaussFit2D_info, $
                                PRINT_2DFITINFO=print_2DFitInfo, $
                                FITSTRING='Maxwellian', $
-                               EPS=eps
+                               MONTE_CARLO_MODE=Monte_Carlo_mode, $
+                               MC__OKSTATUS=MC__OKStatus, $
+                               MC__FITSTRUCT=curGaussStr
         
         IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 
