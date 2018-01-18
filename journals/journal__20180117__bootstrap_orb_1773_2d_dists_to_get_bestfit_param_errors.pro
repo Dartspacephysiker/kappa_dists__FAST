@@ -274,6 +274,9 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      utFil = utFil+'.sav'
 
      fit2DKappa_info = fit2DKappa_inf_list[match_i]
+     fit2DGauss_info = fit2DGauss_inf_list[match_i]
+
+     IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carlo,Pkappa,Pgauss, $
                                          TIDFNSTR=tidFNStr, $
@@ -285,6 +288,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
                                          ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                          MASS=mass, $
                                          FIT2DKAPPA_INFO=fit2DKappa_info, $
+                                         FIT2DGAUSS_INFO=fit2DGauss_info, $
                                          MAKE_FIT2D_INFO=make_fit2D_info, $
                                          MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
                                          MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $

@@ -17,6 +17,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
                                         ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
                                         MASS=mass, $
                                         FIT2DKAPPA_INFO=fit2DKappa_info, $
+                                        FIT2DGAUSS_INFO=fit2DGauss_info, $
                                         MAKE_FIT2D_INFO=make_fit2D_info, $
                                         MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
                                         MAKE_BFUNC_GFUNC_PLOTS=make_bFunc_gFunc_plots, $
@@ -376,7 +377,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,realDataStr,Pkappa,Pgauss, $
 
      saveStr = 'SAVE,'
 
-     saveStr += 'fit2DKappa_info,'
+     saveStr += 'fit2DKappa_info,fit2DGauss_info,'
 
      IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
         saveStr += 'kappaFit2DParamArr,'
