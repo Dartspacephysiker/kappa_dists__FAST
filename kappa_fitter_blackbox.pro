@@ -73,6 +73,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                           KSUM__GRL=kSum__GRL, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
+                          KSUM__ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
@@ -132,6 +133,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      FITFILE=fitFile, $
+     FIT2DPARMERRFILE=fit2DParmErrFile, $
      LOADDIR=outDir
 
   restored_fitFile = 0B
@@ -808,6 +810,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                              GRL=kSum__GRL, $
                              OPLOT_POT=kSum__oPlot_pot, $
+                             ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
+                             FIT2DPARMERRFILE=fit2DParmErrFile, $
+                             FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars
 
      ENDIF

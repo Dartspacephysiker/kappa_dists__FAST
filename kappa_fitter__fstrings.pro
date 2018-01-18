@@ -23,6 +23,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    FITFILE=fitFile, $
+   FIT2DPARMERRFILE=fit2DParmErrFile, $
    LOADDIR=loadDir
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -224,5 +225,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
         END
      ENDCASE
   ;; ENDIF
+
+     fit2DParmErrFile = fitFile.Replace(".sav",'-2DPARMERRORS.sav')
 
 END
