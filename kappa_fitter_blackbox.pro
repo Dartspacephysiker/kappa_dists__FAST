@@ -813,7 +813,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              GRL=kSum__GRL, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
-                             KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
+                             ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                              FIT2DPARMERRFILE=fit2DParmErrFile, $
                              FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars
