@@ -12,7 +12,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
   diff_eFlux_fil = 'orb_1773-diff_eflux-ees-avg_itvl2-09_26_10__000-09_27_15__000.sav'
 
-  nRolls         = 1000
+  nRolls         = 10000
 
   make_fit2D_info     = 0       ;Much more info than we need
   make_fit2DParamArrs = 1       ;Juuust right
@@ -40,12 +40,13 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   ;; carloTimeStart = '09:26:55'
   ;; carloTimeStop  = '09:27:05'
 
-  ;; carloTimeStart = '09:26:11'
-  ;; carloTimeStop  = '09:27:11'
+  ;; 'chine 1
+  carloTimeStart = '09:26:11'
+  carloTimeStop  = '09:27:11'
 
   ;; Some are already done
-  carloTimeStart = '09:26:11'
-  carloTimeStop  = '09:26:55'
+  ;; carloTimeStart = '09:26:11'
+  ;; carloTimeStop  = '09:26:55'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil

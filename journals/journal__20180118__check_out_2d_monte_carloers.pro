@@ -39,7 +39,8 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  nRolls  = 1000
+  ;; nRolls  = 1000
+  nRolls  = 10000               ;2018/01/19
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
   inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180118/'
@@ -65,7 +66,8 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
 
   showPlots     = 0
 
-  outFil = fil.Replace(".sav",'-2DPARMERRORS.sav')
+  outFil = fil.Replace(".sav",'-2DPARMERRORS-'+nRollStr+'.sav')
+  outFil = outFil.Replace('20180117',GET_TODAY_STRING(/DO_YYYYMMDD_FMT))
 
   SPAWN,'cd ' + inDir + '; ls ' + filPref + '*' + filSuff,fileList
 

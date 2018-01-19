@@ -74,6 +74,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__GRL=kSum__GRL, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           KSUM__ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
+                          KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
@@ -134,6 +135,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      FITFILE=fitFile, $
      FIT2DPARMERRFILE=fit2DParmErrFile, $
+     FIT2DPARMERR_NROLLS=fit2DParmErr_nRolls, $
      LOADDIR=outDir
 
   restored_fitFile = 0B
@@ -811,6 +813,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              GRL=kSum__GRL, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
+                             KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                              FIT2DPARMERRFILE=fit2DParmErrFile, $
                              FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars
