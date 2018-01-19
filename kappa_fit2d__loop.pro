@@ -510,7 +510,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   ;; MASS=mass, $
                                   E_ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                                   ANGLES=tempAngleEstRange, $
-                                  N_ANGLES_IN_RANGE=nAngles, $
+                                  ;; N_ANGLES_IN_RANGE=nAngles, $
                                   ;; BULKANGLE_STRUCT=angleStr, $
                                   ;; DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                                   ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $

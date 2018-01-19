@@ -66,12 +66,13 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            minEInd,maxEInd,nEnergies, $
                            peak_ind,peak_energy,eRange_peak, $
                            ANGLES=angles, $
-                           N_ANGLES_IN_RANGE=n_angles_in_range, $
+                           ;; N_ANGLES_IN_RANGE=n_angles_in_range, $
                            BULKANGLE_STRUCT=angleStr, $
                            DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                            KAPPA_EST=kappa, $
                            E_ANGLE=e_angle_range, $
                            ADD_GAUSSIAN_ESTIMATE=add_gaussian_estimate, $
+                           ONLY_GAUSSIAN_ESTIMATE=only_gaussian_estimate, $
                            USE_SDT_GAUSSIAN_FIT=use_SDT_Gaussian_fit, $
                            ESTFACS=estFacs, $
                            PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
@@ -130,16 +131,6 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
   ENDELSE
 
-  ;; parallel temperature for temperature_type = 2
-  ;; perpendicular temperature for temperature_type = 0,1
-  ;; average temperature for temperature_type = 3
-
-  ;;So we estimate the temperature and density based on the full range of angles being considered 
-  T               = (T_2D_FS(dat,ENERGY=eRange_peak, $
-                             ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[temperature_type]*estFacs.T ;T_avg
-  n_est           = N_2D_FS(dat,ENERGY=eRange_peak, $
-                            ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range)*estFacs.N
-
   ;; IF KEYWORD_SET(dont_take_stock_of_bulkangle) THEN BEGIN
   ;;    n_est        /= n_angles_in_range
   ;; ENDIF
@@ -165,15 +156,52 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
      END
   ENDCASE
 
-  A               = DOUBLE([bulk_energy,T,kappa,n_est,dat.integ_t,dat.mass,angleOffset]) 
-  
-  IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
-     PRINT,"Here's my initial estimate based on spectral properties: "
-     PRINT_KAPPA_FLUX_FIT_PARAMS,A
-     PRINT,''
+  ;;Decide on angle range
+  IF N_ELEMENTS(angleStr) GT 0 THEN BEGIN
+     IF angleStr.useMe THEN BEGIN
+        bulkAngle = angleStr.bulkAngle
+        bulkAngleProvided = 1
+     ENDIF ELSE BEGIN
+        bulkAngleProvided = 0
+     ENDELSE
+  ENDIF ELSE BEGIN
+     bulkAngleProvided    = 0
+  ENDELSE
+
+  CASE bulkAngleProvided OF
+     0: BEGIN
+        angleOffset = 0         ;Just assume stuff is field aligned
+     END
+     1: BEGIN
+        angleOffset  = MEAN(angles)-bulkAngle
+     END
+  ENDCASE
+
+  ;; parallel temperature for temperature_type = 2
+  ;; perpendicular temperature for temperature_type = 0,1
+  ;; average temperature for temperature_type = 3
+
+  IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
+
+     ;;So we estimate the temperature and density based on the full range of angles being considered 
+     T               = (T_2D_FS(dat,ENERGY=eRange_peak, $
+                                ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[temperature_type]*estFacs.T ;T_avg
+     n_est           = N_2D_FS(dat,ENERGY=eRange_peak, $
+                               ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range)*estFacs.N
+
+     
+     A               = DOUBLE([bulk_energy,T,kappa,n_est,dat.integ_t,dat.mass,angleOffset]) 
+     
+     IF ~KEYWORD_SET(dont_print_estimates) THEN BEGIN
+        PRINT,"Here's my initial estimate based on spectral properties: "
+        PRINT_KAPPA_FLUX_FIT_PARAMS,A
+        PRINT,''
+     ENDIF
+
+
   ENDIF
 
-  IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+  IF KEYWORD_SET(add_gaussian_estimate) OR KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
      IF KEYWORD_SET(use_SDT_Gaussian_fit) THEN BEGIN
         MAXWELLIAN_1,Xorig,AGauss,Yorig,pder,INDEX=[peak_ind,maxEInd],UNITS=units

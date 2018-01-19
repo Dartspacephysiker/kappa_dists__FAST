@@ -4,6 +4,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                hadSuccessG, $
                                CURKAPPASTR=curKappaStr, $
                                CURGAUSSSTR=curGaussStr, $
+                               ONLY_GAUSSIAN_ESTIMATE=only_Gaussian_estimate, $
                                ;; KAPPAFITS=kappaFits, $
                                ;; GAUSSFITS=gaussFits, $
                                KAPPAFITANGLE_INDEX=kappaFitAngle_index, $
@@ -43,6 +44,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                SAVE_BFUNC_GFUNC_PLOTS=save_bFunc_gFunc_plots, $
                                EPS=eps, $
                                MONTE_CARLO_MODE=Monte_Carlo_mode, $
+                               MONTE_CARLO_KFP2D_HOLDOVER=MC_KFP2D_HOLDOVER, $
                                MC__OKSTATUS=MC__OKStatus
   
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -60,7 +62,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
      ;; bestAngle_i, $
      ;; angleBin_i, $
      !NULL, $
-     kappaFitAngle_index, $
+     KEYWORD_SET(only_Gaussian_estimate) ? gaussFitAngle_index : kappaFitAngle_index, $
      ESTIMATE_LOSSCONE=KF2D__SDTData_opt.estimate_sourceCone_from_dist, $
      ;; /ESTIMATE_LOSSCONE, $
      NORMALIZE_TO_VALS_AT_FITTED_ANGLE=bF_gF__normalize_to_vals_at_fitted_angle, $
@@ -82,70 +84,82 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
      SAVE_PLOTS=save_bFunc_gFunc_plots, $
      EPS=eps
 
-  KAPPA_FIT2D__HORSESHOE,curDataStr, $
-                         hadSuccessK, $
-                         ERANGE_PEAK=eRange_peak, $
-                         FITPARAMSTRUCT=kappaParamStruct, $
-                         ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
-                         ;; IN_ESTIMATED_LC=estimated_lc, $
-                         UNITS=units, $
-                         OUT_FIT2DPARAMS=kappaFit2DParams, $
-                         MAKE_FIT2D_INFO=make_fit2D_info, $
-                         OUT_FIT2D_FITINFO=kappaFit2D_info, $
-                         PRINT_2DFITINFO=print_2DFitInfo, $
-                         FITSTRING='Kappa', $
-                         MONTE_CARLO_MODE=Monte_Carlo_mode, $
-                         MC__OKSTATUS=MC__OKStatus, $
-                         MC__FITSTRUCT=curKappaStr
+  IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
-  IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
+     KAPPA_FIT2D__HORSESHOE,curDataStr, $
+                            hadSuccessK, $
+                            ERANGE_PEAK=eRange_peak, $
+                            FITPARAMSTRUCT=kappaParamStruct, $
+                            ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
+                            ;; IN_ESTIMATED_LC=estimated_lc, $
+                            UNITS=units, $
+                            OUT_FIT2DPARAMS=kappaFit2DParams, $
+                            MAKE_FIT2D_INFO=make_fit2D_info, $
+                            OUT_FIT2D_FITINFO=kappaFit2D_info, $
+                            PRINT_2DFITINFO=print_2DFitInfo, $
+                            FITSTRING='Kappa', $
+                            MONTE_CARLO_MODE=Monte_Carlo_mode, $
+                            MC__OKSTATUS=MC__OKStatus, $
+                            MC__FITSTRUCT=curKappaStr
 
-     ;; IF STRMATCH(timeFNStr,'*09_26_57*') THEN STOP
+     IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 
-     KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr,hadSuccessK, $
-                              IN_FIT2D_PARAMS=kappaFit2DParams, $
-                              FIT2D_FITINFO=kappaFit2D_info, $
-                              ERANGE_PEAK=eRange_peak, $
-                              SHIFTTHETA=shiftTheta, $
-                              FITANGLE_I=kappaFitAngle_index, $
-                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
-                              UNITS=units, $
-                              OPTIONAL__FIT1DINFO=kappaFit, $
-                              FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
-                              FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
-                              FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
-                              FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
-                              FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
-                              FIT2D__SHOW__FITSTRING='Kappa', $
-                              PRINT_2DFITINFO=print_2DFitInfo, $
-                              TIMEFNSTR=timeFNStr
+        ;; IF STRMATCH(timeFNStr,'*09_26_57*') THEN STOP
+
+        KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr,hadSuccessK, $
+                                 IN_FIT2D_PARAMS=kappaFit2DParams, $
+                                 FIT2D_FITINFO=kappaFit2D_info, $
+                                 ERANGE_PEAK=eRange_peak, $
+                                 SHIFTTHETA=shiftTheta, $
+                                 FITANGLE_I=kappaFitAngle_index, $
+                                 EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
+                                 UNITS=units, $
+                                 OPTIONAL__FIT1DINFO=kappaFit, $
+                                 FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
+                                 FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
+                                 FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
+                                 FIT2D__SAVE_ALL_PLOTS=fit2D__save_all_plots, $
+                                 FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
+                                 FIT2D__SHOW__FITSTRING='Kappa', $
+                                 PRINT_2DFITINFO=print_2DFitInfo, $
+                                 TIMEFNSTR=timeFNStr
 
 
-  ENDIF
+     ENDIF
 
-  IF hadSuccessK THEN BEGIN
+  ENDIF ELSE BEGIN
 
-     IF SIZE(fit2DKappa_inf_list,/TYPE) NE 0 THEN $
-        fit2DKappa_inf_list.Add,TEMPORARY(kappaFit2D_info)
+     dispensation = 1
 
-     IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+  ENDELSE
 
-        ;; The following IF statement ensures that we don't beef up the fit2dParamArr if
-        ;;the Gaussian fit turns out to be bad
-        IF ~(KEYWORD_SET(Monte_Carlo_mode) AND $
-             KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate)) THEN BEGIN
+  IF KEYWORD_SET(hadSuccessK) OR KEYWORD_SET(dispensation) THEN BEGIN
 
-           IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
-              kappaFit2DParamArr = kappaFit2DParams
-           ENDIF ELSE BEGIN
-              kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
-           ENDELSE
+     IF KEYWORD_SET(hadSuccessK) THEN BEGIN
+
+        IF SIZE(fit2DKappa_inf_list,/TYPE) NE 0 THEN $
+           fit2DKappa_inf_list.Add,TEMPORARY(kappaFit2D_info)
+
+        IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
+
+           ;; The following IF statement ensures that we don't beef up the fit2dParamArr if
+           ;;the Gaussian fit turns out to be bad
+           IF ~(KEYWORD_SET(Monte_Carlo_mode) AND $
+                KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate)) THEN BEGIN
+
+              IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
+                 kappaFit2DParamArr = kappaFit2DParams
+              ENDIF ELSE BEGIN
+                 kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
+              ENDELSE
+
+           ENDIF
 
         ENDIF
 
      ENDIF
 
-     IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
+     IF (KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) AND ~KEYWORD_SET(Monte_Carlo_mode)) OR KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
         
         KAPPA_FIT2D__HORSESHOE,curDataStr, $
                                hadSuccessG, $
@@ -185,7 +199,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
         ENDIF
 
-        IF hadSuccessG THEN BEGIN
+        
+        IF hadSuccessG AND KEYWORD_SET(hadSuccessK) THEN BEGIN
 
            IF SIZE(fit2DGauss_inf_list,/TYPE) NE 0 THEN $
               fit2DGauss_inf_list.ADD,TEMPORARY(gaussFit2D_info)
@@ -201,9 +216,10 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
               ;; Pick up kappa params here because now we know both fits were good
               IF KEYWORD_SET(Monte_Carlo_mode) THEN BEGIN
                  IF N_ELEMENTS(kappaFit2DParamArr) EQ 0 THEN BEGIN
-                    kappaFit2DParamArr = kappaFit2DParams
+                    kappaFit2DParamArr = TEMPORARY(MC_KFP2D_HOLDOVER)
                  ENDIF ELSE BEGIN
-                    kappaFit2DParamArr = [[kappaFit2DParamArr],[kappaFit2DParams]]
+                    kappaFit2DParamArr = [[kappaFit2DParamArr], $
+                                          [TEMPORARY(MC_KFP2D_HOLDOVER)]]
                  ENDELSE
               ENDIF
 
@@ -211,6 +227,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
         ENDIF
 
+     ENDIF ELSE IF KEYWORD_SET(Monte_Carlo_mode) THEN BEGIN
+        MC_KFP2D_HOLDOVER = TEMPORARY(kappaFit2DParams)
      ENDIF
 
   ENDIF

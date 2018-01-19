@@ -91,6 +91,7 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
   ;; outFil = outFil.Replace('20180117',GET_TODAY_STRING(/DO_YYYYMMDD_FMT))
   outFil = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + $
            STRMID(outFil,8,STRLEN(outFil)-8)
+  outFil = outFil.Replace('.sav','-'+nRollStr+'.sav')
 
   SPAWN,'cd ' + inDir + '; ls ' + filPref + '*' + filSuff,fileList
 

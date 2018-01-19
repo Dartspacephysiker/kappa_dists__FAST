@@ -32,6 +32,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              UNITS=units, $
                              MASS=mass, $
                              AVGFACTORARR=avgFactorArr, $
+                             ONLY_GAUSSIAN_ESTIMATE=only_Gaussian_estimate, $
                              MONTE_CARLO_MODE=monte_carlo_mode
 
   COMPILE_OPT idl2,STRICTARRSUBS
@@ -67,9 +68,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   contKappa  = 0
 
   ;;Keep the original guesses
-  Aorig = A
+  IF ~KEYWORD_SET(only_Gaussian_estimate) THEN Aorig = A
   add_gauss = 0
-  IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+  IF have_curveFit_opt THEN IF (KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) AND ~KEYWORD_SET(monte_carlo_mode)) OR KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
      add_gauss = 1
      AGaussOrig = AGauss
   ENDIF
@@ -149,126 +150,125 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      ENDIF
 
-     UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak, $
-                                NO_ERANGE_PEAK=monte_carlo_mode
-     ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
-     ;;                                        ERANGE_PEAK=eRange_peak)
+     IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
-     ;;Tell routine which units we like
-     A        = MPFITFUN(kappaFunc, $
-                         X,Y, $
-                         WEIGHTS=weights, $
-                         FUNCTARGS=fa, $
-                         BESTNORM=bestNorm, $
-                         NFEV=nfev, $
-                         FTOL=have_curveFit_opt ? $
-                         (KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
-                          kCurvefit_opt.fit_tol : 1e-3) $
-                         : 1e-3, $
-                         GTOL=1e-13, $
-                         STATUS=status, $
-                         BEST_RESID=best_resid, $
-                         PFREE_INDEX=ifree, $
-                         CALC_FJAC=calc_fjac, $
-                         BEST_FJAC=best_fjac, $
-                         PARINFO=kappaParamStruct, $
-                         QUERY=query, $
-                         NPEGGED=npegged, $
-                         NFREE=nfree, $
-                         DOF=dof, $
-                         COVAR=covar, $
-                         PERROR=perror, $
-                         MAXITER=have_curveFit_opt ? $
-                         ( KEYWORD_SET(kCurvefit_opt.max_iter) ? $
-                           kCurvefit_opt.max_iter : 150) $
-                         : 150, $
-                         NITER=itNum, $
-                         YFIT=yFit, $
-                         /QUIET, $
-                         ERRMSG=errMsg, $
-                         _EXTRA=extra)
+        UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak, $
+                                   NO_ERANGE_PEAK=monte_carlo_mode
+        ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
+        ;;                                        ERANGE_PEAK=eRange_peak)
 
-     ;; IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
-     ;; IF status EQ -16 THEN STOP
-     ;; IF status EQ 0 THEN STOP
+        ;;Tell routine which units we like
+        A        = MPFITFUN(kappaFunc, $
+                            X,Y, $
+                            WEIGHTS=weights, $
+                            FUNCTARGS=fa, $
+                            BESTNORM=bestNorm, $
+                            NFEV=nfev, $
+                            FTOL=have_curveFit_opt ? $
+                            (KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
+                             kCurvefit_opt.fit_tol : 1e-3) $
+                            : 1e-3, $
+                            GTOL=1e-13, $
+                            STATUS=status, $
+                            BEST_RESID=best_resid, $
+                            PFREE_INDEX=ifree, $
+                            CALC_FJAC=calc_fjac, $
+                            BEST_FJAC=best_fjac, $
+                            PARINFO=kappaParamStruct, $
+                            QUERY=query, $
+                            NPEGGED=npegged, $
+                            NFREE=nfree, $
+                            DOF=dof, $
+                            COVAR=covar, $
+                            PERROR=perror, $
+                            MAXITER=have_curveFit_opt ? $
+                            ( KEYWORD_SET(kCurvefit_opt.max_iter) ? $
+                              kCurvefit_opt.max_iter : 150) $
+                            : 150, $
+                            NITER=itNum, $
+                            YFIT=yFit, $
+                            /QUIET, $
+                            ERRMSG=errMsg, $
+                            _EXTRA=extra)
 
-     IF nPegged GT 0 THEN BEGIN
-        temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
-        kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
-        IF kappaPegged AND temperaturePegged THEN BEGIN
-           PRINT,"PEGGED!"
-           iBePegged = 1
+        ;; IF (status LE 0) OR (status GE 5) THEN PRINT,MPFITFUN__IDENTIFY_ERROR(status)
+        ;; IF status EQ -16 THEN STOP
+        ;; IF status EQ 0 THEN STOP
+
+        IF nPegged GT 0 THEN BEGIN
+           temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1
+           kappaPegged         = (WHERE(ifree EQ 2))[0] EQ -1
+           IF kappaPegged AND temperaturePegged THEN BEGIN
+              PRINT,"PEGGED!"
+              iBePegged = 1
+           ENDIF ELSE BEGIN
+              iBePegged  = 0
+           ENDELSE
+           ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
+           ;;    iBePegged = 1
+           ;; ENDIF ELSE BEGIN
+           ;;    iBePegged = 0
+           ;; ENDELSE
         ENDIF ELSE BEGIN
-           iBePegged  = 0
+           iBePegged    = 0
         ENDELSE
-        ;; IF ABS(A[2]-kappaParamStruct[2].limits[0]) LT 0.001 THEN BEGIN
-        ;;    iBePegged = 1
-        ;; ENDIF ELSE BEGIN
-        ;;    iBePegged = 0
-        ;; ENDELSE
-     ENDIF ELSE BEGIN
-        iBePegged    = 0
-     ENDELSE
 
-     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) THEN BEGIN
-     ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
-     IF ((WHERE(status EQ OKStatus))[0] NE -1) AND ~KEYWORD_SET(iBePegged) THEN BEGIN
-        fitStatus = 0 
-        kappaParamStruct[*].value = A
-     ENDIF ELSE BEGIN
-        fitStatus = 1
-     ENDELSE
+        ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) THEN BEGIN
+        ;; IF ((WHERE(status EQ OKStatus))[0] NE -1) AND (nPegged EQ 0 ) THEN BEGIN
+        IF ((WHERE(status EQ OKStatus))[0] NE -1) AND ~KEYWORD_SET(iBePegged) THEN BEGIN
+           fitStatus = 0 
+           kappaParamStruct[*].value = A
+        ENDIF ELSE BEGIN
+           fitStatus = 1
+        ENDELSE
 
-     IF KEYWORD_SET(fitStatus) THEN BEGIN
-        IF ~KEYWORD_SET(dont_print_fitInfo) THEN PRINT,'kappaFit failure ...'
-        chi2            = -1
-        pVal            = -1
-     ENDIF ELSE BEGIN
+        IF KEYWORD_SET(fitStatus) THEN BEGIN
+           IF ~KEYWORD_SET(dont_print_fitInfo) THEN PRINT,'kappaFit failure ...'
+           chi2            = -1
+           pVal            = -1
+        ENDIF ELSE BEGIN
 
-        chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (weighting EQ 1) ? ABS(weights) : 1.D) )
+           chi2           = TOTAL( (Y-yFit)^2 * ABS(weights) * ( (weighting EQ 1) ? ABS(weights) : 1.D) )
 
-     IF FINITE(chi2) THEN BEGIN
-        pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-N_ELEMENTS(WHERE(~kappa_fixA))) ;Subtract number of free params
-        checkMath = CHECK_MATH()
-        IF (checkMath AND 16) OR (checkMath AND 32) THEN STOP
-     ENDIF ELSE BEGIN
-        pVal                        = -1
-     ENDELSE
+           IF FINITE(chi2) THEN BEGIN
+              pVal                        = 1 - CHISQR_PDF(chi2,N_ELEMENTS(X)-N_ELEMENTS(WHERE(~kappa_fixA))) ;Subtract number of free params
+              checkMath = CHECK_MATH()
+              IF (checkMath AND 16) OR (checkMath AND 32) THEN STOP
+           ENDIF ELSE BEGIN
+              pVal                        = -1
+           ENDELSE
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        ;;Calculate chi and things if it checks out
+           ;;Calculate chi and things if it checks out
 
-        ;;need to adjust Y bounds?
-        ;; yMax                        = MAX(yFit) 
+           ;;need to adjust Y bounds?
+           ;; yMax                        = MAX(yFit) 
 
-        IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
-           PRINT,"Fitted spectral properties: "
-           PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,A
-           PRINT,''
-        ENDIF
-     ENDELSE
+           IF ~KEYWORD_SET(dont_print_fitInfo) THEN BEGIN
+              PRINT,"Fitted spectral properties: "
+              PRINT_KAPPA_FLUX_FIT_PARAMS__MPFITFUN,A
+              PRINT,''
+           ENDIF
+        ENDELSE
 
-     IF KEYWORD_SET(fit_fail__user_prompt) AND fitStatus GT 0 THEN BEGIN
-        
-        tmpA             = [A[0],A[1],A[2],A[3],0,0,A[4]]
-        tmpfixA          = ~[kappa_fixA[0],kappa_fixA[1],kappa_fixA[2],kappa_fixA[3],1,1,kappa_fixA[4]]
-        KAPPA__FIT_FAIL_USER_PROMPT,tmpA,tmpfixA,energy_inds, $
-                                    Xorig,X,Yorig,Y, $
-                                    STRINGS=strings, $
-                                    BOUNDS_I=bounds_i
+        IF KEYWORD_SET(fit_fail__user_prompt) AND fitStatus GT 0 THEN BEGIN
+           
+           tmpA             = [A[0],A[1],A[2],A[3],0,0,A[4]]
+           tmpfixA          = ~[kappa_fixA[0],kappa_fixA[1],kappa_fixA[2],kappa_fixA[3],1,1,kappa_fixA[4]]
+           KAPPA__FIT_FAIL_USER_PROMPT,tmpA,tmpfixA,energy_inds, $
+                                       Xorig,X,Yorig,Y, $
+                                       STRINGS=strings, $
+                                       BOUNDS_I=bounds_i
+
+        ENDIF ELSE BEGIN
+           contKappa                = 1
+        ENDELSE
 
      ENDIF ELSE BEGIN
-        contKappa                = 1
+        contKappa = 1
      ENDELSE
 
   ENDWHILE
-
-  ;; out_kappaParams           = N_ELEMENTS(out_kappaParams) GT 0 ? $
-  ;;                             [[out_kappaParams],[A]] : A
-  ;; IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
-  ;;    out_eRange_peak        = N_ELEMENTS(out_eRange_peak) GT 0 ? $
-  ;;                             [[out_eRange_peak],[eRange_peak]] : eRange_peak
-  ;; ENDIF
 
   IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
      out_paramStr           = STRING(FORMAT='(A0,"--",A0,A0,"--orb_",A0,"__",A0,"--",I0,"-",I0,".txt")', $
@@ -279,54 +279,58 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                      strings.orbDate)
   ENDIF
 
-  kappaFit                    = {x           : X, $
-                                 y           : yFit, $
-                                 ;; NAME     : "Kappa distribution", $
-                                 NAME        : STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",A[2]), $
-                                 A           : A, $
-                                 A_initGuess : TEMPORARY(Aorig), $
-                                 time        : timeStr, $
-                                 time_index  : bounds_i, $
-                                 fitStatus   : TEMPORARY(fitStatus), $
-                                 chi2        : TEMPORARY(chi2), $
-                                 pVal        : TEMPORARY(pVal)}
+  IF ~KEYWORD_SET(only_Gaussian_estimate) AND ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
 
-  IF KEYWORD_SET(add_full_fits) THEN BEGIN
-     ;; xFull = add_full_fits
-     ;; xFull = Xorig
-     ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
-     ;;    xFull = [extend_fitStruct_eRange,xFull]
+     kappaFit = {x           : X, $
+                 y           : yFit, $
+                 ;; NAME     : "Kappa distribution", $
+                 NAME        : STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",A[2]), $
+                 A           : A, $
+                 A_initGuess : TEMPORARY(Aorig), $
+                 time        : timeStr, $
+                 time_index  : bounds_i, $
+                 fitStatus   : TEMPORARY(fitStatus), $
+                 chi2        : TEMPORARY(chi2), $
+                 pVal        : TEMPORARY(pVal)}
+
+     IF KEYWORD_SET(add_full_fits) THEN BEGIN
+        ;; xFull = add_full_fits
+        ;; xFull = Xorig
+        ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+        ;;    xFull = [extend_fitStruct_eRange,xFull]
+        ;; ENDIF
+        ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
+        ;;    energyStep = Xorig[0]/Xorig[1]
+        ;;    xFull = [REVERSE(Xorig[0]*energyStep^(INDGEN(3)+1)), $
+        ;;             Xorig]
+        ;; ENDIF ELSE BEGIN
+        ;;    xFull = Xorig
+        ;; ENDELSE
+        
+        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
+                                                                       UNITS=units, $
+                                                                       MASS=mass)
+        kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
+     ENDIF
+
+     IF KEYWORD_SET(add_angleStr) THEN BEGIN
+        ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
+     ENDIF
+
+     IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+        A[3] *= avgFactorArr[bounds_i]
+        kappaFit.A[3] *= avgFactorArr[bounds_i]
+     ENDIF
+
      ;; ENDIF
-     ;; IF KEYWORD_SET(extend_fitStruct_eRange) THEN BEGIN
-     ;;    energyStep = Xorig[0]/Xorig[1]
-     ;;    xFull = [REVERSE(Xorig[0]*energyStep^(INDGEN(3)+1)), $
-     ;;             Xorig]
-     ;; ENDIF ELSE BEGIN
-     ;;    xFull = Xorig
-     ;; ENDELSE
-     
-     yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
-                                                                    UNITS=units, $
-                                                                    MASS=mass)
-     kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
-  ENDIF
 
-  IF KEYWORD_SET(add_angleStr) THEN BEGIN
-     ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
-  ENDIF
+     add_orig = ~KEYWORD_SET(monte_carlo_mode)
+     IF KEYWORD_SET(add_orig) THEN BEGIN
+        IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.trim_energies_below_peak) THEN $
+           orig        = CREATE_STRUCT(orig,'energy_inds',energy_inds)
+        kappaFit       = CREATE_STRUCT(kappaFit,"orig",orig)
+     ENDIF
 
-  IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
-     A[3] *= avgFactorArr[bounds_i]
-     kappaFit.A[3] *= avgFactorArr[bounds_i]
-  ENDIF
-
-     ;; ENDIF
-
-  add_orig = 1
-  IF KEYWORD_SET(add_orig) THEN BEGIN
-     IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.trim_energies_below_peak) THEN $
-        orig        = CREATE_STRUCT(orig,'energy_inds',energy_inds)
-     kappaFit       = CREATE_STRUCT(kappaFit,"orig",orig)
   ENDIF
 
   IF KEYWORD_SET(add_gauss) THEN BEGIN
@@ -357,10 +361,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               DOF=gaussDOF, $
                               COVAR=covar, $
                               PERROR=perror, $
-                                    MAXITER=have_curveFit_opt ? $
-                                    (KEYWORD_SET(kCurvefit_opt.max_iter) ? $
-                                     kCurvefit_opt.max_iter : 150) $
-                                    : 150, $
+                              MAXITER=have_curveFit_opt ? $
+                              (KEYWORD_SET(kCurvefit_opt.max_iter) ? $
+                               kCurvefit_opt.max_iter : 150) $
+                              : 150, $
                               NITER=itNum, $
                               YFIT=yGaussFit, $
                               /QUIET, $
@@ -430,44 +434,49 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ENDIF
      ENDELSE
 
-     gaussFit              = {x           : KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
-                              y           : yGaussFit, $
-                              name        : "Maxwellian" + $
-                                            (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
-                              A           : AGauss, $
-                              A_initGuess : TEMPORARY(AGaussOrig), $
-                              time        : timeStr, $
-                              time_index  : bounds_i, $
-                              fitStatus   : TEMPORARY(gaussFitStatus), $
-                              chi2        : TEMPORARY(chi2), $
-                              pVal        : TEMPORARY(pValGauss), $
-                              is_sdt_fit  : KEYWORD_SET(use_SDT_Gaussian_fit)}
+     IF ~KEYWORD_SET(monte_carlo_mode) THEN BEGIN
+        gaussFit = {x           : KEYWORD_SET(use_SDT_Gaussian_fit) ? X_SDT : X, $
+                    y           : yGaussFit, $
+                    name        : "Maxwellian" + $
+                    (KEYWORD_SET(use_SDT_Gaussian_fit) ? "_SDT" : ''), $
+                    A           : AGauss, $
+                    A_initGuess : TEMPORARY(AGaussOrig), $
+                    time        : timeStr, $
+                    time_index  : bounds_i, $
+                    fitStatus   : TEMPORARY(gaussFitStatus), $
+                    chi2        : TEMPORARY(chi2), $
+                    pVal        : TEMPORARY(pValGauss), $
+                    is_sdt_fit  : KEYWORD_SET(use_SDT_Gaussian_fit)}
 
-     IF KEYWORD_SET(add_full_fits) THEN BEGIN
-        CASE 1 OF
-           KEYWORD_SET(use_SDT_Gaussian_fit): BEGIN
-              MAXWELLIAN_1,Xorig,AGauss_SDT,yGaussFull
-           END
-           ELSE: BEGIN
-              ;; yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss, $
-              ;;                                                                     UNITS=units, $
-              ;;                                                                     MASS=mass)
-              yGaussFull = MAXWELL_FLUX__FUNC(add_full_fits,AGauss, $
-                                              UNITS=units, $
-                                              MASS=mass)
-           END
-        ENDCASE
-        gaussFit                 = CREATE_STRUCT(gaussFit,"xFull",add_full_fits,"yFull",yGaussFull)
+        IF KEYWORD_SET(add_full_fits) THEN BEGIN
+           CASE 1 OF
+              KEYWORD_SET(use_SDT_Gaussian_fit): BEGIN
+                 MAXWELLIAN_1,Xorig,AGauss_SDT,yGaussFull
+              END
+              ELSE: BEGIN
+                 ;; yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss, $
+                 ;;                                                                     UNITS=units, $
+                 ;;                                                                     MASS=mass)
+                 yGaussFull = MAXWELL_FLUX__FUNC(add_full_fits,AGauss, $
+                                                 UNITS=units, $
+                                                 MASS=mass)
+              END
+           ENDCASE
+           gaussFit = CREATE_STRUCT(gaussFit,"xFull", $
+                                    add_full_fits, $
+                                    "yFull",yGaussFull)
 
-     ENDIF
+        ENDIF
 
-     IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
-        AGauss[3] *= avgFactorArr[bounds_i]
-        gaussFit.A[3] *= avgFactorArr[bounds_i]
-     ENDIF
+        IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
+           AGauss[3] *= avgFactorArr[bounds_i]
+           gaussFit.A[3] *= avgFactorArr[bounds_i]
+        ENDIF
 
-     IF KEYWORD_SET(add_angleStr) THEN BEGIN
-        ADD_STR_ELEMENT,gaussFit,'bulkAngleInf',add_angleStr
+        IF KEYWORD_SET(add_angleStr) THEN BEGIN
+           ADD_STR_ELEMENT,gaussFit,'bulkAngleInf',add_angleStr
+        ENDIF
+
      ENDIF
 
      out_gaussParams  = N_ELEMENTS(out_gaussParams) GT 0 ? $

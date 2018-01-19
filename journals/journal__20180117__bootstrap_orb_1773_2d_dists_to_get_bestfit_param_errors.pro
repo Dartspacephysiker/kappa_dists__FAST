@@ -1,6 +1,7 @@
 ;2018/12/21
 ;NWO!! Steiner, Hollywood—all of 'em
-PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
+PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,CARLOTIMESTART=carloTimeStart, $
+   CARLOTIMESTOP=carloTimeStop
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -13,6 +14,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   diff_eFlux_fil = 'orb_1773-diff_eflux-ees-avg_itvl2-09_26_10__000-09_27_15__000.sav'
 
   nRolls         = 10000
+  ;; nRolls         = 10000
+  ;; nRolls         = 10000
 
   make_fit2D_info     = 0       ;Much more info than we need
   make_fit2DParamArrs = 1       ;Juuust right
@@ -41,8 +44,8 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
   ;; carloTimeStop  = '09:27:05'
 
   ;; 'chine 1
-  carloTimeStart = '09:26:11'
-  carloTimeStop  = '09:27:11'
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '09:26:11'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '09:27:11'
 
   ;; Some are already done
   ;; carloTimeStart = '09:26:11'
@@ -196,73 +199,32 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
      ;; Now get the data
      IF observed_dist THEN BEGIN
-        carlo = obsStructArr[match_i]
+        carloK = obsStructArr[match_i]
+
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           carloG = obsStructArr[match_i]
+        ENDIF
 
      ENDIF ELSE BEGIN
-        carlo = fit2DKappa_inf_list[match_i].sdt
-        ;; carlo = synthPackage[1,match_i]
+        carloK = fit2DKappa_inf_list[match_i].sdt
 
-        ;; shiftTheta = 0
-        ;; carlo.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
-        ;;                 carlo.energy, $
-        ;;                 SHIFT(carlo.theta,0,shiftTheta), $
-        ;;                 fit2DKappa_inf_list[match_i].fitParams, $
-        ;;                 UNITS=units, $
-        ;;                 MASS=carlo.mass)
-
-        ;; WAIT! Use best-fit param data, but experimental error!
-        ;; tmpStr          = CONV_UNITS(carlo,'counts')
-        ;; tmpStr.ddata    = (tmp3d.data)^.5
-        ;; carlo            = CONV_UNITS(TEMPORARY(tmpStr),units)
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           carloG = fit2DGauss_inf_list[match_i].sdt
+        ENDIF
 
      ENDELSE
 
-     ;; energy_inds = WHERE(carlo.energy[*,0] LE 34120.)
-
-     ;; nEnergies = N_ELEMENTS(energy_inds)
-     ;; nAngles = carlo.nBins
-
-     ;; carlo = { $
-     ;;        data_name        : carlo.data_name, $
-     ;;        valid            : carlo.valid, $
-     ;;        project_name     : carlo.project_name, $
-     ;;        units_name       : carlo.units_name, $
-     ;;        units_procedure  : carlo.units_procedure, $
-     ;;        time             : carlo.time, $
-     ;;        end_time         : carlo.end_time, $
-     ;;        integ_t          : carlo.integ_t, $
-     ;;        nbins            : carlo.nbins, $
-     ;;        nenergy          : nEnergies, $
-     ;;        data             : carlo.data[energy_inds, *], $
-     ;;        ddata            : carlo.ddata[energy_inds, *], $
-     ;;        energy           : carlo.energy[energy_inds, *], $
-     ;;        theta            : carlo.theta[energy_inds, *], $
-     ;;        geom             : carlo.geom[energy_inds, *], $
-     ;;        denergy          : carlo.denergy[energy_inds, *], $
-     ;;        dtheta           : carlo.dtheta, $
-     ;;        eff              : carlo.eff[energy_inds], $
-     ;;        mass             : carlo.mass, $
-     ;;        geomfactor       : carlo.geomfactor, $
-     ;;        header_bytes     : carlo.header_bytes, $
-     ;;        st_index         : carlo.st_index, $
-     ;;        en_index         : carlo.en_index, $
-     ;;        npts             : carlo.npts, $
-     ;;        index            : carlo.index}
-
      ;; Whatever the case, use observed uncertainties
-     carlo.ddata = (obsStructArr[match_i]).ddata
-
-     ;; carlo = {x      : kappaFits[match_i[0]].x, $
-     ;;         y      : kappaFits[match_i[0]].y, $
-     ;;         yerror : kappaFits[match_i[0]].orig.yerror[kappaFits[match_i[0]].orig.energy_inds[0]:kappaFits[match_i[0]].orig.energy_inds[1]]}
+     carloK.ddata = (obsStructArr[match_i]).ddata
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+        carloG.ddata = (obsStructArr[match_i]).ddata
+     ENDIF
 
      ;; Params
      Pkappa         = fit2DKappa_inf_list[match_i].fitParams
      Pgauss         = fit2DGauss_inf_list[match_i].fitParams
 
      mass           = fit2DKappa_inf_list[match_i].sdt.mass
-
-     ;; PRINT,carlo.x[carlo.energy_inds[0]:carlo.energy_inds[1]] ;Range of energies used
 
      tmpTidString = STRSPLIT(tidString[match_i],'/',/EXTRACT)
      IF N_ELEMENTS(tmpTidString) GT 0 THEN tmpTidString = tmpTidString[1] ELSE tmpTidString = tmpTidString[0]
@@ -279,7 +241,7 @@ PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 
      IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP
 
-     KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carlo,Pkappa,Pgauss, $
+     KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carloK,carloG,Pkappa,Pgauss, $
                                          TIDFNSTR=tidFNStr, $
                                          NROLLS=nRolls, $
                                          NOT_MPFIT1D=not_mpFit1D, $
