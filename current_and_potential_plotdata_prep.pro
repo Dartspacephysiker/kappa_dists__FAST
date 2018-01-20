@@ -278,6 +278,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
         pot = curPotList[edind].charE
 
+        only_downE_pot = curPotList[edind].charE
+        
         ;;Nope, going to have to cop out for the time being
         potErr[*,0] = curPotList[edind].charEErr
         ;; potErr[*,0] = curPotList[edind].peakErr
@@ -307,6 +309,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
         pot = curPotList[edind].peakE
 
+        only_downE_pot = curPotList[edind].peakE
+        
         potErr[*,0] = curPotList[edind].peakErr
 
         IF KEYWORD_SET(add_iu_pot) THEN BEGIN
@@ -403,7 +407,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                 cur        : cur       [safe_i] , $
                 je         : je        [safe_i] , $
                 pot        : pot       [safe_i] , $
-                only_downE_pot : curPotList[edind].charE[safe_i], $
+                only_downE_pot :only_downE_pot[safe_i] , $
                 curErr     : curErr    [safe_i] , $
                 jeErr      : jeErr     [safe_i] , $
                 potErr     : potErr    [safe_i] , $

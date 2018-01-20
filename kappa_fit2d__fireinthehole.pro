@@ -170,6 +170,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                ;; IN_ESTIMATED_LC=estimated_lc, $
                                UNITS=units, $
                                OUT_FIT2DPARAMS=gaussFit2DParams, $
+                               MAKE_FIT2D_INFO=make_fit2D_info, $
                                OUT_FIT2D_FITINFO=gaussFit2D_info, $
                                PRINT_2DFITINFO=print_2DFitInfo, $
                                FITSTRING='Maxwellian', $
