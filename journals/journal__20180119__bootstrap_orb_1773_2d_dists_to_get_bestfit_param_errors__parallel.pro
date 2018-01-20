@@ -1,3 +1,16 @@
+;; 2018/01/19
+;; It woiks
+;; 2018/01/20
+;; Somehow we missed a bunch of files...
+;; These'ns:
+;; orb1773_2DMCarlo_ests__09_26_41__669_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_42__301_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_42__933_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_43__565_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_45__461_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_47__357_synthetic_wGauss-10000Rolls-fit2DParams.sav
+;; orb1773_2DMCarlo_ests__09_26_48__621_synthetic_wGauss-10000Rolls-fit2DParams.sav
+
 PRO JOURNAL__20180119__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL
 
   mainRoutine = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/journal__20180117__bootstrap_orb_1773_2d_dists_to_get_bestfit_param_errors.pro'
@@ -32,14 +45,29 @@ PRO JOURNAL__20180119__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   IDLChildOutput = IDLChildDir + IDLChildPref + STRCOMPRESS(INDGEN(nCPUs),/REMOVE_ALL) + '.txt'
 
 
-  carloTimeArr = [['09:26:11','09:26:20'], $
-                  ['09:26:21','09:26:30'], $
-                  ['09:26:31','09:26:40'], $
-                  ['09:26:41','09:26:50'], $
-                  ['09:26:51','09:27:00'], $
-                  ['09:27:01','09:27:11']]
+  ;; carloTimeArr = [['09:26:11','09:26:20'], $
+  ;;                 ['09:26:21','09:26:30'], $
+  ;;                 ['09:26:31','09:26:40'], $
+  ;;                 ['09:26:41','09:26:50'], $
+  ;;                 ['09:26:51','09:27:00'], $
+  ;;                 ['09:27:01','09:27:11']]
+
+  ;; Fixers from 2018/01/19 run
+  ;; ;; carloTimeArr = [['09:26:41.669','09:26:41.669'], $
+  ;; ;;                 ['09:26:42.301','09:26:42.301'], $
+  ;; ;;                 ['09:26:42.933','09:26:42.933'], $
+  ;; ;;                 ['09:26:43.565','09:26:43.565'], $
+  ;; ;;                 ['09:26:45.461','09:26:45.461'], $
+  ;; ;;                 ['09:26:47.357','09:26:47.357'], $
+  ;; ;;                 ['09:26:48.621','09:26:48.621']]
+
+  ;; carloTimeArr = [['09:26:42.301','09:26:42.301'], $
+  ;;                 ['09:26:42.933','09:26:42.933'], $
+  ;;                 ['09:26:45.461','09:26:45.461']]
 
   nCPUsToRun = N_ELEMENTS(carloTimeArr[0,*])
+
+  IF nCPUsToRun GT nCPUs THEN STOP
 
   IF ~KEYWORD_SET(startCPU  ) THEN startCPU   = 0
   stopCPU = (N_ELEMENTS(stopCPU) GT 0 ? stopCPU : (startCPU + nCPUsToRun - 1) < (nCPUs - 1))

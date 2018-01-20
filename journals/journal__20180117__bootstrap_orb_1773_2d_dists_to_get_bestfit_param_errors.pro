@@ -1,5 +1,11 @@
-;2018/12/21
+;2018/01/17
 ;NWO!! Steiner, Hollywood—all of 'em
+
+;2018/01/20
+;For some reason, when running this with the parallelized journal from 20180119,
+;I missed a bunch of times around 09:26:41--47. Test cmd line:
+;; JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,CARLOTIMESTART='09:26:41.669', $
+;;    CARLOTIMESTOP='09:26:42.301'
 PRO JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,CARLOTIMESTART=carloTimeStart, $
    CARLOTIMESTOP=carloTimeStop
 

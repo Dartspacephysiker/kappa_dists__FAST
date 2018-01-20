@@ -312,10 +312,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $
      _EXTRA=cAP_struct
-
-  ;; PRINT,"PRESUMABLY YOU NEED TO SPECIFY WHICH TEMPERATURE TO USE SOMEWHERE AROUND HERE--PARALLEL OR PERP"
-  ;; STOP
-  
+ 
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       T1=plot_t1, $
                                       T2=plot_t2, $

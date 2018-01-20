@@ -33,6 +33,11 @@ FUNCTION GET_SPREAD_FOR_MC_PARMS,mostProbVal,parmArr,parmStep,parmMinVal,binSize
 
      nTry++
 
+     ;; IF ~(nTry MOD 10) THEN PRINT,FORMAT='("try ",I04,": ",F0.3,"/",F0.2)', $
+     ;;                             nTry, $
+     ;;                             captured, $
+     ;;                             frac
+
      IF nTry EQ  1000 THEN PRINT,"Hit 1000 ..."
      IF nTry EQ  2000 THEN PRINT,"Hit 2000 ..."
      IF nTry EQ 30000 THEN BEGIN
@@ -56,7 +61,7 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
   nRolls  = 10000               ;2018/01/19
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
-  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180118/'
+  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180119/'
   ;; inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180118/' + nRollStr + '/'
   filPref = 'orb1773_2DMCarlo_ests__'
   filSuff = '_synthetic_wGauss-' + nRollStr + '-fit2DParams.sav'
@@ -99,7 +104,7 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
   kBinSize      = 0.05
   TBinSize      = 10
   BulkEBinSize  = 10
-  NBinSize      = 0.01
+  NBinSize      = 0.02
 
   ;; stepsizes for getting percentages
   kStepSize     = 0.01
@@ -177,17 +182,24 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
         fGSprArr = MAKE_ARRAY(3,nHere,/FLOAT)
 
      ENDELSE
-
+     
+     IF KEYWORD_SET(make_2D_uncert) THEN $
+        PRINT,FORMAT='(A8,TR3,A8,TR3,A7,TR3,A6,TR5,A8,TR3,A8,TR3,A6)', $
+              "KBulkE","KTemp","kappa","K N","GBulkE","GTemp","G N"
+     
      FOR k=0,nHere-1 DO BEGIN
         
         RESTORE,inDir+fileList[k]
-
-        PRINT,STRMID(fileList[k],STRLEN(filPref),13)
 
         IF fit2DKappa_info.SDT.time NE fit2DGauss_info.SDT.time THEN STOP
         tidKArr[k] = fit2DKappa_info.SDT.time
         tidGArr[k] = fit2DGauss_info.SDT.time
            
+        PRINT,FORMAT='(I03," : ",A0," (",F0.5,")")', $
+              k, $
+              STRMID(fileList[k],STRLEN(filPref),13), $
+              tidKArr[k]-tidKArr[(k-1)>0]
+
         ;; Pick up original fitParams
         K2Dparm = fit2DKappa_info.fitParams
         g2Dparm = fit2DGauss_info.fitParams
@@ -249,6 +261,15 @@ PRO JOURNAL__20180118__CHECK_OUT_2D_MONTE_CARLOERS
                  ;; fGSprArr[*,kk,k] = g2DParm[kk] + STDDEV(fGArr[kk,*]) * multFac > lowLimG[kk]
 
               ENDFOR
+
+              PRINT,FORMAT='(G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3)', $
+                    fKMostProb[0,k], $
+                    fKMostProb[1,k], $
+                    fKMostProb[2,k], $
+                    fKMostProb[3,k], $
+                    fGMostProb[0,k], $
+                    fGMostProb[1,k], $
+                    fGMostProb[2,k]
 
            END
            ELSE: BEGIN

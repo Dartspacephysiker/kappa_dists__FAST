@@ -135,7 +135,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      FITFILE=fitFile, $
      FIT2DPARMERRFILE=fit2DParmErrFile, $
-     FIT2DPARMERR_NROLLS=fit2DParmErr_nRolls, $
      LOADDIR=outDir
 
   restored_fitFile = 0B

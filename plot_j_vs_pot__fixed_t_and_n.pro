@@ -122,7 +122,7 @@ PRO PLOT_J_VS_POT__FIXED_T_AND_N,jvPlotData,avgs_JVfit,pData, $
                                LINESTYLE='', $
                                NAME=dataName, $
                                TITLE=titleStr, $
-                               XTITLE='$\Phi$ (V)', $
+                               XTITLE='$\Delta \Phi$ (V)', $
                                ;; YTITLE='Current Density at 100 km ($\mu$A/m!U2!N)', $
                                YTITLE=pData.yTitle, $
                                ;; XRANGE=xRange, $
