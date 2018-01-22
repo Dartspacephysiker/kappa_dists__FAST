@@ -75,6 +75,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           KSUM__ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
                           KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
+                          KSUM__ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
@@ -813,6 +814,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
                              ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
+                             ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
                              FIT2DPARMERRFILE=fit2DParmErrFile, $
                              FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars

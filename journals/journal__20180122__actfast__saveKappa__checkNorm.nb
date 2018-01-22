@@ -1,0 +1,1504 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     54900,       1496]
+NotebookOptionsPosition[     50066,       1324]
+NotebookOutlinePosition[     50606,       1344]
+CellTagsIndexPosition[     50563,       1341]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Barbosa kappa func", "Chapter",
+ CellChangeTimes->{{3.725638600586006*^9, 3.725638607065695*^9}, {
+  3.725643652060483*^9, 3.725643655892557*^9}},
+ ExpressionUUID -> "a2098048-db8a-4c38-a5e4-bb780e3faaf7"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"normK", "[", 
+   RowBox[{"V_", ",", "kappa_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["1", 
+    RowBox[{
+     SuperscriptBox["\[Pi]", 
+      RowBox[{"3", "/", "2"}]], 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"2", "-", 
+        FractionBox["3", "kappa"]}], ")"}], 
+      RowBox[{"3", "/", "2"}]]}]], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{
+      FractionBox[
+       SuperscriptBox["kappa", 
+        RowBox[{"3", "/", "2"}]], "2"], 
+      FractionBox[
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "-", 
+         RowBox[{"1", "/", "2"}]}], "]"}], 
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "+", "1"}], "]"}]]}], "+", 
+     RowBox[{
+      FractionBox["V", 
+       RowBox[{
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"2", "-", 
+           FractionBox["3", "kappa"]}], ")"}], 
+         RowBox[{"1", "/", "2"}]], 
+        SuperscriptBox["\[Pi]", 
+         RowBox[{"1", "/", "2"}]]}]], 
+      RowBox[{"Hypergeometric2F1", "[", 
+       RowBox[{
+        FractionBox["1", "2"], ",", "kappa", ",", 
+        FractionBox["3", "2"], ",", 
+        RowBox[{"-", 
+         FractionBox[
+          SuperscriptBox["V", "2"], 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"2", "kappa"}], " ", "-", "3"}], ")"}]]}]}], "]"}]}]}], 
+    ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"barbKappa", "[", 
+   RowBox[{"vpar_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "kappa_"}], 
+   "]"}], ":=", 
+  RowBox[{
+   RowBox[{"normK", "[", 
+    RowBox[{"V", ",", "kappa"}], "]"}], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox[
+       RowBox[{
+        SuperscriptBox["vpar", "2"], "+", 
+        SuperscriptBox["vperp", "2"], "+", 
+        SuperscriptBox["V", "2"], "-", 
+        RowBox[{"2", " ", "V", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{
+            SuperscriptBox["vpar", "2"], "+", 
+            RowBox[{
+             SuperscriptBox["vperp", "2"], 
+             RowBox[{"(", 
+              RowBox[{"1", "-", "alpha"}], ")"}]}]}], ")"}], 
+          RowBox[{"1", "/", "2"}]]}]}], 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"2", " ", "kappa"}], " ", "-", " ", "3"}], ")"}]]}], ")"}], 
+    RowBox[{"-", 
+     RowBox[{"(", 
+      RowBox[{"kappa", "+", "1"}], ")"}]}]], 
+   RowBox[{"UnitStep", "[", "vpar", "]"}]}]}]}], "Input",
+ CellChangeTimes->{{3.725643670820836*^9, 3.725643677159197*^9}, {
+  3.72564371731842*^9, 3.725643864377412*^9}, {3.7256440290169363`*^9, 
+  3.7256440598531733`*^9}, {3.725644163485169*^9, 3.7256442788137302`*^9}, {
+  3.725644396262702*^9, 3.7256444709427443`*^9}, {3.7256445128313313`*^9, 
+  3.725644637472787*^9}, {3.725644671327095*^9, 3.725644681585608*^9}, {
+  3.725644724139431*^9, 3.7256447517222977`*^9}, {3.725644943462164*^9, 
+  3.725644948932272*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"barbDist", "[", 
+   RowBox[{"vz_", ",", "vperp_", ",", "V_", ",", "alpha_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["2", 
+    RowBox[{
+     SuperscriptBox["\[Pi]", 
+      RowBox[{"3", "/", "2"}]], 
+     RowBox[{"Erfc", "[", 
+      RowBox[{"-", "V"}], "]"}]}]], 
+   RowBox[{"Exp", "[", 
+    RowBox[{
+     RowBox[{"-", "1"}], 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["vz", "2"], "+", 
+       SuperscriptBox["vperp", "2"], "+", 
+       SuperscriptBox["V", "2"], "-", 
+       RowBox[{"2", "V", " ", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["vz", "2"], "+", " ", 
+           RowBox[{
+            SuperscriptBox["vperp", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", " ", "-", " ", "alpha"}], ")"}]}]}], " ", ")"}], 
+         RowBox[{"1", "/", "2"}]]}]}], ")"}]}], "]"}], " ", 
+   RowBox[{"UnitStep", "[", "vz", "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"barbDistWA", "[", 
+   RowBox[{"vz_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "a_"}], "]"}],
+   ":=", 
+  RowBox[{
+   FractionBox["2", 
+    RowBox[{
+     SuperscriptBox["\[Pi]", 
+      RowBox[{"3", "/", "2"}]], 
+     SuperscriptBox["a", "3"], 
+     RowBox[{"Erfc", "[", 
+      RowBox[{
+       RowBox[{"-", "V"}], "/", "a"}], "]"}]}]], 
+   RowBox[{"Exp", "[", 
+    RowBox[{
+     RowBox[{"-", 
+      FractionBox["1", 
+       SuperscriptBox["a", "2"]]}], 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["vz", "2"], "+", 
+       SuperscriptBox["vperp", "2"], "+", 
+       SuperscriptBox["V", "2"], "-", 
+       RowBox[{"2", "V", " ", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["vz", "2"], "+", " ", 
+           RowBox[{
+            SuperscriptBox["vperp", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", " ", "-", " ", "alpha"}], ")"}]}]}], " ", ")"}], 
+         RowBox[{"1", "/", "2"}]]}]}], ")"}]}], "]"}], " ", 
+   RowBox[{"UnitStep", "[", "vz", "]"}]}]}]}], "Input",
+ CellChangeTimes->{{3.725638612251462*^9, 3.725638614009935*^9}, {
+   3.7256386517287893`*^9, 3.725638778861442*^9}, {3.7256459041112537`*^9, 
+   3.725645935072029*^9}, {3.725646478746875*^9, 3.725646537396784*^9}, 
+   3.725646584325479*^9, {3.725646730447522*^9, 3.7256467305904713`*^9}},
+ ExpressionUUID -> "f4514e74-58b0-4429-be35-27080bdee789"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"barbDistMod", "[", 
+   RowBox[{"vz_", ",", "vperp_", ",", "V_", ",", "alpha_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["2", 
+    RowBox[{
+     SuperscriptBox["\[Pi]", 
+      RowBox[{"3", "/", "2"}]], 
+     RowBox[{"Erfc", "[", 
+      RowBox[{"-", "V"}], "]"}]}]], 
+   RowBox[{"Exp", "[", 
+    RowBox[{
+     RowBox[{"-", "1"}], 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["vz", "2"], "+", 
+       SuperscriptBox["vperp", "2"], "+", 
+       SuperscriptBox["V", "2"], "-", 
+       RowBox[{"2", "V", " ", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["vz", "2"], "+", " ", 
+           RowBox[{
+            SuperscriptBox["vperp", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", " ", "-", " ", "alpha"}], ")"}]}]}], " ", ")"}], 
+         RowBox[{"1", "/", "2"}]]}]}], ")"}]}], "]"}], " ", 
+   RowBox[{"UnitStep", "[", "vz", "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"barbDistWAMod", "[", 
+   RowBox[{"vz_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "a_"}], "]"}],
+   ":=", 
+  RowBox[{
+   FractionBox["2", 
+    RowBox[{
+     SuperscriptBox["\[Pi]", 
+      RowBox[{"3", "/", "2"}]], 
+     SuperscriptBox["a", "3"], 
+     RowBox[{"Erfc", "[", 
+      RowBox[{
+       RowBox[{"-", "V"}], "/", "a"}], "]"}]}]], 
+   RowBox[{"Exp", "[", 
+    RowBox[{
+     RowBox[{"-", 
+      FractionBox["1", 
+       SuperscriptBox["a", "2"]]}], 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["vz", "2"], "+", 
+       SuperscriptBox["vperp", "2"], "+", 
+       SuperscriptBox["V", "2"], "-", 
+       RowBox[{"2", "V", " ", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["vz", "2"], "+", " ", 
+           RowBox[{
+            SuperscriptBox["vperp", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", " ", "-", " ", "alpha"}], ")"}]}]}], " ", ")"}], 
+         RowBox[{"1", "/", "2"}]]}]}], ")"}]}], "]"}], " ", 
+   RowBox[{"UnitStep", "[", "vz", "]"}]}]}]}], "Input",
+ CellChangeTimes->{{3.725638612251462*^9, 3.725638614009935*^9}, {
+   3.7256386517287893`*^9, 3.725638778861442*^9}, {3.7256459041112537`*^9, 
+   3.725645935072029*^9}, {3.725646478746875*^9, 3.725646537396784*^9}, 
+   3.725646584325479*^9, {3.725646730447522*^9, 3.7256467305904713`*^9}, {
+   3.725647442007571*^9, 3.7256474446258287`*^9}},
+ ExpressionUUID -> "f4514e74-58b0-4429-be35-27080bdee789"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"normKMod", "[", 
+   RowBox[{"V_", ",", "kappa_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["1", 
+    SuperscriptBox["\[Pi]", 
+     RowBox[{"3", "/", "2"}]]], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{
+      FractionBox[
+       SuperscriptBox["kappa", 
+        RowBox[{"3", "/", "2"}]], "2"], 
+      FractionBox[
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "-", 
+         RowBox[{"1", "/", "2"}]}], "]"}], 
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "+", "1"}], "]"}]]}], "+", 
+     RowBox[{
+      FractionBox["V", 
+       SuperscriptBox["\[Pi]", 
+        RowBox[{"1", "/", "2"}]]], 
+      RowBox[{"Hypergeometric2F1", "[", 
+       RowBox[{
+        FractionBox["1", "2"], ",", "kappa", ",", 
+        FractionBox["3", "2"], ",", 
+        RowBox[{"-", 
+         FractionBox[
+          SuperscriptBox["V", "2"], "kappa"]}]}], "]"}]}]}], 
+    ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"barbKappaMod", "[", 
+   RowBox[{"vpar_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "kappa_"}], 
+   "]"}], ":=", 
+  RowBox[{
+   RowBox[{"normKMod", "[", 
+    RowBox[{"V", ",", "kappa"}], "]"}], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox[
+       RowBox[{
+        SuperscriptBox["vpar", "2"], "+", 
+        SuperscriptBox["vperp", "2"], "+", 
+        SuperscriptBox["V", "2"], "-", 
+        RowBox[{"2", " ", "V", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{
+            SuperscriptBox["vpar", "2"], "+", 
+            RowBox[{
+             SuperscriptBox["vperp", "2"], 
+             RowBox[{"(", 
+              RowBox[{"1", "-", "alpha"}], ")"}]}]}], ")"}], 
+          RowBox[{"1", "/", "2"}]]}]}], "kappa"]}], ")"}], 
+    RowBox[{"-", 
+     RowBox[{"(", 
+      RowBox[{"kappa", "+", "1"}], ")"}]}]], 
+   RowBox[{"UnitStep", "[", "vpar", "]"}]}]}]}], "Input",
+ CellChangeTimes->{{3.725643670820836*^9, 3.725643677159197*^9}, {
+  3.72564371731842*^9, 3.725643864377412*^9}, {3.7256440290169363`*^9, 
+  3.7256440598531733`*^9}, {3.725644163485169*^9, 3.7256442788137302`*^9}, {
+  3.725644396262702*^9, 3.7256444709427443`*^9}, {3.7256445128313313`*^9, 
+  3.725644637472787*^9}, {3.725644671327095*^9, 3.725644681585608*^9}, {
+  3.725644724139431*^9, 3.7256447517222977`*^9}, {3.725644943462164*^9, 
+  3.725644948932272*^9}, {3.725647101780026*^9, 3.725647151827426*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"normKMod2", "[", 
+   RowBox[{"V_", ",", "kappa_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["1", 
+    SuperscriptBox["\[Pi]", 
+     RowBox[{"3", "/", "2"}]]], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{
+      FractionBox["1", "2"], 
+      FractionBox[
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "-", 
+         RowBox[{"1", "/", "2"}]}], "]"}], 
+       RowBox[{"Gamma", "[", 
+        RowBox[{"kappa", "+", "1"}], "]"}]]}], "+", 
+     RowBox[{
+      FractionBox["V", 
+       RowBox[{
+        SuperscriptBox["\[Pi]", 
+         RowBox[{"1", "/", "2"}]], "kappa"}]], 
+      RowBox[{"Hypergeometric2F1", "[", 
+       RowBox[{
+        FractionBox["1", "2"], ",", "kappa", ",", 
+        FractionBox["3", "2"], ",", 
+        RowBox[{"-", 
+         SuperscriptBox["V", "2"]}]}], "]"}]}]}], 
+    ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"barbKappaMod2", "[", 
+   RowBox[{"vpar_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "kappa_"}], 
+   "]"}], ":=", 
+  RowBox[{
+   RowBox[{"normKMod2", "[", 
+    RowBox[{"V", ",", "kappa"}], "]"}], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      SuperscriptBox["vpar", "2"], "+", 
+      SuperscriptBox["vperp", "2"], "+", 
+      SuperscriptBox["V", "2"], "-", 
+      RowBox[{"2", " ", "V", 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{
+          SuperscriptBox["vpar", "2"], "+", 
+          RowBox[{
+           SuperscriptBox["vperp", "2"], 
+           RowBox[{"(", 
+            RowBox[{"1", "-", "alpha"}], ")"}]}]}], ")"}], 
+        RowBox[{"1", "/", "2"}]]}]}], ")"}], 
+    RowBox[{"-", 
+     RowBox[{"(", 
+      RowBox[{"kappa", "+", "1"}], ")"}]}]], 
+   RowBox[{"UnitStep", "[", "vpar", "]"}]}]}]}], "Input",
+ CellChangeTimes->{{3.725643670820836*^9, 3.725643677159197*^9}, {
+  3.72564371731842*^9, 3.725643864377412*^9}, {3.7256440290169363`*^9, 
+  3.7256440598531733`*^9}, {3.725644163485169*^9, 3.7256442788137302`*^9}, {
+  3.725644396262702*^9, 3.7256444709427443`*^9}, {3.7256445128313313`*^9, 
+  3.725644637472787*^9}, {3.725644671327095*^9, 3.725644681585608*^9}, {
+  3.725644724139431*^9, 3.7256447517222977`*^9}, {3.725644943462164*^9, 
+  3.725644948932272*^9}, {3.725647101780026*^9, 3.725647151827426*^9}, {
+  3.725648187310731*^9, 3.725648250551404*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"normKMod2", "[", 
+   RowBox[{"V_", ",", "kappa_"}], "]"}], ":=", 
+  RowBox[{"NIntegrate", "[", 
+   RowBox[{
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"1", "+", 
+        FractionBox[
+         RowBox[{
+          SuperscriptBox["vpar", "2"], "+", 
+          SuperscriptBox["vperp", "2"], "+", 
+          SuperscriptBox["V", "2"], "-", 
+          RowBox[{"2", " ", "V", 
+           SuperscriptBox[
+            RowBox[{"(", 
+             RowBox[{
+              SuperscriptBox["vpar", "2"], "+", 
+              RowBox[{
+               SuperscriptBox["vperp", "2"], 
+               RowBox[{"(", 
+                RowBox[{"1", "-", "alpha"}], ")"}]}]}], ")"}], 
+            RowBox[{"1", "/", "2"}]]}]}], "\[Placeholder]"]}], ")"}], 
+      RowBox[{"-", 
+       RowBox[{"(", 
+        RowBox[{"kappa", "+", "1"}], ")"}]}]], 
+     RowBox[{"UnitStep", "[", "vpar", "]"}], "\[IndentingNewLine]", 
+     RowBox[{"barbKappaMod2", "[", 
+      RowBox[{
+      "vpar_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "kappa_"}], 
+      "]"}]}], ":=", 
+    RowBox[{
+     RowBox[{"normKMod2", "[", 
+      RowBox[{"V", ",", "kappa"}], "]"}], " ", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"1", "+", 
+        SuperscriptBox["vpar", "2"], "+", 
+        SuperscriptBox["vperp", "2"], "+", 
+        SuperscriptBox["V", "2"], "-", 
+        RowBox[{"2", " ", "V", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{
+            SuperscriptBox["vpar", "2"], "+", 
+            RowBox[{
+             SuperscriptBox["vperp", "2"], 
+             RowBox[{"(", 
+              RowBox[{"1", "-", "alpha"}], ")"}]}]}], ")"}], 
+          RowBox[{"1", "/", "2"}]]}]}], ")"}], 
+      RowBox[{"-", 
+       RowBox[{"(", 
+        RowBox[{"kappa", "+", "1"}], ")"}]}]], 
+     RowBox[{"UnitStep", "[", "vpar", "]"}]}]}]}]}]], "Input",
+ CellChangeTimes->{{3.725643670820836*^9, 3.725643677159197*^9}, {
+  3.72564371731842*^9, 3.725643864377412*^9}, {3.7256440290169363`*^9, 
+  3.7256440598531733`*^9}, {3.725644163485169*^9, 3.7256442788137302`*^9}, {
+  3.725644396262702*^9, 3.7256444709427443`*^9}, {3.7256445128313313`*^9, 
+  3.725644637472787*^9}, {3.725644671327095*^9, 3.725644681585608*^9}, {
+  3.725644724139431*^9, 3.7256447517222977`*^9}, {3.725644943462164*^9, 
+  3.725644948932272*^9}, {3.725647101780026*^9, 3.725647151827426*^9}, {
+  3.725648187310731*^9, 3.725648250551404*^9}, {3.725648908303022*^9, 
+  3.725648949528998*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["\[Alpha] = 0.5 (no mirroring, so vanilla Maxwellian)", "Section",
+ CellChangeTimes->{{3.725639137539337*^9, 3.7256391475527678`*^9}, {
+  3.725645074195136*^9, 3.725645075523293*^9}},
+ ExpressionUUID -> "e94318e2-0f86-4e49-b487-28e9832f35f4"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"alpha", "=", "0.0001"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"vbeam", "=", "5"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"a", "=", "1"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.725645077752426*^9, 3.725645080165317*^9}, {
+   3.725645145654316*^9, 3.725645150646674*^9}, {3.72564519515066*^9, 
+   3.725645195349742*^9}, {3.7256452671351957`*^9, 3.7256452739348707`*^9}, {
+   3.725645640451104*^9, 3.725645640578426*^9}, {3.7256463144744368`*^9, 
+   3.725646315929762*^9}, {3.725646418323547*^9, 3.7256464184587708`*^9}, {
+   3.725646669991921*^9, 3.725646671765731*^9}, {3.7256467551912403`*^9, 
+   3.725646824063438*^9}, 3.725646879489689*^9, {3.725647194037298*^9, 
+   3.725647195140904*^9}, 3.725647276924855*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Table", "[", 
+  RowBox[{
+   RowBox[{"NIntegrate", "[", 
+    RowBox[{
+     RowBox[{"barbKappa", "[", 
+      RowBox[{
+      "vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "kappa"}], "]"}],
+      ",", 
+     RowBox[{"{", 
+      RowBox[{"vpar", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"vperp", ",", 
+       RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+     RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+     RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"kappa", ",", 
+     RowBox[{"{", 
+      RowBox[{"100", ",", "50", ",", "25", ",", "15", ",", "10"}], "}"}]}], 
+    "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.7256456104685183`*^9, 3.7256456614109163`*^9}, {
+  3.725645764964507*^9, 3.7256458181413603`*^9}, {3.725646293843904*^9, 
+  3.725646296172818*^9}}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{
+  3.725645818814777*^9, {3.7256462992349663`*^9, 3.7256463274280243`*^9}, 
+   3.725646421011711*^9, 3.725646696111154*^9, 3.725646734332903*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"barbDist", "[", 
+    RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha"}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}}],
+
+Cell[BoxData["0.564189583548016`"], "Output",
+ CellChangeTimes->{
+  3.7256459908054113`*^9, {3.725646282067196*^9, 3.725646286938354*^9}, 
+   3.725646334202433*^9, 3.725646425944273*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Results for alpha= 1 (cylindrical geom)", "Subsection",
+ CellChangeTimes->{{3.725647202209708*^9, 3.725647212089808*^9}, 
+   3.725647514188756*^9, {3.725647651006308*^9, 3.7256476552224207`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"alpha", "=", "1"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"vbeam", "=", "5"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"a", "=", "1"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7256475174983788`*^9, 3.725647529126788*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbDistWA", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "a"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.7256475415838614`*^9, 
+  3.725647544031114*^9}, {3.72564760480119*^9, 3.7256476050320168`*^9}}],
+
+Cell[BoxData["1.0000000000000664`"], "Output",
+ CellChangeTimes->{{3.725646575983142*^9, 3.725646588622964*^9}, 
+   3.725646641572954*^9, {3.725646743150618*^9, 3.725646760218161*^9}, 
+   3.725646843719531*^9, {3.725646874126453*^9, 3.7256468841802807`*^9}, 
+   3.725647545624565*^9, 3.725647606482389*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbDist", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha"}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}}],
+
+Cell[BoxData["1.0000000000000664`"], "Output",
+ CellChangeTimes->{
+  3.7256470190072947`*^9, {3.725647620567024*^9, 3.725647637094336*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[Kappa]=100", "Subsection",
+ CellChangeTimes->{{3.725647863784589*^9, 3.725647865784713*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappa", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "100"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}}],
+
+Cell[BoxData["1.0075523539117075`"], "Output",
+ CellChangeTimes->{3.725647827117889*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[Kappa]=10", "Subsection",
+ CellChangeTimes->{{3.725647854265955*^9, 3.7256478559545383`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappa", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "10"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}, {3.725647848827033*^9, 
+  3.725647850922003*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "NIntegrate","slwcon",
+   "\"Numerical integration converging too slowly; suspect one of the \
+following: singularity, value of the integration is 0, highly oscillatory \
+integrand, or WorkingPrecision too small.\"",2,137,10,23878757621956212601,
+   "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.725647876442663*^9}],
+
+Cell[BoxData["1.0806414814207679`"], "Output",
+ CellChangeTimes->{3.725647883804192*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[Kappa]=5", "Subsection",
+ CellChangeTimes->{{3.725647907809224*^9, 3.725647913241556*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"FullSimplify", "[", 
+     RowBox[{"barbKappaMod", "[", 
+      RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "5"}], 
+      "]"}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}, {3.725647848827033*^9, 
+  3.725647850922003*^9}, {3.72564791814771*^9, 3.725647919305552*^9}, {
+  3.725649428269211*^9, 3.725649463707724*^9}}],
+
+Cell[BoxData["1.174351026956029`"], "Output",
+ CellChangeTimes->{3.7256479402271852`*^9, 3.7256494784781446`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "5"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}, {3.725647848827033*^9, 
+  3.725647850922003*^9}, {3.72564791814771*^9, 3.725647919305552*^9}, {
+  3.725647987996149*^9, 3.725647988337307*^9}}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.725648000633664*^9, 3.725649445162696*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[Kappa] = 2.0", "Subsection",
+ CellChangeTimes->{{3.7256484286251497`*^9, 3.72564843984134*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"vbeam", "=", "40"}]], "Input",
+ CellChangeTimes->{{3.725648495159523*^9, 3.725648515179943*^9}}],
+
+Cell[BoxData["40"], "Output",
+ CellChangeTimes->{3.725648524646267*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappa", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "2"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}, {3.725647848827033*^9, 
+  3.725647850922003*^9}, {3.72564791814771*^9, 3.725647919305552*^9}, {
+  3.725648445009322*^9, 3.725648445107747*^9}}],
+
+Cell[BoxData["1.5707859179515624`"], "Output",
+ CellChangeTimes->{
+  3.7256484471896763`*^9, {3.7256484996726027`*^9, 3.725648528316958*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[Kappa] = 1.7", "Subsection",
+ CellChangeTimes->{{3.725648619111744*^9, 3.725648627180732*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappa", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.7"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.7256476163604717`*^9, 3.725647635953558*^9}, {
+  3.725647743881774*^9, 3.725647758697912*^9}, {3.725647848827033*^9, 
+  3.725647850922003*^9}, {3.72564791814771*^9, 3.725647919305552*^9}, {
+  3.725648445009322*^9, 3.725648445107747*^9}, {3.7256486374353933`*^9, 
+  3.7256486383008327`*^9}}],
+
+Cell[BoxData["1.7358085496024662`"], "Output",
+ CellChangeTimes->{3.725648641130862*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Results for alpha= 0.0001", "Subsection",
+ CellChangeTimes->{{3.725647202209708*^9, 3.725647212089808*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"alpha", "=", "0.0001"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"vbeam", "=", "5"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"a", "=", "1"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7256476641786833`*^9, 3.7256476714563*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbDistWA", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "a"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647675394021*^9, 
+  3.725647685152873*^9}}],
+
+Cell[BoxData["50.9117582655573`"], "Output",
+ CellChangeTimes->{{3.725646575983142*^9, 3.725646588622964*^9}, 
+   3.725646641572954*^9, {3.725646743150618*^9, 3.725646760218161*^9}, 
+   3.725646843719531*^9, {3.725646874126453*^9, 3.7256468841802807`*^9}, 
+   3.7256476869683228`*^9, 3.725648701745406*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbDist", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha"}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647016232955*^9}, {3.725647698153146*^9, 3.725647718948188*^9}}],
+
+Cell[BoxData["50.9117582655573`"], "Output",
+ CellChangeTimes->{
+  3.7256470190072947`*^9, {3.725647708551469*^9, 3.725647721218528*^9}, 
+   3.725648704959482*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappa", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "100"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725648667188463*^9, 3.725648678836586*^9}}],
+
+Cell[BoxData["26.427934399921796`"], "Output",
+ CellChangeTimes->{3.725647050566381*^9, 3.725648679313676*^9, 
+  3.725648809874139*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Aha! So barbKappa is a hoser!", "Subsection",
+ CellChangeTimes->{{3.725649283967909*^9, 3.725649291255814*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "100"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}}],
+
+Cell[BoxData["51.04445932116019`"], "Output",
+ CellChangeTimes->{3.7256471698754473`*^9, 3.7256489633352623`*^9, 
+  3.725649224385507*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["But barbKappaMod looks right ...", "Subsection",
+ CellChangeTimes->{{3.725649295615958*^9, 3.725649302519836*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "10"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}}],
+
+Cell[BoxData["52.31843026497392`"], "Output",
+ CellChangeTimes->{{3.725649261962665*^9, 3.725649286374984*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "5"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.7256493178259583`*^9}}],
+
+Cell[BoxData["53.92046850367565`"], "Output",
+ CellChangeTimes->{{3.725649261962665*^9, 3.725649286374984*^9}, 
+   3.725649335020649*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "2"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649346893464*^9}}],
+
+Cell[BoxData["60.08031303755998`"], "Output",
+ CellChangeTimes->{3.725649349518132*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.7"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649360370576*^9}}],
+
+Cell[BoxData["62.3096715487957`"], "Output",
+ CellChangeTimes->{3.725649363082885*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.55"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649373185548*^9}}],
+
+Cell[BoxData["63.86064701231291`"], "Output",
+ CellChangeTimes->{3.725649375921204*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.52"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649385953981*^9}}],
+
+Cell[BoxData["64.22051400589298`"], "Output",
+ CellChangeTimes->{3.7256493887800713`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Results for alpha= 10*^-9", "Subsection",
+ CellChangeTimes->{{3.725647202209708*^9, 3.725647212089808*^9}, {
+  3.725649409385129*^9, 3.725649409705143*^9}, {3.7256494981619253`*^9, 
+  3.7256495134677973`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"alpha", "=", "10*^-9"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"vbeam", "=", "5"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"a", "=", "1"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7256476641786833`*^9, 3.7256476714563*^9}, {
+  3.725649516492157*^9, 3.7256495215562887`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "5"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.7256493178259583`*^9}}],
+
+Cell[BoxData["54.02249581133579`"], "Output",
+ CellChangeTimes->{{3.725649261962665*^9, 3.725649286374984*^9}, 
+   3.725649335020649*^9, 3.725649554390616*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "2"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649346893464*^9}}],
+
+Cell[BoxData["60.20812068148409`"], "Output",
+ CellChangeTimes->{3.725649349518132*^9, 3.725649559302958*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.7"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649360370576*^9}}],
+
+Cell[BoxData["62.446464135175844`"], "Output",
+ CellChangeTimes->{3.725649363082885*^9, 3.725649563703261*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.55"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649373185548*^9}}],
+
+Cell[BoxData["64.0036301320757`"], "Output",
+ CellChangeTimes->{3.725649375921204*^9, 3.7256495678190193`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbKappaMod", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "1.52"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647013417541*^9, 
+  3.725647040521084*^9}, {3.725647162531584*^9, 3.7256471628190737`*^9}, {
+  3.7256490625129347`*^9, 3.7256490732076073`*^9}, {3.72564924623382*^9, 
+  3.725649270313683*^9}, {3.7256493158825502`*^9, 3.725649385953981*^9}}],
+
+Cell[BoxData["64.3649271900536`"], "Output",
+ CellChangeTimes->{3.7256495731454687`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NIntegrate", "[", 
+  RowBox[{
+   RowBox[{"2", " ", "\[Pi]", " ", "vperp", " ", 
+    RowBox[{"barbDistWA", "[", 
+     RowBox[{"vpar", ",", "vperp", ",", "vbeam", ",", "alpha", ",", "a"}], 
+     "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vpar", ",", 
+     RowBox[{"-", "\[Infinity]"}], ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"vperp", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+   RowBox[{"AccuracyGoal", "\[Rule]", "10"}], ",", 
+   RowBox[{"PrecisionGoal", "\[Rule]", "10"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.725645949560603*^9, 3.725645990302586*^9}, {
+  3.725646277706468*^9, 3.725646286049556*^9}, {3.725646568445074*^9, 
+  3.725646572812893*^9}, {3.725646638680868*^9, 3.725646640405974*^9}, {
+  3.72564684040075*^9, 3.725646870528386*^9}, {3.725647675394021*^9, 
+  3.725647685152873*^9}}],
+
+Cell[BoxData["50.99999116670987`"], "Output",
+ CellChangeTimes->{3.725649605617353*^9}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1280, 997},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+PrintingCopies->1,
+PrintingPageRange->{Automatic, Automatic},
+PrintingOptions->{"PaperOrientation"->"Portrait",
+"PaperSize"->{Automatic, Automatic},
+"PostScriptOutputFile"->"/home/spencerh/print.pdf"},
+FrontEndVersion->"11.0 for Linux x86 (64-bit) (September 21, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 211, 3, 68, "Chapter"],
+Cell[794, 27, 2872, 85, 217, "Input"],
+Cell[3669, 114, 2380, 68, 140, "Input"],
+Cell[6052, 184, 2438, 69, 140, "Input"],
+Cell[8493, 255, 2392, 67, 154, "Input"],
+Cell[10888, 324, 2305, 64, 123, "Input"],
+Cell[13196, 390, 2486, 64, 132, "Input"],
+Cell[CellGroupData[{
+Cell[15707, 458, 247, 3, 66, "Section"],
+Cell[15957, 463, 779, 14, 83, "Input"],
+Cell[CellGroupData[{
+Cell[16761, 481, 894, 23, 59, "Input"],
+Cell[17658, 506, 200, 3, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17895, 514, 588, 13, 35, "Input"],
+Cell[18486, 529, 186, 3, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18709, 537, 201, 2, 46, "Subsection"],
+Cell[18913, 541, 281, 7, 83, "Input"],
+Cell[CellGroupData[{
+Cell[19219, 552, 901, 18, 59, "Input"],
+Cell[20123, 572, 306, 4, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20466, 581, 882, 17, 59, "Input"],
+Cell[21351, 600, 139, 2, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[21539, 608, 100, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[21664, 613, 950, 19, 59, "Input"],
+Cell[22617, 634, 88, 1, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[22754, 641, 101, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[22880, 646, 998, 20, 59, "Input"],
+Cell[23881, 668, 373, 8, 43, "Message"],
+Cell[24257, 678, 88, 1, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[24394, 685, 98, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[24517, 690, 1138, 22, 59, "Input"],
+Cell[25658, 714, 113, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[25808, 720, 1094, 21, 59, "Input"],
+Cell[26905, 743, 99, 1, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27053, 750, 103, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[27181, 755, 120, 2, 33, "Input"],
+Cell[27304, 759, 71, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27412, 765, 1091, 21, 59, "Input"],
+Cell[28506, 788, 141, 2, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28696, 796, 102, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[28823, 801, 1146, 22, 59, "Input"],
+Cell[29972, 825, 88, 1, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[30109, 832, 113, 1, 46, "Subsection"],
+Cell[30225, 835, 284, 7, 83, "Input"],
+Cell[CellGroupData[{
+Cell[30534, 846, 852, 18, 59, "Input"],
+Cell[31389, 866, 306, 4, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[31732, 875, 880, 17, 59, "Input"],
+Cell[32615, 894, 163, 3, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[32815, 902, 899, 18, 59, "Input"],
+Cell[33717, 922, 135, 2, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[33901, 930, 117, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[34043, 935, 957, 19, 59, "Input"],
+Cell[35003, 956, 138, 2, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[35190, 964, 120, 1, 46, "Subsection"],
+Cell[CellGroupData[{
+Cell[35335, 969, 1004, 20, 59, "Input"],
+Cell[36342, 991, 111, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36490, 997, 1053, 20, 59, "Input"],
+Cell[37546, 1019, 137, 2, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[37720, 1026, 1051, 20, 59, "Input"],
+Cell[38774, 1048, 87, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[38898, 1054, 1053, 20, 59, "Input"],
+Cell[39954, 1076, 86, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[40077, 1082, 1054, 20, 59, "Input"],
+Cell[41134, 1104, 87, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[41258, 1110, 1054, 20, 59, "Input"],
+Cell[42315, 1132, 89, 1, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[42453, 1139, 215, 3, 46, "Subsection"],
+Cell[42671, 1144, 335, 8, 83, "Input"],
+Cell[CellGroupData[{
+Cell[43031, 1156, 1053, 20, 59, "Input"],
+Cell[44087, 1178, 159, 2, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[44283, 1185, 1051, 20, 59, "Input"],
+Cell[45337, 1207, 109, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[45483, 1213, 1053, 20, 59, "Input"],
+Cell[46539, 1235, 110, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[46686, 1241, 1054, 20, 59, "Input"],
+Cell[47743, 1263, 110, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[47890, 1269, 1054, 20, 59, "Input"],
+Cell[48947, 1291, 88, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[49072, 1297, 852, 18, 59, "Input"],
+Cell[49927, 1317, 87, 1, 65, "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
