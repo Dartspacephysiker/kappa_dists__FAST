@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    807263,      13338]
-NotebookOptionsPosition[    806219,      13299]
-NotebookOutlinePosition[    806557,      13314]
-CellTagsIndexPosition[    806514,      13311]
+NotebookDataLength[    808047,      13339]
+NotebookOptionsPosition[    806406,      13304]
+NotebookOutlinePosition[    806744,      13319]
+CellTagsIndexPosition[    806701,      13316]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -22,8 +22,9 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["Barbosa kappa func", "Chapter",
  CellChangeTimes->{{3.725638600586006*^9, 3.725638607065695*^9}, {
-  3.725643652060483*^9, 3.725643655892557*^9}},
- ExpressionUUID -> "a2098048-db8a-4c38-a5e4-bb780e3faaf7"],
+  3.725643652060483*^9, 
+  3.725643655892557*^9}},ExpressionUUID->"a2098048-db8a-4c38-a5e4-\
+bb780e3faaf7"],
 
 Cell[BoxData[{
  RowBox[{
@@ -39,39 +40,41 @@ Cell[BoxData[{
        RowBox[{"2", "-", 
         FractionBox["3", "kappa"]}], ")"}], 
       RowBox[{"3", "/", "2"}]]}]], 
-   RowBox[{"(", 
-    RowBox[{
+   SuperscriptBox[
+    RowBox[{"(", 
      RowBox[{
-      FractionBox[
-       SuperscriptBox["kappa", 
-        RowBox[{"3", "/", "2"}]], "2"], 
-      FractionBox[
-       RowBox[{"Gamma", "[", 
-        RowBox[{"kappa", "-", 
-         RowBox[{"1", "/", "2"}]}], "]"}], 
-       RowBox[{"Gamma", "[", 
-        RowBox[{"kappa", "+", "1"}], "]"}]]}], "+", 
-     RowBox[{
-      FractionBox["V", 
-       RowBox[{
-        SuperscriptBox[
-         RowBox[{"(", 
-          RowBox[{"2", "-", 
-           FractionBox["3", "kappa"]}], ")"}], 
-         RowBox[{"1", "/", "2"}]], 
-        SuperscriptBox["\[Pi]", 
-         RowBox[{"1", "/", "2"}]]}]], 
-      RowBox[{"Hypergeometric2F1", "[", 
-       RowBox[{
-        FractionBox["1", "2"], ",", "kappa", ",", 
-        FractionBox["3", "2"], ",", 
-        RowBox[{"-", 
-         FractionBox[
-          SuperscriptBox["V", "2"], 
+      RowBox[{
+       FractionBox[
+        SuperscriptBox["kappa", 
+         RowBox[{"3", "/", "2"}]], "2"], 
+       FractionBox[
+        RowBox[{"Gamma", "[", 
+         RowBox[{"kappa", "-", 
+          RowBox[{"1", "/", "2"}]}], "]"}], 
+        RowBox[{"Gamma", "[", 
+         RowBox[{"kappa", "+", "1"}], "]"}]]}], "+", 
+      RowBox[{
+       FractionBox["V", 
+        RowBox[{
+         SuperscriptBox[
           RowBox[{"(", 
-           RowBox[{
-            RowBox[{"2", "kappa"}], " ", "-", "3"}], ")"}]]}]}], "]"}]}]}], 
-    ")"}]}]}], "\[IndentingNewLine]", 
+           RowBox[{"2", "-", 
+            FractionBox["3", "kappa"]}], ")"}], 
+          RowBox[{"1", "/", "2"}]], 
+         SuperscriptBox["\[Pi]", 
+          RowBox[{"1", "/", "2"}]]}]], 
+       RowBox[{"Hypergeometric2F1", "[", 
+        RowBox[{
+         FractionBox["1", "2"], ",", "kappa", ",", 
+         FractionBox["3", "2"], ",", 
+         RowBox[{"-", 
+          FractionBox[
+           SuperscriptBox["V", "2"], 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"2", "kappa"}], " ", "-", "3"}], ")"}]]}]}], "]"}]}]}], 
+     ")"}], 
+    RowBox[{"-", "1"}]]}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"barbKappa", "[", 
    RowBox[{"vpar_", ",", "vperp_", ",", "V_", ",", "alpha_", ",", "kappa_"}], 
@@ -110,7 +113,9 @@ Cell[BoxData[{
   3.725644396262702*^9, 3.7256444709427443`*^9}, {3.7256445128313313`*^9, 
   3.725644637472787*^9}, {3.725644671327095*^9, 3.725644681585608*^9}, {
   3.725644724139431*^9, 3.7256447517222977`*^9}, {3.725644943462164*^9, 
-  3.725644948932272*^9}}],
+  3.725644948932272*^9}, {3.725791323238866*^9, 
+  3.7257913244304323`*^9}},ExpressionUUID->"2860a63f-4023-48d1-90cf-\
+86000de96f1b"],
 
 Cell[CellGroupData[{
 
@@ -13299,7 +13304,7 @@ n9Z8WvMpstv/+l88cwim\
 },
 WindowSize->{1600, 873},
 WindowMargins->{{Automatic, 0}, {Automatic, 0}},
-FrontEndVersion->"11.0 for Linux x86 (64-bit) (September 21, 2016)",
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
 StyleDefinitions->"Default.nb"
 ]
 (* End of Notebook Content *)
@@ -13314,29 +13319,25 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 211, 3, 68, "Chapter"],
-Cell[794, 27, 2872, 85, 163, "Input"],
+Cell[580, 22, 212, 4, 69, "Chapter",ExpressionUUID->"a2098048-db8a-4c38-a5e4-bb780e3faaf7"],
+Cell[795, 28, 3058, 89, 138, "Input",ExpressionUUID->"2860a63f-4023-48d1-90cf-86000de96f1b"],
 Cell[CellGroupData[{
-Cell[3691, 116, 196, 2, 66, "Section"],
+Cell[3878, 121, 196, 2, 68, "Section",ExpressionUUID->"e94318e2-0f86-4e49-b487-28e9832f35f4"],
 Cell[CellGroupData[{
-Cell[3912, 122, 833, 17, 35, "Input"],
-Cell[4748, 141, 196432, 3218, 467, 80193, 1311, "CachedBoxData", "BoxData", \
-"Output"]
+Cell[4099, 127, 833, 17, 31, "Input",ExpressionUUID->"2ce24359-c365-41a5-bfdd-a2ccd0fc066e"],
+Cell[4935, 146, 196432, 3218, 469, 80193, 1311, "CachedBoxData", "BoxData", "Output",ExpressionUUID->"1e55b166-2af5-4834-b8e4-4082ba02aaba"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[201217, 3364, 978, 19, 35, "Input"],
-Cell[202198, 3385, 219016, 3588, 384, 80124, 1310, "CachedBoxData", \
-"BoxData", "Output"]
+Cell[201404, 3369, 978, 19, 31, "Input",ExpressionUUID->"2ce24359-c365-41a5-bfdd-a2ccd0fc066e"],
+Cell[202385, 3390, 219016, 3588, 386, 80124, 1310, "CachedBoxData", "BoxData", "Output",ExpressionUUID->"5a5a5932-94c9-4c26-805b-d2786d1d7bc4"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[421251, 6978, 977, 19, 35, "Input"],
-Cell[422231, 6999, 204254, 3347, 386, 80541, 1317, "CachedBoxData", \
-"BoxData", "Output"]
+Cell[421438, 6983, 977, 19, 31, "Input",ExpressionUUID->"2ce24359-c365-41a5-bfdd-a2ccd0fc066e"],
+Cell[422418, 7004, 204254, 3347, 388, 80541, 1317, "CachedBoxData", "BoxData", "Output",ExpressionUUID->"f66f05c0-ae01-4266-8d99-a2c3d385c147"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[626522, 10351, 979, 19, 35, "Input"],
-Cell[627504, 10372, 178675, 2922, 723, 93885, 1530, "CachedBoxData", \
-"BoxData", "Output"]
+Cell[626709, 10356, 979, 19, 31, "Input",ExpressionUUID->"2ce24359-c365-41a5-bfdd-a2ccd0fc066e"],
+Cell[627691, 10377, 178675, 2922, 725, 93885, 1530, "CachedBoxData", "BoxData", "Output",ExpressionUUID->"25af989e-78b8-4313-b482-27bb443f177c"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
