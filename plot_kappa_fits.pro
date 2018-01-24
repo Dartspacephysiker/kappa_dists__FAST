@@ -311,9 +311,9 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      ;;                      STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
      fitTitle          = ["Bulk energy  (eV)","Plasma temp. (eV)","Density     (cm^-3)"]
      fitInfoStr        = [STRING(FORMAT='(I-15)',kappaFit.A[0]), $
-                          STRING(FORMAT='(F-15.1)',kappaFit.A[1]), $
+                          STRING(FORMAT='(I-15)',kappaFit.A[1]), $
                           ;; STRING(FORMAT='(F-7.3)',kappaFit.A[2]), $
-                          STRING(FORMAT='(F-8.4)',kappaFit.A[3])]
+                          STRING(FORMAT='(F-8.3)',kappaFit.A[3])]
 
      IF KEYWORD_SET(add_angle_label) THEN BEGIN
         fitTitle       = [fitTitle,"Angle         (deg)"]
@@ -326,7 +326,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2)]
-        fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x)-4))]
+        fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.3)',kappaFit.chi2/(N_ELEMENTS(kappaFit.x)-4))]
         ;; chiInd     = 4 + KEYWORD_SET(add_angle_label)
         chiInd     = 3 + KEYWORD_SET(add_angle_label)
      ENDIF
