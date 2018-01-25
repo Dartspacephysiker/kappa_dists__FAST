@@ -5,10 +5,14 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
 
   doPlots = 1
   overwrite_plots = 1
-  plotsPerWindow  = 5
+  ;; plotsPerWindow  = 5
+
+  plotKInds = [1,9,29,49,99,105,116,122,130]
+  plotsPerWindow  = N_ELEMENTS(plotKInds)
+  nTotPlots = plotsPerWindow
+  ;; corresponds to kappa=1.51,1.55,1.65,1.75,2.00,2.50,4.50,6.00,8.00000
 
   overwrite_saveFile = 0
-
 
   dir     = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   filPref = 'kappaBarbosaFacs-TFAST_eq_110_2-nFAST_eq_1_88--'
@@ -26,7 +30,7 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
 
   nFiles  = 131
   dat1    = READ_ASCII(dir+starter,TEMPLATE=tmplt)
-  kapBarb = REPLICATE(dat1,nFiles)
+  kapBarbRAW = REPLICATE(dat1,nFiles)
 
   IF KEYWORD_SET(doPlots) THEN BEGIN
      SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
@@ -44,8 +48,9 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
      defBigFontSize   = 18
      defMidFontSize   = 16
      lineStyle        = ['-','__',"--","-.",":","-",'__']
-
-     color            = ['orange','red','green','blue','black','purple','pink']
+     color            = ['orange','red','green','blue','black','purple','pink','brown']
+     nStyles          = N_ELEMENTS(lineStyle)
+     nColors          = N_ELEMENTS(color)
 
 
   ENDIF
@@ -62,13 +67,27 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
 
         IF ~FILE_TEST(dir+fil) THEN STOP
 
-        kapBarb[k-1] = READ_ASCII(dir+fil,TEMPLATE=tmplt)
+        kapBarbRAW[k-1] = READ_ASCII(dir+fil,TEMPLATE=tmplt)
 
 
      ENDFOR
 
-     PRINT,"Saving kapBarbs to " + outFil + ' ...'
-     SAVE,kapBarb,FILENAME=dir+outFil
+     nRB     = N_ELEMENTS(kapBarbRAW[0].RB)
+     kArr    = MAKE_ARRAY(nFiles,/FLOAT)
+     barbFac = MAKE_ARRAY(nFiles,nRB,/FLOAT)
+     FOR k=1,nFiles DO BEGIN
+        kArr[k-1]      = kapBarbRAW[k-1].kappa[0]
+        barbFac[k-1,*] = kapBarbRAW[k-1].factor
+     ENDFOR
+
+     barbKappa = {TFAST   : temperature, $
+                  NFAST   : density, $
+                  kappa   : kArr, $
+                  RB      : kapBarbRAW[0].RB, $
+                  NFactor : barbFac}
+
+     PRINT,"Saving kapBarbRAWs to " + outFil + ' ...'
+     SAVE,kapBarbRAW,barbKappa,FILENAME=dir+outFil
 
   ENDIF ELSE BEGIN
 
@@ -80,19 +99,26 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
 
      k = 1
      plotCount = 0
-     WHILE k LT nFiles DO BEGIN
+     IF N_ELEMENTS(plotKInds) EQ 0 THEN BEGIN
+        plotKInds = INDGEN(nFiles)
+        nTotPlots = N_ELEMENTS(plotKInds)
+     ENDIF
+
+     WHILE k LE nTotPlots DO BEGIN
+
+        plotKInd = plotKInds[k-1]
 
         IF ((k-1) MOD plotsPerWindow) EQ 0 THEN BEGIN
            window = WINDOW(DIMENSION=[800,600],/BUFFER)
            plotArr = MAKE_ARRAY(plotsPerWindow,/OBJ)
-           startKappa = kapBarb[k-1].kappa[0]
+           startKappa = kapBarbRAW[plotKInd].kappa[0]
         ENDIF
 
         ;; plotInd = (k-1) MOD plotsPerWindow
 
-        plotArr[plotCount] = PLOT(kapBarb[k-1].RB, $
-                                  kapBarb[k-1].factor, $
-                                  NAME=STRING(FORMAT='("$\kappa$ = ",G0.4)',kapBarb[k-1].kappa[0]), $
+        plotArr[plotCount] = PLOT(kapBarbRAW[plotKInd].RB, $
+                                  kapBarbRAW[plotKInd].factor, $
+                                  NAME=STRING(FORMAT='("$\kappa$ = ",G0.4)',kapBarbRAW[plotKInd].kappa[0]), $
                                   XRANGE=[5,10000], $
                                   ;; YRANGE=[1,1000], $
                                   /XLOG, $
@@ -100,18 +126,18 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
                                   TITLE=title, $
                                   XTITLE=xTitle, $
                                   YTITLE=yTitle, $
-                                  LINESTYLE=lineStyle[plotCount], $
-                                  COLOR=color[plotCount], $
+                                  LINESTYLE=lineStyle[plotCount MOD nStyles], $
+                                  COLOR=color[plotCount MOD nColors], $
                                   FONT_SIZE=defBigFontSize, $
                                   XTICKFONT_SIZE=defMidFontSize, $
                                   YTICKFONT_SIZE=defMidFontSize, $
                                   CURRENT=window)
 
         ;; IF (k MOD plotsPerWindow) EQ 0 OR (k EQ nPlots) THEN BEGIN
-        IF plotCount EQ (plotsPerWindow-1) OR (k EQ nPlots) THEN BEGIN
+        IF plotCount EQ (plotsPerWindow-1) OR (k EQ nFiles) THEN BEGIN
 
            plotCount = 0
-           stopKappa = kapBarb[k-1].kappa[0]
+           stopKappa = kapBarbRAW[plotKInd].kappa[0]
 
            plotFil = filPref + (STRING(FORMAT='("kappa_",F0.3,"-",F0.3)',startKappa,stopKappa)).Replace(".","_") + '.png'
 
@@ -129,6 +155,7 @@ PRO JOURNAL__20180124__PARSE_MATHEMATICA_KAPPA_BARBOSA_TXT_FILES
 
         ENDIF
         
+        plotCount++
         k++
         
      ENDWHILE
