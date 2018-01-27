@@ -191,6 +191,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  @common__jv_curve_fit__tie_r_b_and_dens.pro
+
   have_cap_struct_t_type = 0
   have_e_struct_t_type   = 0
   IF N_ELEMENTS(cAP_struct) GT 0 THEN BEGIN
@@ -943,6 +945,13 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ENDCASE
 
      STOP
+
+     ;; SAVE, $
+     ;;    jvplotdata, $
+     ;;    avgs_jvfit, $
+     ;;    mmagdat, $
+     ;;    tRB_RBpairs,tRB_fLine,tRB_nFAST,tRB_nFLine,tRB_fLineRE, $
+     ;;    FILENAME='orb1773_jvplotdata_and_avgs_jvfit_for_GRLRESPONSE2_using_peak_en.sav'
 
   ENDIF
 

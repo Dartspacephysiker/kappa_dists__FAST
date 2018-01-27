@@ -2,6 +2,7 @@
 PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    MAP__2D=map__2D, $
    MAP2D__LOG_KAPPA=map2D__log_kappa, $
+   ONLY_GAUSSIAN=only_Gaussian, $
    ORBIT=orbit, $
    IN_KAPPA_A=A, $
    IN_GAUSS_A=AGauss, $
@@ -149,6 +150,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;;Supposing a vertical color bar
   cbpos            = [0.96,0.06,0.975,0.92]
   contPos          = [0.09,0.19,0.82,0.92]
+  gaussPos         = [0.10,0.19,0.95,0.92]
   surfPos          = [0.50,0.40,0.75,0.80]
 
 
@@ -162,8 +164,12 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                             DENSITY=Density, $
                             /DONT_MAP_SOURCEDENS ;, $
 
-  titleStr         = STRING(FORMAT='(A0," (T!DF!N=",I0," eV, n!DF!N=",G0.3," cm!U-3!N)")', $
-                            orbPref,Temperature,Density)
+  titleStr         = STRING(FORMAT='(A0,A0,I0,A0,G0.3," cm!U-3!N")', $
+                            orbPref, $
+                            " $\langle$T!DFAST!N$\rangle$=", $
+                            Temperature, $
+                            " eV, $\langle$n!DFAST!N$\rangle$=", $
+                            Density)
 
   ;;Are we going to add an R_E axis?
 
@@ -423,6 +429,72 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
         ENDIF
 
+
+     END
+     KEYWORD_SET(only_Gaussian): BEGIN
+
+        xVar       = mMagDat.G.magRat
+        yVar       = mMagDat.G.chi2
+        yTitle     = '$\chi$!U2!Dred!N'
+
+        maxVal     = MAX(mMagDat.G.chi2)
+        maxPow     = FLOOR(ALOG10(maxVal))
+        maxY       = 10.D^maxPow * CEIL(maxVal/10.D^maxPow)
+
+        minVal     = MIN(mMagDat.G.chi2)
+        minPow     = FLOOR(ALOG10(minVal))
+        minY       = 10.D^minPow * FLOOR(minVal/10.D^minPow)
+
+        yRange     = [minY,maxY]
+
+        gaussPlot  = PLOT(xVar, $
+                          yVar, $
+                          NAME=contChiPlotName, $
+                          XRANGE=MINMAX(mMagDat.G.magRat), $
+                          YRANGE=yRange, $
+                          XTITLE=xTitle, $
+                          YTITLE=yTitle, $
+                          /XLOG, $
+                          /YLOG, $
+                          THICK=2, $
+                          AXIS_STYLE=2, $
+                          YSTYLE=1, $
+                          TITLE=titleStr, $
+                          XGRIDSTYLE=xGridStyle, $
+                          YGRIDSTYLE=yGridStyle, $
+                          XTICKLEN=xTickLen, $
+                          YTICKLEN=yTickLen, $
+                          XSUBTICKLEN=xSubTickLen, $
+                          YSUBTICKLEN=ySubTickLen, $
+                          XTICKNAME=R_B_axis_names, $
+                          XTICKVALUES=R_B_axis_vals, $
+                          FONT_SIZE=defBigFontSize, $
+                          XTICKFONT_SIZE=defMidFontSize, $
+                          YTICKFONT_SIZE=defMidFontSize, $
+                          POSITION=gaussPos, $
+                          /CURRENT)
+
+        IF KEYWORD_SET(make_R_E_axis) THEN BEGIN
+           R_Eaxis = AXIS('X', $
+                          TARGET=gaussPlot, $
+                          ;; LOCATION="bottom", $
+                          LOCATION=6, $
+                          CLIP=0, $
+                          TITLE='R!DE!N', $
+                          SUBTICKLEN=0.0, $
+                          TICKLEN=0.015, $
+                          TICKFONT_SIZE=defMidFontSize, $
+                          TICKVALUES=R_B_axis_vals, $
+                          TICKNAME=R_E_axis_names)
+        ENDIF
+
+        checkMe = mMagDat.K.chi2
+        checkMeG = mMagDat.G.chi2
+        junkK = MIN(checkMe,indK)
+        junkG = MIN(checkMeG,indG)
+
+        close_i     = WHERE(mMagDat.K.magRat LT 20)
+        junkKClose  = MIN(checkMe[close_i],indKClose)
 
      END
      ELSE: BEGIN
