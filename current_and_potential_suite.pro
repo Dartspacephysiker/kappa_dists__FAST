@@ -951,6 +951,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;;    avgs_jvfit, $
      ;;    mmagdat, $
      ;;    tRB_RBpairs,tRB_fLine,tRB_nFAST,tRB_nFLine,tRB_fLineRE, $
+     ;;    pData, $
+     ;;    A,AGauss, $
      ;;    FILENAME='orb1773_jvplotdata_and_avgs_jvfit_for_GRLRESPONSE2_using_peak_en.sav'
 
   ENDIF

@@ -1,18 +1,19 @@
 ;2018/01/17
 PRO PLOT_J_VS_POT__WITH_ESTIMATED_CONDUCTIVITY,jvPlotData,avgs_JVfit,pData, $
-                                 ;; USE_SOURCE_AVGS=use_source_avgs, $
-                                 KAPPA_A=A, $
-                                 GAUSS_A=AGauss, $
-                                 ORBIT=orbit, $
-                                 ORIGINATING_ROUTINE=routName, $
-                                 SAVEPLOT=savePlot, $
-                                 SPNAME=sPName, $
-                                 PLOTDIR=plotDir, $
-                                 J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
-                                 J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
-                                 NO_TITLE=no_title, $
-                                 IN_MMAGDAT=mMagDat, $
-                                 _EXTRA=e
+   ;; USE_SOURCE_AVGS=use_source_avgs, $
+   KAPPA_A=A, $
+   GAUSS_A=AGauss, $
+   ORBIT=orbit, $
+   ORIGINATING_ROUTINE=routName, $
+   ADD_GAUSSIAN=add_gaussian, $
+   SAVEPLOT=savePlot, $
+   SPNAME=sPName, $
+   PLOTDIR=plotDir, $
+   J_V__WITHESTCOND__SAVEPLOTDATA=j_v__withEstCond__savePlotData, $
+   J_V__WITHESTCOND__DATAFILENAME=j_v__withEstCond__dataFilename, $
+   NO_TITLE=no_title, $
+   IN_MMAGDAT=mMagDat, $
+   _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -65,6 +66,9 @@ conductivity = coeffs[1] / 1D6 ;division by 1D6 because current density is in mi
 condErr = sig[1] / 1D6
 normCondErr = condErr / conductivity
 
+result = REGRESS(pot, cur*(-1.D), SIGMA=sigma, CONST=const, $
+                 CORRELATION=rho,MEASURE_ERRORS=curerr)
+
 ;; Use number flux
 ;; cur = cur*(-1.)/1.6D-9
 ;; curerr = curerr/1.6D-9
@@ -96,6 +100,8 @@ PRINT,FORMAT='(A20,TR2,"(",A10,")",TR5,A20,TR5,A15,TR5,A15)', $
 PRINT,FORMAT='(G20.5,TR2,"(",F10.4,")",TR5,F20.3,TR5,F15.3,TR5,F15.3)', $
       conductivity,normCondErr,thermAngle,E_p,R_B_Thermal
 
+PRINT,"Linear correlation coeff: ",STRING(FORMAT='(F0.4)',rho)
+
 ;; PROB
 ;; Set this keyword to a named variable that will contain the probability that
 ;; the computed fit would have a value of CHISQ or greater. If PROB is greater
@@ -122,15 +128,17 @@ t1Str            = (STRSPLIT(TIME_TO_STR(MIN(jvPlotData.time[avgs_JVFit.useInds]
 t2Str            = (STRSPLIT(TIME_TO_STR(MAX(jvPlotData.time[avgs_JVFit.useInds]),MSEC=msec),'/',/EXTRACT))[1]
 dataName         = STRING(FORMAT='(A0,"–",A0)',t1Str,t2Str)
 ;; kappaName        = STRING(FORMAT='("j!D$\parallel$!N = ",G0.2," + ",G0.3," $\Delta \Phi$ $\mu$A m!U-2!N")',coeffs[0],coeffs[1])
-kappaName        = STRING(FORMAT='("j!D$\parallel$,i!N = ",G0.3," + ",G0.4," $\Delta \Phi$")',coeffs[0],coeffs[1])
+conducName        = STRING(FORMAT='("j!D$\parallel$,i!N = ",G0.3," + ",G0.4," $\Delta \Phi$")',coeffs[0],coeffs[1])
+Nstring          = 'n' + (KEYWORD_SET(pData.is_sourceDens) ? '!Dm!N' : '')
+gaussName        = STRING(FORMAT='("Maxwellian, R!DB!N = ",G0.3,", ",A0," = ",G0.2," cm!U-3!N")',AGauss[3],Nstring,AGauss[2])
 
-window1          = WINDOW(DIMENSION=[1000,800],BUFFER=savePlot)
+window1          = WINDOW(DIMENSION=[900,600],BUFFER=savePlot)
 
 symbol      = '+'
 sym_thick   = 2.0
 thick       = 2.2
 font_size   = 18
-legFont_size = 16
+legFont_size = 13
 
 ;; xRange      = MINMAX(pot)
 ;; yRange      = MINMAX(cur*(-1))
@@ -166,18 +174,41 @@ that             = ERRORPLOT(pot,cur*(-1),curerr, $
                              /CURRENT)
 
 this             = PLOT(potFit,yFit, $
-                        NAME=kappaName, $
+                        NAME=conducName, $
                         XRANGE=xRange, $
                         YRANGE=yRange, $
-                        LINESTYLE='--', $
+                        ;; LINESTYLE='--', $
                         THICK=thick, $
                         FONT_SIZE=font_size, $
-                        COLOR='gray', $
+                        ;; COLOR='gray', $
                         /OVERPLOT)
 
-  legPos           = [0.47,0.83]
+legTarg = [that,this]
+
+IF KEYWORD_SET(add_gaussian) THEN BEGIN
+
+  ;; sortie           = SORT(pData.x)
+  ;; sortieFit        = SORT(pData.xFit)
+
+   ;; thatGauss        = PLOT(pData.XFit[sortieFit],pData.yGaussFit[sortieFit], $
+   thatGauss        = PLOT(pData.extended.pot, $
+                           pData.extended.yGaussFit, $
+                           NAME=gaussName, $
+                           XRANGE=xRange, $
+                           YRANGE=yRange, $
+                           LINESTYLE='--', $
+                           THICK=thick, $
+                           FONT_SIZE=font_size, $
+                           COLOR='gray', $
+                           /OVERPLOT)
+
+legTarg = [legTarg,thatGauss]
+
+ENDIF
+
+  legPos           = [0.55,0.83]
   ;; leg           = LEGEND(TARGET=[that,this,those],POSITION=legPos__data,/DATA)
-  leg              = LEGEND(TARGET=[that,this], $
+  leg              = LEGEND(TARGET=legTarg, $
                             POSITION=legPos, $
                             FONT_SIZE=legFont_size)
 

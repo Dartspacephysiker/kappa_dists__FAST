@@ -417,6 +417,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         bestKappa = kappaArr[indK]
         bestRBK   = magRatArr[indK]
         potVals   = X;        potVals   = jvPlotData.pot[avgs_jvFit.useinds]
+        extPotVals = POWGEN(1D2,1D5,1.05)
 
         IF KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) THEN BEGIN
            bestDensK = densArr[*,indK2D[1]]
@@ -428,6 +429,13 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                  A[1], $
                                                  bestDensK, $
                                                  potVals, $
+                                                 bestRBK, $
+                                                 /NO_MULT_BY_CHARGE)*1D6
+
+        yExtFit = KNIGHT_RELATION__DORS_KLETZING_11(bestKappa, $
+                                                 A[1], $
+                                                 bestDensK, $
+                                                 extPotVals, $
                                                  bestRBK, $
                                                  /NO_MULT_BY_CHARGE)*1D6
 
@@ -448,6 +456,13 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
         YGaussFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
                                                      bestDensG, $
                                                      potVals, $
+                                                     bestRBG, $
+                                                     /NO_MULT_BY_CHARGE, $
+                                                     MASS=mass)*1D6
+
+        YGaussExtFit = KNIGHT_RELATION__DORS_KLETZING_4(AGauss[1], $
+                                                     bestDensG, $
+                                                     extPotVals, $
                                                      bestRBG, $
                                                      /NO_MULT_BY_CHARGE, $
                                                      MASS=mass)*1D6
@@ -638,6 +653,12 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
            AGauss         : AGauss, $
            is_sourceDens  : KEYWORD_SET(iterative_game_mode) OR KEYWORD_SET(jv_theor__itergame_tie_R_B_and_dens)}
 
+  IF KEYWORD_SET(extPotVals) THEN BEGIN
+     pData = CREATE_STRUCT(pData, $
+                           "extended",{pot: extPotVals, $
+                                       yfit: yExtFit, $
+                                       ygaussfit: ygaussextfit})
+  ENDIF
 
 
 END

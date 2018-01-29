@@ -9,6 +9,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
    OUT_YBEST=out_yBest, $
    SAVEPLOT=savePlot, $
    SPNAME=SPName, $
+   WINDIM=winDim, $
    PLOTDIR=plotDir, $
    IS_EFLUX=is_eFlux, $
    ZOOM_ON_EXTREME_KAPPA=zoom_on_extreme_kappa, $
@@ -52,7 +53,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   defFontSize      = 14
   defBigFontSize   = 18
-  defMidFontSize   = 16
+  defMidFontSize   = 17
 
   nLinCBTicks      = 10
   nLogCBTicks      = 5
@@ -133,7 +134,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
 
   ;;Winder
   ;; savePlot = 1
-  winDim           = [900,600]
+  winDim           = KEYWORD_SET(winDim) ? winDim : [900,600]
   window1          = WINDOW(DIMENSIONS=winDim, $
                             BUFFER=savePlot)
 
@@ -150,7 +151,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
   ;;Supposing a vertical color bar
   cbpos            = [0.96,0.06,0.975,0.92]
   contPos          = [0.09,0.19,0.82,0.92]
-  gaussPos         = [0.10,0.19,0.95,0.92]
+  gaussPos         = [0.15,0.39,0.95,0.95]
   surfPos          = [0.50,0.40,0.75,0.80]
 
 
@@ -192,12 +193,16 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      ;; R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
 
      R_B_axis_names   = STRING(FORMAT='(I0)',R_B_axis_vals)
+     R_B_axis_names   = ['5','10','100','10!U3!N','10!U4!N']
+
      R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
      nVals            = N_ELEMENTS(R_E_axis_vals)
      ;; nValsStr         = STRING('(I0)',nVals)
      ;; R_E_axis_names   = STRING(FORMAT='('+nValsStr+'(F0.1))',R_E_axis_vals)
-     R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
+
+     ;; R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
+     R_E_axis_names   = ['1.8','2.2','4.7','12.1','36.4']
 
   ENDIF
 
@@ -459,7 +464,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
                           THICK=2, $
                           AXIS_STYLE=2, $
                           YSTYLE=1, $
-                          TITLE=titleStr, $
+                          ;; TITLE=titleStr, $
                           XGRIDSTYLE=xGridStyle, $
                           YGRIDSTYLE=yGridStyle, $
                           XTICKLEN=xTickLen, $
@@ -478,7 +483,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
            R_Eaxis = AXIS('X', $
                           TARGET=gaussPlot, $
                           ;; LOCATION="bottom", $
-                          LOCATION=6, $
+                          LOCATION=2.6, $
                           CLIP=0, $
                           TITLE='R!DE!N', $
                           SUBTICKLEN=0.0, $
