@@ -119,6 +119,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
    JV_THEOR__ALSO_EFLUX=jv_theor__also_eFlux, $
    JV_THEOR__ONLY_EFLUX=jv_theor__only_eFlux, $
+   JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
    ;; JV_THEOR__ADD_DENTON_ET_AL_2006_MODEL_COEFFS=add_Denton2006, $
    JVPOTBAR__J_ON_YAXIS=jvPotBar__j_on_yAxis, $
    JVPOTBAR__INTERACTIVE_OVERPLOT=interactive_overplot, $
@@ -637,6 +638,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                            MAGRATIOLIMS=magRatioLims, $
                                            ORIGINATING_ROUTINE=routName, $
                                            OUT_KAPPA_A=A, $
+                                           JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
                                            OUT_GAUSS_A=AGauss, $
                                            OUT_PLOTDATA=pData, $
                                            _EXTRA=e

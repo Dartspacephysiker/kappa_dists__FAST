@@ -19,6 +19,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
    MAP__2D=map__2D, $
    ORIGINATING_ROUTINE=routName, $
    EFLUX_NOT_NFLUX=eFlux_not_nFlux, $
+   JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
    OUT_KAPPA_A=A, $
    OUT_GAUSS_A=AGauss, $
    OUT_PLOTDATA=pData, $
@@ -193,44 +194,101 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
               CASE 1 OF 
                  KEYWORD_SET(all_temps): BEGIN
 
-                    FOR k=0,nMagRatio-1 DO BEGIN
+                    CASE 1 OF
+                       KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
-                       densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
-                                                                   tRB_TFAST, $
-                                                                   0, $
-                                                                   tRB_nFAST, $
-                                                                   multi_magRatio_array[k]*fastR_BFac)
-                    ENDFOR
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             densArr[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                                                                         tRB_TFAST, $
+                                                                         0, $
+                                                                         tRB_nFAST, $
+                                                                         multi_magRatio_array[k]*fastR_BFac)
+                          ENDFOR
+
+                       END
+                       ELSE: BEGIN
+
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                         tRB_TFAST, $
+                                                                         0, $
+                                                                         tRB_nFAST, $
+                                                                         multi_magRatio_array[k]*fastR_BFac)
+                          ENDFOR
+
+                       END
+                    ENDCASE
 
                  END
                  KEYWORD_SET(individual_Barbosa_factors): BEGIN
 
-                    FOR k=0,nMagRatio-1 DO BEGIN
+                    CASE 1 OF
+                       KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
-                       densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
-                                                                   A[1], $
-                                                                   0, $
-                                                                   avgs_JVfit.N_SC.avg, $
-                                                                   multi_magRatio_array[k]*fastR_BFac)
-                    ENDFOR
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             densArr[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                                                                         A[1], $
+                                                                         0, $
+                                                                         avgs_JVfit.N_SC.avg, $
+                                                                         multi_magRatio_array[k]*fastR_BFac)
+                          ENDFOR
+
+                       END
+                       ELSE: BEGIN
+
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             densArr[*,k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                         A[1], $
+                                                                         0, $
+                                                                         avgs_JVfit.N_SC.avg, $
+                                                                         multi_magRatio_array[k]*fastR_BFac)
+                          ENDFOR
+
+                       END
+                    ENDCASE
 
                  END
                  ELSE: BEGIN
-                    FOR k=0,nMagRatio-1 DO BEGIN
 
-                       ;; 2018/01/15 Goodness no! (Think shoes-wearin' cat)
-                       ;; densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
-                       ;;                                                A[1], $
-                       ;;                                                0, $
-                       ;;                                                avgs_JVfit.N_SC.avg, $
-                       ;;                                                multi_magRatio_array[k]*fastR_BFac))
-                       densArr[k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
-                                                                   A[1], $
-                                                                   0, $
-                                                                 avgs_JVfit.N_SC.avg, $
-                                                                   multi_magRatio_array[k]*fastR_BFac)
+                    CASE 1 OF
+                       KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
-                    ENDFOR
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             densArr[k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                                                                       A[1], $
+                                                                       0, $
+                                                                       avgs_JVfit.N_SC.avg, $
+                                                                       multi_magRatio_array[k]*fastR_BFac)
+
+                          ENDFOR
+
+                       END
+                       ELSE: BEGIN
+
+                          FOR k=0,nMagRatio-1 DO BEGIN
+
+                             ;; 2018/01/15 Goodness no! (Think shoes-wearin' cat)
+                             ;; densArr[k] = MEAN(DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                             ;;                                                A[1], $
+                             ;;                                                0, $
+                             ;;                                                avgs_JVfit.N_SC.avg, $
+                             ;;                                                multi_magRatio_array[k]*fastR_BFac))
+                             densArr[k] = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                       A[1], $
+                                                                       0, $
+                                                                       avgs_JVfit.N_SC.avg, $
+                                                                       multi_magRatio_array[k]*fastR_BFac)
+
+                          ENDFOR
+
+                       END
+                    ENDCASE
+
                  END
               ENDCASE
 
@@ -360,12 +418,25 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               FOR k=0,nMagRatio-1 DO BEGIN
 
-                 kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
-                                                                              kappaParamStruct[1].value, $
-                                                                              0, $
-                                                                              tRB_nFAST, $
-                                                                              magRatArr[j,k])
+                    CASE 1 OF
+                       KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
+                          kappaParamStruct[2].value  = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                                                                                  kappaParamStruct[1].value, $
+                                                                                  0, $
+                                                                                  tRB_nFAST, $
+                                                                                  magRatArr[j,k])
+                       END
+                       ELSE: BEGIN
+
+                          kappaParamStruct[2].value     = DENSITY_FACTOR__BARBOSA_1977(barbosaPot, $
+                                                                                       kappaParamStruct[1].value, $
+                                                                                       0, $
+                                                                                       tRB_nFAST, $
+                                                                                       magRatArr[j,k])
+
+                       END
+                    ENDCASE
 
                  kappaParamStruct[3].value     = multi_magRatio_array[k]
                  kappaParamStruct[3].limits[1] = multi_magRatio_array[k]+.1
