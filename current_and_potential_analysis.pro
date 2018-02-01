@@ -164,6 +164,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      aRange__charE_e_up      = KEYWORD_SET(aRange__charE_e_up    ) ? aRange__charE_e_up     : !NULL
      aRange__charE_i_up      = KEYWORD_SET(aRange__charE_i_up    ) ? aRange__charE_i_up     : !NULL
 
+     ;; These can all be overridden by msph_sc_dens! They might be meaningless!
      aRange__dens_e_down    = KEYWORD_SET(aRange__dens_e_down  ) ? aRange__dens_e_down   : !NULL
      aRange__dens_e_up      = KEYWORD_SET(aRange__dens_e_up    ) ? aRange__dens_e_up     : !NULL
      aRange__dens_i_up      = KEYWORD_SET(aRange__dens_i_up    ) ? aRange__dens_i_up     : !NULL
@@ -507,6 +508,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;;    aRange__dens = also_msph_sourcecone[k] ? 'source' : !NULL
         ;; ENDIF
         IF KEYWORD_SET(msph_sc_dens[k]) OR KEYWORD_SET(msph_sc_temp[k]) THEN BEGIN
+           ;; Make sure there isn't a conflict
+           IF N_ELEMENTS(aRange__dens_list) GT 0 THEN $
+              IF N_ELEMENTS(aRange__dens_list[k]) EQ 2 THEN BEGIN
+              PRINT,"You realize there's a probable conflict, eh?"
+              PRINT,"You're using the msphere sc to get dens, but you have also defined these ranges:"
+              PRINT,aRange__dens_list[k]
+              STOP
+           ENDIF
+
            aRange__dens    = 'source'
         ENDIF ELSE IF N_ELEMENTS(aRange__dens_list[k]) GT 0 THEN BEGIN
            aRange__dens = aRange__dens_list[k]

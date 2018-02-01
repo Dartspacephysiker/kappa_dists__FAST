@@ -787,8 +787,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                                  MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
                                                  MAP__2D=map__2D, $
                                                  JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
-                                                 ORIGINATING_ROUTINE=routName, $
                                                  JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
+                                                 ORIGINATING_ROUTINE=routName, $
                                                  OUT_KAPPA_A=A, $
                                                  OUT_GAUSS_A=AGauss, $
                                                  OUT_PLOTDATA=pData, $
@@ -837,6 +837,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
               MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
               MAP__2D=map__2D, $
               JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+              JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
               /EFLUX_NOT_NFLUX, $
               ORIGINATING_ROUTINE=routName, $
               OUT_KAPPA_A=A_eFlux, $
@@ -890,6 +891,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                                  MAP__MULTI_KAPPA_ARRAY=map__multi_kappa_array, $
                                                  MAP__2D=map__2D, $
                                                  JV_THEOR__ITERGAME_TIE_R_B_AND_DENS=jv_theor__itergame_tie_R_B_and_dens, $
+                                                 JV_THEOR__LIEMOHN_AND_KHAZANOV_DENS=jv_theor__Liemohn_and_Khazanov_dens, $
                                                  EFLUX_NOT_NFLUX=KEYWORD_SET(jv_theor__only_eFlux), $
                                                  ORIGINATING_ROUTINE=routName, $
                                                  OUT_KAPPA_A=A, $
