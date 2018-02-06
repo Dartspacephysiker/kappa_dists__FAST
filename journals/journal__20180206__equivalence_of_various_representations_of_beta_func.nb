@@ -1,0 +1,212 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      5577,        204]
+NotebookOptionsPosition[      4750,        169]
+NotebookOutlinePosition[      5090,        184]
+CellTagsIndexPosition[      5047,        181]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[TextData[{
+ "Pick \[Kappa]=5/2 (or a=\[Kappa]-1/2=5/2-1/2=2) so that ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox["t", 
+     RowBox[{"a", "-", "1"}]], "=", 
+    RowBox[{
+     SuperscriptBox["t", 
+      RowBox[{"\[Kappa]", "-", 
+       RowBox[{"3", "/", "2"}]}]], "=", 
+     RowBox[{
+      SuperscriptBox["t", 
+       RowBox[{
+        RowBox[{"5", "/", "2"}], "-", 
+        RowBox[{"3", "/", "2"}]}]], "=", "t"}]}]}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ ";\npick b =3/2 so that ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox[
+     RowBox[{"(", 
+      RowBox[{"1", "-", "t"}], ")"}], 
+     RowBox[{"b", "-", "1"}]], "=", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"1", "-", "t"}], ")"}], 
+      RowBox[{
+       RowBox[{"3", "/", "2"}], "-", "1"}]], "=", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"1", "-", "t"}], ")"}], 
+      RowBox[{"1", "/", "2"}]]}]}], TraditionalForm]],
+  FormatType->"TraditionalForm"]
+}], "Subsection",
+ CellChangeTimes->{{3.726907728620779*^9, 3.726907822988215*^9}, {
+  3.726908116323579*^9, 3.7269081512045107`*^9}, {3.726908184293818*^9, 
+  3.726908222690337*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Beta", "[", 
+   RowBox[{"2", ",", "2", ",", 
+    RowBox[{"3", "/", "2"}]}], "]"}], "//", "N"}]], "Input",
+ CellChangeTimes->{{3.72690756134851*^9, 3.726907579913862*^9}, {
+  3.726908533669772*^9, 3.726908572079274*^9}}],
+
+Cell[BoxData[
+ RowBox[{"0.2666666666666669`", "\[VeryThinSpace]", "+", 
+  RowBox[{"1.0666666666666667`", " ", "\[ImaginaryI]"}]}]], "Output",
+ CellChangeTimes->{{3.7269085460927553`*^9, 3.72690857352497*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "This is the same as ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    FractionBox["4", "15"], "+", 
+    RowBox[{
+     FractionBox["16", "15"], "\[ImaginaryI]"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ ":"
+}], "Subsection",
+ CellChangeTimes->{{3.726908620630859*^9, 3.726908640777342*^9}, {
+  3.726908711862911*^9, 3.726908712325891*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"4", "/", "15"}], "+", 
+   RowBox[{
+    RowBox[{"16", "/", "15"}], "I"}]}], "//", "N"}]], "Input",
+ CellChangeTimes->{{3.726907666187684*^9, 3.726907682521634*^9}, {
+  3.726908580344303*^9, 3.726908613064633*^9}, {3.7269086927509117`*^9, 
+  3.7269086966350718`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"0.26666666666666666`", "\[VeryThinSpace]", "+", 
+  RowBox[{"1.0666666666666667`", " ", "\[ImaginaryI]"}]}]], "Output",
+ CellChangeTimes->{{3.726907679153493*^9, 3.726907682992795*^9}, 
+   3.726908592239881*^9, 3.726908697875141*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Integrate", "[", 
+  RowBox[{
+   RowBox[{"t", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      RowBox[{"1", "-", "t"}], ")"}], 
+     RowBox[{"1", "/", "2"}]]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"t", ",", "0", ",", "2"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.726907699372471*^9, 3.726907708198586*^9}, {
+  3.726907829719923*^9, 3.726907848294104*^9}, {3.726908325523066*^9, 
+  3.7269083265642147`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["4", "15"], "+", 
+  FractionBox[
+   RowBox[{"16", " ", "\[ImaginaryI]"}], "15"]}]], "Output",
+ CellChangeTimes->{3.7269078496130123`*^9, 3.726908327982668*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"a", "=", "2"}], ";", 
+  RowBox[{"b", "=", 
+   RowBox[{"3", "/", "2"}]}], ";", 
+  RowBox[{"z", "=", "2"}], ";"}]], "Input",
+ CellChangeTimes->{{3.726908435930002*^9, 3.7269084635549107`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox[
+   SuperscriptBox["z", "a"], "a"], 
+  RowBox[{"Hypergeometric2F1", "[", 
+   RowBox[{"a", ",", 
+    RowBox[{"1", "-", "b"}], ",", 
+    RowBox[{"a", "+", "1"}], ",", "z"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.7269083980889053`*^9, 3.726908415863575*^9}, {
+  3.726908447716919*^9, 3.726908479186301*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["4", "15"], "+", 
+  FractionBox[
+   RowBox[{"16", " ", "\[ImaginaryI]"}], "15"]}]], "Output",
+ CellChangeTimes->{3.726908483690609*^9}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 753},
+WindowMargins->{{396, Automatic}, {42, Automatic}},
+FrontEndVersion->"11.0 for Linux x86 (64-bit) (September 21, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 1183, 39, 73, "Subsection"],
+Cell[CellGroupData[{
+Cell[1788, 65, 254, 6, 35, "Input"],
+Cell[2045, 73, 208, 3, 33, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2302, 82, 367, 12, 54, "Subsection"],
+Cell[CellGroupData[{
+Cell[2694, 98, 312, 8, 33, "Input"],
+Cell[3009, 108, 256, 4, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3302, 117, 434, 12, 43, "Input"],
+Cell[3739, 131, 197, 5, 50, "Output"]
+}, Open  ]],
+Cell[3951, 139, 225, 6, 35, "Input"],
+Cell[CellGroupData[{
+Cell[4201, 149, 345, 9, 58, "Input"],
+Cell[4549, 160, 173, 5, 50, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
