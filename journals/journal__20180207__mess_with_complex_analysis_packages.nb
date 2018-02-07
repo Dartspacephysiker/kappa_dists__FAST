@@ -1,0 +1,4666 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    162982,       4658]
+NotebookOptionsPosition[    156045,       4508]
+NotebookOutlinePosition[    156950,       4535]
+CellTagsIndexPosition[    156816,       4529]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["\<\
+Initialization (from Dr. Robert Kragler\[CloseCurlyQuote]s \
+ContourIntegration_P2.nb)\
+\>", "Subsubsection",
+ CellMargins->{{14.883332953767582`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ CellChangeTimes->{{3.726995273170957*^9, 3.726995273404887*^9}},
+ FontSize->16,
+ FontWeight->"Bold",
+ FontSlant->"Plain",ExpressionUUID->"3cc62ef9-8b98-45b0-b1a9-56ae11189deb"],
+
+Cell[TextData[{
+ StyleBox["In order to execute the subsequent ",
+  FontFamily->"Times New Roman"],
+ StyleBox["Mathematica",
+  FontFamily->"Times New Roman",
+  FontSlant->"Italic"],
+ StyleBox[" code with the examples given the ",
+  FontFamily->"Times New Roman"],
+ StyleBox["Mathematica",
+  FontFamily->"Times New Roman",
+  FontSlant->"Italic"],
+ StyleBox[" package ",
+  FontFamily->"Times New Roman"],
+ StyleBox["ContourIntegration`",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"],
+ StyleBox[" must be loaded first. It should be located in the ",
+  FontFamily->"Times New Roman"],
+ StyleBox["same",
+  FontFamily->"Times New Roman",
+  FontVariations->{"Underline"->True}],
+ StyleBox[" subdirectory from where the current notebook ",
+  FontFamily->"Times New Roman"],
+ StyleBox["ContourIntegration_P2.nb",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"],
+ StyleBox[" is revoked.",
+  FontFamily->"Times New Roman"]
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"c97ed183-dc7a-4cec-90d8-0833c1925f56"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ StyleBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{"Clear", "[", "\"\<Global`*\>\"", "]"}], ";"}], " "}],
+  FontColor->RGBColor[0, 0, 0]], "\[IndentingNewLine]", 
+ RowBox[{"SetDirectory", "[", 
+  RowBox[{"NotebookDirectory", "[", "]"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Get", "[", "\"\<ContourIntegration`\>\"", "]"}]}], "Code",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ InitializationCell->
+  True,ExpressionUUID->"1786eca6-3b98-457b-b203-c68631b95afd"],
+
+Cell[BoxData["\<\"/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals\"\
+\>"], "Output",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ CellChangeTimes->{
+  3.726995243635809*^9},ExpressionUUID->"080a320d-ee55-425a-873d-\
+4931aa6b2074"]
+}, Open  ]],
+
+Cell[TextData[{
+ "The ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " package comprises all definitions, procedures, replacement rules etc. \
+which are required to run the main procedure ",
+ StyleBox["ContourIntegral",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"],
+ " etc. .  After successful execution of the package the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " version, date and time are shown. "
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"45f51059-64b7-4213-8d75-05901f90932d"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Special n",
+ StyleBox["otations",
+  FontSlant->"Italic"]
+}], "Subsubsubsection",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"d86ee551-69c2-41e4-b90f-f6afd3e52098"],
+
+Cell["\<\
+For sake of better readability some special notations will be introduced and \
+used throughout the notebook which are given here.\
+\>", "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ TextJustification->0.,ExpressionUUID->"c0ad42d3-14b0-4498-b61d-2dc71d728c10"],
+
+Cell[TextData[{
+ "Numerical contour ",
+ StyleBox["integrals ",
+  FontFamily->"Times New Roman"],
+ Cell[BoxData[
+  StyleBox[
+   RowBox[{
+    SubscriptBox["\[ContourIntegral]", "\[Gamma]"], " ", 
+    RowBox[{
+     StyleBox["f",
+      FontSlant->"Italic"], 
+     RowBox[{"(", 
+      StyleBox["z",
+       FontSlant->"Italic"], ")"}], 
+     RowBox[{"\[DifferentialD]", "z"}]}]}],
+   FontWeight->"Bold"]],
+  CellMargins->{{32, 26}, {10, 5}},
+  FontFamily->"Times New Roman",ExpressionUUID->
+  "ee136e23-3de9-4fa6-bfc4-97288ac456ce"],
+ StyleBox[" and  ",
+  FontFamily->"Times New Roman"],
+ Cell[BoxData[
+  StyleBox[
+   RowBox[{
+    SubsuperscriptBox["\[ContourIntegral]", 
+     RowBox[{" ", "a"}], 
+     RowBox[{" ", "b"}]], 
+    RowBox[{
+     StyleBox["f",
+      FontSlant->"Italic"], 
+     RowBox[{"(", 
+      StyleBox["z",
+       FontSlant->"Italic"], ")"}], 
+     RowBox[{"\[DifferentialD]", "z"}]}]}],
+   FontWeight->"Bold"]],
+  CellMargins->{{32, 26}, {10, 5}},
+  PageBreakAbove->False,
+  PageBreakBelow->False,
+  FontFamily->"Times New Roman",ExpressionUUID->
+  "bc46d8eb-77b4-4d34-88b2-a5f1d1923301"],
+ StyleBox[" ,",
+  FontFamily->"Times New Roman"]
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"4f3b74cc-21c9-49a8-b45c-0235453cb273"],
+
+Cell[BoxData[
+ RowBox[{"Notation", "[", 
+  RowBox[{
+   RowBox[{
+    TemplateBox[{RowBox[{
+        SubscriptBox["\[ContourIntegral]", "\[Gamma]_"], 
+        RowBox[{"f_", 
+          RowBox[{"\[DifferentialD]", "z_"}]}]}]},
+     "NotationTemplateTag"], "\[DoubleLongRightArrow]", 
+    TemplateBox[{RowBox[{" ", 
+        RowBox[{"NIntegrate", "[", 
+          RowBox[{"f_", ",", " ", 
+            RowBox[{"Evaluate", "[", 
+              RowBox[{"Join", "[", 
+                RowBox[{
+                  RowBox[{"{", "z_", "}"}], ",", "\[Gamma]_"}], "]"}], 
+              "]"}]}], "]"}]}]},
+     "NotationTemplateTag"]}], ",", 
+   RowBox[{"WorkingForm", " ", "\[Rule]", " ", "tF"}]}], "]"}]], "Code",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"5bff4801-296e-456b-9b79-e5a899089e36"],
+
+Cell[BoxData[
+ RowBox[{"Notation", "[", 
+  RowBox[{
+   RowBox[{
+    TemplateBox[{RowBox[{" ", 
+        RowBox[{
+          SubsuperscriptBox["\[ContourIntegral]", 
+           RowBox[{"\[Theta]_", "\[Equal]", "a_"}], 
+           RowBox[{"\[Theta]_", "\[Equal]", "b_"}]], 
+          RowBox[{"f_", 
+            RowBox[{"\[DifferentialD]", 
+              SubscriptBox["z_", 
+               RowBox[{"z_", "\[Rule]", " ", "g_"}]]}]}]}]}]},
+     "NotationTemplateTag"], "\[DoubleLongRightArrow]", 
+    TemplateBox[{RowBox[{"NIntegrate", "[", 
+        RowBox[{
+          RowBox[{"Evaluate", "[", 
+            RowBox[{"Simplify", "[", 
+              FractionBox[
+               RowBox[{
+                 RowBox[{"f_", " ", 
+                   RowBox[{"Dt", "[", "z_", "]"}]}], "/.", 
+                 RowBox[{"z_", "\[Rule]", "g_"}]}], 
+               RowBox[{"Dt", "[", "\[Theta]_", "]"}]], "]"}], "]"}], ",", 
+          RowBox[{"{", 
+            RowBox[{"\[Theta]_", ",", "a_", ",", "b_"}], "}"}]}], "]"}]},
+     "NotationTemplateTag"]}], ",", 
+   RowBox[{"WorkingForm", " ", "\[Rule]", " ", "tF"}]}], "]"}]], "Code",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"201c19d8-0793-449a-845c-aa0962440e11"],
+
+Cell[TextData[{
+ StyleBox["Line integrals ",
+  FontFamily->"Times New Roman"],
+ Cell[BoxData[
+  StyleBox[
+   RowBox[{
+    SubscriptBox["\[Integral]", 
+     RowBox[{"\[ScriptCapitalL]", 
+      RowBox[{"(", "t", ")"}]}]], 
+    RowBox[{
+     StyleBox["f",
+      FontSlant->"Italic"], 
+     RowBox[{
+      RowBox[{"(", 
+       StyleBox[
+        RowBox[{"R", 
+         RowBox[{"(", "t", ")"}]}],
+        FontSlant->"Italic"], ")"}], "\[CenterDot]", 
+      RowBox[{"\[DifferentialD]", 
+       RowBox[{"t", "[", 
+        StyleBox["R",
+         FontSlant->"Italic"], "]"}]}]}]}]}],
+   FontWeight->"Bold"]],
+  CellMargins->{{32, 26}, {10, 5}},
+  FontFamily->"Times New Roman",ExpressionUUID->
+  "f32a4bb3-5e27-409c-92f9-2ef471e8aea3"],
+ StyleBox[" ",
+  FontFamily->"Times New Roman"]
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"ce2026da-e46c-4316-b2fa-4d7459053f51"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Notation", "[", 
+   RowBox[{
+    TemplateBox[{RowBox[{
+        SubscriptBox["\[Integral]", 
+         RowBox[{"\[ScriptCapitalL]_", ",", "p_"}]], 
+        RowBox[{"f_", " ", ".", " ", 
+          RowBox[{"\[DifferentialD]", 
+            RowBox[{"t", "[", "r_", "]"}]}]}]}]},
+     "NotationTemplateTag"], " ", "\[DoubleLongLeftRightArrow]", " ", 
+    TemplateBox[{RowBox[{"LineIntegral", "[", 
+        RowBox[{
+          RowBox[{"f_", " ", ".", " ", 
+            RowBox[{"Dt", "[", "r_", "]"}]}], ",", "\[ScriptCapitalL]_", ",", 
+          "p_", ",", "r_"}], "]"}]},
+     "NotationTemplateTag"]}], "]"}], " "}]], "Code",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"e319eef0-6ff8-4b14-a8d7-b9dd5e9155cd"],
+
+Cell[TextData[{
+ StyleBox["Symbolic contour integrals ",
+  FontFamily->"Times New Roman"],
+ Cell[BoxData[
+  StyleBox[
+   RowBox[{
+    SubscriptBox["\[ContourIntegral]", 
+     RowBox[{"selPol", ",", " ", "polRange", ",", " ", "onoff"}]], 
+    RowBox[{
+     StyleBox["f",
+      FontSlant->"Italic"], 
+     RowBox[{"(", 
+      StyleBox["z",
+       FontSlant->"Italic"], ")"}], 
+     RowBox[{"\[DifferentialD]", "z"}]}]}],
+   FontFamily->"Times New Roman",
+   FontWeight->"Bold"]],
+  CellMargins->{{30.74999983236191, 22.87499958090484}, {10., 5.}},
+  ExpressionUUID->"227319ea-ba30-4e1b-83b5-5bdecc24b6aa"],
+ "  "
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"0bccca17-3bd2-4921-aeb4-c49789e9260b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Notation", "[", 
+   RowBox[{
+    TemplateBox[{RowBox[{
+        SubscriptBox["\[ContourIntegral]", 
+         RowBox[{"selectPoles_", ",", "polesRange_", ",", "onoff_"}]], 
+        RowBox[{"f_", 
+          RowBox[{"\[DifferentialD]", "z_"}]}]}]},
+     "NotationTemplateTag"], " ", "\[DoubleLongLeftRightArrow]", " ", 
+    TemplateBox[{RowBox[{"ContourIntegral", "[", 
+        RowBox[{
+         "f_", ",", "z_", ",", "selectPoles_", ",", "polesRange_", ",", 
+          "onoff_"}], "]"}]},
+     "NotationTemplateTag"]}], "]"}], " "}]], "Code",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"816ceb88-56f8-4b39-bde5-7d636cf04067"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Replacement  Rules and Shortcuts", "Subsubsubsection",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->True,
+ PageBreakBelow->False,ExpressionUUID->"b1337429-a6c1-4a29-9e2f-7f4f7458ffdc"],
+
+Cell[TextData[{
+ "This are ",
+ StyleBox["substitution rules",
+  FontSlant->"Italic"],
+ " for {",
+ StyleBox["sin(\[Theta]), cos(\[Theta]) }",
+  FontWeight->"Bold"],
+ " and {",
+ StyleBox["sinh(\[Theta]), cosh(\[Theta]) }",
+  FontWeight->"Bold"],
+ " ",
+ StyleBox["not",
+  FontVariations->{"Underline"->True}],
+ " included in the package ",
+ StyleBox["ContourIntegration",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"]
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"ddec3add-c3e0-4ba2-aae5-5cf41d6b9c37"],
+
+Cell[BoxData[
+ RowBox[{" ", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "=."}], " ", ";"}], "\n", " ", 
+   RowBox[{
+    RowBox[{"trigRule", ":=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Sin", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", 
+          RowBox[{"2", "\[ImaginaryI]"}]], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "-", " ", 
+           FractionBox["1", "z"]}], ")"}]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Cos", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", "2"], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "+", " ", 
+           FractionBox["1", "z"]}], ")"}]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Csc", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        FractionBox[
+         RowBox[{"2", "\[ImaginaryI]"}], 
+         RowBox[{"z", " ", "-", " ", 
+          FractionBox["1", "z"]}]]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Sec", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        FractionBox["2", 
+         RowBox[{"z", " ", "+", " ", 
+          FractionBox["1", "z"]}]]}], ",", "\n", "            ", 
+       RowBox[{
+        RowBox[{"Tan", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         RowBox[{"-", "\[ImaginaryI]"}], " ", 
+         FractionBox[
+          RowBox[{"(", 
+           RowBox[{"z", " ", "-", " ", 
+            FractionBox["1", "z"]}], ")"}], 
+          RowBox[{"(", 
+           RowBox[{"z", " ", "+", " ", 
+            FractionBox["1", "z"]}], ")"}]]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Cot", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{"\[ImaginaryI]", " ", 
+         FractionBox[
+          RowBox[{"(", 
+           RowBox[{"z", " ", "+", " ", 
+            FractionBox["1", "z"]}], ")"}], 
+          RowBox[{"(", 
+           RowBox[{"z", " ", "-", " ", 
+            FractionBox["1", "z"]}], ")"}]]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"\[DifferentialD]", "\[Theta]_"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", 
+          RowBox[{"\[ImaginaryI]", " ", "z"}]], " ", 
+         RowBox[{"\[DifferentialD]", "z"}]}]}]}], " ", "}"}]}], ";"}], "  ", 
+   RowBox[{"(*", " ", 
+    RowBox[{"z", " ", "=", " ", 
+     SuperscriptBox["\[ExponentialE]", 
+      RowBox[{"\[ImaginaryI]", " ", "\[Theta]"}]]}], " ", "*)"}], "\n", " ", 
+   RowBox[{
+    RowBox[{"hypRule", ":=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Sinh", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", "2"], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "-", " ", 
+           FractionBox["1", "z"]}], ")"}]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Cosh", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", "2"], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "+", " ", 
+           FractionBox["1", "z"]}], ")"}]}]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Csch", "[", "\[Theta]_", "]"}], " ", "\[Rule]", "  ", 
+        FractionBox["2", 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "-", " ", 
+           FractionBox["1", "z"]}], ")"}]]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Sech", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        FractionBox["2", 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "+", " ", 
+           FractionBox["1", "z"]}], ")"}]]}], ",", "\n", "            ", 
+       RowBox[{
+        RowBox[{"Tanh", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        FractionBox[
+         RowBox[{"(", 
+          RowBox[{"z", " ", "-", " ", 
+           FractionBox["1", "z"]}], ")"}], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "+", " ", 
+           FractionBox["1", "z"]}], ")"}]]}], ",", " ", 
+       RowBox[{
+        RowBox[{"Coth", "[", "\[Theta]_", "]"}], " ", "\[Rule]", " ", 
+        FractionBox[
+         RowBox[{"(", 
+          RowBox[{"z", " ", "+", " ", 
+           FractionBox["1", "z"]}], ")"}], 
+         RowBox[{"(", 
+          RowBox[{"z", " ", "-", " ", 
+           FractionBox["1", "z"]}], ")"}]]}], ",", " ", 
+       RowBox[{
+        RowBox[{"\[DifferentialD]", "\[Theta]_"}], " ", "\[Rule]", " ", 
+        RowBox[{
+         FractionBox["1", "z"], " ", 
+         RowBox[{"\[DifferentialD]", "z"}]}]}]}], " ", "}"}]}], ";"}], 
+   "      ", 
+   RowBox[{"(*", " ", 
+    RowBox[{"z", " ", "=", " ", 
+     SuperscriptBox["\[ExponentialE]", "\[Theta]"]}], " ", "*)"}]}]}]], "Code",\
+
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"536a92d4-8751-45ee-a6b8-564824f0f0c0"],
+
+Cell[TextData[{
+ "In order to make the code more transparent some ",
+ StyleBox["shortcuts",
+  FontSlant->"Italic"],
+ " will be used throughout this paper :\n",
+ StyleBox["fl=Flatten, sf=Simplify, fs=FullSimplify, sF=StandardForm, \
+tF=TraditionalForm, cF=ColumnForm, ce=ComplexExpand, hF=HoldForm, \
+th=AbsoluteThickness[2]",
+  FontWeight->"Bold"],
+ " and ",
+ StyleBox["th1=AbsoluteThickness[1]",
+  FontWeight->"Bold"],
+ " and ",
+ StyleBox["polyForm=PolynomialForm[#, TraditionalOrder\[Rule]True]& . ",
+  FontWeight->"Bold"]
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ TextJustification->0.,ExpressionUUID->"0c32c7bd-c30f-46e7-b251-4f05e6db9d5b"],
+
+Cell[TextData[{
+ "Some additional ",
+ StyleBox["rules",
+  FontSlant->"Italic"],
+ " are defined : \n",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", 
+    StyleBox[
+     RowBox[{"AbsRule", "=", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Abs", "[", 
+         RowBox[{"x_", 
+          RowBox[{"+", "\[ImaginaryI]"}], "  ", "y_"}], " ", "]"}], "\[Rule]",
+         "  ", 
+        SqrtBox[
+         RowBox[{
+          SuperscriptBox["x", "2"], "+", 
+          SuperscriptBox["y", "2"]}]]}], "}"}]}],
+     FontWeight->"Bold"]}], TraditionalForm]],ExpressionUUID->
+  "d49fa479-ce2d-454c-bf2b-794f085891ae"],
+ StyleBox[" ,  reIm = {Re[#],Im[#]}&  ,   ratChop[v_] := \
+Rationalize[Chop[expr]]",
+  FontWeight->"Bold"],
+ " ."
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ TextJustification->0.,ExpressionUUID->"c7e87c4e-179c-488b-934c-ca9bcd190c70"],
+
+Cell[TextData[{
+ StyleBox["Global variables",
+  FontSlant->"Italic"],
+ " $<name> being used are :  ",
+ StyleBox["$\[Kappa],  $sing, $branchCut, $rootObj, $poles, $polesType, \
+$orderC, $i, $circ",
+  FontWeight->"Bold"],
+ ".  "
+}], "Text",
+ CellMargins->{{21.416666287100917`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"b2b7926b-6764-46b4-b207-f47e99f7262a"],
+
+Cell[TextData[{
+ "In ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " V10 there are three useful procedures in the package ",
+ StyleBox["ComplexAnalysis",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"],
+ " :"
+}], "Text",
+ CellMargins->{{22.083333059731412`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"aa7a4d0e-b145-407e-aa32-b6485a15e14c"],
+
+Cell[TextData[{
+ "The following definitions circumvent the context ",
+ StyleBox["ComplexAnalysis`",
+  FontFamily->"Courier New",
+  FontWeight->"Bold"]
+}], "Text",
+ CellMargins->{{22.083333059731412`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"295730b3-56c6-4be4-8d08-b442f2553d5c"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"branchCuts", ",", "branchPoints", ",", "holomorphicQ"}], "}"}], 
+   "=", "\[IndentingNewLine]", "                      ", 
+   RowBox[{"{", 
+    RowBox[{
+    "ComplexAnalysis`BranchCuts", " ", ",", "ComplexAnalysis`BranchPoints", 
+     " ", ",", " ", "ComplexAnalysis`HolomorphicQ"}], "   ", "}"}]}], 
+  ";"}]], "Input",
+ CellMargins->{{22.083333059731412`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"3d1c6ff7-7930-4f8e-b6b6-67aad75c8f5d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", " ", 
+  "ComplexAnalysis`BranchCuts ComplexAnalysis`BranchPoints \
+ComplexAnalysis`HolomorphicQ   "}]], "Input",
+ CellMargins->{{22.083333059731412`, 0.}, {10., 5.}},
+ PageBreakAbove->False,
+ PageBreakBelow->False,ExpressionUUID->"18bc0a65-aa53-4504-aaa0-e3bddb2b4c94"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"BranchCuts[f, z] gives the branch cuts of f with respect to \
+the variable z. BranchCuts[f] returns the branch cuts of the pure function f.\
+\"\>"], "Print", "PrintUsage",
+ CellChangeTimes->{3.7269952461916447`*^9},
+ CellTags->
+  "Info143726977245-4795296",ExpressionUUID->"3758a5a6-4a71-4897-9fd7-\
+86a4d7c1d852"],
+
+Cell[BoxData["\<\"BranchPoints[f, z] gives the branch points of f with \
+respect to the variable z. BranchPoints[f] returns the branch points of the \
+pure function f.\"\>"], "Print", "PrintUsage",
+ CellChangeTimes->{3.726995246749188*^9},
+ CellTags->
+  "Info143726977246-4795296",ExpressionUUID->"37a308cb-2669-4a4e-80b4-\
+b9905859fcec"],
+
+Cell[BoxData["\<\"HolomorphicQ[f, z] returns True if f is a holomorphic \
+function. HolomorphicQ works best if there are no symbolic parameters.\"\>"], \
+"Print", "PrintUsage",
+ CellChangeTimes->{3.726995247351492*^9},
+ CellTags->
+  "Info143726977246-4795296",ExpressionUUID->"54946e89-37e2-41f9-9e27-\
+023c2c8cdd31"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Mess around with complex analysis packages", "Section",
+ CellChangeTimes->{{3.726993270096602*^9, 
+  3.726993276156452*^9}},ExpressionUUID->"84ee8b18-32fe-4375-b98e-\
+90b72ab5a0c5"],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Show documentation for ComplexAnalysis`* and ContourIntegration`*\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.726995801774067*^9, 
+  3.7269958417150097`*^9}},ExpressionUUID->"ff2a3aae-9bb7-4b1c-a29d-\
+b3379f8d2ab8"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"func", "[", "z_", "]"}], " ", "=", " ", 
+  SqrtBox[
+   RowBox[{"1", "-", "z"}]]}]], "Input",
+ CellChangeTimes->{{3.726995414176608*^9, 
+  3.726995434606937*^9}},ExpressionUUID->"9871648e-dc63-4bdc-a6ea-\
+987ede6efdf6"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", "ComplexAnalysis`*"}]], "Input",
+ CellChangeTimes->{{3.726995749084272*^9, 
+  3.726995754762022*^9}},ExpressionUUID->"53bdea35-822e-4b2e-99ef-\
+d8fc95bdb6f3"],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`open$$ = True}, 
+  PaneSelectorBox[{False->
+   RowBox[{
+    OpenerBox[Dynamic[Typeset`open$$],
+     ImageSize->Small], 
+    StyleBox["ComplexAnalysis`", "InfoHeading"]}], True->GridBox[{
+     {
+      RowBox[{
+       OpenerBox[Dynamic[Typeset`open$$],
+        ImageSize->Small], 
+       StyleBox["ComplexAnalysis`", "InfoHeading"]}]},
+     {GridBox[{
+        {
+         ButtonBox["BranchCuts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info263726977755-3946050", {"BranchCuts", "ComplexAnalysis`"}},
+          ButtonNote->"ComplexAnalysis`"], 
+         ButtonBox["BranchPoints",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info263726977755-3946050", {"BranchPoints", "ComplexAnalysis`"}},
+          ButtonNote->"ComplexAnalysis`"], 
+         ButtonBox["HolomorphicQ",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info263726977755-3946050", {"HolomorphicQ", "ComplexAnalysis`"}},
+          ButtonNote->"ComplexAnalysis`"]}
+       },
+       DefaultBaseStyle->"InfoGrid",
+       GridBoxItemSize->{"Columns" -> {{
+            Scaled[0.31666666666666665`]}}}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}}]}, 
+   Dynamic[Typeset`open$$],
+   ImageSize->Automatic]]], "Print", "InfoCell",
+ CellChangeTimes->{
+  3.7269957554960403`*^9},ExpressionUUID->"7e1bd305-65b6-4a11-8f94-\
+6fa52f876956"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", "ContourIntegration`*"}]], "Input",
+ CellChangeTimes->{{3.726995762307497*^9, 
+  3.726995779392374*^9}},ExpressionUUID->"20553038-654f-4420-beb3-\
+6d3ed1def221"],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`open$$ = True}, 
+  PaneSelectorBox[{False->
+   RowBox[{
+    OpenerBox[Dynamic[Typeset`open$$],
+     ImageSize->Small], 
+    StyleBox["ContourIntegration`", "InfoHeading"]}], True->GridBox[{
+     {
+      RowBox[{
+       OpenerBox[Dynamic[Typeset`open$$],
+        ImageSize->Small], 
+       StyleBox["ContourIntegration`", "InfoHeading"]}]},
+     {GridBox[{
+        {
+         ButtonBox["a",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"a", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["nullList$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nullList$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["AbsReImContPlot3D",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "AbsReImContPlot3D", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["numberOfBranchCuts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "numberOfBranchCuts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["AbsRule",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"AbsRule", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["O2L",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"O2L", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["after",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"after", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["on",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"on", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["algebraic",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"algebraic", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["onoff",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"onoff", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["any",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"any", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["on$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"on$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Arc",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Arc", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["opts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"opts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["arc2deg",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"arc2deg", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["Orientation",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Orientation", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Arc3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Arc3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["out",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"out", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ArcsAndLines",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "ArcsAndLines", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["outPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"outPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ArcTrigHypFctQ",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "ArcTrigHypFctQ", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["out$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"out$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["args",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"args", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["p",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"p", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["arrowList",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"arrowList", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["P",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"P", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["axes2d",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"axes2d", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pj",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pj", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["axes3d",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"axes3d", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pj$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pj$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["a$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"a$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pkgN1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pkgN1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["b",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"b", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pkgN1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pkgN1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["before",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"before", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pkgN2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pkgN2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["boole",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"boole", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pkgN2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pkgN2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["boolean",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"boolean", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pkgName",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pkgName", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["boolean$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"boolean$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotAbs",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotAbs", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchCutContour",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchCutContour", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotAbs$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotAbs$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchCuts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"branchCuts", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchCutsPlot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchCutsPlot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotIm$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotIm$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPoints",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchPoints", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPoints1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchPoints1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotRange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotRange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPointsA",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchPointsA", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotRe",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotRe", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPointsF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchPointsF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotRe$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotRe$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"branchPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotStyle",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotStyle", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchPtsExtraction",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchPtsExtraction", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["plotStyle$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"plotStyle$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["branchTargetPts",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "branchTargetPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["PointInPolygonQ",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "PointInPolygonQ", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poles",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poles", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC0",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC0", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poles1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poles1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC0$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC0$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poles1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poles1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polesOfComplexFunction4",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "polesOfComplexFunction4", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polesRange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polesRange", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poles$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poles$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poly",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poly", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCgraph",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCgraph", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polyForm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polyForm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brClen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brClen", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polyL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polyL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brClen$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brClen$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polyL1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polyL1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCplot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCplot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polyL1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polyL1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCPlt",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCPlt", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polylines",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polylines", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polylines$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polylines$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCtsBC",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCtsBC", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["polyL$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"polyL$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCtsBC1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCtsBC1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["poly$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"poly$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCtsBCLen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCtsBCLen", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["posMax",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"posMax", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCtsBCLen1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCtsBCLen1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["posMin",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"posMin", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCtslen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCtslen", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["powArg",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"powArg", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["powArg$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"powArg$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brCuts1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brCuts1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["powerArg",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"powerArg", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brC$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brC$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["print",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"print", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPoints",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPoints", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pro",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pro", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPoints1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPoints1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pro2d",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pro2d", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["prolog",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"prolog", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["prolog$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"prolog$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts10",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts10", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["prtList",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"prtList", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1Len",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1Len", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pt",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pt", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1Len$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1Len$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptListj",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptListj", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1s",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1s", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptListj$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptListj$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1s$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1s$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptLst",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptLst", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptS3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptS3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts20",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts20", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptS4",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptS4", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2Len",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2Len", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptS4$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptS4$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2Len$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2Len$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptsInOut",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptsInOut", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2s",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2s", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptsTest",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptsTest", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2s$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2s$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ptsTest$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ptsTest$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["pts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"pts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["p$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"p$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts30",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts30", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["range",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"range", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts3Len",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts3Len", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["raster",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"raster", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts3Len$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts3Len$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["rasterize",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"rasterize", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts3$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts3$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ratChop",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ratChop", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPtsF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPtsF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["redL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"redL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPtsLen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPtsLen", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["redLine",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"redLine", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["brPts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"brPts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["redL$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"redL$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["b$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"b$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["region",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"region", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["calculateResidues",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "calculateResidues", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["region$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"region$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["calculateResidues4SpecFct",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "calculateResidues4SpecFct", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["reIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"reIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["canonicalizeFct",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "canonicalizeFct", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["removeAdjacentDuplicates",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "removeAdjacentDuplicates", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ce",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ce", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["RemovePackage",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "RemovePackage", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["cF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"cF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"res1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["cFwrap",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"cFwrap", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"res1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["changeVariable4Integral",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "changeVariable4Integral", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"res2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["circ",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"circ", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"res2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["circle",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"circle", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["resMulti",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"resMulti", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["cmplxOp",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"cmplxOp", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["resMulti$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"resMulti$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["col",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"col", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["resSingle",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"resSingle", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["color",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"color", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["resSingle$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"resSingle$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["colors",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"colors", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res\[CapitalSigma]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "res\[CapitalSigma]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["colors$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"colors$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["res\[CapitalSigma]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "res\[CapitalSigma]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFct2d3dPlot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFct2d3dPlot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["rootArg",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"rootArg", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFct2Plots",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFct2Plots", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["rootArg$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"rootArg$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFct3dPlot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFct3dPlot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["round",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"round", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFct4Plots",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFct4Plots", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["runEncode",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"runEncode", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFct5Plots",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFct5Plots", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["s",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"s", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFctContourPlot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFctContourPlot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sec",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sec", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["complexFctPlot3D",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "complexFctPlot3D", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["selectbCk",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"selectbCk", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"contIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["selectPoles",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"selectPoles", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contIm$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"contIm$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sf",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sf", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contourPathGeneration",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "contourPathGeneration", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contourPathGraphic",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "contourPathGraphic", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showBranchCut",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showBranchCut", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contPlt",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"contPlt", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showBranchCuts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showBranchCuts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["contPlt$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"contPlt$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showMultipleBranchCut",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showMultipleBranchCut", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["createPolylines",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "createPolylines", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showPointsInContour",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showPointsInContour", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["darkGreen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"darkGreen", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showPolygonalContour",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showPolygonalContour", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["darkGreen$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"darkGreen$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["showPolygonalContour1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "showPolygonalContour1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["darkOrange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"darkOrange", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sign",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sign", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["darkOrange$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"darkOrange$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["simp",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"simp", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["day",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"day", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["simp$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"simp$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["dir",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"dir", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sing",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sing", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["discontinuity",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "discontinuity", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sing$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sing$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["discriminant",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "discriminant", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sj",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sj", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["distList",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"distList", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sj$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sj$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["domain",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"domain", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sort",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sort", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["domain$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"domain$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sortG",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sortG", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["draw2dAxes",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"draw2dAxes", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["sortL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"sortL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["draw3dAxes",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"draw3dAxes", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["span",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"span", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["specFctInt",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"specFctInt", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["specFctL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"specFctL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["specFctlen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"specFctlen", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["specFctlen$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"specFctlen$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["specFctL$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"specFctL$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e3$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e3$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ss",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ss", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e4",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e4", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ss$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ss$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["e4$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"e4$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["startPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"startPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["endPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"endPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["startPts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"startPts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["endPts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"endPts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["strL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"strL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epi1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epi1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["style",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"style", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epi2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epi2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleA",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleA", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epiB",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epiB", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleA$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleA$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epiC",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epiC", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleI",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleI", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epilog",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epilog", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleI$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleI$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epilog1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epilog1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleR",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleR", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epilog3d",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epilog3d", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["styleR$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"styleR$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["epilog3d$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"epilog3d$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["style$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"style$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["eqn",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"eqn", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["subRatCmplx",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"subRatCmplx", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["eqn1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"eqn1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["subxy",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"subxy", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["eqnFirst",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"eqnFirst", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["subz",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"subz", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["eqns",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"eqns", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["t",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"t", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["exclude",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"exclude", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["T",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"T", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["expandLogical",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "expandLogical", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["tF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"tF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["expr",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"expr", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["tF$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"tF$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["extractBranchCutsAndBranchPoints",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "extractBranchCutsAndBranchPoints", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["th",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"th", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["extractBranchCutsBranchPointsAndVisualize",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "extractBranchCutsBranchPointsAndVisualize", 
+             "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["th1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"th1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["f",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"f", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["th1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"th1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["F",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"F", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["th2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"th2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fct",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fct", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["th3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"th3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fcts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fcts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["transcendental",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "transcendental", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["findSingularities4SpecFct",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "findSingularities4SpecFct", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["tri",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"tri", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fl",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fl", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["TriangleArea",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "TriangleArea", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fontSize6",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fontSize6", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["trigRule",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"trigRule", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fontSize6$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fontSize6$", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["tri$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"tri$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fs",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fs", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ttip",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ttip", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fxy",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fxy", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["ttip$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ttip$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fxy$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fxy$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["u",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"u", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["fz",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"fz", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["f$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"f$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["generateClosedContourPath",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "generateClosedContourPath", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr2",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v3$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v3$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["vectAngles",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"vectAngles", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["VersionDateTime",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "VersionDateTime", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["view",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"view", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr31",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr31", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["viewPt",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {"viewPt", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr31",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr31", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["viewPtIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"viewPtIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr3dAbs",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr3dAbs", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["viewPtRe",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"viewPtRe", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr3dAxes",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr3dAxes", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["visualizeBranchCutsAndBranchPoints",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "visualizeBranchCutsAndBranchPoints", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr3dIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr3dIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["VisualizeSingularities",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "VisualizeSingularities", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr4",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr4", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["v$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"v$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr4",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr4", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["w",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"w", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Gr41",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Gr41", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["wz",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"wz", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["gr5",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"gr5", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["wz$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"wz$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["grAbs",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"grAbs", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["w$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"w$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["graphics6",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"graphics6", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["graphicsGrid",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "graphicsGrid", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["X",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"X", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["grIm",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"grIm", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x0",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x0", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["grRe",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"grRe", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x0$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x0$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["HalfInteger",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"HalfInteger", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["hF",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"hF", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["holomorphicQ",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "holomorphicQ", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["hour",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"hour", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["x2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"x2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["hourS",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"hourS", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xMax",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {"xMax", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["hypRule",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"hypRule", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xMax$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xMax$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["i",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"i", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xMin",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xMin", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["id",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"id", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xMin$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xMin$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["id$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"id$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xRange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xRange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["imageSize",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {"imageSize", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xRange$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xRange$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["imageSize1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"imageSize1", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xTicks",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xTicks", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["in",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"in", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xyAxes",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xyAxes", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ineqn1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ineqn1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xyAxes$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xyAxes$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ineqn2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ineqn2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xyzAxes",
+          BaseStyle->"InformationLink",
+          ButtonData:>{
+           "Info283726977779-3946050", {"xyzAxes", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["xyzAxes$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"xyzAxes$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y0",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y0", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y0$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y0$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf3",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf3", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inf3$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inf3$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y1$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y1$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["inPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"inPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["interChange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"interChange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["y2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"y2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["in$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"in$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["year",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"year", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["i$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"i$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yMax",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yMax", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["j",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"j", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yMax$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yMax$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["jump",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"jump", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yMin",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yMin", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["j$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"j$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yMin$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yMin$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["k",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"k", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yRange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yRange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["k$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"k$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yRange$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yRange$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["L2O",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"L2O", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["yTicks",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"yTicks", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["labels",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"labels", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["z",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"z", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["labels$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"labels$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["z0",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"z0", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["len",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"len", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["zrange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"zrange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["lenPts",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"lenPts", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["zScale",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"zScale", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["lenPts$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"lenPts$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["zz",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"zz", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["len$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"len$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["zzz",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"zzz", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["lightGray",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"lightGray", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["zz$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"zz$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["line",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"line", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[ScriptCapitalL]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "\[ScriptCapitalL]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["LineIntegral",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "LineIntegral", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[ScriptCapitalL]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "\[ScriptCapitalL]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["lineLst",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"lineLst", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Alpha]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Alpha]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["list",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"list", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Alpha]1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Alpha]1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["list$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"list$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Beta]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Beta]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["m",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"m", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Beta]1",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Beta]1", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["makeComplex",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"makeComplex", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Beta]2",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Beta]2", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["MeijerGIndexList",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "MeijerGIndexList", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Beta]2$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Beta]2$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mesh",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mesh", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Epsilon]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Epsilon]", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mG",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mG", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Epsilon]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Epsilon]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mGL",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mGL", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Zeta]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Zeta]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mGLlen",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mGLlen", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Theta]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Theta]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mGLlen$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mGLlen$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Theta]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Theta]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["mGL$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"mGL$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Kappa]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Kappa]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["min",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"min", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Kappa]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Kappa]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["minmax",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"minmax", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Lambda]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Lambda]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["minmaxRange",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"minmaxRange", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Mu]",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Mu]", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["minmax$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"minmax$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Mu]j",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Mu]j", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["minS",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"minS", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Mu]j$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Mu]j$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["month",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"month", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["\[Mu]$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"\[Mu]$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Months",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Months", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$BCplot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$BCplot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["multiplicityOfPoles",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "multiplicityOfPoles", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$brCplot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$brCplot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["multipoles",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"multipoles", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$epilog",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$epilog", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["multipoles$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"multipoles$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$exact",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$exact", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["multiValuedTerms",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {
+            "multiValuedTerms", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$exclusions",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$exclusions", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["n",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"n", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$fctType",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$fctType", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nbC",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nbC", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$i",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$i", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nbCj",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nbCj", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$labelType",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$labelType", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nbCj$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nbCj$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$onoff",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$onoff", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nbC$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nbC$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$orderC",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$orderC", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["ndig",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"ndig", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$plot",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$plot", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nlist",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nlist", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$polesType",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$polesType", "ContourIntegration`"}},
+          
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nlist$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nlist$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$print",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$print", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Np",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Np", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$reverseY",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$reverseY", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["Np$",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"Np$", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], 
+         ButtonBox["$zScale",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"$zScale", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"]},
+        {
+         ButtonBox["nullList",
+          BaseStyle->"InformationLink",
+          
+          ButtonData:>{
+           "Info283726977779-3946050", {"nullList", "ContourIntegration`"}},
+          ButtonNote->"ContourIntegration`"], ""}
+       },
+       DefaultBaseStyle->"InfoGrid",
+       GridBoxItemSize->{"Columns" -> {{
+            Scaled[0.475]}}}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}}]}, 
+   Dynamic[Typeset`open$$],
+   ImageSize->Automatic]]], "Print", "InfoCell",
+ CellChangeTimes->{
+  3.726995779895197*^9},ExpressionUUID->"96bcf913-5979-4838-8913-\
+aa7869bff7f3"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Define the functions compare, analyticityCondition, singularCondition\
+\>", "Subsection",
+ CellChangeTimes->{{3.72699627388555*^9, 3.726996290691152*^9}, {
+  3.726996368832624*^9, 
+  3.726996369136612*^9}},ExpressionUUID->"f06804f4-71ad-47b9-b539-\
+0bbb60290a43"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"singularCondition", "[", 
+   RowBox[{"func_", ",", "variable_"}], "]"}], ":=", 
+  RowBox[{"Reduce", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"1", "/", 
+       RowBox[{"func", "[", "variable", "]"}]}], "\[Equal]", "0"}], "||", 
+     RowBox[{
+      RowBox[{"1", "/", 
+       RowBox[{
+        RowBox[{"func", "'"}], "[", "variable", "]"}]}], "\[Equal]", "0"}]}], 
+    ",", "variable", ",", "Reals"}], "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"analyticityCondition", "[", 
+   RowBox[{"func_", ",", "variable_"}], "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"n", ",", "c"}], "}"}], ",", 
+    RowBox[{"TrueQ", "@", 
+     RowBox[{"SumConvergence", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"x", "^", "n"}], " ", 
+        RowBox[{"Simplify", "[", 
+         RowBox[{
+          RowBox[{"SeriesCoefficient", "[", 
+           RowBox[{
+            RowBox[{"func", "[", "variable", "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"variable", ",", "c", ",", "n"}], "}"}]}], "]"}], ",", 
+          RowBox[{"n", "\[GreaterEqual]", "0"}]}], "]"}]}], ",", "n"}], 
+      "]"}]}]}], "]"}]}]}], "Input",
+ CellChangeTimes->{{3.726996319202703*^9, 3.726996319203809*^9}, {
+  3.7269967768117237`*^9, 
+  3.726996777327302*^9}},ExpressionUUID->"956e01ce-fa6c-4e6a-9e82-\
+05829eea2cb8"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"singularConditionBro", "[", 
+   RowBox[{"func_", ",", "variable_"}], "]"}], ":=", 
+  RowBox[{"Reduce", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"1", "/", 
+       RowBox[{"func", "[", 
+        RowBox[{"variable", ",", "a", ",", "\[Kappa]"}], "]"}]}], "\[Equal]", 
+      "0"}], "||", 
+     RowBox[{
+      RowBox[{"1", "/", 
+       RowBox[{
+        RowBox[{"func", "'"}], "[", 
+        RowBox[{"variable", ",", "a", ",", "\[Kappa]"}], "]"}]}], "\[Equal]", 
+      "0"}]}], ",", "variable", ",", "Reals"}], 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"analyticityConditionBro", "[", 
+   RowBox[{"func_", ",", "variable_"}], "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"n", ",", "c"}], "}"}], ",", 
+    RowBox[{"TrueQ", "@", 
+     RowBox[{"SumConvergence", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"x", "^", "n"}], " ", 
+        RowBox[{"Simplify", "[", 
+         RowBox[{
+          RowBox[{"SeriesCoefficient", "[", 
+           RowBox[{
+            RowBox[{"func", "[", "variable", "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"variable", ",", "c", ",", "n"}], "}"}]}], "]"}], ",", 
+          RowBox[{"n", "\[GreaterEqual]", "0"}]}], "]"}]}], ",", "n"}], 
+      "]"}]}]}], "]"}]}]}], "Input",
+ CellChangeTimes->{{3.726996319202703*^9, 3.726996319203809*^9}, {
+  3.7269967768117237`*^9, 3.726996785283618*^9}, {3.726996961168385*^9, 
+  3.726996970802456*^9}},ExpressionUUID->"5b118aa5-f306-445a-8a0d-\
+463b4e9e77ae"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"compare", "[", "fun_", "]"}], ":=", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"fun", "[", "x", "]"}], ",", 
+    RowBox[{"FunctionDomain", "[", 
+     RowBox[{
+      RowBox[{"fun", "[", "x", "]"}], ",", "x", ",", "Reals"}], "]"}], ",", 
+    RowBox[{"FunctionDomain", "[", 
+     RowBox[{
+      RowBox[{"fun", "[", "x", "]"}], ",", "x", ",", "Complexes"}], "]"}], 
+    ",", 
+    RowBox[{"analyticityCondition", "[", 
+     RowBox[{"fun", ",", "x"}], "]"}], ",", 
+    RowBox[{"singularCondition", "[", 
+     RowBox[{"fun", ",", "x"}], "]"}]}], "}"}]}], "\n", 
+ RowBox[{
+  RowBox[{"compareBro", "[", "fun_", "]"}], ":=", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"fun", "[", 
+     RowBox[{"x", ",", "a", ",", "\[Kappa]"}], "]"}], ",", 
+    RowBox[{"FunctionDomain", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"fun", "[", 
+         RowBox[{"x", ",", "a", ",", "\[Kappa]"}], "]"}], ",", 
+        RowBox[{
+         RowBox[{"a", ">", "0"}], "&&", 
+         RowBox[{"\[Kappa]", ">", 
+          RowBox[{"3", "/", "2"}]}]}]}], "}"}], ",", "x", ",", "Reals"}], 
+     "]"}], ",", 
+    RowBox[{"FunctionDomain", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"fun", "[", 
+         RowBox[{"x", ",", "a", ",", "\[Kappa]"}], "]"}], ",", 
+        RowBox[{
+         RowBox[{"a", ">", "0"}], "&&", 
+         RowBox[{"\[Kappa]", ">", 
+          RowBox[{"3", "/", "2"}]}]}]}], "}"}], ",", "x", ",", "Complexes"}], 
+     "]"}], ",", 
+    RowBox[{"analyticityCondition", "[", 
+     RowBox[{"fun", ",", "x"}], "]"}], ",", 
+    RowBox[{"singularCondition", "[", 
+     RowBox[{"fun", ",", "x"}], "]"}]}], "}"}]}]}], "Input",
+ CellChangeTimes->{{3.726996298626823*^9, 3.726996298627696*^9}, {
+  3.726996642622314*^9, 
+  3.7269967505368767`*^9}},ExpressionUUID->"ae8c0ccf-3c86-4a7b-a30e-\
+1e07f4a6584d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TableForm", "[", 
+  RowBox[{
+   RowBox[{"compare", "/@", 
+    RowBox[{"{", 
+     RowBox[{"Sin", ",", "Tan"}], "}"}]}], ",", 
+   RowBox[{"TableHeadings", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"None", ",", 
+      RowBox[{"{", 
+       RowBox[{
+       "\"\<Function\>\"", ",", "\"\<RealDomain\>\"", ",", 
+        "\"\<ComplexDomain\>\"", ",", "\"\<analyticityCondition\>\"", ",", 
+        "\"\<singularCondition\>\"", ",", "\"\<RealRange\>\""}], "}"}]}], 
+     "}"}]}], ",", 
+   RowBox[{"TableSpacing", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"3", ",", "3"}], "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.726996648932239*^9, 
+  3.7269966497829514`*^9}},ExpressionUUID->"16dc6f0d-196c-41af-ae02-\
+16ed0e79a8e6"],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      TagBox["\<\"Function\"\>",
+       HoldForm], 
+      TagBox["\<\"RealDomain\"\>",
+       HoldForm], 
+      TagBox["\<\"ComplexDomain\"\>",
+       HoldForm], 
+      TagBox["\<\"analyticityCondition\"\>",
+       HoldForm], 
+      TagBox["\<\"singularCondition\"\>",
+       HoldForm]},
+     {
+      RowBox[{"Sin", "[", "x", "]"}], "True", "True", "True", "False"},
+     {
+      RowBox[{"Tan", "[", "x", "]"}], 
+      RowBox[{
+       RowBox[{
+        FractionBox["1", "2"], "+", 
+        FractionBox["x", "\[Pi]"]}], "\[NotElement]", 
+       TemplateBox[{},
+        "Integers"]}], 
+      RowBox[{
+       RowBox[{
+        FractionBox["1", "2"], "+", 
+        FractionBox["x", "\[Pi]"]}], "\[NotElement]", 
+       TemplateBox[{},
+        "Integers"]}], "False", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"C", "[", "1", "]"}], "\[Element]", 
+          TemplateBox[{},
+           "Integers"]}], "&&", 
+         RowBox[{"x", "\[Equal]", 
+          RowBox[{
+           FractionBox["\[Pi]", "2"], "+", 
+           RowBox[{"\[Pi]", " ", 
+            RowBox[{"C", "[", "1", "]"}]}]}]}]}], ")"}], "||", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"C", "[", "1", "]"}], "\[Element]", 
+          TemplateBox[{},
+           "Integers"]}], "&&", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"x", "\[Equal]", 
+            RowBox[{
+             RowBox[{"-", 
+              FractionBox["\[Pi]", "2"]}], "+", 
+             RowBox[{"2", " ", "\[Pi]", " ", 
+              RowBox[{"C", "[", "1", "]"}]}]}]}], "||", 
+           RowBox[{"x", "\[Equal]", 
+            RowBox[{
+             FractionBox["\[Pi]", "2"], "+", 
+             RowBox[{"2", " ", "\[Pi]", " ", 
+              RowBox[{"C", "[", "1", "]"}]}]}]}]}], ")"}]}], ")"}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {{False}}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[1.2]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {None, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, 
+    TableHeadings -> {
+     None, {"Function", "RealDomain", "ComplexDomain", "analyticityCondition",
+        "singularCondition", "RealRange"}}, 
+    TableSpacing -> {3, 3}]]]], "Output",
+ CellChangeTimes->{
+  3.7269966584788113`*^9},ExpressionUUID->"e377bfc1-0729-417e-95aa-\
+f99b1a4fdcb7"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Define our function", "Subsection",
+ CellChangeTimes->{{3.726996265651525*^9, 
+  3.7269962678913107`*^9}},ExpressionUUID->"fbb132ad-465a-4ca3-800f-\
+300d008ed20c"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"bro", "[", 
+   RowBox[{"x_", ",", "a_", ",", "\[Kappa]_"}], "]"}], ":=", " ", 
+  RowBox[{
+   SqrtBox[
+    RowBox[{"1", "-", "x"}]], 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox[
+       RowBox[{"a", " ", "x"}], 
+       RowBox[{"(", 
+        RowBox[{"\[Kappa]", "-", 
+         RowBox[{"3", "/", "2"}]}], ")"}]]}], ")"}], 
+    RowBox[{"-", 
+     RowBox[{"(", 
+      RowBox[{"\[Kappa]", "+", "1"}], ")"}]}]]}]}]], "Input",
+ CellChangeTimes->{{3.726996400557645*^9, 
+  3.726996479933632*^9}},ExpressionUUID->"6aae7858-2a93-49b0-b76d-\
+400d4c078cd1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TableForm", "[", 
+  RowBox[{
+   RowBox[{"compare", "/@", 
+    RowBox[{"{", "bro", "}"}]}], ",", 
+   RowBox[{"TableHeadings", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"None", ",", 
+      RowBox[{"{", 
+       RowBox[{
+       "\"\<Function\>\"", ",", "\"\<RealDomain\>\"", ",", 
+        "\"\<ComplexDomain\>\"", ",", "\"\<analyticityCondition\>\"", ",", 
+        "\"\<singularCondition\>\"", ",", "\"\<RealRange\>\""}], "}"}]}], 
+     "}"}]}], ",", 
+   RowBox[{"TableSpacing", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"3", ",", "3"}], "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.726996494332608*^9, 
+  3.7269964954046583`*^9}},ExpressionUUID->"e2ae1bb7-4f01-43af-8fe3-\
+9d32ec056ffb"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "FunctionDomain","nmet",
+   "\"Unable to find the domain with the available methods.\"",2,37,20,
+   28479814445836514134,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.726996507780704*^9},ExpressionUUID->"053e2e2b-47e7-43e2-8c6d-\
+bd932ff8c065"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "FunctionDomain","nmet",
+   "\"Unable to find the domain with the available methods.\"",2,37,21,
+   28479814445836514134,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.726996507785685*^9},ExpressionUUID->"a1f8372c-962f-4bb1-a2c8-\
+d634ae3ba139"],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      TagBox["\<\"Function\"\>",
+       HoldForm], 
+      TagBox["\<\"RealDomain\"\>",
+       HoldForm], 
+      TagBox["\<\"ComplexDomain\"\>",
+       HoldForm], 
+      TagBox["\<\"analyticityCondition\"\>",
+       HoldForm], 
+      TagBox["\<\"singularCondition\"\>",
+       HoldForm]},
+     {
+      RowBox[{"bro", "[", "x", "]"}], 
+      RowBox[{"FunctionDomain", "[", 
+       RowBox[{
+        RowBox[{"bro", "[", "x", "]"}], ",", "x", ",", 
+        TemplateBox[{},
+         "Reals"]}], "]"}], 
+      RowBox[{"FunctionDomain", "[", 
+       RowBox[{
+        RowBox[{"bro", "[", "x", "]"}], ",", "x", ",", 
+        TemplateBox[{},
+         "Complexes"]}], "]"}], "False", "False"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {{False}}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[1.2]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {None, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, 
+    TableHeadings -> {
+     None, {"Function", "RealDomain", "ComplexDomain", "analyticityCondition",
+        "singularCondition", "RealRange"}}, 
+    TableSpacing -> {3, 3}]]]], "Output",
+ CellChangeTimes->{
+  3.72699650781243*^9},ExpressionUUID->"67df3c9f-ca2e-4f46-a64b-a9dcd52899b5"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1600, 873},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "Info143726977245-4795296"->{
+  Cell[20034, 607, 332, 6, 46, "Print",ExpressionUUID->"3758a5a6-4a71-4897-9fd7-86a4d7c1d852",
+   CellTags->"Info143726977245-4795296"]},
+ "Info143726977246-4795296"->{
+  Cell[20369, 615, 338, 6, 46, "Print",ExpressionUUID->"37a308cb-2669-4a4e-80b4-b9905859fcec",
+   CellTags->"Info143726977246-4795296"],
+  Cell[20710, 623, 317, 6, 46, "Print",ExpressionUUID->"54946e89-37e2-41f9-9e27-023c2c8cdd31",
+   CellTags->"Info143726977246-4795296"]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"Info143726977245-4795296", 156349, 4518},
+ {"Info143726977246-4795296", 156518, 4521}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 399, 10, 37, "Subsubsection",ExpressionUUID->"3cc62ef9-8b98-45b0-b1a9-56ae11189deb",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[982, 34, 1088, 31, 56, "Text",ExpressionUUID->"c97ed183-dc7a-4cec-90d8-0833c1925f56",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[CellGroupData[{
+Cell[2095, 69, 533, 13, 108, "Code",ExpressionUUID->"1786eca6-3b98-457b-b203-c68631b95afd",
+ PageBreakAbove->False,
+ PageBreakBelow->False,
+ InitializationCell->True],
+Cell[2631, 84, 298, 7, 48, "Output",ExpressionUUID->"080a320d-ee55-425a-873d-4931aa6b2074",
+ PageBreakAbove->False,
+ PageBreakBelow->False]
+}, Open  ]],
+Cell[2944, 94, 594, 16, 59, "Text",ExpressionUUID->"45f51059-64b7-4213-8d75-05901f90932d",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[CellGroupData[{
+Cell[3563, 114, 255, 7, 35, "Subsubsubsection",ExpressionUUID->"d86ee551-69c2-41e4-b90f-f6afd3e52098",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[3821, 123, 334, 7, 35, "Text",ExpressionUUID->"c0ad42d3-14b0-4498-b61d-2dc71d728c10",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[4158, 132, 1320, 45, 43, "Text",ExpressionUUID->"4f3b74cc-21c9-49a8-b45c-0235453cb273",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[5481, 179, 851, 21, 88, "Code",ExpressionUUID->"5bff4801-296e-456b-9b79-e5a899089e36",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[6335, 202, 1266, 30, 93, "Code",ExpressionUUID->"201c19d8-0793-449a-845c-aa0962440e11",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[7604, 234, 943, 31, 41, "Text",ExpressionUUID->"ce2026da-e46c-4316-b2fa-4d7459053f51",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[8550, 267, 809, 19, 89, "Code",ExpressionUUID->"e319eef0-6ff8-4b14-a8d7-b9dd5e9155cd",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[9362, 288, 779, 23, 43, "Text",ExpressionUUID->"0bccca17-3bd2-4921-aeb4-c49789e9260b",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[10144, 313, 731, 17, 89, "Code",ExpressionUUID->"816ceb88-56f8-4b39-bde5-7d636cf04067",
+ PageBreakAbove->False,
+ PageBreakBelow->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10912, 335, 216, 3, 35, "Subsubsubsection",ExpressionUUID->"b1337429-a6c1-4a29-9e2f-7f4f7458ffdc",
+ PageBreakAbove->True,
+ PageBreakBelow->False],
+Cell[11131, 340, 588, 20, 36, "Text",ExpressionUUID->"ddec3add-c3e0-4ba2-aae5-5cf41d6b9c37",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[11722, 362, 4676, 126, 304, "Code",ExpressionUUID->"536a92d4-8751-45ee-a6b8-564824f0f0c0",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[16401, 490, 717, 19, 81, "Text",ExpressionUUID->"0c32c7bd-c30f-46e7-b251-4f05e6db9d5b",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[17121, 511, 912, 30, 78, "Text",ExpressionUUID->"c7e87c4e-179c-488b-934c-ca9bcd190c70",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[18036, 543, 395, 11, 35, "Text",ExpressionUUID->"b2b7926b-6764-46b4-b207-f47e99f7262a",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[18434, 556, 387, 12, 36, "Text",ExpressionUUID->"aa7a4d0e-b145-407e-aa32-b6485a15e14c",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[18824, 570, 319, 8, 36, "Text",ExpressionUUID->"295730b3-56c6-4be4-8d08-b442f2553d5c",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[19146, 580, 541, 13, 72, "Input",ExpressionUUID->"3d1c6ff7-7930-4f8e-b6b6-67aad75c8f5d",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[CellGroupData[{
+Cell[19712, 597, 297, 6, 48, "Input",ExpressionUUID->"18bc0a65-aa53-4504-aaa0-e3bddb2b4c94",
+ PageBreakAbove->False,
+ PageBreakBelow->False],
+Cell[CellGroupData[{
+Cell[20034, 607, 332, 6, 46, "Print",ExpressionUUID->"3758a5a6-4a71-4897-9fd7-86a4d7c1d852",
+ CellTags->"Info143726977245-4795296"],
+Cell[20369, 615, 338, 6, 46, "Print",ExpressionUUID->"37a308cb-2669-4a4e-80b4-b9905859fcec",
+ CellTags->"Info143726977246-4795296"],
+Cell[20710, 623, 317, 6, 46, "Print",ExpressionUUID->"54946e89-37e2-41f9-9e27-023c2c8cdd31",
+ CellTags->"Info143726977246-4795296"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[21100, 637, 187, 3, 68, "Section",ExpressionUUID->"84ee8b18-32fe-4375-b98e-90b72ab5a0c5"],
+Cell[CellGroupData[{
+Cell[21312, 644, 226, 5, 45, "Subsubsection",ExpressionUUID->"ff2a3aae-9bb7-4b1c-a29d-b3379f8d2ab8"],
+Cell[21541, 651, 253, 7, 35, "Input",ExpressionUUID->"9871648e-dc63-4bdc-a6ea-987ede6efdf6"],
+Cell[CellGroupData[{
+Cell[21819, 662, 186, 4, 31, "Input",ExpressionUUID->"53bdea35-822e-4b2e-99ef-d8fc95bdb6f3"],
+Cell[22008, 668, 1487, 42, 55, "Print",ExpressionUUID->"7e1bd305-65b6-4a11-8f94-6fa52f876956"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[23532, 715, 189, 4, 31, "Input",ExpressionUUID->"20553038-654f-4420-beb3-6d3ed1def221"],
+Cell[23724, 721, 119702, 3394, 6127, "Print",ExpressionUUID->"96bcf913-5979-4838-8913-aa7869bff7f3"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[143475, 4121, 273, 6, 55, "Subsection",ExpressionUUID->"f06804f4-71ad-47b9-b539-0bbb60290a43"],
+Cell[143751, 4129, 1386, 39, 55, "Input",ExpressionUUID->"956e01ce-fa6c-4e6a-9e82-05829eea2cb8"],
+Cell[145140, 4170, 1543, 43, 55, "Input",ExpressionUUID->"5b118aa5-f306-445a-8a0d-463b4e9e77ae"],
+Cell[146686, 4215, 1860, 52, 78, "Input",ExpressionUUID->"ae8c0ccf-3c86-4a7b-a30e-1e07f4a6584d"],
+Cell[CellGroupData[{
+Cell[148571, 4271, 743, 20, 55, "Input",ExpressionUUID->"16dc6f0d-196c-41af-ae02-16ed0e79a8e6"],
+Cell[149317, 4293, 2816, 85, 120, "Output",ExpressionUUID->"e377bfc1-0729-417e-95aa-f99b1a4fdcb7"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[152182, 4384, 169, 3, 55, "Subsection",ExpressionUUID->"fbb132ad-465a-4ca3-800f-300d008ed20c"],
+Cell[152354, 4389, 614, 20, 53, "Input",ExpressionUUID->"6aae7858-2a93-49b0-b76d-400d4c078cd1"],
+Cell[CellGroupData[{
+Cell[152993, 4413, 715, 19, 55, "Input",ExpressionUUID->"e2ae1bb7-4f01-43af-8fe3-9d32ec056ffb"],
+Cell[153711, 4434, 304, 8, 22, "Message",ExpressionUUID->"053e2e2b-47e7-43e2-8c6d-bd932ff8c065"],
+Cell[154018, 4444, 304, 8, 22, "Message",ExpressionUUID->"a1f8372c-962f-4bb1-a2c8-d634ae3ba139"],
+Cell[154325, 4454, 1680, 49, 78, "Output",ExpressionUUID->"67df3c9f-ca2e-4f46-a64b-a9dcd52899b5"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
