@@ -732,20 +732,20 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ;; helper                    = [0.0D,0.025D,0.05D,0.075D]
      ;; helper                    = [0.0D,0.01D,0.02D,0.03D,0.04D,0.05D,0.06D,0.07D,0.08D,0.09D]
      helper                    = LINDGEN(20)*0.005D
-     helper2                   = [0.0D,0.25D,0.50D,0.75D]
+     helper2                   = [0.0D,0.25D,0.50D,0.75D]-0.01D ;-0.01D since analytic Liemohn and kappa dens thing can't do integer kappa
      ;; map__multi_kappa_array    = [1.505,1.5075,1.51,1.515,1.52,1.525,1.53,1.535,1.54,1.55,1.56,1.57,1.58,1.59, $
      map__multi_kappa_array    = [1.5 + helper[1:-1], $
                                   1.6 + helper, $
                                   1.7 + helper, $
                                   1.8 + helper, $
                                   1.9 + helper, $
-                                  2.00,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9, $
-                                  3.0D + helper2, $
-                                  4.0D + helper2, $
-                                  5.0D + helper2, $
-                                  6.0D + helper2, $
-                                  7.0D + helper2, $
-                                  8.0]
+                                  2.01,2.05,2.10,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9, $
+                                  3.01D + helper2, $
+                                  4.01D + helper2, $
+                                  5.01D + helper2, $
+                                  6.01D + helper2, $
+                                  7.01D + helper2, $
+                                  8.01D]
 
      ;; 2018/01/15 Checkitout with Jim
      ;; map__multi_kappa_array    = [1.5 + helper[1:-1], $

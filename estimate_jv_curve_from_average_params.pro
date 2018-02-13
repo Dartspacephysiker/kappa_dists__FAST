@@ -166,9 +166,21 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               ;; 2018/01/15 Get real! Need to let dens vary with potential to be true to physics
               IF KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) THEN BEGIN
-                 densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
+
+                 IF KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens) THEN BEGIN
+                    densArr   = MAKE_ARRAY(nPts,nMagRatio,nKappa,/DOUBLE)
+                 ENDIF ELSE BEGIN
+                    densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
+                 ENDELSE
+                 densArrG  = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
+
               ENDIF ELSE BEGIN
-                 densArr   = MAKE_ARRAY(nMagRatio,/DOUBLE)
+                 IF KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens) THEN BEGIN
+                    densArr   = MAKE_ARRAY(nMagRatio,nKappa,/DOUBLE)
+                 ENDIF ELSE BEGIN
+                    densArr   = MAKE_ARRAY(nMagRatio,/DOUBLE)
+                 ENDELSE
+                 densArrG  = MAKE_ARRAY(nMagRatio,/DOUBLE)
               ENDELSE
               ;; densArr   = MAKE_ARRAY(nPts,nMagRatio,/DOUBLE)
 
@@ -197,9 +209,21 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     CASE 1 OF
                        KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
+                          FOR j=0,N_ELEMENTS(barbosaPot)-1 DO BEGIN
+
+                             FOR k=0,nKappa-1 DO BEGIN
+                                densArr[j,*,k]  = NFACTOR_KAPPA_L_AND_K(barbosaPot[j], $
+                                                                        tRB_TFAST, $
+                                                                        multi_kappa_array[k], $
+                                                                        tRB_nFAST, $
+                                                                        multi_magRatio_array*fastR_BFac)
+                             ENDFOR
+
+                          ENDFOR
+
                           FOR k=0,nMagRatio-1 DO BEGIN
 
-                             densArr[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                             densArrG[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
                                                                          tRB_TFAST, $
                                                                          0, $
                                                                          tRB_nFAST, $
@@ -217,6 +241,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                          tRB_nFAST, $
                                                                          multi_magRatio_array[k]*fastR_BFac)
                           ENDFOR
+
+                          densArrG = densArr
 
                        END
                     ENDCASE
@@ -227,9 +253,21 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     CASE 1 OF
                        KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
+                          FOR j=0,N_ELEMENTS(barbosaPot)-1 DO BEGIN
+
+                             FOR k=0,nKappa-1 DO BEGIN
+                                densArr[j,*,k]  = NFACTOR_KAPPA_L_AND_K(barbosaPot[j], $
+                                                                        A[1], $
+                                                                        multi_kappa_array[k], $
+                                                                        avgs_JVfit.N_SC.avg, $
+                                                                        multi_magRatio_array*fastR_BFac)
+                             ENDFOR
+
+                          ENDFOR
+
                           FOR k=0,nMagRatio-1 DO BEGIN
 
-                             densArr[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                             densArrG[*,k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
                                                                          A[1], $
                                                                          0, $
                                                                          avgs_JVfit.N_SC.avg, $
@@ -248,6 +286,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                                                                          multi_magRatio_array[k]*fastR_BFac)
                           ENDFOR
 
+                          densArrG = densArr
+
                        END
                     ENDCASE
 
@@ -257,13 +297,21 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     CASE 1 OF
                        KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
+                          FOR k=0,nKappa-1 DO BEGIN
+                             densArr[*,k]  = NFACTOR_KAPPA_L_AND_K(barbosaPot, $
+                                                                   A[1], $
+                                                                   multi_kappa_array[k], $
+                                                                   avgs_JVfit.N_SC.avg, $
+                                                                   multi_magRatio_array*fastR_BFac)
+                          ENDFOR
+
                           FOR k=0,nMagRatio-1 DO BEGIN
 
-                             densArr[k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
-                                                                       A[1], $
-                                                                       0, $
-                                                                       avgs_JVfit.N_SC.avg, $
-                                                                       multi_magRatio_array[k]*fastR_BFac)
+                             densArrG[k] = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
+                                                                      A[1], $
+                                                                      0, $
+                                                                      avgs_JVfit.N_SC.avg, $
+                                                                      multi_magRatio_array[k]*fastR_BFac)
 
                           ENDFOR
 
@@ -286,6 +334,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
                           ENDFOR
 
+                          densArrG = densArr
+
                        END
                     ENDCASE
 
@@ -302,8 +352,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                  FOR k=0,nMagRatio-1 DO BEGIN
 
                     N_thisRound = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ?  $
-                                  densArr[*,k] : $
-                                  densArr[k]
+                                  (KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens) ? densArr[*,k,j] : densArr[*,k]) : $
+                                  (KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens) ? densArr[k,j]   : densArr[k]  )
 
                     ;; PRINT,kappaArr[j,k],A[1],MEAN(dens),magRatArr[j,k]
                     ;; PRINT,kappaArr[j,k],A[1],densArr[k],magRatArr[j,k]
@@ -349,9 +399,9 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
 
               FOR k=0,nMagRatio-1 DO BEGIN
 
-                 N_thisRound = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ?  $
-                               densArr[*,k] : $
-                               densArr[k]
+                 N_thisRoundG = KEYWORD_SET(all_temps) OR KEYWORD_SET(individual_Barbosa_factors) ?  $
+                               densArrG[*,k] : $
+                               densArrG[k]
 
 
                  CASE 1 OF
@@ -359,7 +409,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                        
                        yFit = KAPPA_1__DORS_KLETZING_EQ_14__EFLUX__MAXWELL( $
                               T_thisRound, $
-                              N_thisRound, $
+                              N_thisRoundG, $
                               X, $
                               multi_magRatio_array[k], $
                               OUT_POTBAR=potBar, $
@@ -371,7 +421,7 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     ELSE: BEGIN
 
                        yFit = KNIGHT_RELATION__DORS_KLETZING_4(T_thisRound, $
-                                                               N_thisRound, $
+                                                               N_thisRoundG, $
                                                                X, $
                                                                multi_magRatio_array[k], $
                                                                OUT_POTBAR=potBar, $
@@ -421,6 +471,8 @@ PRO ESTIMATE_JV_CURVE_FROM_AVERAGE_PARAMS, $
                     CASE 1 OF
                        KEYWORD_SET(jv_theor__Liemohn_and_Khazanov_dens): BEGIN
 
+                          PRINT,"WAIT! Haven't gotten it going for kappa with NFACTOR_KAPPA yet!"
+                          STOP
                           kappaParamStruct[2].value  = NFACTOR_MAXWELLIAN_L_AND_K(barbosaPot, $
                                                                                   kappaParamStruct[1].value, $
                                                                                   0, $
