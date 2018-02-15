@@ -547,6 +547,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,A,kappa_fixA
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,AGauss,gauss_fixA
 
+              tmpFit1Denergies = fit1denergies[0:peak_ind] ;for 1-D plots
+
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                        orig,kappaFit1D,gaussFit1D, $
                                        YORIG_ERROR=worig, $
@@ -567,7 +569,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                                        ;; OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
                                        ;; OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
-                                       ADD_FULL_FITS=fit1Denergies, $
+                                       ADD_FULL_FITS=tmpFit1Denergies, $
                                        ADD_ANGLESTR=angleStr, $
                                        ;; OUT_ERANGE_PEAK=eRange_peakArr, $
                                        OUT_PARAMSTR=out_paramStr, $
