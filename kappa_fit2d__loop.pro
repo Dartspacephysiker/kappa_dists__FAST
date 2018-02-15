@@ -547,7 +547,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,A,kappa_fixA
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,AGauss,gauss_fixA
 
-              tmpFit1Denergies = fit1denergies[0:peak_ind] ;for 1-D plots
+              tmpFit1Denergies = fit1denergies[0:((peak_ind+1) < (nEnergies -1))] ;for 1-D plots
 
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                        orig,kappaFit1D,gaussFit1D, $
