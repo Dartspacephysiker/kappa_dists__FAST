@@ -34,6 +34,8 @@ PRO KAPPA_EFLUX_FIT2D, $
    ESTIMATE_FACTORS=estFacs, $
    DONT_PRINT_ESTIMATES=dont_print_estimates, $
    DONT_PRINT_FITINFO=dont_print_fitInfo, $
+   FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+   FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
    ONLY_1D_FITS=only_1D_fits, $
    FIT1D__MAX_ITERATIONS=max_iter, $
    FIT1D__TOLERANCE=fit_tol, $
@@ -125,6 +127,8 @@ PRO KAPPA_EFLUX_FIT2D, $
      UPGOING=upgoing, $
      TIMES=times, $
      SDT_TIME_INDS=bounds, $
+     FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+     FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
      ONLY_1D_FITS=only_1D_fits, $
      FIT1D__TOLERANCE=fit_tol, $
      FIT1D__MAX_ITERATIONS=max_iter, $

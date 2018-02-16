@@ -25,6 +25,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           T1STR=t1Str, $
                           T2STR=t2Str, $
                           SHOW_POST_PLOTS=show_post_plots, $
+                          FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+                          FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
                           ONLY_1D_FITS=only_1D_fits, $
                           FIT1D__N_BELOW_PEAK=n_below_peak1D, $
                           FIT1D__N_ABOVE_PEAK=n_above_peak1D, $
@@ -223,8 +225,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         MAX_PEAK_ENERGY=max_peak_energy, $
         PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
         PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
-        N_ENERGIES_BELOW_PEAK=n_below_peak, $
-        N_ENERGIES_ABOVE_PEAK=n_above_peak, $
+        N_ENERGIES_BELOW_PEAK=n_below_peak1D, $
+        N_ENERGIES_ABOVE_PEAK=n_above_peak1D, $
         N_BELOW_PEAK2D=n_below_peak2D, $
         N_ABOVE_PEAK2D=n_above_peak2D, $
         CHECK_FOR_HIGHER_FLUX_PEAKS__SET_CORRESPONDING_PEAK_ENERGY=check_higher_peaks_set_peakEn, $
@@ -238,6 +240,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ESTIMATE_FACTORS=estFacs, $
         DONT_PRINT_ESTIMATES=dont_print_estimates, $
         DONT_PRINT_FITINFO=dont_print_fitInfo, $
+        FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+        FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
         ONLY_1D_FITS=only_1D_fits, $
         FIT1D__MAX_ITERATIONS=max_iter, $
         FIT1D__TOLERANCE=fit_tol, $

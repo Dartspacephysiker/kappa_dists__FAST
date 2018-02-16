@@ -27,6 +27,8 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   ENDIF
 
   KF__Curvefit_opt = INIT_KAPPA_CURVEFIT_OPTIONS( $
+                     FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+                     FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
                      ONLY_1D_FITS=only_1D_fits, $
                      FIT1D__TOLERANCE=fit_tol, $
                      FIT1D__MAX_ITERATIONS=max_iter, $

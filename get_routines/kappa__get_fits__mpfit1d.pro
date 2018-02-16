@@ -21,6 +21,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              STRINGS=strings, $
                              ;; OUT_FITTED_PARAMS=out_kappaParams, $
                              ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
+                             FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+                             ;; FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
                              ADD_FULL_FITS=add_full_fits, $
                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                              ADD_ANGLESTR=add_angleStr, $
@@ -41,10 +43,15 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   have_curveFit_opt = N_ELEMENTS(kCurvefit_opt) GT 0
 
-  kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
-  gaussFunc  = 'MAXWELL_FLUX__FUNC'
+  IF KEYWORD_SET(fit__linear_energy_shift) THEN BEGIN
+     kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY'
+     gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY'
+  ENDIF ELSE BEGIN
+     kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
+     gaussFunc  = 'MAXWELL_FLUX__FUNC'
+  ENDELSE
 
-  OKStatus   = [1,2,3,4]        ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
+  OKStatus   = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
   IF ~KEYWORD_SET(units) THEN BEGIN
      units   = 'eFlux'
   ENDIF
@@ -306,10 +313,14 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;; ENDIF ELSE BEGIN
         ;;    xFull = Xorig
         ;; ENDELSE
-        
-        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
-                                                                       UNITS=units, $
-                                                                       MASS=mass)
+        yFull = CALL_FUNCTION(kappaFunc, $
+                              add_full_fits, $
+                              A, $
+                              UNITS=units, $
+                              MASS=mass)
+        ;; yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
+        ;;                                                                UNITS=units, $
+        ;;                                                                MASS=mass)
         kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
      ENDIF
 
@@ -457,9 +468,12 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                  ;; yGaussFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(Xorig,AGauss, $
                  ;;                                                                     UNITS=units, $
                  ;;                                                                     MASS=mass)
-                 yGaussFull = MAXWELL_FLUX__FUNC(add_full_fits,AGauss, $
-                                                 UNITS=units, $
-                                                 MASS=mass)
+                 ;; yGaussFull = MAXWELL_FLUX__FUNC(add_full_fits,AGauss, $
+                 ;;                                 UNITS=units, $
+                 ;;                                 MASS=mass)
+                 yGaussFull = CALL_FUNCTION(gaussFunc,add_full_fits,AGauss, $
+                                            UNITS=units, $
+                                            MASS=mass)
               END
            ENDCASE
            gaussFit = CREATE_STRUCT(gaussFit,"xFull", $
