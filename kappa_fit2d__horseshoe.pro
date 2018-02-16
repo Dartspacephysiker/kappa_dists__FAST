@@ -5,6 +5,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            ;; TIMEFNSTR=timeFNStr, $
                            ERANGE_PEAK=eRange_peak, $
                            FITPARAMSTRUCT=fitParamStruct, $
+                           FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
                            ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                            PRINT_2DFITINFO=print_2DFitInfo, $
                            FITSTRING=fitString, $
@@ -62,7 +63,12 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__bulk_e_anisotropy): BEGIN
-        func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON'
+
+        IF KEYWORD_SET(KF2D__curveFit_opt.fit__linear_energy_shift) THEN BEGIN
+           func = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__LINEAR_ENERGY_SHIFT__COMMON'
+        ENDIF ELSE BEGIN
+           func   = 'KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON'
+        ENDELSE
 
         ;; fitAngle_i = 0.0       ;As we learn later
         
@@ -87,7 +93,6 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      END
      ELSE: BEGIN
         func   = 'KAPPA_FLUX2D__HORSESHOE'
-
      END
   ENDCASE
 
@@ -157,13 +162,22 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      ;; To calc dens, we first need a synthed fitStruct
      CASE 1 OF
         KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
-           fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
-                           fit2DStr.energy, $
-                           ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
-                           fit2DStr.theta, $ ;Assume shiftTheta isn't necessary
-                           fit2DParams, $
-                           UNITS=units, $
-                           MASS=curDataStr.mass)
+
+           fit2DStr.data = CALL_FUNCTION(func, $
+                                         fit2DStr.energy, $
+                                         ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
+                                         fit2DStr.theta, $ ;Assume shiftTheta isn't necessary
+                                         fit2DParams, $
+                                         UNITS=units, $
+                                         MASS=curDataStr.mass)
+
+           ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
+           ;;                 fit2DStr.energy, $
+           ;;                 ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
+           ;;                 fit2DStr.theta, $ ;Assume shiftTheta isn't necessary
+           ;;                 fit2DParams, $
+           ;;                 UNITS=units, $
+           ;;                 MASS=curDataStr.mass)
 
            ;; Not necessary for getting the density (but is used in KAPPA_FIT2D__FIRE_EXTRAS
            ;; 

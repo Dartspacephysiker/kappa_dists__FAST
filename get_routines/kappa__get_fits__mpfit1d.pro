@@ -99,10 +99,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
         thesens           = WHERE(Yerror GT 0.)
         weights           = MAKE_ARRAY(N_ELEMENTS(Yerror),/FLOAT,VALUE=0.)
+        ;; weighting         = 1
         CASE weighting OF
            1: BEGIN             ;linear
               weights[thesens]  = 1./ABS(Yerror[thesens])
-
            END
            2: BEGIN
               weights[thesens]  = 1./ABS(Yerror[thesens])^2
@@ -163,6 +163,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                    NO_ERANGE_PEAK=monte_carlo_mode
         ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
         ;;                                        ERANGE_PEAK=eRange_peak)
+
+        weights[*] = 0
 
         ;;Tell routine which units we like
         A        = MPFITFUN(kappaFunc, $
@@ -313,14 +315,17 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ;; ENDIF ELSE BEGIN
         ;;    xFull = Xorig
         ;; ENDELSE
+
         yFull = CALL_FUNCTION(kappaFunc, $
                               add_full_fits, $
                               A, $
                               UNITS=units, $
                               MASS=mass)
-        ;; yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
-        ;;                                                                UNITS=units, $
-        ;;                                                                MASS=mass)
+
+        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
+                                                                       UNITS=units, $
+                                                                       MASS=mass)
+
         kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
      ENDIF
 

@@ -92,6 +92,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                             FITPARAMSTRUCT=kappaParamStruct, $
                             ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                             ;; IN_ESTIMATED_LC=estimated_lc, $
+                            FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
+                            ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                             UNITS=units, $
                             OUT_FIT2DPARAMS=kappaFit2DParams, $
                             MAKE_FIT2D_INFO=make_fit2D_info, $
@@ -168,6 +170,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                FITPARAMSTRUCT=gaussParamStruct, $
                                ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                                ;; IN_ESTIMATED_LC=estimated_lc, $
+                               FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
+                               ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                                UNITS=units, $
                                OUT_FIT2DPARAMS=gaussFit2DParams, $
                                MAKE_FIT2D_INFO=make_fit2D_info, $

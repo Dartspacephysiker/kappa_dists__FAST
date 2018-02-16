@@ -907,6 +907,38 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         N_ELEMENTS(kappaFit1Ds) GT 0 AND $
         hadSuccessK THEN BEGIN
 
+        ;; 2018/02/16 Save thyself!
+        kappaFit1D=kappafit1ds[-1]
+        gaussFit1D=gaussFit1Ds[-1]
+        SAVE,KF2D__Curvefit_opt, $
+             kappaFit1D, $
+             gaussFit1D, $
+             kappaParamStruct, $
+             gaussParamStruct, $
+             oneCurve, $
+             iTime, $
+             xRange, $
+             yRange, $
+             KF2D__strings, $
+             eps, $
+             units1D, $
+             orig, $
+             Xorig, $
+             Yorig, $
+             worig, $
+             energy_inds, $
+             erange_peak, $
+             peak_ind, $
+             A, $
+             AGauss, $
+             kappa_fixA, $
+             gauss_fixA, $
+             tmpfit1denergies, $
+             out_paramStr, $
+             curdatastr, $
+             avgfactorarr, $
+             FILENAME='/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180216--soscrewed.sav'
+
         PLOT_KAPPA_FITS,orig,kappaFit1Ds[-1], $
                         KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
                         gaussFit1Ds[-1] : $
