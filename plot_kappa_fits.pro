@@ -49,6 +49,14 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         lowerBound     = 1.0e1
         upperBound     = 1.0e8
      END
+     'JE_OVER_E': BEGIN
+        pPref          = '-j_over_e_fit'
+        unitTitle      = "e!E-!N # flux"
+        yTitle         = "J(E)/E (#/cm$^2$-s-sr-eV!U2!N)"
+        lowerBound     = 1.0e-3
+        upperBound     = 1.0e7
+        ;; xRange         = [
+     END
   ENDCASE
   ;;Need to know if OMNI2D is responsible for this, or something else
   pref                 = pPref + (KEYWORD_SET(using_sdt_data) ? '__SDT_data-' : '-')

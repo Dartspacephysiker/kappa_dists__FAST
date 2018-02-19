@@ -9,6 +9,9 @@ PRO JOURNAL__20180216__TRY_TO_FIGURE_OUT_WASSUP, $
   buffer        = 0
 
   doNewFit      = 1
+  explicit_derivatives = 1
+
+  fit__JE_over_E = 1
 
   ;; The file with the evidences
   dir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
@@ -31,13 +34,43 @@ PRO JOURNAL__20180216__TRY_TO_FIGURE_OUT_WASSUP, $
 
   IF KEYWORD_SET(doNewFit) THEN BEGIN
 
-     tmpfit1denergies = orig.x
+     ;; tmpfit1denergies = orig.x
 
-     
      IF KEYWORD_SET(shift_lower_energy_bin_downward_by) THEN BEGIN
         energy_inds[1] += shift_lower_energy_bin_downward_by
         eRange_peak[0] = xorig[energy_inds[1]]
      ENDIF
+
+     ;; kappa_fixA  = [0, $                                                   ;Vary bulk E [0]
+     ;;                KF2D__Curvefit_opt.fit1D__clampTemperature, $          ;Temperature [1] (maybe)
+     ;;                0, $                                                   ;kappa       [2]
+     ;;                KF2D__CurveFit_opt.fit1D__clampDensity    , $          ;and density [3] (but not angle)
+     ;;                1] 
+     
+     ;; gauss_fixA  = [0, $                                                   ;Vary bulk E [0]
+     ;;                KF2D__Curvefit_opt.fit1D__clampTemperature, $          ;Temperature [1] (maybe)
+     ;;                1, $
+     ;;                KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (not kappa,angle)
+     ;;                1]
+
+     ATmp        = [eRange_peak[0]*0.998D,200.,10.,0.3,0.]
+     ;; ATmp        = kappaParamStruct[*].value
+     kappa_fixA  = kappaParamStruct[*].fixed
+     gauss_fixA  = gaussParamStruct[*].fixed
+
+     IF KEYWORD_SET(fit__je_over_E) THEN BEGIN
+        units1D = 'je_over_E'
+        ;; kappaParamStruct[0].fixed = 1
+        ;; gaussParamStruct[0].fixed = 1
+        ;; kappa_fixA[0] = 1
+        ;; gauss_fixA[0] = 1
+     ENDIF
+
+     A                 = ATmp
+     kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,kappa_fixA, $
+                                                  EXPLICIT_DERIVATIVES=explicit_derivatives)
+     gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),gauss_fixA, $
+                                                  EXPLICIT_DERIVATIVES=explicit_derivatives)
 
      KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               orig,kappaFit1D,gaussFit1D, $
@@ -60,6 +93,7 @@ PRO JOURNAL__20180216__TRY_TO_FIGURE_OUT_WASSUP, $
                               ;; OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
                               ;; OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
                               FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
+                              FIT__JE_OVER_E=fit__JE_over_E, $
                               ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                               ADD_FULL_FITS=tmpFit1Denergies, $
                               ADD_ANGLESTR=angleStr, $
@@ -79,6 +113,7 @@ PRO JOURNAL__20180216__TRY_TO_FIGURE_OUT_WASSUP, $
   ENDIF
 
   ;; kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY'
+  ;; kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E'
 
   ;; kappaFit1D.yFull = CALL_FUNCTION(kappaFunc, $
   ;;                                  tmpFit1Denergies, $

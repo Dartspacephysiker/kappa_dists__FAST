@@ -48,7 +48,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      KEYWORD_SET(fit__linear_energy_shift): BEGIN
         IF KEYWORD_SET(fit__JE_over_E) THEN BEGIN
            kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E'
-           gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY_JE_OVER_E'
+           gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E'
         ENDIF ELSE BEGIN
            kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY'
            gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY'
@@ -61,13 +61,22 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
   ENDCASE
 
   OKStatus   = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
-  IF ~KEYWORD_SET(units) THEN BEGIN
-     units   = 'eFlux'
-  ENDIF
-  ;; fa         = {units : units}
-  fa         = {units : units, $
-                mass  : mass   }
+  IF KEYWORD_SET(fit__JE_over_E) THEN BEGIN
 
+     Yorig /= Xorig
+     IF KEYWORD_SET(Yorig_error) THEN Yorig_error /= Xorig
+
+  ENDIF ELSE BEGIN
+
+     IF ~KEYWORD_SET(units) THEN BEGIN
+        units   = 'eFlux'
+     ENDIF
+     ;; fa         = {units : units}
+     fa         = {units : units, $
+                   mass  : mass   }
+
+  ENDELSE
+  
   timeStr    = KEYWORD_SET(monte_carlo_mode) ? STRING(FORMAT='("iter_",I02)',bounds_i): $
                STR_TO_TIME(strings.yearstr+'/'+strings.plotTimes[bounds_i])
 
@@ -108,7 +117,6 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
         thesens           = WHERE(Yerror GT 0.)
         weights           = MAKE_ARRAY(N_ELEMENTS(Yerror),/FLOAT,VALUE=0.)
-        ;; weighting         = 1
         CASE weighting OF
            1: BEGIN             ;linear
               weights[thesens]  = 1./ABS(Yerror[thesens])
@@ -168,14 +176,38 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
-        UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak, $
+        kappaParamStruct[0].limits = [815,X[-1]*.9999D]
+        tmpeRange_Peak = [815,X[-1]*.9999D]
+        ;; UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak, $
+        UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,tmpeRange_peak, $
                                    NO_ERANGE_PEAK=monte_carlo_mode
+
+        
         ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
         ;;                                        ERANGE_PEAK=eRange_peak)
 
-        weights[*] = 0
+        ;; weights[*] = 1
 
         ;;Tell routine which units we like
+        ;; kCurvefit_opt.fit_tol = 0.00001D
+        ;;perror =       0.0000000       7.3913775       3.5255372     0.014240319       0.0000000
+        ;; kCurvefit_opt.fit_tol = 0.000001D
+        ;;perror =       0.0000000       7.3985375       3.4759219     0.014240447       0.0000000
+        ;; kCurvefit_opt.fit_tol = 0.000001D
+        ;;A      =       940.79987       258.02326       12.311067      0.53685875       0.0000000
+        ;;perror =       0.0000000       7.3985375       3.4759219     0.014240447       0.0000000
+        ;; kCurvefit_opt.fit_tol = 1D-7
+        ;;A      =       940.79987       258.05509       12.296171      0.53685272       0.0000000
+        ;;perror =       0.0000000       7.4008254       3.4602508     0.014240512       0.0000000
+        ;; kCurvefit_opt.fit_tol = 1D-8
+        ;;A      =       940.79987       258.06528       12.291403      0.53685078       0.0000000
+        ;;perror =       0.0000000       7.4015570       3.4552592     0.014240502       0.0000000
+        ;; kCurvefit_opt.fit_tol = 1D-10
+        ;;A      =       940.79987       258.06982       12.289280      0.53684992       0.0000000
+        ;;perror =       0.0000000       7.4018841       3.4530399     0.014240532       0.0000000
+        kCurvefit_opt.fit_tol = 1D-13
+        ;;A      =       940.79987       258.06982       12.289280      0.53684992       0.0000000
+        ;;perror =       0.0000000       7.4018841       3.4530399     0.014240532       0.0000000
         A        = MPFITFUN(kappaFunc, $
                             X,Y, $
                             WEIGHTS=weights, $
@@ -184,9 +216,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                             NFEV=nfev, $
                             FTOL=have_curveFit_opt ? $
                             (KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
-                             kCurvefit_opt.fit_tol : 1e-3) $
-                            : 1e-3, $
-                            GTOL=1e-13, $
+                             kCurvefit_opt.fit_tol : 1D-13) $
+                            : 1D-13, $
+                            GTOL=1D-13, $
+                            XTOL=1D-13, $
                             STATUS=status, $
                             BEST_RESID=best_resid, $
                             PFREE_INDEX=ifree, $
@@ -331,9 +364,9 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               UNITS=units, $
                               MASS=mass)
 
-        yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
-                                                                       UNITS=units, $
-                                                                       MASS=mass)
+        ;; yFull = KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC(add_full_fits,A, $
+        ;;                                                                UNITS=units, $
+        ;;                                                                MASS=mass)
 
         kappaFit                 = CREATE_STRUCT(kappaFit,"xFull",add_full_fits,"yFull",yFull)
      ENDIF

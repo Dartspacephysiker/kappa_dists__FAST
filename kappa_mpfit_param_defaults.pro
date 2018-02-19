@@ -25,6 +25,16 @@ IF ~KEYWORD_SET(kFit__DEFSINITIALIZED) THEN BEGIN
                       limited   :  [0,0]    , $
                       limits    :  [0.D,0]}
 
+   IF KEYWORD_SET(explicit_derivatives) THEN BEGIN
+      kFit__parmTmplt = CREATE_STRUCT(kFit__parmTmplt, $
+                                      "MPSIDE",0S, $
+                                      'MPDERIV_DEBUG',0S, $
+                                      'MPDERIV_RELTOL',0.D, $
+                                      'MPDERIV_ABSTOL',0.D)
+   ENDIF
+
+
+
    kFit__parmNames      = ["E_b","T","kappa","N","bulkAngle"]
 
    kFit__MaxStep        = DOUBLE([50., $ ; A[0]: E_b,       

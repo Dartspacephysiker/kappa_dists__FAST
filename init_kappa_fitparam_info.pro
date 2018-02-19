@@ -7,7 +7,8 @@
 ; A[3]: n,         Plasma density (cm^-3)
 ; A[4]: bulkAngle, Angle between bulk velocity, u_b, and velocity in direction for which we're interested in the distribution
 
-FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
+FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
+                                  EXPLICIT_DERIVATIVES=explicit_derivatives;; , $
                                   ;; ERANGE_PEAK=eRange_peak
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -48,6 +49,13 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA;; , $
   ;; kFit__parmInfo[1].mpmaxstep = 50.D ;T
   ;; kFit__parmInfo[2].mpmaxstep = 0.1D ;kappa
   ;; kFit__parmInfo[3].mpmaxstep = 0.5D ;n
+
+   IF KEYWORD_SET(explicit_derivatives) THEN BEGIN
+      kFit__parmInfo[*].MPSIDE = 3 ;enable explicit derivative calculation
+      kFit__parmInfo[*].MPDERIV_DEBUG = 1 ;enable derivative debugging
+      kFit__parmInfo[*].MPDERIV_RELTOL = 0.05D ;reltol between exact and numerical deriv
+      ;; kFit__parmInfo[*].MPDERIV_ABSTOL = 0.D ;abstol between exact and numerical deriv
+   ENDIF
 
   RETURN,kFit__parmInfo
 
