@@ -26,6 +26,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           T2STR=t2Str, $
                           SHOW_POST_PLOTS=show_post_plots, $
                           FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+                          FIT__JE_OVER_E=fit__JE_over_E, $
                           FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
                           ONLY_1D_FITS=only_1D_fits, $
                           FIT1D__N_BELOW_PEAK=n_below_peak1D, $
@@ -241,6 +242,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         DONT_PRINT_ESTIMATES=dont_print_estimates, $
         DONT_PRINT_FITINFO=dont_print_fitInfo, $
         FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+        FIT__JE_OVER_E=fit__JE_over_E, $
         FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
         ONLY_1D_FITS=only_1D_fits, $
         FIT1D__MAX_ITERATIONS=max_iter, $

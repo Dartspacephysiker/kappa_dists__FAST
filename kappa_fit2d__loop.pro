@@ -570,6 +570,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        ;; OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
                                        ;; OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
                                        FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
+                                       FIT__JE_OVER_E=KF2D__Curvefit_opt.fit__JE_over_E, $                                       
                                        ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                                        ADD_FULL_FITS=tmpFit1Denergies, $
                                        ADD_ANGLESTR=angleStr, $

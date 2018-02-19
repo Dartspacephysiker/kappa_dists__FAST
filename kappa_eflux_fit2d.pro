@@ -128,6 +128,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      TIMES=times, $
      SDT_TIME_INDS=bounds, $
      FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+     FIT__JE_OVER_E=fit__JE_over_E, $
      FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
      ONLY_1D_FITS=only_1D_fits, $
      FIT1D__TOLERANCE=fit_tol, $

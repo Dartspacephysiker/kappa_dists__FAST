@@ -10,6 +10,7 @@
 ;2016/07/19
 FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+   FIT__JE_OVER_E=fit__JE_over_E, $
    FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
    ONLY_1D_FITS=only_1D_fits, $
    FIT1D__TOLERANCE=fit_tol, $
@@ -72,6 +73,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
   defKappaFitA              = [1000,300,3.0,0.1,0.0,5.6856602e-06,0.0]
 
   kCurvefit_opt             = {fit__linear_energy_shift          : 0B, $
+                               fit__JE_over_E                    : 0B, $
                                fit__LES__take_stock_of_RB        : 0B, $
                                only_1D_fits                      : 0B, $
                                fit_tol                           : defFit_tol, $
@@ -120,6 +122,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
 
      PRINT,FORMAT='("kCurvefit_opt.fit__linear_energy_shift",T45,":",T48,F0.2)', $
      kCurvefit_opt.fit__linear_energy_shift           
+  ENDIF
+
+  IF N_ELEMENTS(fit__JE_over_E) GT 0 THEN BEGIN
+     kCurvefit_opt.fit__JE_over_E              = fit__JE_over_E
+
+     PRINT,FORMAT='("kCurvefit_opt.fit__JE_over_E",T45,":",T48,F0.2)', $
+     kCurvefit_opt.fit__JE_over_E           
   ENDIF
 
   IF N_ELEMENTS(fit__LES__take_stock_of_RB) GT 0 THEN BEGIN

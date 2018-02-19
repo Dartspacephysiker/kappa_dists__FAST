@@ -22,6 +22,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              ;; OUT_FITTED_PARAMS=out_kappaParams, $
                              ;; OUT_FITTED_GAUSS_PARAMS=out_gaussParams, $
                              FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
+                             FIT__JE_OVER_E=fit__JE_over_E, $
                              ;; FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
                              ADD_FULL_FITS=add_full_fits, $
                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
@@ -43,13 +44,21 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   have_curveFit_opt = N_ELEMENTS(kCurvefit_opt) GT 0
 
-  IF KEYWORD_SET(fit__linear_energy_shift) THEN BEGIN
-     kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY'
-     gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY'
-  ENDIF ELSE BEGIN
-     kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
-     gaussFunc  = 'MAXWELL_FLUX__FUNC'
-  ENDELSE
+  CASE 1 OF
+     KEYWORD_SET(fit__linear_energy_shift): BEGIN
+        IF KEYWORD_SET(fit__JE_over_E) THEN BEGIN
+           kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E'
+           gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY_JE_OVER_E'
+        ENDIF ELSE BEGIN
+           kappaFunc  = 'KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY'
+           gaussFunc  = 'MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY'
+        ENDELSE
+     END
+     ELSE: BEGIN
+        kappaFunc  = 'KAPPA_FLUX__LIVADIOTIS_MCCOMAS_EQ_322__CONV_TO_F__FUNC'
+        gaussFunc  = 'MAXWELL_FLUX__FUNC'
+     END
+  ENDCASE
 
   OKStatus   = [1,2,3,4] ;These are all the acceptable outcomes of fitting with MPFIT2DFUN
   IF ~KEYWORD_SET(units) THEN BEGIN
