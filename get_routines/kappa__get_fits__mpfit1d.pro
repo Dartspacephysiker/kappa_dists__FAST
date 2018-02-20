@@ -10,8 +10,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              KFITPARAMSTRUCT=kappaParamStruct, $
                              GFITPARAMSTRUCT=gaussParamStruct, $
                              ENERGY_INDS=energy_inds, $
-                             ERANGE_PEAK=eRange_peak, $
-                             PEAK_IND=peak_ind, $
+                             ERANGE_FIT=eRange_fit, $
+                             ERANGE_PHI=eRange_phi, $
                              BOUNDS_I=bounds_i, $
                              KAPPA_A=A, $
                              GAUSS_A=AGauss, $
@@ -27,7 +27,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                              ADD_FULL_FITS=add_full_fits, $
                              EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
                              ADD_ANGLESTR=add_angleStr, $
-                             ;; OUT_ERANGE_PEAK=out_eRange_peak, $
+                             ;; OUT_ERANGE_FIT=out_eRange_fit, $
                              OUT_PARAMSTR=out_paramStr, $
                              ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                              DONT_PRINT_FITINFO=dont_print_fitinfo, $
@@ -176,18 +176,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
      IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
-        kappaParamStruct[0].limits = [815,X[-1]*.9999D]
-        tmpeRange_Peak = [815,X[-1]*.9999D]
-        ;; UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,eRange_peak, $
-        UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA,tmpeRange_peak, $
-                                   NO_ERANGE_PEAK=monte_carlo_mode
-
+        UPDATE_KAPPA_FITPARAM_INFO,kappaParamStruct,A,kappa_fixA, $
+                                   eRange_phi, $
+                                   NO_ERANGE_FIT=monte_carlo_mode
         
-        ;; kappaParamStruct = INIT_KAPPA_FITPARAM_INFO(A,kappa_fixA, $
-        ;;                                        ERANGE_PEAK=eRange_peak)
-
-        ;; weights[*] = 1
-
         ;;Tell routine which units we like
         ;; kCurvefit_opt.fit_tol = 0.00001D
         ;;perror =       0.0000000       7.3913775       3.5255372     0.014240319       0.0000000
@@ -393,8 +385,8 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
 
   IF KEYWORD_SET(add_gauss) THEN BEGIN
 
-     UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_peak, $
-                                NO_ERANGE_PEAK=monte_carlo_mode
+     UPDATE_KAPPA_FITPARAM_INFO,gaussParamStruct,AGauss,gauss_fixA,eRange_phi, $
+                                NO_ERANGE_FIT=monte_carlo_mode
 
      AGauss        = MPFITFUN(gaussFunc, $
                               X,Y, $
@@ -436,7 +428,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
      ENDIF
 
      ;; IF nGaussPegged GT 0 THEN PRINT,"GAUSSPEGGED!"
-     IF nGaussFree LT 3 THEN PRINT,"GAUSSPEGGED!"
+     IF nGaussFree LT (3-KEYWORD_SET(fit__JE_over_E)) THEN PRINT,"GAUSSPEGGED!"
 
      ;; IF nPegged GT 0 THEN BEGIN
      ;;    temperaturePegged   = (WHERE(ifree EQ 1))[0] EQ -1

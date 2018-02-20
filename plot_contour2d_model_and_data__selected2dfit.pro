@@ -84,25 +84,25 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                  PLOTS,plotme,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize
               END
-              KEYWORD_SET(KF2D__curveFit_opt.fit2D_just_eRange_peak): BEGIN
+              KEYWORD_SET(KF2D__curveFit_opt.fit2D_just_eRange_fit): BEGIN
 
-                 eBounds  = fit2DStruct.extra_info.eRange_peak
+                 eBounds  = fit2DStruct.extra_info.eRange_fit
 
                  ;; This chunk does ALL angles
                  plotme1      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-                 plotme1[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
-                 plotme1[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme1[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[0]) ;*K_EA__bFunc)
+                 plotme1[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[0]) ;*K_EA__bFunc)
                  plotme2      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-                 plotme2[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
-                 plotme2[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+                 plotme2[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[1]) ;*K_EA__bFunc)
+                 plotme2[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[1]) ;*K_EA__bFunc)
 
                  ;; This chunk does only angles that we fit
                  plotme1      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
-                 plotme1[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
-                 plotme1[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[0]) ;*K_EA__bFunc)
+                 plotme1[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[0]) ;*K_EA__bFunc)
+                 plotme1[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[0]) ;*K_EA__bFunc)
                  plotme2      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
-                 plotme2[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
-                 plotme2[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_peak[1]) ;*K_EA__bFunc)
+                 plotme2[0,*] = COS(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[1]) ;*K_EA__bFunc)
+                 plotme2[1,*] = SIN(K_EA__fitAngles*!PI/180.)*ALOG10(fit2DStruct.extra_info.eRange_fit[1]) ;*K_EA__bFunc)
 
                  PLOTS,plotme1,/DATA,PSYM=boundarySym,COLOR=boundaryColor, $
                        SYMSIZE=symSize

@@ -52,8 +52,8 @@ FUNCTION INIT_KAPPA_FITPARAM_INFO,A,fixA, $
 
    IF KEYWORD_SET(explicit_derivatives) THEN BEGIN
       kFit__parmInfo[*].MPSIDE = 3 ;enable explicit derivative calculation
-      kFit__parmInfo[*].MPDERIV_DEBUG = 1 ;enable derivative debugging
-      kFit__parmInfo[*].MPDERIV_RELTOL = 0.05D ;reltol between exact and numerical deriv
+      ;; kFit__parmInfo[*].MPDERIV_DEBUG = 1 ;enable derivative debugging
+      ;; kFit__parmInfo[*].MPDERIV_RELTOL = 0.05D ;reltol between exact and numerical deriv
       ;; kFit__parmInfo[*].MPDERIV_ABSTOL = 0.D ;abstol between exact and numerical deriv
    ENDIF
 

@@ -53,17 +53,18 @@ PRO JOURNAL__20180216__TRY_TO_FIGURE_OUT_WASSUP, $
      ;;                KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (not kappa,angle)
      ;;                1]
 
-     ATmp        = [eRange_peak[0]*0.998D,200.,10.,0.3,0.]
      ;; ATmp        = kappaParamStruct[*].value
+     ;; ATmp        = [eRange_peak[0]*0.998D,200.,10.,0.3,0.]
+     ATmp        = [xorig[energy_inds[1]+1],200.,10.,0.3,0.]
      kappa_fixA  = kappaParamStruct[*].fixed
      gauss_fixA  = gaussParamStruct[*].fixed
 
      IF KEYWORD_SET(fit__je_over_E) THEN BEGIN
         units1D = 'je_over_E'
-        ;; kappaParamStruct[0].fixed = 1
-        ;; gaussParamStruct[0].fixed = 1
-        ;; kappa_fixA[0] = 1
-        ;; gauss_fixA[0] = 1
+        kappaParamStruct[0].fixed = 1
+        gaussParamStruct[0].fixed = 1
+        kappa_fixA[0] = 1
+        gauss_fixA[0] = 1
      ENDIF
 
      A                 = ATmp

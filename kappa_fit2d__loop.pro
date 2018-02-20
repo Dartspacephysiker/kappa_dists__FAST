@@ -143,7 +143,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
                       OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
                       OUT_SYNTH_SDT_STRUCTS=synthPackage, $
-                      OUT_ERANGE_PEAK=eRange_peak, $
+                      OUT_ERANGE_FIT=eRange_fit, $
                       OUT_PARAMSTR=out_paramStr, $
                       TXTOUTPUTDIR=txtOutputDir, $
                       DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
@@ -203,15 +203,24 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.fit1D__nFlux): BEGIN
         units1D = 'flux'
+        eSpecUnits = 'flux'
+     END
+     KEYWORD_SET(KF2D__Curvefit_opt.fit__JE_over_E): BEGIN
+        units1D = 'je_over_E'
+        eSpecUnits = 'flux'
      END
      ELSE: BEGIN
         units1D = 'eFlux'
+        eSpecUnits = 'eFlux'
      END
   ENDCASE
 
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.fit2D__nFlux): BEGIN
         units2D = 'flux'
+     END
+     KEYWORD_SET(KF2D__Curvefit_opt.fit__JE_over_E): BEGIN
+        units2D = 'je_over_E'
      END
      ELSE: BEGIN
         units2D = 'eFlux'
@@ -286,7 +295,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                 diff_eFlux, $
                 /RETRACE, $
                 ANGLE=KF2D__SDTData_opt.electron_angleRange, $
-                UNITS=units1D, $
+                UNITS=eSpecUnits, $
                 OUT_AVGFACTORARR=avgFactorArr, $
                 OUT_NORMARR=normArr)
 
@@ -303,7 +312,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                             dEF_oneCount, $
                             /RETRACE, $
                             ANGLE=KF2D__SDTData_opt.electron_angleRange, $
-                            UNITS=units1D)
+                            UNITS=eSpecUnits)
         END
 
 
@@ -317,21 +326,25 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   CASE 1 OF
      KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
         ;;Vary bulk E [0], Temperature [1], kappa [2], and density [3] (but not angle)
-        kappa_fixA        = [0, $                                          ;Vary bulk E [0]                              
-                             KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)                         
+        kappa_fixA        = [KF2D__Curvefit_opt.fit__JE_over_E, $          ;Vary bulk E [0] 
+                             KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)
                              0, $                                          ;kappa       [2]
                              KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not angle)
                              1] 
         
-        gauss_fixA        = [0, $                                          ;Vary bulk E [0]
+        gauss_fixA        = [KF2D__Curvefit_opt.fit__JE_over_E, $          ;Vary bulk E [0]
                              KF2D__Curvefit_opt.fit1D__clampTemperature, $ ;Temperature [1] (maybe)
                              1, $
-                             KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not kappa or angle)
+                             KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (not kappa or angle)
                              1]
         ATmp              = DOUBLE([1e3,100.,3.0,0.01,0])
-        kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,kappa_fixA)
 
-        gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),gauss_fixA)
+        explicit_derivatives = KEYWORD_SET(KF2D__Curvefit_opt.fit__JE_over_E)
+        kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,kappa_fixA, $
+                                                    EXPLICIT_DERIVATIVES=explicit_derivatives)
+
+        gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(TEMPORARY(ATmp),gauss_fixA, $
+                                                     EXPLICIT_DERIVATIVES=explicit_derivatives)
      END
      ELSE: BEGIN
      END
@@ -472,40 +485,32 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            Xorig,Yorig, $
            peak_ind,peak_energy, $
+           NENERGIES=nEnergies, $
+           MAXEIND=maxEInd, $
+           MINEIND=minEInd, $
+           ENERGY_INDS=energy_inds, $
+           ERANGE_FIT=eRange_fit, $
+           N_BELOW_PEAK=KF2D__Curvefit_opt.n_below_peak, $
+           N_ABOVE_PEAK=KF2D__Curvefit_opt.n_above_peak, $
            BULK_OFFSET=KF2D__Curvefit_opt.bulk_offset, $
            CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
            MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
            MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
            PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
            /CONTINUE_IF_NOMATCH, $
+           /TEST_NOREV, $
            ONECOUNT_STR=oneCurve
         
         IF peak_energy EQ -1 THEN CONTINUE
-
-        ;; minEInd        = (peak_ind - KF2D__Curvefit_opt.n_below_peak) > 0
-        ;; maxEInd        = (peak_ind + KF2D__Curvefit_opt.n_above_peak) < nEnergies-1
-
-        ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
-        ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
-        ;;  for fitting—namely, n_below_peak and n_above_peak
-        maxEInd           = (peak_ind + KF2D__Curvefit_opt.n_below_peak) < (nEnergies-1)
-        minEInd           = (peak_ind - KF2D__Curvefit_opt.n_above_peak) > 0
-
-        ;; IF KEYWORD_SET(KF2D__Curvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
-           
-        ;;    nAbove      = nEnergies-1-maxEInd
-        ;;    killIt      = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
-        ;;    IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
-        ;;       maxEInd  = maxEInd < MIN(killIt)
-        ;;    ENDIF
-        ;; ENDIF
 
         ;;estimate from the data!
         IF KEYWORD_SET(KF2D__Curvefit_opt.estimate_A_from_data) THEN BEGIN 
 
            KAPPA__GET_A_ESTIMATES,curDataStr,Xorig,Yorig, $
-                                  minEInd,maxEInd,nEnergies, $
-                                  peak_ind,peak_energy,eRange_peak, $
+                                  peak_ind,peak_energy, $
+                                  MAXEIND=maxEInd, $
+                                  MINEIND=minEInd, $
+                                  ERANGE_FIT=eRange_fit, $
                                   KAPPA_EST=KF2D__Curvefit_opt.fitA[2], $
                                   ;; MASS=mass, $
                                   E_ANGLE=KF2D__SDTData_opt.electron_angleRange, $
@@ -520,7 +525,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   A_OUT=A, $
                                   AGAUSS_OUT=AGauss, $
                                   DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                                  /TEST_NOREV, $
                                   TEMPERATURE_TYPE=KF2D__SDTData_opt.fit2D__temperature_type, $
                                   UNITS=units1D
 
@@ -531,7 +535,6 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            A           = DOUBLE([peak_energy,T,kappa,n_est,0.000001,5.68e-6,0])
         ENDELSE
         
-        energy_inds    = [minEInd,maxEInd]
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.use_mpFit1D): BEGIN
 
@@ -547,7 +550,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,A,kappa_fixA
               KAPPA__CONVERT_A_AND_FIXA_TO_MPFITFUN1D_FORMAT,AGauss,gauss_fixA
 
-              tmpFit1Denergies = fit1denergies[0:((peak_ind+1) < (nEnergies -1))] ;for 1-D plots
+              ;; tmpFit1Denergies = fit1denergies[0:((peak_ind+1) < (nEnergies -1))] ;for 1-D plots
+              tmpFit1Denergies = fit1denergies[energy_inds[1]:energy_inds[0]:-1]
+              eRange_phi = (KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) ? $
+                                    [bulkEOrigEstimate,eRange_fit[0]]: $
+                                    eRange_fit)
 
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                        orig,kappaFit1D,gaussFit1D, $
@@ -556,8 +563,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        KFITPARAMSTRUCT=kappaParamStruct, $
                                        GFITPARAMSTRUCT=gaussParamStruct, $
                                        ENERGY_INDS=energy_inds, $
-                                       ERANGE_PEAK=eRange_peak, $
-                                       PEAK_IND=peak_ind, $
+                                       ERANGE_FIT=eRange_fit, $
+                                       ERANGE_PHI=eRange_phi, $
                                        BOUNDS_I=iTime, $
                                        KAPPA_A=A, $
                                        GAUSS_A=AGauss, $
@@ -574,7 +581,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                                        ADD_FULL_FITS=tmpFit1Denergies, $
                                        ADD_ANGLESTR=angleStr, $
-                                       ;; OUT_ERANGE_PEAK=eRange_peakArr, $
+                                       ;; OUT_ERANGE_FIT=eRange_fitArr, $
                                        OUT_PARAMSTR=out_paramStr, $
                                        DONT_PRINT_FITINFO=dont_print_fitInfo, $
                                        FIT_FAIL__USER_PROMPT=fit1D_fail__user_prompt, $
@@ -590,7 +597,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                               USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                               BOUNDS_I=iTime, $
                               ENERGY_INDS=energy_inds, $
-                              ;; ERANGE_PEAK=eRange_peak, $
+                              ;; ERANGE_FIT=eRange_fit, $
                               PEAK_IND=peak_ind, $
                               KAPPA_A=A, $
                               GAUSS_A=AGauss, $
@@ -607,7 +614,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                               ;; OUT_GAUSSFIT1DSTRUCTS=gaussFit1Ds, $
                               /ADD_FULL_FITS, $
                               ADD_ANGLESTR=angleStr, $
-                              ;; OUT_ERANGE_PEAK=eRange_peakArr, $
+                              ;; OUT_ERANGE_FIT=eRange_fitArr, $
                               OUT_PARAMSTR=out_paramStr, $
                               ;; DONT_PRINT_ESTIMATES=dont_print_estimates, $
                               DONT_PRINT_FITINFO=dont_print_fitInfo, $
@@ -617,8 +624,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            END
         ENDCASE
 
-        eRange_peakArr = N_ELEMENTS(eRange_peakArr) GT 0 ? $
-                         [[eRange_peakArr],[eRange_peak]] : eRange_peak
+        eRange_fitArr = N_ELEMENTS(eRange_fitArr) GT 0 ? $
+                         [[eRange_fitArr],[eRange_fit]] : eRange_fit
 
         ;;Now handle the adding of kappa/gaussFit1D structs to ze lists
         ;; IF KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) THEN BEGIN
@@ -794,7 +801,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               UNITS=units2D, $
               SHIFTTHETA=shiftTheta, $
               PEAK_ENERGY=peak_energy, $
-              ERANGE_PEAK=eRange_peakArr[*,-1], $
+              ERANGE_FIT=eRange_fitArr[*,-1], $
               EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
               /MAKE_FIT2D_INFO, $
               /BF_GF__NORMALIZE_TO_VALS_AT_FITTED_ANGLE, $
@@ -928,7 +935,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
              Yorig, $
              worig, $
              energy_inds, $
-             erange_peak, $
+             eRange_fit, $
              peak_ind, $
              A, $
              AGauss, $

@@ -34,6 +34,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    ESTIMATE_FACTORS=estFacs, $
    DONT_PRINT_ESTIMATES=dont_print_estimates, $
    DONT_PRINT_FITINFO=dont_print_fitInfo, $
+   FIT__JE_OVER_E=fit__JE_over_E, $
    FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
    FIT__LES__TAKE_STOCK_OF_RB=fit__LES__take_stock_of_RB, $
    ONLY_1D_FITS=only_1D_fits, $
@@ -99,7 +100,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
    OUT_SYNTH_SDT_STRUCTS=synthPackage, $
    ADD_FULL_FITS=add_full_fits, $
-   OUT_ERANGE_PEAK=out_eRange_peak, $
+   OUT_ERANGE_FIT=out_eRange_fit, $
    OUT_PARAMSTR=out_paramStr, $
    OUT_STRINGS=strings, $
    TXTOUTPUTDIR=txtOutputDir,$
@@ -221,7 +222,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     OUT_FIT2DKAPPA_INF_LIST=fit2dKappa_inf_list, $
                     OUT_FIT2DGAUSS_INF_LIST=fit2dGauss_inf_list, $
                     OUT_SYNTH_SDT_STRUCTS=synthPackage, $
-                    OUT_ERANGE_PEAK=out_eRange_peak, $
+                    OUT_ERANGE_FIT=out_eRange_fit, $
                     OUT_PARAMSTR=out_paramStr, $
                     TXTOUTPUTDIR=txtOutputDir,$
                     DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $

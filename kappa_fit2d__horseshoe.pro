@@ -3,7 +3,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            hadSuccess, $
                            IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
                            ;; TIMEFNSTR=timeFNStr, $
-                           ERANGE_PEAK=eRange_peak, $
+                           ERANGE_FIT=eRange_fit, $
                            FITPARAMSTRUCT=fitParamStruct, $
                            FIT__LINEAR_ENERGY_SHIFT=fit__linear_energy_shift, $
                            ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
@@ -45,7 +45,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
   ENDELSE
 
   SETUP_KAPPA_FIT2D__HORSESHOE, $
-     eRange_peak, $
+     eRange_fit, $
      curDataStr, $
      wtsForFit,X2D,Y2D,dataToFit, $
      fa, $
@@ -197,7 +197,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
      fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                                 ;; ENERGY=eRange_peak, $
+                                 ;; ENERGY=eRange_fit, $
                                  ANGLE=tmpDensSourceConeRange)
 
      fit2DParams[3] = TEMPORARY(fit_scDens)

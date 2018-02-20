@@ -63,8 +63,11 @@
 ;;
 
 PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
-                           minEInd,maxEInd,nEnergies, $
-                           peak_ind,peak_energy,eRange_peak, $
+                           peak_ind,peak_energy, $
+                           NENERGIES=nEnergies, $
+                           MAXEIND=maxEInd, $
+                           MINEIND=minEInd, $
+                           ERANGE_FIT=eRange_fit, $
                            ANGLES=angles, $
                            ;; N_ANGLES_IN_RANGE=n_angles_in_range, $
                            BULKANGLE_STRUCT=angleStr, $
@@ -79,7 +82,6 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                            A_OUT=A, $
                            AGAUSS_OUT=AGauss, $
                            DONT_PRINT_ESTIMATES=dont_print_estimates, $
-                           TEST_NOREV=test_noRev, $
                            TEMPERATURE_TYPE=temperature_type, $
                            UNITS=units
 
@@ -104,20 +106,6 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
                      NGauss:5.0, $
                      B_EGauss:1.0}
   ENDIF
-
-  IF KEYWORD_SET(test_noRev) THEN BEGIN
-     ;; max_energy =  Xorig[(minEInd - 2) > 0]
-     ;; min_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
-     max_energy =  Xorig[minEInd > 0]
-     min_energy =  Xorig[maxEInd < (nEnergies - 1)]
-  ENDIF ELSE BEGIN
-     ;; min_energy =  Xorig[(minEInd - 2) > 0]
-     ;; max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
-     min_energy = !NULL
-     max_energy = !NULL
-  ENDELSE
-
-  eRange_peak     = [min_energy,max_energy]
 
   IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
 
@@ -184,9 +172,9 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   IF ~KEYWORD_SET(only_Gaussian_estimate) THEN BEGIN
 
      ;;So we estimate the temperature and density based on the full range of angles being considered 
-     T               = (T_2D_FS(dat,ENERGY=eRange_peak, $
+     T               = (T_2D_FS(dat,ENERGY=eRange_fit, $
                                 ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range))[temperature_type]*estFacs.T ;T_avg
-     n_est           = N_2D_FS(dat,ENERGY=eRange_peak, $
+     n_est           = N_2D_FS(dat,ENERGY=eRange_fit, $
                                ANGLE=KEYWORD_SET(dont_take_stock_of_bulkangle) ? angles : e_angle_range)*estFacs.N
 
      
@@ -218,10 +206,20 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
 
      ENDIF ELSE BEGIN
 
-        bulk_EGauss  = peak_energy*estFacs.B_EGauss
+        IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
 
-        TGauss       = (T_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range))[temperature_type]*estFacs.TGauss
-        n_estGauss   = N_2D_FS(dat,ENERGY=eRange_peak,ANGLE=e_angle_range)*estFacs.NGauss
+           bulk_EGauss  = (Xorig[peak_ind+1] LT peak_energy ? $
+                          Xorig[peak_ind+1] : $
+                          Xorig[peak_ind-1]) * estFacs.B_EGauss
+
+        ENDIF ELSE BEGIN
+
+           bulk_EGauss  = peak_energy*estFacs.B_EGauss
+
+        ENDELSE
+
+        TGauss       = (T_2D_FS(dat,ENERGY=eRange_fit,ANGLE=e_angle_range))[temperature_type]*estFacs.TGauss
+        n_estGauss   = N_2D_FS(dat,ENERGY=eRange_fit,ANGLE=e_angle_range)*estFacs.NGauss
         
         kappaGauss   = 100
 

@@ -1,11 +1,19 @@
 PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    Xorig,Yorig,peak_ind,peak_energy, $
+   NENERGIES=nEnergies, $
+   MAXEIND=maxEInd, $
+   MINEIND=minEInd, $
+   ENERGY_INDS=energy_inds, $
+   ERANGE_FIT=eRange_fit, $
+   N_BELOW_PEAK=n_below_peak, $
+   N_ABOVE_PEAK=n_above_peak, $
    BULK_OFFSET=bulk_offset, $
    CHECK_FOR_HIGHER_FLUX_PEAKS=check_for_higher_flux_peaks, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
+   TEST_NOREV=test_noRev, $
    ONECOUNT_STR=oneCurve
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -133,6 +141,40 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            peak_energy  = Xorig[peak_ind]
      END
   ENDCASE
+
+  ;; minEInd        = (peak_ind - n_below_peak) > 0
+  ;; maxEInd        = (peak_ind + n_above_peak) < nEnergies-1
+
+  ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
+  ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
+  ;;  for fitting—namely, n_below_peak and n_above_peak
+  maxEInd           = (peak_ind + n_below_peak) < (nEnergies-1)
+  minEInd           = (peak_ind - n_above_peak) > 0
+
+  ;; IF KEYWORD_SET(KF2D__Curvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
+  
+  ;;    nAbove      = nEnergies-1-maxEInd
+  ;;    killIt      = WHERE( (Xorig GE peak_energy) AND (Yorig LE 1e5),nStink)
+  ;;    IF (nAbove GE 4) AND nStink NE 0 THEN BEGIN
+  ;;       maxEInd  = maxEInd < MIN(killIt)
+  ;;    ENDIF
+  ;; ENDIF
+
+  IF KEYWORD_SET(test_noRev) THEN BEGIN
+     ;; max_energy =  Xorig[(minEInd - 2) > 0]
+     ;; min_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     max_energy =  Xorig[minEInd > 0]
+     min_energy =  Xorig[maxEInd < (nEnergies - 1)]
+  ENDIF ELSE BEGIN
+     ;; min_energy =  Xorig[(minEInd - 2) > 0]
+     ;; max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
+     min_energy = !NULL
+     max_energy = !NULL
+  ENDELSE
+
+  eRange_fit      = [min_energy,max_energy]
+
+  energy_inds     = [minEInd,maxEInd]
 
   ;; IF KEYWORD_SET(check_for_higher_flux_peaks) THEN BEGIN
   ;;    ;;Figure out where most energetic maximum is

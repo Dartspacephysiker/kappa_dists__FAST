@@ -307,7 +307,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
         OUT_SYNTH_SDT_STRUCTS=synthPackage, $
         ADD_FULL_FITS=add_full_fits, $
-        OUT_ERANGE_PEAK=out_eRange_peak, $
+        OUT_ERANGE_FIT=out_eRange_fit, $
         OUT_PARAMSTR=out_paramStr, $
         OUT_STRINGS=strings, $
         TXTOUTPUTDIR=txtOutputDir,$

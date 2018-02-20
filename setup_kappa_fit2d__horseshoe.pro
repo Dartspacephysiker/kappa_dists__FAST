@@ -1,5 +1,5 @@
 PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
-   eRange_peak, $
+   eRange_fit, $
    curDataStr, $
    wtsForFit,X2D,Y2D,dataToFit, $
    fa, $
@@ -28,9 +28,9 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
   ;; wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])
 
   CASE 1 OF
-     KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_peak): BEGIN
-        eRange_i        = WHERE((curDataStr.energy[*,curDataStr.nBins/2] GE eRange_peak[0]) AND $
-                                (curDataStr.energy[*,curDataStr.nBins/2] LE eRange_peak[1]),nEnKeep)
+     KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_fit): BEGIN
+        eRange_i        = WHERE((curDataStr.energy[*,curDataStr.nBins/2] GE eRange_fit[0]) AND $
+                                (curDataStr.energy[*,curDataStr.nBins/2] LE eRange_fit[1]),nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN

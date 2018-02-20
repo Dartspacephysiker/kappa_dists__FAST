@@ -12,7 +12,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                ;; KEEPKAPPA_INDICES=keepKappa_indices, $
                                ;; KEEPGAUSS_INDICES=keepGauss_indices, $
                                SHIFTTHETA=shiftTheta, $
-                               ERANGE_PEAK=eRange_peak, $
+                               ERANGE_FIT=eRange_fit, $
                                PEAK_ENERGY=peak_energy, $
                                TIMEFNSTR=timeFNStr, $
                                UNITS=units, $
@@ -88,7 +88,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
      KAPPA_FIT2D__HORSESHOE,curDataStr, $
                             hadSuccessK, $
-                            ERANGE_PEAK=eRange_peak, $
+                            ERANGE_FIT=eRange_fit, $
                             FITPARAMSTRUCT=kappaParamStruct, $
                             ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                             ;; IN_ESTIMATED_LC=estimated_lc, $
@@ -111,7 +111,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
         KAPPA_FIT2D__FIRE_EXTRAS,curKappaStr,curDataStr,hadSuccessK, $
                                  IN_FIT2D_PARAMS=kappaFit2DParams, $
                                  FIT2D_FITINFO=kappaFit2D_info, $
-                                 ERANGE_PEAK=eRange_peak, $
+                                 ERANGE_FIT=eRange_fit, $
                                  SHIFTTHETA=shiftTheta, $
                                  FITANGLE_I=kappaFitAngle_index, $
                                  EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
@@ -166,7 +166,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
         KAPPA_FIT2D__HORSESHOE,curDataStr, $
                                hadSuccessG, $
                                /IS_MAXWELLIAN_FIT, $
-                               ERANGE_PEAK=eRange_peak, $
+                               ERANGE_FIT=eRange_fit, $
                                FITPARAMSTRUCT=gaussParamStruct, $
                                ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
                                ;; IN_ESTIMATED_LC=estimated_lc, $
@@ -187,7 +187,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
            KAPPA_FIT2D__FIRE_EXTRAS,curGaussStr,curDataStr,hadSuccessG, $
                                     IN_FIT2D_PARAMS=gaussFit2DParams, $
                                     FIT2D_FITINFO=gaussFit2D_info, $
-                                    ERANGE_PEAK=eRange_peak, $
+                                    ERANGE_FIT=eRange_fit, $
                                     SHIFTTHETA=shiftTheta, $
                                     FITANGLE_I=gaussFitAngle_index, $
                                     EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $

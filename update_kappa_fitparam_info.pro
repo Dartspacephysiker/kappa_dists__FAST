@@ -9,15 +9,15 @@
 
 ;2016/08/08 Requiring no_fixA and no_eRange_peak to be explicitly requested so that nothing happens inadvertently. They should be
 ;updated, except in very particular circumstances such as those found in KAPPA_FIT2D__1DFIT_EACH_ANGLE
-PRO UPDATE_KAPPA_FITPARAM_INFO,paramInfo,A,fixA,eRange_peak, $
+PRO UPDATE_KAPPA_FITPARAM_INFO,paramInfo,A,fixA,eRange_fit, $
                                NO_FIXA=no_fixA, $
-                               NO_ERANGE_PEAK=no_eRange_peak
+                               NO_ERANGE_FIT=no_eRange_fit
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;update this guy first
-  IF ~KEYWORD_SET(no_eRange_peak) THEN BEGIN
-     paramInfo[0].limits = eRange_peak
+  IF ~KEYWORD_SET(no_eRange_fit) THEN BEGIN
+     paramInfo[0].limits = eRange_fit
   END
 
   ;;Make 'em play nice

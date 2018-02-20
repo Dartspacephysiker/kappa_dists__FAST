@@ -80,7 +80,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                fit2D_tol                         : defFit2D_tol, $
                                fit2D_only_dens_angles            : 0B, $
                                fit2D_only_eAngles                : 0B, $
-                               fit2D_just_eRange_peak            : 0B, $
+                               fit2D_just_eRange_fit             : 0B, $
                                fit2D_fit_above_minE              : 0B, $
                                fit2D__bulk_e_anisotropy          : 0B, $
                                fit2D__bulk_e_anis_factor         : 0., $
@@ -373,10 +373,10 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
   ENDIF
 
   IF N_ELEMENTS(fit2D__only_fit_peak_eRange) GT 0 THEN BEGIN
-     kCurvefit_opt.fit2D_just_eRange_peak = fit2D__only_fit_peak_eRange
+     kCurvefit_opt.fit2D_just_eRange_fit = fit2D__only_fit_peak_eRange
 
-     PRINT,FORMAT='("kCurvefit_opt.fit2D_just_eRange_peak",T45,":",T48,I0)', $
-     kCurvefit_opt.fit2D_just_eRange_peak
+     PRINT,FORMAT='("kCurvefit_opt.fit2D_just_eRange_fit",T45,":",T48,I0)', $
+     kCurvefit_opt.fit2D_just_eRange_fit
   ENDIF
 
   IF N_ELEMENTS(fit2D__only_fit_aboveMin) GT 0 THEN BEGIN
