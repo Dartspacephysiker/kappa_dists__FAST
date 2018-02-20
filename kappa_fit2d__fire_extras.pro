@@ -57,7 +57,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 
-        fit2DStr.data[WHERE(fit2DStr.energy LT MIN(eRange_fit),/NULL)] = 0.
+        ;; fit2DStr.data[WHERE(fit2DStr.energy LT MIN(eRange_fit),/NULL)] = 0.
 
         tmpStr          = CONV_UNITS(fit2DStr,'counts')
         tmpStr.ddata    = (tmpStr.data)^.5
@@ -103,12 +103,12 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
 
   fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                               ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                              ;; ENERGY=eRange_fit, $
+                              ENERGY=eRange_fit, $
                               ANGLE=tmpDensSourceConeRange)
 
   fit_scTemp  = (T_2D_FS(fit2DStr, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                      ;; ENERGY=eRange_fit, $
+                      ENERGY=eRange_fit, $
                       ANGLE=tmpTempSourceConeRange))[KF2D__SDTData_opt.fit2D__temperature_type]
   ;; fit_scTemp  = fit2DParams[1]
 

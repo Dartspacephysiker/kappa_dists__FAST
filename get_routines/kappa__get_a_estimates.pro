@@ -110,8 +110,8 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
   IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
 
      bulk_energy = (Xorig[peak_ind+1] LT peak_energy ? $
-                    Xorig[peak_ind+1] : $
-                    Xorig[peak_ind-1]) * estFacs.B_E
+                    Xorig[peak_ind+2] : $
+                    Xorig[peak_ind-2]) * estFacs.B_E
 
   ENDIF ELSE BEGIN
 
@@ -209,8 +209,8 @@ PRO KAPPA__GET_A_ESTIMATES,dat,Xorig,Yorig, $
         IF KEYWORD_SET(phi__use_energy_before_peak) THEN BEGIN
 
            bulk_EGauss  = (Xorig[peak_ind+1] LT peak_energy ? $
-                          Xorig[peak_ind+1] : $
-                          Xorig[peak_ind-1]) * estFacs.B_EGauss
+                          Xorig[peak_ind+2] : $
+                          Xorig[peak_ind-2]) * estFacs.B_EGauss
 
         ENDIF ELSE BEGIN
 
