@@ -227,7 +227,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      END
   ENDCASE
 
-  fit1Denergies = diff_eFlux.energy[*,0,0]
+  fit1Denergies = diff_eFlux.energy[1:-1,0,0]
 
   synthKappa                     = diff_eFlux
   synthKappa.data[*]             = 0.0
@@ -552,9 +552,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
               ;; tmpFit1Denergies = fit1denergies[0:((peak_ind+1) < (nEnergies -1))] ;for 1-D plots
               tmpFit1Denergies = fit1denergies[energy_inds[1]:energy_inds[0]:-1]
-              eRange_phi = (KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) ? $
-                                    [bulkEOrigEstimate,eRange_fit[0]]: $
-                                    eRange_fit)
+              eRange_phi       = (KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) ? $
+                                  [bulkEOrigEstimate,eRange_fit[0]]: $
+                                  eRange_fit)
 
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                                        orig,kappaFit1D,gaussFit1D, $

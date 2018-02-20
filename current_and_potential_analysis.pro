@@ -807,12 +807,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
               Xorig,Yorig, $
               peak_ind,peak_energy, $
+              NENERGIES=nEnergies, $
+              MAXEIND=maxEInd, $
+              MINEIND=minEInd, $
+              ENERGY_INDS=energy_inds, $
+              ERANGE_FIT=eRange_fit, $
+              N_BELOW_PEAK=n_below_peak, $
+              N_ABOVE_PEAK=n_above_peak, $
               BULK_OFFSET=bulk_offset, $
               CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
               MIN_PEAK_ENERGY=min_peak_energy, $
               MAX_PEAK_ENERGY=max_peak_energy, $
               PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
               /CONTINUE_IF_NOMATCH, $
+              /TEST_NOREV, $
               ONECOUNT_STR=oneCurve
 
            ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 

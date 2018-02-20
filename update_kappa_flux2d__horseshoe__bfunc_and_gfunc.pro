@@ -175,8 +175,8 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
         bro              = KF2D__SDTData_opt.electron_angleRange
-        K_EA__fitAngle_i = WHERE((K_EA__angles GE bro[0]) AND $
-                                 (K_EA__angles LE bro[1]),nAnKeep)
+        K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) AND $
+                                 (K_EA__angles LE CEIL(bro[1])),nAnKeep)
         ;; K_EA__fitAngles  = [MIN(K_EA__angles[K_EA__fitAngle_i]), $
         ;;                     MAX(K_EA__angles[K_EA__fitAngle_i])]
         K_EA__fitAngles  = K_EA__angles[K_EA__fitAngle_i]
