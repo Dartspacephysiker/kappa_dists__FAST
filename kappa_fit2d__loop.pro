@@ -553,7 +553,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               ;; tmpFit1Denergies = fit1denergies[0:((peak_ind+1) < (nEnergies -1))] ;for 1-D plots
               tmpFit1Denergies = fit1denergies[energy_inds[1]:energy_inds[0]:-1]
               eRange_phi       = (KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) ? $
-                                  [bulkEOrigEstimate,eRange_fit[0]]: $
+                                  ;; [bulkEOrigEstimate,eRange_fit[0]]: $
+                                  [bulkEOrigEstimate,tmpFit1Denergies[1]]: $
                                   eRange_fit)
 
               KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
