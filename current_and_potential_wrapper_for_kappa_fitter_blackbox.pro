@@ -115,7 +115,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   plot_t1                 = STR_TO_TIME(plot_times[0])
   plot_t2                 = STR_TO_TIME(plot_times[1])
-  add_iu_pot              = (N_ELEMENTS(add_iu_pot    ) EQ 0) ? 1 : add_iu_pot
+  add_iu_pot              = (N_ELEMENTS(add_iu_pot    ) EQ 0) ? (N_ELEMENTS(cAP_struct) GT 0 ? TAG_EXIST(cAP_struct,'add_iu_pot') : 1) : add_iu_pot
   use_ed_current          = (KEYWORD_SET(use_ed_current) OR (N_ELEMENTS(use_ed_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
   use_iu_current          = (KEYWORD_SET(use_iu_current) OR (N_ELEMENTS(use_iu_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
 

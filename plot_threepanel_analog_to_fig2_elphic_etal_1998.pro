@@ -625,13 +625,24 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
-     IF ~KEYWORD_SET(sPName) THEN BEGIN
-        sPName = routName + '-believeIt.png'
-     ENDIF
+     filNavn = KEYWORD_SET(SPName) ? SPName : (routName + '-believeIt')
+     filTmp  = STRSPLIT(filNavn,'.',/EXTRACT)
+     filPref = (filTmp)[0]
+     filSuff = N_ELEMENTS(filTmp) GT 1 ? '.' + filTmp[1] : '.png'
+     IF KEYWORD_SET(is_eFlux) THEN filPref += '-eFlux'
 
-     PRINT,"Saving to " + sPName + ' ...'
+     count = 0
+     WHILE FILE_TEST(plotDir+filNavn) DO BEGIN
+        count++
+        filNavn = STRING(FORMAT='(A0,I02,A0)', $
+                         filPref, $
+                         count, $
+                         filSuff)
+     ENDWHILE
 
-     window1.Save,plotDir+sPName
+     PRINT,"Saving to " + filNavn + ' ...'
+
+     window1.Save,plotDir+filNavn
 
   ENDIF
 

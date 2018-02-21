@@ -46,16 +46,15 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         pPref          = '-nFlux_fit'
         unitTitle      = "e!E-!N # flux"
         yTitle         = "Differential Number Flux (#/cm$^2$-s-sr-eV)"      
-        lowerBound     = 1.0e1
-        upperBound     = 1.0e8
+        lowerBound     = 1.0D2
+        upperBound     = 1.0D8
      END
      'JE_OVER_E': BEGIN
         pPref          = '-j_over_e_fit'
         unitTitle      = "e!E-!N # flux"
         yTitle         = "J(E)/E (#/cm$^2$-s-sr-eV!U2!N)"
-        lowerBound     = 1.0e-3
-        upperBound     = 1.0e7
-        ;; xRange         = [
+        lowerBound     = 1.0D-3
+        upperBound     = 1.0D7
      END
   ENDCASE
   ;;Need to know if OMNI2D is responsible for this, or something else
@@ -131,10 +130,14 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
 
   lineStyle       = ['','--','-.','-:']
 
-  yRange          = [(MIN(orig.y[WHERE(orig.y GT 0)]) < $
-                     MIN(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) > lowerBound, $
+  ;; yRange          = [(MIN(orig.y[WHERE(orig.y GT 0)]) < $
+  ;;                    MIN(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) > lowerBound, $
+  ;;                    (MAX(orig.y[WHERE(orig.y GT 0)]) > $
+  ;;                    MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
+  yRange          = [lowerBound, $
                      (MAX(orig.y[WHERE(orig.y GT 0)]) > $
-                     MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
+                      MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
+  xRange[1]       = 3.4D4
 
   iPlot           = 0
 
