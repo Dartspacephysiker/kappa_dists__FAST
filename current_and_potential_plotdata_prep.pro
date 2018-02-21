@@ -60,12 +60,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         MAXCUR=maxCur, $
                                         USEINDS=useInds, $
                                         PLOT_J_RATIOS=plot_j_ratios, $
-                                        JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
-                                        JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
-                                        JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                                         MAP_TO_100KM=map_to_100km, $
                                         IN_MAGCURRENT=magCurrent, $
                                         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
+                                        MRATIO=mRatio, $
                                         _EXTRA=e
                                    
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -403,6 +401,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      TErr = REFORM(curPotList[edind].Terr[TTypeInd,safe_i])
   ENDELSE
 
+  IF N_ELEMENTS(magCurrent) LT N_ELEMENTS(time) THEN magcurrent=je*0S
+
   jvPlotData = {time       : time      [safe_i] , $
                 cur        : cur       [safe_i] , $
                 je         : je        [safe_i] , $
@@ -560,20 +560,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   ENDFOR
 
-  IF ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
-       KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km)) $
-  THEN jv_theor__initial_source__Polar = 1
-
-  
-  junk = GET_FA_MIRROR_RATIO__UTC(JVPlotData.time, $
-                                  /TIME_ARRAY, $
-                                  ;; USE_FAST_AS_IONOS=~KEYWORD_SET(map_to_100km), $
-                                  TO_EQUATOR=jv_theor__initial_source__equator, $
-                                  TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
-                                  TO_THIS_RE=jv_theor__initial_source_R_E, $
-                                  TO_THIS_KM=to_km)
-
-  STR_ELEMENT,jvPlotData,'mRatio',junk,/ADD_REPLACE
+  IF N_ELEMENTS(mRatio) GT 0 THEN STR_ELEMENT,jvPlotData,'mRatio',TEMPORARY(mRatio),/ADD_REPLACE
 
   ;; add_Denton2006 = 0
   ;; IF KEYWORD_SET(add_Denton2006) THEN BEGIN

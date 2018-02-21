@@ -38,7 +38,7 @@ FUNCTION THEORETISCH_CURVES,conductivities, $
         curs          = MAKE_ARRAY(nPots,nCond,/FLOAT)
 
         FOR k=0,nCond-1 DO BEGIN
-           curs[*,k]  = conductivities[k]*pots[*,k]*(-1D6)     
+           curs[*,k]  = conductivities[k]*pots[*,k]*(1D6)
         ENDFOR
 
      END
@@ -57,6 +57,8 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
    ORIGINATING_ROUTINE=routName, $
    UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
    DOWNCURRENT_CONDUCTIVITIES=downCurrent_conductivities, $
+   POT_ON_X_AXIS=pot_on_x_axis, $
+   JUST_J_AND_V=just_j_and_v, $
    PLOTDIR=plotDir, $
    _EXTRA=e ;; , $
    ;; ERROR_BAR_FACTOR=errorBarFac
@@ -98,21 +100,26 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
   curTitle         = 'j!D||!N($\mu$A m!U-2!N)'
 
-  potRange         = [1,3e4]
+  potRange         = KEYWORD_SET(just_j_and_v) ? MINMAX(jvPlotData.pot) : [1D2,3.1D4]
   potTitle         = '$\Phi$ (V)'
 
   errSym           = '.'
   errSym_size      = 3.0
   errSym_fill      = 0
   errSym_capSize   = 0.05
+  errThick         = 2.0
 
   ;;J-V plot options
-  logPotTmp        = ROUND_TO_NTH_DECIMAL_PLACE(ALOG10(potRange[1]))
-  jv_tickValues    = (10L)^(LINDGEN(FIX(logPotTmp))+1)
+  jv_tickValues    = !NULL
   jv_tickNames     = !NULL
-  FOR k=0,logPotTmp-1 DO $
-     jv_tickNames  = [jv_tickNames,STRING(FORMAT='("10!U",I0,"!N")',k+1)]
-  ;; jv_tickNames  = STRING(FORMAT='('+STRCOMPRESS(N_ELEMENTS(logPotTmp-1),/REMOVE_ALL)+'())'
+  IF ~KEYWORD_SET(just_j_and_v) THEN BEGIN
+     logPotTmp        = ROUND_TO_NTH_DECIMAL_PLACE(ALOG10(potRange[1]))
+     jv_tickValues    = (10L)^(LINDGEN(FIX(logPotTmp)-1)+2)
+     jv_tickNames     = !NULL
+     FOR k=1,logPotTmp-1 DO $
+        jv_tickNames  = [jv_tickNames,STRING(FORMAT='("10!U",I0,"!N")',k+1)]
+     ;; jv_tickNames  = STRING(FORMAT='('+STRCOMPRESS(N_ELEMENTS(logPotTmp-1),/REMOVE_ALL)+'())'
+  ENDIF
   jvSym            = '*'
   jvSymSize        = 2.0
   jvSymThick       = 2.0
@@ -123,6 +130,9 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
   curCondLStyle    = '--'
 
+  font_size        = 18
+  timeFont_size    = 15
+
   ;;These all pertain to grid creation
   xGridStyle       = ':'
   yGridStyle       = ':'
@@ -131,12 +141,22 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
   xSubTickLen      = 0.01
   ySubTickLen      = 0.01
   
-  winDim           = [900,600]
+  winDim           = [1000,800]
 
-  p1pos            = [0.10,0.08,0.46,0.50]
-  p2pos            = [0.10,0.53,0.46,0.94]
-  p3pos            = [0.54,0.08,0.95,0.94]
-  cbpos            = [0.10,0.97,0.95,0.99]
+  CASE 1 OF
+     KEYWORD_SET(just_j_and_v): BEGIN
+        p1pos            = !NULL
+        p2pos            = !NULL
+        p3pos            = [0.08,0.08,0.95,0.94]
+        cbpos            = [0.10,0.97,0.95,0.99]
+     END
+     ELSE: BEGIN
+        p1pos            = [0.10,0.08,0.46,0.50]
+        p2pos            = [0.10,0.53,0.46,0.94]
+        p3pos            = [0.54,0.08,0.95,0.94]
+        cbpos            = [0.10,0.97,0.95,0.99]
+     END
+  ENDCASE
 
   orig_p1Pos       = [0.1,0.1,0.95,0.8]
   orig_cbPos       = [0.1,0.96,0.95,0.98]
@@ -147,7 +167,7 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
   timeTitle        = 'Seconds since ' + TIME_TO_STR(jvPlotData.time[0])
 
-  jRange           = MINMAX(jvPlotData.cur)
+  jRange           = MINMAX(jvPlotData.cur*(-1.D))
 
   ;;Amplify/diminish pot by factor(s) of T?
   pot              = jvPlotData.pot
@@ -205,7 +225,8 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
                             POSITION=orig_cbPos, $
                             RANGE=tMagRange, $
                             ;; TEXT_ORIENTATION=180, $
-                            /NORMAL)
+                              /NORMAL, $
+                             FONT_SIZE=timeFont_size)
      STOP
 
   ENDIF
@@ -277,176 +298,229 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
                                   YTICKLEN=1, $
                                   XSUBTICKLEN=0.01, $
                                   YSUBTICKLEN=0.01, $
+                                  FONT_SIZE=font_size, $
                                   /CURRENT, $
                                   POSITION=p3pos)
 
      END
      ELSE: BEGIN
 
-        ;;Initialize things
-        inds              = [0,1]
-        tmpCurErr         = jvPlotData.curErr[inds]
+        IF ~KEYWORD_SET(just_j_and_v) THEN BEGIN
+           ;;Initialize things
+           inds              = [0,1]
+           tmpCurErr         = jvPlotData.curErr[inds]
 
-        plot_1            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.cur[inds], $
-                                      tmpCurErr, $
-                                      XRANGE=tRange, $
-                                      ;; YRANGE=jRange, $
-                                      YRANGE=errJRange, $
-                                      XTITLE=timeTitle, $
-                                      YTITLE=curTitle, $
-                                      RGB_TABLE=hammerCT, $
-                                      ;; ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
-                                      VERT_COLORS=CTInds[inds], $
-                                      LINESTYLE='', $
-                                      ERRORBAR_CAPSIZE=errSym_capSize, $
-                                      SYMBOL=errSym, $
-                                      SYM_SIZE=errSym_size, $
-                                      SYM_FILLED=errSym_fill, $
-                                      XGRIDSTYLE=xGridStyle, $
-                                      YGRIDSTYLE=yGridStyle, $
-                                      XTICKLEN=xTickLen, $
-                                      YTICKLEN=yTickLen, $
-                                      XSUBTICKLEN=xSubTickLen, $
-                                      YSUBTICKLEN=ySubTickLen, $
-                                      /CURRENT, $
-                                      POSITION=p1pos, $
-                                      BUFFER=savePlot)
+           plot_1            = ERRORPLOT((jvPlotData.tDiff[inds]), $
+                                         jvPlotData.cur[inds]*(-1.D), $
+                                         tmpCurErr, $
+                                         XRANGE=tRange, $
+                                         ;; YRANGE=jRange, $
+                                         YRANGE=errJRange, $
+                                         XTITLE=timeTitle, $
+                                         YTITLE=curTitle, $
+                                         RGB_TABLE=hammerCT, $
+                                         ;; ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
+                                         VERT_COLORS=CTInds[inds], $
+                                         LINESTYLE='', $
+                                         ERRORBAR_CAPSIZE=errSym_capSize, $
+                                         ERRORBAR_THICK=errThick, $
+                                         SYMBOL=errSym, $
+                                         SYM_SIZE=errSym_size, $
+                                         SYM_FILLED=errSym_fill, $
+                                         XGRIDSTYLE=xGridStyle, $
+                                         YGRIDSTYLE=yGridStyle, $
+                                         XTICKLEN=xTickLen, $
+                                         YTICKLEN=yTickLen, $
+                                         XSUBTICKLEN=xSubTickLen, $
+                                         YSUBTICKLEN=ySubTickLen, $
+                                         /CURRENT, $
+                                         FONT_SIZE=font_size, $
+                                         POSITION=p1pos, $
+                                         BUFFER=savePlot)
 
-        ;;Now add all the other symbols
-        FOR k=2,nPoints-1,2 DO BEGIN
+           ;;Now add all the other symbols
+           FOR k=2,nPoints-1,2 DO BEGIN
 
-           inds           = [k,((k+1) < (nPoints-1))]
-           ;; tmpCurErr      = curErr[*,inds]
-           tmpCurErr      = jvPlotData.curErr[inds]
+              inds           = [k,((k+1) < (nPoints-1))]
+              ;; tmpCurErr      = curErr[*,inds]
+              tmpCurErr      = jvPlotData.curErr[inds]
 
-           plot_1         = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      jvPlotData.cur[inds], $
-                                      tmpCurErr, $
-                                      ;; RGB_TABLE=hammerCT, $
-                                      VERT_COLORS=hammerCT[*,CTInds[inds]], $
-                                      ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
-                                      ERRORBAR_CAPSIZE=errSym_capSize, $
-                                      LINESTYLE='', $
-                                      SYMBOL=errSym, $
-                                      SYM_SIZE=errSym_size, $
-                                      SYM_FILLED=errSym_fill, $
-                                      /CURRENT, $
-                                      ;; POSITION=p1pos, $
-                                      /OVERPLOT)
-        ENDFOR
+              plot_1         = ERRORPLOT((jvPlotData.tDiff[inds]), $
+                                         jvPlotData.cur[inds]*(-1.D), $
+                                         tmpCurErr, $
+                                         ;; RGB_TABLE=hammerCT, $
+                                         VERT_COLORS=hammerCT[*,CTInds[inds]], $
+                                         ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
+                                         ERRORBAR_CAPSIZE=errSym_capSize, $
+                                         ERRORBAR_THICK=errThick, $
+                                         LINESTYLE='', $
+                                         SYMBOL=errSym, $
+                                         SYM_SIZE=errSym_size, $
+                                         SYM_FILLED=errSym_fill, $
+                                         /CURRENT, $
+                                         ;; POSITION=p1pos, $
+                                         /OVERPLOT)
+           ENDFOR
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        ;;Second plot
+           ;;Second plot
 
-        inds              = [0,1]
-        tmpPotErr         = jvPlotData.potErr[inds]
+           inds              = [0,1]
+           tmpPotErr         = jvPlotData.potErr[inds]
 
-        errPotRange       = MINMAX(pot)
-        plot_2            = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      pot[inds], $
-                                      tmpPotErr, $
-                                      XRANGE=tRange, $
-                                      /YLOG, $
-                                      YRANGE=potRange, $
-                                      YTITLE=potTitle, $
-                                      RGB_TABLE=hammerCT, $
-                                      ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
-                                      VERT_COLORS=CTInds[inds], $
-                                      LINESTYLE='', $
-                                      ERRORBAR_CAPSIZE=errSym_capSize, $
-                                      SYMBOL=errSym, $
-                                      SYM_SIZE=errSym_size, $
-                                      SYM_FILLED=errSym_fill, $
-                                      XGRIDSTYLE=xGridStyle, $
-                                      YGRIDSTYLE=yGridStyle, $
-                                      XTICKLEN=xTickLen, $
-                                      YTICKLEN=yTickLen, $
-                                      XSUBTICKLEN=xSubTickLen, $
-                                      YSUBTICKLEN=ySubTickLen, $
-                                      /CURRENT, $
-                                      POSITION=p2pos, $
-                                      XSHOWTEXT=0B)
-        ;; plot_2.xshowtext  = 0B
+           errPotRange       = MINMAX(pot)
+           plot_2            = ERRORPLOT((jvPlotData.tDiff[inds]), $
+                                         pot[inds], $
+                                         tmpPotErr, $
+                                         XRANGE=tRange, $
+                                         /YLOG, $
+                                         YRANGE=potRange, $
+                                         YTITLE=potTitle, $
+                                         RGB_TABLE=hammerCT, $
+                                         ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
+                                         VERT_COLORS=CTInds[inds], $
+                                         LINESTYLE='', $
+                                         ERRORBAR_CAPSIZE=errSym_capSize, $
+                                         ERRORBAR_THICK=errThick, $
+                                         SYMBOL=errSym, $
+                                         SYM_SIZE=errSym_size, $
+                                         SYM_FILLED=errSym_fill, $
+                                         XGRIDSTYLE=xGridStyle, $
+                                         YGRIDSTYLE=yGridStyle, $
+                                         XTICKLEN=xTickLen, $
+                                         YTICKLEN=yTickLen, $
+                                         XSUBTICKLEN=xSubTickLen, $
+                                         YSUBTICKLEN=ySubTickLen, $
+                                         /CURRENT, $
+                                         POSITION=p2pos, $
+                                         FONT_SIZE=font_size, $
+                                         XSHOWTEXT=0B)
+           ;; plot_2.xshowtext  = 0B
 
-        ;;Now add all the other symbols
-        FOR k=2,nPoints-1,2 DO BEGIN
+           ;;Now add all the other symbols
+           FOR k=2,nPoints-1,2 DO BEGIN
 
-           inds           = [k,((k+1) < (nPoints-1))]
-           tmpPotErr      = jvPlotData.potErr[inds]
+              inds           = [k,((k+1) < (nPoints-1))]
+              tmpPotErr      = jvPlotData.potErr[inds]
 
-           plot_2         = ERRORPLOT((jvPlotData.tDiff[inds]), $
-                                      pot[inds], $
-                                      tmpPotErr, $
-                                      /YLOG, $
-                                      VERT_COLORS=hammerCT[*,CTInds[inds]], $
-                                      ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
-                                      ERRORBAR_CAPSIZE=errSym_capSize, $
-                                      LINESTYLE='', $
-                                      SYMBOL=errSym, $
-                                      SYM_SIZE=errSym_size, $
-                                      SYM_FILLED=errSym_fill, $
-                                      /CURRENT, $
-                                      /OVERPLOT)
-        ENDFOR
+              plot_2         = ERRORPLOT((jvPlotData.tDiff[inds]), $
+                                         pot[inds], $
+                                         tmpPotErr, $
+                                         /YLOG, $
+                                         VERT_COLORS=hammerCT[*,CTInds[inds]], $
+                                         ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
+                                         ERRORBAR_CAPSIZE=errSym_capSize, $
+                                         ERRORBAR_THICK=errThick, $
+                                         LINESTYLE='', $
+                                         SYMBOL=errSym, $
+                                         SYM_SIZE=errSym_size, $
+                                         SYM_FILLED=errSym_fill, $
+                                         /CURRENT, $
+                                         /OVERPLOT)
+           ENDFOR
 
+        ENDIF
+        
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;;Third plot
 
-        inds              = [0,1]
-        ;; tmpCurErr         = curErr[*,inds]
-        ;; tmpPotErr         = potErr[*,inds]
-        tmpCurErr         = jvPlotData.curErr[inds]
-        tmpPotErr         = jvPlotData.potErr[inds]
+        CASE 1 OF
+           KEYWORD_SET(pot_on_x_axis): BEGIN
+              xDat = pot
+              xErr = jvPlotData.potErr
 
-        plot_3      = ERRORPLOT(jvPlotData.cur[inds], $
-                                pot[inds], $
-                                tmpCurErr, $
-                                tmpPotErr, $
-                                XRANGE=jRange, $
-                                YRANGE=potRange, $
-                                /YLOG, $
-                                LINESTYLE='', $
-                                ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
-                                ERRORBAR_CAPSIZE=errSym_capSize, $
-                                SYMBOL=errSym, $
-                                SYM_SIZE=errSym_size, $
-                                SYM_FILLED=errSym_fill, $
-                                VERT_COLORS=CTInds[inds], $
-                                YTICKVALUES=jv_tickValues, $
-                                YTICKNAME=jv_tickNames, $
-                                XTITLE=jv_xTitle, $
-                                YTITLE=jv_yTitle, $
-                                XGRIDSTYLE=xGridStyle, $
-                                YGRIDSTYLE=yGridStyle, $
-                                XTICKLEN=xTickLen, $
-                                YTICKLEN=yTickLen, $
-                                XSUBTICKLEN=xSubTickLen, $
-                                YSUBTICKLEN=ySubTickLen, $
-                                /CURRENT, $
-                                POSITION=p3pos)
+              yDat = jvPlotData.cur*(-1.D)
+              yErr = jvPlotData.curErr
+
+              xTitle = jv_yTitle
+              xRange = KEYWORD_SET(just_j_AND_v) ? potRange : [potRange[0]+jvPlotData.potErr[0],potRange[1]-jvPlotData.potErr[1]]
+              xLog   = 1
+              xTickValues = jv_tickValues
+              xTickName   = jv_tickNames
+
+              yTitle = jv_xTitle
+              yRange = jRange
+              yLog   = 0
+           END
+           ELSE: BEGIN
+              xDat = jvPlotData.cur*(-1.D)
+              xErr = jvPlotData.curErr
+
+              yDat = pot
+              yErr = jvPlotData.potErr
+
+              xTitle = jv_xTitle
+              xRange = jRange
+              xLog   = 0
+
+              yTitle = jv_yTitle
+              yRange = KEYWORD_SET(just_j_AND_v) ? potRange : [potRange[0]+jvPlotData.potErr[0],potRange[1]-jvPlotData.potErr[1]]
+              yLog   = 1
+              yTickValues = jv_tickValues
+              yTickName   = jv_tickNames
+           END
+        ENDCASE
+
+        inds     = [0,1]
+        ;; tmpXErr         = curErr[*,inds]
+        ;; tmpPotErr         = potErr[*,inds]
+        tmpXErr  = xErr[inds]
+        tmpYErr  = yErr[inds]
+
+        plot_3   = ERRORPLOT(xDat[inds], $
+                             yDat[inds], $
+                             tmpXErr, $
+                             tmpYErr, $
+                             XRANGE=xRange, $
+                             YRANGE=yRange, $
+                             XLOG=xLog, $
+                             YLOG=yLog, $
+                             LINESTYLE='', $
+                             ERRORBAR_COLOR=hammerCT[*,CTInds[0]], $
+                             ERRORBAR_CAPSIZE=errSym_capSize, $
+                             ERRORBAR_THICK=errThick, $
+                             SYMBOL=errSym, $
+                             SYM_SIZE=errSym_size, $
+                             SYM_FILLED=errSym_fill, $
+                             VERT_COLORS=CTInds[inds], $
+                             XTICKVALUES=xTickValues, $
+                             XTICKNAME=xTickName, $
+                             YTICKVALUES=yTickValues, $
+                             YTICKNAME=yTickName, $
+                             XTITLE=xTitle, $
+                             YTITLE=yTitle, $
+                             XGRIDSTYLE=xGridStyle, $
+                             YGRIDSTYLE=yGridStyle, $
+                             XTICKLEN=xTickLen, $
+                             YTICKLEN=yTickLen, $
+                             XSUBTICKLEN=xSubTickLen, $
+                             YSUBTICKLEN=ySubTickLen, $
+                             FONT_SIZE=font_size, $
+                             /CURRENT, $
+                             POSITION=p3pos)
 
         ;;Now add all the other symbols
         FOR k=2,nPoints-1,2 DO BEGIN
 
-           inds           = [k,((k+1) < (nPoints-1))]
-           tmpCurErr      = jvPlotData.curErr[inds]
-           tmpPotErr      = jvPlotData.potErr[inds]
+           inds     = [k,((k+1) < (nPoints-1))]
+           tmpXErr  = xErr[inds]
+           tmpYErr  = yErr[inds]
 
-           plot_3         = ERRORPLOT((jvPlotData.cur[inds]), $
-                                      pot[inds], $
-                                      tmpCurErr, $
-                                      tmpPotErr, $
-                                      ;; RGB_TABLE=hammerCT, $
-                                      LINESTYLE='', $
-                                      VERT_COLORS=hammerCT[*,CTInds[inds]], $
-                                      ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
-                                      ERRORBAR_CAPSIZE=errSym_capSize, $
-                                      SYMBOL=errSym, $
-                                      SYM_SIZE=errSym_size, $
-                                      SYM_FILLED=errSym_fill, $
-                                      /CURRENT, $
-                                      /OVERPLOT)
+           plot_3   = ERRORPLOT((xDat[inds]), $
+                                yDat[inds], $
+                                tmpXErr, $
+                                tmpYErr, $
+                                ;; RGB_TABLE=hammerCT, $
+                                LINESTYLE='', $
+                                VERT_COLORS=hammerCT[*,CTInds[inds]], $
+                                ERRORBAR_COLOR=hammerCT[*,CTInds[k]], $
+                                ERRORBAR_CAPSIZE=errSym_capSize, $
+                                ERRORBAR_THICK=errThick, $
+                                SYMBOL=errSym, $
+                                SYM_SIZE=errSym_size, $
+                                SYM_FILLED=errSym_fill, $
+                                /CURRENT, $
+                                /OVERPLOT)
         ENDFOR
 
      END
@@ -473,9 +547,20 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
      t_curPots         = THEORETISCH_CURVES(upCurrent_conductivities, $
                                             /UPGOING)
      
+     CASE 1 OF
+        KEYWORD_SET(pot_on_x_axis): BEGIN
+           xDat = t_curPots.pot
+           yDat = t_curPots.cur
+        END
+        ELSE: BEGIN
+           xDat = t_curPots.cur
+           yDat = t_curPots.pot
+        END
+     ENDCASE
+
      FOR k=0,nCurCond-1 DO BEGIN
-        plot_upCurCondArr = PLOT(t_curPots.cur[*,k], $
-                                 t_curPots.pot[*,k], $
+        plot_upCurCondArr = PLOT(xDat[*,k], $
+                                 yDat[*,k], $
                                  LINESTYLE=curCondLStyle, $
                                  /OVERPLOT)
      ENDFOR
@@ -500,9 +585,20 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
 
      t_curPots         = THEORETISCH_CURVES(downCurrent_conductivities, $
                                             /DOWNGOING)
+     CASE 1 OF
+        KEYWORD_SET(pot_on_x_axis): BEGIN
+           xDat = t_curPots.pot
+           yDat = t_curPots.cur
+        END
+        ELSE: BEGIN
+           xDat = t_curPots.cur
+           yDat = t_curPots.pot
+        END
+     ENDCASE
+
      FOR k=0,nCurCond-1 DO BEGIN
-        plot_upCurCondArr = PLOT(t_curPots.cur[*,k], $
-                                 t_curPots.pot[*,k], $
+        plot_upCurCondArr = PLOT(xDat[*,k], $
+                                 yDat[*,k], $
                                  LINESTYLE=curCondLStyle, $
                                  /OVERPLOT)
      ENDFOR
@@ -517,13 +613,14 @@ PRO PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
   IF tInds[-1] EQ nPoints THEN tInds[-1] -= 1
   tickValues  = jvPlotData.tMag[tInds]
   tickTimes   = jvPlotData.time[tInds]
-  tickName    = STRMID(TIME_TO_STR(tickTimes),11,15)
+  tickName    = STRMID(TIME_TO_STR(tickTimes,/MS),11,15)
   tMagRange   = [jvPlotData.tMag[0],jvPlotData.tMag[-1]]
   cb          = COLORBAR(RGB_TABLE=hammerCT, $
                          TICKNAME=tickName, $
                          TICKVALUES=tickValues, $
                          POSITION=cbpos, $
                          RANGE=tMagRange, $
+                         FONT_SIZE=timeFont_size, $
                          /NORMAL)
 
   IF KEYWORD_SET(savePlot) THEN BEGIN

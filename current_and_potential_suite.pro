@@ -307,6 +307,9 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      ERROR_ESTIMATES=error_estimates, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      MAP_TO_100KM=map_to_100km, $
+     JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+     JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+     JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
      OUT_MAGCURRENT=magCurrent, $
@@ -314,6 +317,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $
+     OUT_MRATIO=mRatio, $
      _EXTRA=cAP_struct
  
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
@@ -356,12 +360,10 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       MAXCUR=maxCur, $
                                       USEINDS=useInds, $
                                       PLOT_J_RATIOS=plot_j_ratios, $
-                                      JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
-                                      JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
-                                      JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
                                       MAP_TO_100KM=map_to_100km, $
                                       IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
+                                      MRATIO=mRatio, $
                                       _EXTRA=e
 
   savePlot = KEYWORD_SET(plots_in_buffer)
@@ -549,6 +551,23 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         SAVEPLOT=savePlot, $
         SPNAME=a_la_Elphic_spName, $
         UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
+        /POT_ON_X_AXIS, $
+        JUST_J_AND_V=just_j_and_v, $
+        ORIGINATING_ROUTINE=routName, $
+        PLOTDIR=plotDir, $
+        _EXTRA=e
+
+     tmpStrLen  = STRLEN(a_la_elphic_spname)
+     justJVName = STRMID(a_la_elphic_spname,0,tmpStrLen-4)+'-just_jv'+ $
+                  STRMID(a_la_elphic_spname,tmpStrLen-4,4)
+     upCurrent_conductivities = 1
+     PLOT_THREEPANEL_ANALOG_TO_FIG2_ELPHIC_ETAL_1998,jvPlotData, $
+        ORIGINAL_PLOTIDEE=orig_plotIdee, $
+        SAVEPLOT=savePlot, $
+        SPNAME=justJVName, $
+        UPCURRENT_CONDUCTIVITIES=upCurrent_conductivities, $
+        /POT_ON_X_AXIS, $
+        /JUST_J_AND_V, $
         ORIGINATING_ROUTINE=routName, $
         PLOTDIR=plotDir, $
         _EXTRA=e
@@ -950,7 +969,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
         END
      ENDCASE
 
-     STOP
+     ;; STOP
 
      ;; SAVE, $
      ;;    jvplotdata, $

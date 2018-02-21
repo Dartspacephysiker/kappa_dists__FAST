@@ -67,6 +67,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ERROR_ESTIMATES=error_estimates, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    MAP_TO_100KM=map_to_100km, $
+   JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
+   JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
+   JV_THEOR__INITIAL_SOURCE__EQUATOR=jv_theor__initial_source__equator, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
    OUT_MAGCURRENT=magCurrent, $
@@ -74,6 +77,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
    OUT_SOURCECONE=out_sourcecone, $
    OUT_LOSSCONE=out_losscone, $
+   OUT_MRATIO=mRatio, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -1037,6 +1041,20 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      magCurrent = DATA_CUT(magCurrent,itvlTime)
 
+     IF ~(KEYWORD_SET(jv_theor__initial_source__equator) OR KEYWORD_SET(jv_theor__initial_source__Polar) OR $
+          KEYWORD_SET(jv_theor__initial_source_R_E) OR KEYWORD_SET(to_km)) $
+     THEN jv_theor__initial_source__Polar = 1
+
+     
+     mRatio = GET_FA_MIRROR_RATIO__UTC(time_list[0], $
+                                       /TIME_ARRAY, $
+                                       ;; USE_FAST_AS_IONOS=~KEYWORD_SET(map_to_100km), $
+                                       TO_EQUATOR=jv_theor__initial_source__equator, $
+                                       TO_POLAR_SATELLITE=jv_theor__initial_source__Polar, $
+                                       TO_THIS_RE=jv_theor__initial_source_R_E, $
+                                       TO_THIS_KM=to_km)
+
+
      afterString = "Made "
 
      SAVE,t1,t2, $
@@ -1082,6 +1100,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           aRange_oPeakEn_list, $
           diff_eFlux_files, $
           magCurrent, $
+          mRatio, $
           FILENAME=outDir+masterFile
 
   ENDELSE
