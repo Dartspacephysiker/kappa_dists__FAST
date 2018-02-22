@@ -550,10 +550,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
-     PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct, $
-        /ALSO_PARAM_STRUCTS, $
-        KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
-        GFIT2DPARAM_STRUCT=gFit2DParam_struct
+     PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData;; , $
+        ;; /ALSO_PARAM_STRUCTS, $
+        ;; KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
+        ;; GFIT2DPARAM_STRUCT=gFit2DParam_struct
 
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
