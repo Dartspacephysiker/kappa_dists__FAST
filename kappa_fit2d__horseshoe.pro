@@ -137,6 +137,9 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
   ENDIF
 
+  ;; Added 2018/02/22 because it seems dumb to calculate the density as a moment of the best-fit distribution---Right?
+  fit2DParams[3] *= fit2D_dens_angleInfo.nAngle
+
   IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 
      fit2D_info = {chi2         : bestNorm   , $
@@ -152,7 +155,9 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                    covar        : covar      , $
                    pError       : pError     , $
                    nIter        : nIter      , $
-                   angleRange   : fit2D_dens_angleInfo.aRange}
+                   angleRange   : fit2D_dens_angleInfo.aRange, $
+                   angle_i      : fit2D_dens_angleInfo.angle_i, $
+                   nAngle       : fit2D_dens_angleInfo.nAngle}
 
   ENDIF
 
@@ -179,7 +184,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
            ;;                 UNITS=units, $
            ;;                 MASS=curDataStr.mass)
 
-           ;; Not necessary for getting the density (but is used in KAPPA_FIT2D__FIRE_EXTRAS
+           ;; Not necessary for getting the density (but is used in KAPPA_FIT2D__FIRE_EXTRAS)
            ;; 
            ;; tmpStr          = CONV_UNITS(fit2DStr,'counts')
            ;; tmpStr.ddata    = (tmpStr.data)^.5
@@ -197,10 +202,10 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
      fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                                 ;; ENERGY=eRange_fit, $
+                                 ENERGY=eRange_fit, $
                                  ANGLE=tmpDensSourceConeRange)
 
-     fit2DParams[3] = TEMPORARY(fit_scDens)
+     ;; fit2DParams[3] = TEMPORARY(fit_scDens)
 
   ENDIF
 

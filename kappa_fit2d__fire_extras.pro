@@ -53,7 +53,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
         fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
                         fit2DStr.energy, $
                         SHIFT(fit2DStr.theta,0,shiftTheta), $
-                        fit2DParams, $
+                        [fit2DParams[0],fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 

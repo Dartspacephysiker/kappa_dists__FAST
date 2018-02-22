@@ -91,7 +91,8 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
 
   ;; angle_i            = INDGEN(curDataStr.nBins)
 
-  fit2D_dens_angleInfo = {angle_i:TEMPORARY(aRange_i), $
+  fit2D_dens_angleInfo = {nAngle: N_ELEMENTS(aRange_i), $
+                          angle_i:TEMPORARY(aRange_i), $
                           aRange:TEMPORARY(aRange), $
                           ;; nAKeep:nAKeep, $
                           ;; remAngle_i:remAngle_i, $

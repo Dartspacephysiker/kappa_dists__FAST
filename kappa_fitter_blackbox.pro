@@ -376,29 +376,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDELSE
 
-  ;; PARSE_KAPPA_FIT_STRUCTS,kappaFit1Ds, $
-  ;;                         A=a, $
-  ;;                         STRUCT_A=Astruct, $
-  ;;                         TIME=time, $
-  ;;                         NAMES_A=A_names, $
-  ;;                         CHI2=chi2, $
-  ;;                         PVAL=pVal, $
-  ;;                         FITSTATUS=fitStatus, $
-  ;;                         USE_MPFIT1D=use_mpFit1D
-
-  ;; PARSE_KAPPA_FIT_STRUCTS,gaussFit1Ds, $
-  ;;                         A=AGauss, $
-  ;;                         STRUCT_A=AStructGauss, $
-  ;;                         TIME=time, $
-  ;;                         NAMES_A=AGauss_names, $
-  ;;                         CHI2=chi2Gauss, $
-  ;;                         PVAL=pValGauss, $
-  ;;                         FITSTATUS=gaussFit1DStatus, $
-  ;;                         USE_MPFIT1D=use_mpFit1D
-
-  ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'fitStatus',VALUE=kappaFit1DStatus
-  ;; STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFit1Ds,'fitStatus',VALUE=gaussFit1DStatus
-  ;; PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFit1DStatus,gaussFit1DStatus
   STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DKappa_inf_list,'status',VALUE=kappaFit2DStatus
   STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DGauss_inf_list,'status',VALUE=gaussFit2DStatus
   PRINT_KAPPA_LOOP_FIT_SUMMARY,kappaFit2DStatus,gaussFit2DStatus,/IS2D
@@ -485,6 +462,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDIF
 
+  lastFile = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/lastFile.sav'
+  PRINT,"Saving lastFile stuff: "
+  PRINT,"avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh"
+  SAVE,avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh, $
+       FILENAME=lastFile
+
   ;;Can we do 2D action?
   canDo2D = ~KEYWORD_SET(only_1D_fits) AND $
             N_ELEMENTS(fit2DKappa_inf_list) GT 0
@@ -567,6 +550,11 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
+     PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct, $
+        /ALSO_PARAM_STRUCTS, $
+        KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
+        GFIT2DPARAM_STRUCT=gFit2DParam_struct
+
      ;;Now shrink everyone
      IF ~( ARRAY_EQUAL(includeK_i,includeG_i)                          AND $
            (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(gaussFit1Ds)           ) AND $
