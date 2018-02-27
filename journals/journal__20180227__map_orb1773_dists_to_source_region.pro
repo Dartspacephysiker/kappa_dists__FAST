@@ -1,18 +1,33 @@
 ;2018/02/27
-PRO KILLER,curDataStr,killed,careInds
+PRO KILLER,curDataStr,killed,careInds, $
+           MINE=minE, $
+           MAXE=maxE
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+
+
   killed = WHERE(((curDataStr.theta GE 90.D) OR $
                   (curDataStr.theta LE -90.D)) $
-                 OR (curDataStr.energy LT 300.D) $
-                 OR (curDataStr.energy GT 3.1D4), $
+                 OR (curDataStr.energy LT (KEYWORD_SET(minE) ? minE : 0.)) $
+                 OR (curDataStr.energy GT (KEYWORD_SET(maxE) ? maxE : 3.1E4)), $
                  /NULL,  $
                  COMPLEMENT=careInds)
 
 END
 
- PRO JOURNAL__20180227__MAP_ORB1773_DISTS_TO_SOURCE_REGION,KILL=kill,FIX_ANGLE=fickAngle,MAP=map,RBFAST=RBFAST,SMOOTH_EN=smooth_en,SMWIN_EN=smWin_en,SMOOTH_AN=smooth_an,SMWIN_AN=smWin_an,MIN_CURVE_SURF=min_curve_surf
+PRO JOURNAL__20180227__MAP_ORB1773_DISTS_TO_SOURCE_REGION, $
+   KILL=kill, $
+   FIX_ANGLE=fickAngle, $
+   MAP=map, $
+   ONLY_MAPPED=only_mapped, $
+   RBFAST=RBFAST, $
+   POTABOVEFAST=potAboveFAST, $
+   SMOOTH_EN=smooth_en, $
+   SMWIN_EN=smWin_en, $
+   SMOOTH_AN=smooth_an, $
+   SMWIN_AN=smWin_an, $
+   MIN_CURVE_SURF=min_curve_surf
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -24,7 +39,7 @@ END
   IF N_ELEMENTS(kill      ) EQ 0 THEN kill       = 0 ;Kill stuff at |pitch angles| GT 90
   IF N_ELEMENTS(fickAngle ) EQ 0 THEN fickAngle  = 0 ;Average the angles so they're not all weird and rude
   IF N_ELEMENTS(map       ) EQ 0 THEN map        = 0
-  IF N_ELEMENTS(RBFAST    ) EQ 0 THEN RBFAST     = 3
+  IF N_ELEMENTS(RBFAST    ) EQ 0 THEN RBFAST     = 1
   IF N_ELEMENTS(smooth_en ) EQ 0 THEN smooth_en  = 1
   IF N_ELEMENTS(smWin_en  ) EQ 0 THEN smWin_en   = 5
   IF N_ELEMENTS(smooth_an ) EQ 0 THEN smooth_an  = 1
@@ -87,7 +102,9 @@ END
   ENDIF
 
   ;; Kill everyone with |pitch angle| gt 90°
-  KILLER,curDataStr,killed,careInds
+  KILLER,curDataStr,killed,careInds, $
+         MINE=potAboveFAST, $
+         MAXE=maxE
   IF kill THEN BEGIN
      curDataStr.data[killed] = 0.
   ENDIF
@@ -95,7 +112,30 @@ END
   ;; Now map
   IF map THEN BEGIN
      mapDataStr                 = curDataStr
-     mapDataStr.theta[careInds] = ASIN(SIN(curDataStr.theta[careInds]*!PI/180.)/SQRT(FLOAT(RBFAST)))*180./!PI
+
+     haveEdgery                 = KEYWORD_SET(potAboveFAST)
+     haveRB                     = KEYWORD_SET(RBFAST)
+
+     CASE 1 OF
+        haveEdgery AND haveRB: BEGIN
+
+           mapDataStr.energy[careInds] = mapDataStr.energy[careInds] - potAboveFAST
+
+           ;; canDo = WHERE(mapDataStr.energy GT potAboveFAST,/NULL,COMPLEMENT=cantDo)
+
+           mapDataStr.theta[careInds] = ASIN(SIN(curDataStr.theta[careInds]*!PI/180.) $
+                                             * SQRT( curDataStr.energy[careInds] / (curDataStr.energy[careInds]-potAboveFAST) / FLOAT(RBFAST)))*180./!PI
+
+        END
+        haveRB: BEGIN
+
+           mapDataStr.theta[careInds] = ASIN(SIN(curDataStr.theta[careInds]*!PI/180.)/SQRT(FLOAT(RBFAST)))*180./!PI
+
+        END
+     ENDCASE
+
+     minMaxMapAngle             = MAX(mapDataStr.theta[careInds])
+     
   ENDIF
 
   ;; Smooth_En?
@@ -147,21 +187,42 @@ END
      vPar      = speed * COS(mapDataStr.theta*!PI/180.)
      vPerp     = speed * SIN(mapDataStr.theta*!PI/180.)
 
-     outVPar   = [-1.*speed[1:-1,0],REVERSE(speed[1:-1,0])]
-     nNew      = N_ELEMENTS(outVPar)
+     posVPar_i = WHERE(vPar GT 0,/NULL)
+
+     ;;OLD WAY
+     ;;;;;;;;;;;;;;;;;;;
+     ;; outVPar   = [-1.*speed[1:-1,0],REVERSE(speed[1:-1,0])]
+     ;; nNewAngle = N_ELEMENTS(outVPar)
+     ;; nNewSpeed = N_ELEMENTS(outVPar)
               
-     outVPar   = outVPar # REPLICATE(1.,nNew)
-     outVPerp  = TRANSPOSE(outVPar)
+     ;; outVPar   = outVPar # REPLICATE(1.,nNew)
+     ;; outVPerp  = TRANSPOSE(outVPar)
               
+     ;;NEW WAY
+     ;;;;;;;;;;;;;;;;;;;
+     nNewAngleHalfm1 = 10
+     tmper     = FINDGEN(nNewAngleHalfm1-1)+1.
+     outAngles = [-1. * REVERSE(tmper),0.,tmper] $
+                 / (nNewAngleHalfm1-1.) $
+                 * minMaxMapAngle 
+     outSpeed  = REVERSE(speed[*,0])
+
+     nNewAngle = N_ELEMENTS(outAngles)
+     nNewSpeed = N_ELEMENTS(outSpeed)
+
+     outVPar   = outSpeed # COS(outAngles*!PI/180.)
+     outVPerp  = outSpeed # SIN(outAngles*!PI/180.)
+
      newE      = (outVPar^2. + outVPerp^2.)/2.*5.109989E5
      newThet   = ATAN(outVPerp,outVPar)*180./!PI
 
      ;; outVPerp = [-1.*speed[1:-1,0],REVERSE(speed[1:-1,0])]
      
+     zoData = MIN_CURVE_SURF(mapDataStr.data[posVPar_i],vPar[posVPar_i],vPerp[posVPar_i],XPOUT=outVPar,YPOUT=outVPerp)
 
-     ;; zeData = mapDataStr.data[careInds]
-     PRINT,"HERE"
-     zoData = MIN_CURVE_SURF(mapDataStr.data,vPar,vPerp,XPOUT=outVPar,YPOUT=outVPerp,/TPS)
+     ;;The min and max angles
+     zoData[*,-1] = 0.
+     zoData[*,0]  = 0.
 
      tmpTheta = REFORM(mapDataStr.theta[0,*])
      sortMe = SORT(tmpTheta)
@@ -170,16 +231,14 @@ END
      geomInds = VALUE_CLOSEST2(sortTheta,newThet,/CONSTRAINED)
      newGeom = sortGeom[TEMPORARY(geomInds)]
 
-     ;; IF KEYWORD_SET(only_map) THEN 
-
-     mapDataStr.NBins   = nNew
-     mapDataStr.NEnergy = nNew
+     mapDataStr.NBins   = nNewAngle
+     mapDataStr.NEnergy = nNewSpeed
      STR_ELEMENT,mapDataStr,'data',zoData,/ADD_REPLACE
      STR_ELEMENT,mapDataStr,'ddata',zoData*1.,/ADD_REPLACE
      STR_ELEMENT,mapDataStr,'energy',TEMPORARY(newE),/ADD_REPLACE
      STR_ELEMENT,mapDataStr,'theta',TEMPORARY(newThet),/ADD_REPLACE
      STR_ELEMENT,mapDataStr,'geom',TEMPORARY(newGeom),/ADD_REPLACE
-     STR_ELEMENT,mapDataStr,'eff',REPLICATE(1.,nNew),/ADD_REPLACE
+     STR_ELEMENT,mapDataStr,'eff',REPLICATE(1.,nNewSpeed),/ADD_REPLACE
      ;; STR_ELEMENT,mapDataStr,'geom',/DELETE
 
      ;; curDataStr = TEMPORARY(mapDataStr)
@@ -187,14 +246,23 @@ END
      ;; A re-killing is necessary sometimes
      IF kill THEN BEGIN
 
-        KILLER,mapDataStr,killed,careInds
+        KILLER,mapDataStr,killed,careInds, $
+               MINE=potAboveFAST, $
+               MAXE=maxE
         mapDataStr.data[killed] = 0.
         
      ENDIF
 
+     killed = WHERE((mapDataStr.theta GT minMaxMapAngle) OR (mapDataStr.theta LT (-1.)*minMaxMapAngle),/NULL)
+     mapDataStr.data[killed] = 0.
+
   ENDIF
 
-  IF map THEN BEGIN
+  IF KEYWORD_SET(only_mapped) THEN BEGIN
+
+     curDataStr = TEMPORARY(mapDataStr)
+
+  ENDIF ELSE IF map THEN BEGIN
      mapDataStr = {SDT : TEMPORARY(mapDataStr)}
 
      @common__kappa_fit2d_structs.pro
@@ -203,7 +271,7 @@ END
   ENDIF
 
   PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,mapDataStr,curDataStr, $
-     ONLY_DATA=~map, $ 
+     ONLY_DATA=(~map) OR KEYWORD_SET(only_mapped), $ 
      FOR_HORSESHOE_FIT=for_horseshoe_fit, $
      LIMITS=cont2DLims, $
      ;; ADD_FITPARAMS_TEXT=KF2D__Plot_opt.add_fitParams_text, $
