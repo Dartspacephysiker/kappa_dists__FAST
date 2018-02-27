@@ -3,13 +3,13 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
    FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    LIMITS=limits, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
-   FITSTRING=fitString
+   FITSTRING=fitString, $
+   SKIP_ORNAMENTATION=skip_ornamentation
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro
-
   
   IF N_ELEMENTS(fitString) EQ 0 THEN BEGIN
      is_kappa = 0
@@ -135,25 +135,28 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
 
         ENDIF
 
-        ;;    CONTOUR2D,curDataStr,/POLAR
-        junk        = MAX(fit2DStruct.SDT.data[*,fit2DStruct.extra_info.fitAngle_i],edgery_i)
-        peak_energy = (fit2DStruct.SDT.energy[edgery_i,fit2DStruct.extra_info.fitAngle_i])[0]
+        IF ~KEYWORD_SET(skip_ornamentation) THEN BEGIN
+           ;;    CONTOUR2D,curDataStr,/POLAR
+           junk        = MAX(fit2DStruct.SDT.data[*,fit2DStruct.extra_info.fitAngle_i],edgery_i)
+           peak_energy = (fit2DStruct.SDT.energy[edgery_i,fit2DStruct.extra_info.fitAngle_i])[0]
 
-        ;; This chunk does ALL angles
-        ;; plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
-        ;; plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
-        ;; plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
+           ;; This chunk does ALL angles
+           ;; plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__angle_i))
+           ;; plotme[0,*] = COS(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
+           ;; plotme[1,*] = SIN(K_EA__angles*!PI/180.)*ALOG10(peak_energy*K_EA__bFunc)
 
-        ;; This chunk does only angles that we fit
-        plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
-        plotme[0,*] = COS(K_EA__fitAngles*!PI/180.)* $
-                      ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
-        plotme[1,*] = SIN(K_EA__fitAngles*!PI/180.)* $
-                      ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
-        PLOTS,plotme,/DATA,PSYM=bFuncSym, $
-              SYMSIZE=symSize
+           ;; This chunk does only angles that we fit
+           plotme      = MAKE_ARRAY(2,N_ELEMENTS(K_EA__fitAngle_i))
+           plotme[0,*] = COS(K_EA__fitAngles*!PI/180.)* $
+                         ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
+           plotme[1,*] = SIN(K_EA__fitAngles*!PI/180.)* $
+                         ALOG10(peak_energy*K_EA__bFunc[K_EA__fitAngle_i])
+           PLOTS,plotme,/DATA,PSYM=bFuncSym, $
+                 SYMSIZE=symSize
 
-        ;;    STOP
+           ;;    STOP
+
+        ENDIF
 
         IF KEYWORD_SET(add_fitParams_text) THEN BEGIN
            
