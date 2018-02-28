@@ -185,7 +185,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-   OUT_SC_POT=out_sc_pot, $
+   SC_POT=sc_pot, $
    PLOTDIR=plotDir, $
    CAP_STRUCT=cAP_struct, $
    _EXTRA=e
@@ -313,7 +313,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
      OUT_MAGCURRENT=magCurrent, $
-     OUT_SC_POT=out_sc_pot, $
+     SC_POT=sc_pot, $
      OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $

@@ -103,6 +103,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    OUT_ERANGE_FIT=out_eRange_fit, $
    OUT_PARAMSTR=out_paramStr, $
    OUT_STRINGS=strings, $
+   OUT_SC_POT=sc_pot, $
    TXTOUTPUTDIR=txtOutputDir,$
    DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
    DEBUG__BREAK_ON_THIS_TIME=debug__break_on_this_time, $
@@ -194,6 +195,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      ADD_FITPARAMS_TEXT=add_fitParams_text, $
      ADD_ANGLE_LABEL=add_angle_label, $
      FIT2D__ADD_BOUNDARIES=fit2D__add_boundaries, $
+     OUT_SC_POT=sc_pot, $
      _REF_EXTRA=e
 
   IF KEYWORD_SET(just_diff_eFlux) THEN RETURN

@@ -1,7 +1,8 @@
 ;2018/02/22
 PRO PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData, $
    FIT2DINDS=fit2DInds, $
-   JVPLOTINDS=jvPlotInds;, $
+   JVPLOTINDS=jvPlotInds, $
+   SOK_IF_INDS_DONT_MATCH=sok;, $
    ;; ALSO_PARAM_STRUCTS=also_param_structs, $
    ;; KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
    ;; GFIT2DPARAM_STRUCT=gFit2DParam_struct
@@ -29,7 +30,7 @@ PRO PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlo
   nfit2DInds = N_ELEMENTS(fit2DInds)
   njvPlotInds = N_ELEMENTS(jvPlotInds)
   
-  IF nfit2DInds NE njvPlotInds THEN STOP
+  IF (nfit2DInds NE njvPlotInds) AND ~KEYWORD_SET(sok) THEN STOP
 
   PRINT,FORMAT='(A0,T5,A0,T30,A0,T40,A0,T50,A0,T60,A0,T70,A0,T80,A0,T90,A0,T100,A0,T110,A0)', $
         ;; 'i','Time','PotBove','T','kappa','n','TFracErr','NFracErr','JFracErr','potBar'

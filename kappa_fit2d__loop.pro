@@ -362,6 +362,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   xRange                                      = [MIN(energies[WHERE(energies GT 0)]),MAX(fit1Denergies)*1.05]
   yRange                                      = [yMin,MAX(data)]
 
+  SET_PLOT_DIR,plotDir,/FOR_SDT,/ADD_TODAY
+
   keepK_iTime          = !NULL ;Keep track of which fits get to come home with us
   keepG_iTime          = !NULL ;Keep track of which fits get to come home with us
   successesK           = 0
@@ -977,6 +979,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                         ;; PLOT_SAVENAME=plotSN, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
+                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/")',KF2D__strings.orbStr), $
                         POSTSCRIPT=~KEYWORD_SET(eps), $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER, $

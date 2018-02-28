@@ -307,6 +307,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
         OUT_FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
         OUT_SYNTH_SDT_STRUCTS=synthPackage, $
+        OUT_SC_POT=sc_pot, $
         ADD_FULL_FITS=add_full_fits, $
         OUT_ERANGE_FIT=out_eRange_fit, $
         OUT_PARAMSTR=out_paramStr, $
@@ -456,7 +457,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_CURPOTLIST=curPotList, $
         OUT_JVPLOTDATA=jvPlotData, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-        OUT_SC_POT=sc_pot, $
+        SC_POT=sc_pot, $
         EPS=eps, $
         CAP_STRUCT=cAP_struct
 
@@ -550,7 +551,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
-     PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData;; , $
+     PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData, $
+        /SOK_IF_INDS_DONT_MATCH
         ;; /ALSO_PARAM_STRUCTS, $
         ;; KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
         ;; GFIT2DPARAM_STRUCT=gFit2DParam_struct
@@ -785,16 +787,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              KAPPAFIT1DS=kappaFit1Ds, $
                              GAUSSFIT1DS=gaussFit1Ds, $
                              DIFF_EFLUX=diff_eFlux, $
-                             CURPOTLIST=curPotList, $
                              JVPLOTDATA=jvPlotData, $
                              ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
                              SC_POT=sc_pot, $
-                             CHI2_THRESHOLD=chi2_thresh, $
-                             CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
-                             HIGHDENSITY_THRESHOLD=highDens_thresh, $
-                             LOWDENSITY_THRESHOLD=lowDens_thresh, $
-                             DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
-                             N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                              CONVERT_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
                              SAVE_PS=kSum__save_ps, $
                              SAVE_PNG=kSum__save_png, $

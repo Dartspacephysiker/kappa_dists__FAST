@@ -17,6 +17,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    FIT_EACH_ANGLE=fit_each_angle, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+   OUT_SC_POT=sc_pot, $
    _REF_EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
