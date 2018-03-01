@@ -85,6 +85,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
    ADD_UPGOING_ION_POT=add_iu_pot, $
+   IU_POT_TIDS=iu_pot_tids, $
    T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
    ERROR_BAR_FACTOR=errorBarFac, $
    USEI__RELCHANGE=useInds__relChange, $
@@ -185,7 +186,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-   OUT_SC_POT=out_sc_pot, $
+   SC_POT=sc_pot, $
    PLOTDIR=plotDir, $
    CAP_STRUCT=cAP_struct, $
    _EXTRA=e
@@ -313,7 +314,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      SAVECURPOTFILE=saveCurPotFile, $
      OUT_CURPOTLIST=curPotList, $
      OUT_MAGCURRENT=magCurrent, $
-     OUT_SC_POT=out_sc_pot, $
+     SC_POT=sc_pot, $
      OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $
@@ -331,6 +332,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
+                                      IU_POT_TIDS=iu_pot_tids, $
                                       T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
                                       TEMPERATURE_TYPE_INDEX=tTypeInd, $
                                       ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $

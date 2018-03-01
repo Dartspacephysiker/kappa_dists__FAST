@@ -28,6 +28,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
+                                        IU_POT_TIDS=iu_pot_tids, $
                                         T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
                                         TEMPERATURE_TYPE_INDEX=TTypeInd, $
                                         ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
@@ -293,6 +294,30 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
            iuPot = blankArr
            iuPotErr = blankArr
            inds  = WHERE(curPotList[iuind].charE GT 62.5,nIUPot)
+
+           IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
+
+              nTRanges = N_ELEMENTS(iu_pot_tids[0,*])
+              useInds  = !NULL
+              FOR k=0,nTRanges-1 DO BEGIN
+
+                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_tids[0,k]) AND $
+                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
+
+                 IF nTmp GT 0 THEN BEGIN
+                    useInds = [useInds,tmpInds]
+                 ENDIF ELSE BEGIN
+                    PRINT,"Ingenting her!"
+                    STOP
+                 ENDELSE
+                 
+              ENDFOR
+
+              inds = CGSETINTERSECTION(inds,useInds,COUNT=nIUPot)
+              IF nIUPot EQ 0 THEN STOP
+
+           ENDIF
+
            IF nIUPot GT 0 THEN BEGIN
               iuPot[inds]    = curPotList[iuind].charE[inds]
               iuPotErr[inds] = curPotList[iuind].charEErr[inds]
@@ -316,6 +341,29 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
            iuPot = blankArr
            iuPotErr = blankArr
            inds  = WHERE(curPotList[iuind].peakE GT 62.5,nIUPot)
+
+           IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
+
+              nTRanges = N_ELEMENTS(iu_pot_tids[0,*])
+              useInds  = !NULL
+              FOR k=0,nTRanges-1 DO BEGIN
+
+                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_tids[0,k]) AND $
+                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
+
+                 IF nTmp GT 0 THEN BEGIN
+                    useInds = [useInds,tmpInds]
+                 ENDIF ELSE BEGIN
+                    PRINT,"Ingenting her!"
+                    STOP
+                 ENDELSE
+                 
+              ENDFOR
+
+              inds = CGSETINTERSECTION(inds,useInds,COUNT=nIUPot)
+              IF nIUPot EQ 0 THEN STOP
+
+           ENDIF
            IF nIUPot GT 0 THEN BEGIN
               iuPot[inds]    = curPotList[iuind].peakE[inds]
               iuPotErr[inds] = curPotList[iuind].peakErr[inds]

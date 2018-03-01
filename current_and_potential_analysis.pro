@@ -73,7 +73,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
    OUT_MAGCURRENT=magCurrent, $
-   OUT_SC_POT=out_sc_pot, $
+   SC_POT=sc_pot, $
    OUT_DIFF_EFLUX_FILES=diff_eFlux_files, $
    OUT_SOURCECONE=out_sourcecone, $
    OUT_LOSSCONE=out_losscone, $
@@ -156,6 +156,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;;Remember, !NULL means that the program will use the loss-cone angle range by default!
      ;; aRange__dens_e_down     = KEYWORD_SET(aRange__dens_e_down) ? aRange__dens_e_down : [0.,360.]
 
+     ;; Set defaults
      aRange__moments_e_down  = KEYWORD_SET(aRange__moments_e_down) ? aRange__moments_e_down : [0.,360.]
      aRange__moments_i_up    = KEYWORD_SET(aRange__moments_i_up  ) ? aRange__moments_i_up   : [0.,360.]
      aRange__moments_e_up    = KEYWORD_SET(aRange__moments_e_up  ) ? aRange__moments_e_up   : !NULL
@@ -196,7 +197,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
      min_peak_energyArr      = KEYWORD_SET(min_peak_energyArr) ? min_peak_energyArr : [4,4,4]
-     max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3e4,3e4,2.4e4]
+     max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3.1D4,3.1D4,2.4e4]
 
      ;;If doing upgoing electrons
      peak_energy__start_at_highEArr  = [0,1,1]
@@ -205,8 +206,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF
 
   GET_CURRENT_AND_POTENTIAL_FILENAMES, $
-     ARANGE__MOMENTS_E_DOWN=aRange__moments_e_down, $
-     ARANGE__MOMENTS_I_UP=aRange__moments_i_up, $
+     ARANGE__MOMENTS_E_DOWN=aRange__moments_list[0], $
+     ARANGE__MOMENTS_I_UP=aRange__moments_list[2], $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
@@ -282,6 +283,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
         sc_pot_list        = LIST()
+
+        IF SIZE(sc_pot,/TYPE) NE 8 THEN BEGIN
+           GET_SC_POTENTIAL,T1=t1,T2=t2, $
+                            DATA=sc_pot, $
+                            FROM_FA_POTENTIAL=pot__from_fa_potential, $
+                            ALL=pot__all, $
+                            /REPAIR, $
+                            CHASTON_STYLE=pot__Chaston_style, $
+                            FILENAME=pot__fName, $
+                            FROM_FILE=pot__from_file, $
+                            ORBIT=orbit, $
+                            SAVE_FILE=pot__save_file
+        ENDIF
      ENDIF
 
      diff_eFlux_files      = !NULL
@@ -337,19 +351,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;;Can we get pot?
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
-           ;; GET_SC_POTENTIAL,T1=diff_eFlux.time[0],T2=diff_eFlux.time[-1], $
-           GET_SC_POTENTIAL,T1=t1,T2=t2, $
-                            DATA=sc_pot, $
-                            FROM_FA_POTENTIAL=pot__from_fa_potential, $
-                            ALL=pot__all, $
-                            /REPAIR, $
-                            CHASTON_STYLE=pot__Chaston_style, $
-                            FILENAME=pot__fName, $
-                            FROM_FILE=pot__from_file, $
-                            ORBIT=orbit, $
-                            SAVE_FILE=pot__save_file
-           out_sc_pot = sc_pot
-           sc_pot_list.Add,sc_pot
+
+           tmpscinds = WHERE((sc_pot.x GE t1) AND (sc_pot.x LE t2))
+           IF tmpscinds[0] EQ -1 THEN STOP
+           tmpSc_pot = sc_pot
+           STR_ELEMENT,tmpSc_pot,'x',sc_pot.x[tmpscinds],/ADD_REPLACE
+           STR_ELEMENT,tmpSc_pot,'y',sc_pot.y[tmpscinds],/ADD_REPLACE
+
+           sc_pot_list.Add,tmpSc_pot
         ENDIF
 
         gotIt = 0B
@@ -384,7 +393,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
                           MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
-                          SC_POT=sc_pot, $
+                          SC_POT=tmpSc_pot, $
                           OUT_DIFF_EFLUX=diff_eflux, $
                           SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                           LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
@@ -400,7 +409,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
                                    EEB_OR_EES=eeb_or_ees, $
                                    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                                   SC_POT=sc_pot, $
+                                   SC_POT=tmpSc_pot, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $
                                    ANGLE=e_angle, $
@@ -440,7 +449,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            dEF_oneCount              = dEF_1c_list[eeb_k]
         ENDIF
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
-           sc_pot                    = sc_pot_list[eeb_k]
+           tmpSc_pot                 = sc_pot_list[eeb_k]
         ENDIF ELSE BEGIN
            
         ENDELSE
@@ -450,12 +459,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ;; energy                       = moment_energyArr[*,k]
         energy                       = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
                                                                           ENERGY=moment_energyArr[*,k], $
-                                                                          SC_POT=sc_pot, $
+                                                                          SC_POT=tmpSc_pot, $
                                                                           EEB_OR_EES=eeb_or_ees)
         IF KEYWORD_SET(e_above_peak_temp[k]) THEN BEGIN
            energyArr_forTemp         = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
                                                                           ENERGY=moment_energyArr[*,k], $
-                                                                          SC_POT=sc_pot, $
+                                                                          SC_POT=tmpSc_pot, $
                                                                           EEB_OR_EES=eeb_or_ees)
         ENDIF
 
@@ -845,6 +854,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(maxEInd)],Xorig[TEMPORARY(minEInd)]]
         ENDFOR
 
+        kill = WHERE(peak_energyArr LT -0.5,/NULL)
+        peak_energyarr[kill] = 0.
+        peak_dEArr[kill]     = 0.
         peak_ind_list.Add,TEMPORARY(peak_indArr)
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
         peak_dE_list.Add,TEMPORARY(peak_dEArr)
@@ -869,7 +881,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         ARANGE__CHARE=aRange__charE, $
                         ARANGE__TEMP=aRange__temp, $
                         ERANGE__TEMP=eRange__temp, $
-                        SC_POT=sc_pot, $
+                        SC_POT=tmpSc_pot, $
                         EEB_OR_EES=eeb_OR_ees, $
                         ERROR_ESTIMATES=error_estimates, $
                         ;; MAP_TO_100KM=map_to_100km, $ 
@@ -903,7 +915,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ARANGE__CHARE=aRange__charE, $
                            ARANGE__TEMP=aRange__temp, $
                            ERANGE__TEMP=eRange__temp, $
-                           SC_POT=sc_pot, $
+                           SC_POT=tmpSc_pot, $
                            EEB_OR_EES=eeb_or_ees, $
                            ERROR_ESTIMATES=error_estimates, $
                            ;; MAP_TO_100KM=map_to_100km, $ 
@@ -1001,7 +1013,6 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
      ENDFOR
-
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;The following loop ONLY exists so that times can be gotten for hacking at the mag current
