@@ -71,7 +71,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    OUT_CURPOTLIST=curPotList, $
    OUT_JVPLOTDATA=jvPlotData, $
    OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-   OUT_SC_POT=out_sc_pot, $
+   SC_POT=sc_pot, $
    EPS=eps, $
    CAP_STRUCT=cAP_struct, $
    _EXTRA=e
@@ -95,7 +95,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; map_to_100km            = KEYWORD_SET(map_to_100km) OR (N_ELEMENTS(map_to_100km) EQ 0)
   map_to_100km            = (N_ELEMENTS(map_to_100km) EQ 0) ? 1 : map_to_100km
 
-  add_oneCount_stats      = 1
+  add_oneCount_stats      = 0
 
   CASE 1 OF
      KEYWORD_SET(useInds__relChange): BEGIN
@@ -115,9 +115,9 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   plot_t1                 = STR_TO_TIME(plot_times[0])
   plot_t2                 = STR_TO_TIME(plot_times[1])
-  add_iu_pot              = (N_ELEMENTS(add_iu_pot    ) EQ 0) ? (N_ELEMENTS(cAP_struct) GT 0 ? TAG_EXIST(cAP_struct,'add_iu_pot') : 1) : add_iu_pot
-  use_ed_current          = (KEYWORD_SET(use_ed_current) OR (N_ELEMENTS(use_ed_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
-  use_iu_current          = (KEYWORD_SET(use_iu_current) OR (N_ELEMENTS(use_iu_current) EQ 0)) AND ~KEYWORD_SET(use_all_currents)
+  add_iu_pot              = (N_ELEMENTS(add_iu_pot    ) EQ 0) ? (N_ELEMENTS(cAP_struct) GT 0 ? (TAG_EXIST(cAP_struct,'add_iu_pot') ? cAP_struct.add_iu_pot : 0) : 1) : add_iu_pot
+  use_ed_current          = KEYWORD_SET(use_ed_current) OR ((N_ELEMENTS(use_ed_current) EQ 0) AND ~KEYWORD_SET(use_all_currents))
+  use_iu_current          = KEYWORD_SET(use_iu_current) OR ((N_ELEMENTS(use_iu_current) EQ 0) AND KEYWORD_SET(use_all_currents))
 
   interactive_overplot    = 0
   
@@ -421,7 +421,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      OUT_CURPOTLIST=curPotList, $
      OUT_JVPLOTDATA=jvPlotData, $
      OUT_AVGS_FOR_FITTING=avgs_JVfit, $
-     OUT_SC_POT=out_sc_pot, $
+     SC_POT=sc_pot, $
      EPS=eps, $
      CAP_STRUCT=cAP_struct, $
      _EXTRA=cAP_struct

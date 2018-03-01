@@ -20,6 +20,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ;; PLOT_SAVENAME=plotSN, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
+                    ADD_PLOTDIR_SUFF=add_plotDir_suff, $
                     OUT_WINDOWARR=windowArr, $
                     BUFFER=buffer, $
                     UNITS=units, $
@@ -409,7 +410,19 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
      ENDIF
 
      PRINT,'Saving plot to ' + plotSN + '...'
-     window.Save,plotDir+plotSN
+
+     tmpDir = plotDir
+     IF KEYWORD_SET(add_plotDir_suff) THEN BEGIN
+        
+        tmpDir += '/' + add_plotDir_suff
+        IF ~FILE_TEST(tmpDir,/DIRECTORY) THEN BEGIN
+           PRINT,"Making directory " + tmpDir
+           SPAWN,'mkdir -p ' + tmpDir
+        ENDIF
+     ENDIF
+
+
+     window.Save,tmpDir + plotSN
      window.Close
   ENDIF
 
