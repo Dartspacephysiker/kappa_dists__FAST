@@ -979,7 +979,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                         ;; PLOT_SAVENAME=plotSN, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
-                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/")',KF2D__strings.orbStr), $
+                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/")', $
+                                                KF2D__strings.orbStr, $
+                                                KF2D__SDTData_opt.spec_avg_intvl), $
                         POSTSCRIPT=~KEYWORD_SET(eps), $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER, $

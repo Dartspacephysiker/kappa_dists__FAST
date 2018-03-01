@@ -85,6 +85,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
    USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
    ADD_UPGOING_ION_POT=add_iu_pot, $
+   IU_POT_TIDS=iu_pot_tids, $
    T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
    ERROR_BAR_FACTOR=errorBarFac, $
    USEI__RELCHANGE=useInds__relChange, $
@@ -331,6 +332,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_CHAR_EN_FOR_DOWNPOT=use_charE_for_downPot, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
+                                      IU_POT_TIDS=iu_pot_tids, $
                                       T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
                                       TEMPERATURE_TYPE_INDEX=tTypeInd, $
                                       ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $

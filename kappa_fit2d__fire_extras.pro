@@ -213,7 +213,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
   IF KEYWORD_SET(print_2DFitInfo) AND hadSuccess THEN BEGIN
 
      tmpParams    = fit2D_info.fitParams
-     tmpParams[3] = fit2D_info.obsMoms.scDens
+     ;; tmpParams[3] = fit2D_info.obsMoms.scDens
 
      ;; PRINT,kfitparamstruct[*].value ;Diagnostic kind
 

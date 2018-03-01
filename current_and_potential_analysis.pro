@@ -197,7 +197,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      ;; min_peak_energy      = KEYWORD_SET(upgoing) ? 100 : 500
      ;; max_peak_energy      = KEYWORD_SET(upgoing) ? 3e4 : !NULL
      min_peak_energyArr      = KEYWORD_SET(min_peak_energyArr) ? min_peak_energyArr : [4,4,4]
-     max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3e4,3e4,2.4e4]
+     max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3.1D4,3.1D4,2.4e4]
 
      ;;If doing upgoing electrons
      peak_energy__start_at_highEArr  = [0,1,1]
@@ -854,6 +854,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(maxEInd)],Xorig[TEMPORARY(minEInd)]]
         ENDFOR
 
+        kill = WHERE(peak_energyArr LT -0.5,/NULL)
+        peak_energyarr[kill] = 0.
+        peak_dEArr[kill]     = 0.
         peak_ind_list.Add,TEMPORARY(peak_indArr)
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
         peak_dE_list.Add,TEMPORARY(peak_dEArr)

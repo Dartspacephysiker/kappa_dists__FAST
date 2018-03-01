@@ -723,6 +723,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PRINT,"Avg    kappa value: ",MEAN(fit2DK.fitParams[2,theseInds]) &         PRINT,"Median kappa value: ",MEDIAN(fit2DK.fitParams[2,theseInds])
      ENDIF
 
+     PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
+
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
