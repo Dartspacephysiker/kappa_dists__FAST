@@ -16,7 +16,8 @@ FUNCTION GET_INDS_FOR_PLOT_THEORIE,JVPlotData, $
                                    MIN_TDOWN=min_TDown, $
                                    MAX_NDOWN=max_NDown, $
                                    MIN_NDOWN=min_NDown, $
-                                   TRANGES=tRanges
+                                   TRANGES=tRanges, $
+                                   BATCH_MODE=batch_mode
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -61,7 +62,7 @@ FUNCTION GET_INDS_FOR_PLOT_THEORIE,JVPlotData, $
               useInds = [useInds,tmpInds]
            ENDIF ELSE BEGIN
               PRINT,"Ingenting her!"
-              STOP
+              IF ~KEYWORD_SET(batch_mode) THEN STOP
            ENDELSE
            
         ENDFOR

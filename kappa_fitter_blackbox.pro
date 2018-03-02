@@ -98,7 +98,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           CURANDPOT_ANALYSIS=curAndPot_analysis, $
                           CAP_STRUCT=cAP_struct, $
                           TIMEBARS=timeBars, $
-                          EPS=eps
+                          EPS=eps, $
+                          BATCH_MODE=batch_mode
   
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -204,7 +205,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         IF ~foundFitFile THEN BEGIN
            PRINT,"Couldn't get file!"
-           STOP
+           IF ~KEYWORD_SET(batch_mode) THEN STOP
         ENDIF
         
   ENDIF ELSE BEGIN
@@ -463,7 +464,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
         SC_POT=sc_pot, $
         EPS=eps, $
-        CAP_STRUCT=cAP_struct
+        CAP_STRUCT=cAP_struct, $
+        BATCH_MODE=batch_mode
 
   ENDIF
 
@@ -491,7 +493,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      junk1DTimeInds = CGSETINTERSECTION(g1DFitsTimeInd,k1DFitsTimeInd, $
                                         POSITIONS=g1DTInds)
 
-     IF ~ARRAY_EQUAL(k1DTInds,g1DTInds) THEN STOP
+     IF ~ARRAY_EQUAL(k1DTInds,g1DTInds) THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
      
      kappaFit1Ds = kappaFit1Ds[k1DTInds]
      gaussFit1Ds = gaussFit1Ds[g1DTInds]
@@ -567,9 +569,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
            (N_ELEMENTS(kappaFit1Ds)  EQ N_ELEMENTS(fit2DKappa_inf_list) ) AND $
            (N_ELEMENTS(includeK_i) EQ N_ELEMENTS(fit2DKappa_inf_list) ) ) THEN BEGIN
 
-        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(gaussFit1Ds) THEN STOP
-        IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN STOP
-        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(fit2DKappa_inf_list) THEN STOP
+        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(gaussFit1Ds) THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
+        IF N_ELEMENTS(fit2DKappa_inf_list) NE N_ELEMENTS(fit2DGauss_inf_list) THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
+        IF N_ELEMENTS(kappaFit1Ds) NE N_ELEMENTS(fit2DKappa_inf_list) THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
 
         include_i = CGSETINTERSECTION(includeK_i,includeG_i)
 
@@ -719,7 +721,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
         theseInds = WHERE(fit2DK.SDT.time GE STR_TO_TIME(tRanges[0]) AND $
                           fit2DK.SDT.time LE STR_TO_TIME(tRanges[1]),nHjar)
-        IF nHjar EQ 0 THEN STOP
+        IF nHjar EQ 0 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
         FOR k=0,nHjar-1 DO BEGIN & $
            PRINT,FORMAT='(A0,T30,F0.2)',TIME_TO_STR(fit2DK.SDT[theseInds[k]].time),fit2DK.fitParams[2,theseInds[k]] & $
         ENDFOR

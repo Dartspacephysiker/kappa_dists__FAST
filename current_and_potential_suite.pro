@@ -189,6 +189,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    SC_POT=sc_pot, $
    PLOTDIR=plotDir, $
    CAP_STRUCT=cAP_struct, $
+   BATCH_MODE=batch_mode, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -366,6 +367,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       IN_MAGCURRENT=magCurrent, $
                                       OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                       MRATIO=mRatio, $
+                                      BATCH_MODE=batch_mode, $
                                       _EXTRA=e
 
   savePlot = KEYWORD_SET(plots_in_buffer)

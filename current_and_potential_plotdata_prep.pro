@@ -65,6 +65,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         IN_MAGCURRENT=magCurrent, $
                                         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
                                         MRATIO=mRatio, $
+                                        BATCH_MODE=batch_mode, $
                                         _EXTRA=e
                                    
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -530,7 +531,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       MIN_TDOWN=min_TDown, $
                                       MAX_NDOWN=max_NDown, $
                                       MIN_NDOWN=min_NDown, $
-                                      TRANGES=tRanges)
+                                      TRANGES=tRanges, $
+                                      BATCH_MODE=batch_mode)
 
   negcur_i                    = WHERE(jvPlotData.cur LE 0)
   negcur_i                    = negcur_i[SORT(jvPlotData.pot[negcur_i])]

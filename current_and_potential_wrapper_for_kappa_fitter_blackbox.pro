@@ -74,6 +74,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    SC_POT=sc_pot, $
    EPS=eps, $
    CAP_STRUCT=cAP_struct, $
+   BATCH_MODE=batch_mode, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -424,6 +425,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      SC_POT=sc_pot, $
      EPS=eps, $
      CAP_STRUCT=cAP_struct, $
+     BATCH_MODE=batch_mode, $
      _EXTRA=cAP_struct
 
 END
