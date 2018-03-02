@@ -114,8 +114,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
      IF (nHere NE N_ELEMENTS(curPotList[1].time)) OR $
         (nHere NE N_ELEMENTS(curPotList[2].time))    $
      THEN BEGIN
-        PRINT,"Death!"
-        STOP
+        IF KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_iu_current) OR KEYWORD_SET(add_iu_pot) THEN BEGIN
+           PRINT,"Death!"
+           STOP
+        ENDIF
      ENDIF
 
      IF ((WHERE(ABS(curPotList[0].time-curPotList[1].time) GT 1.))[0] NE -1) OR $
