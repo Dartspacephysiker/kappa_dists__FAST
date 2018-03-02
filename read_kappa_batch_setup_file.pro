@@ -35,7 +35,6 @@ PRO READ_KAPPA_BATCH_SETUP_FILE,orbit,MLT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_av
   cont = 0
   junkLine = ''
   READF,lun,junkLine
-  READF,lun,junkLine
   tmpOrb = 0L
   WHILE ~cont DO BEGIN
      READF,lun,FORMAT='(I05,T7,F04.1,T12,F05.1,T19,I4,T25,A19,T46,A8,T56,G-8.5,T66,I-5,T73,G-6.3,T81,G-0.5)', $

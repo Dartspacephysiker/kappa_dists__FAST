@@ -37,6 +37,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
                           FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
                           FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
+                          FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
+                          FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
                           FIT2D__N_BELOW_PEAK=n_below_peak2D, $
                           FIT2D__N_ABOVE_PEAK=n_above_peak2D, $
                           FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
@@ -258,6 +260,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
         FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
         FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
+        FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
+        FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
         FIT2D__KEEP_WHOLEFIT=fit2D__keep_wholeFit, $
         FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
         FIT2D__NFLUX=fit2D__nFlux, $

@@ -127,6 +127,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       FIT1D__SHOW_AND_PROMPT=fit1D__show_and_prompt, $
                       FIT1D__USER_PROMPT_ON_FAIL=fit1D_fail__user_prompt, $
                       FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
+                      FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
+                      FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
                       FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                       FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                       FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -919,74 +921,102 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         hadSuccessK THEN BEGIN
 
         ;; 2018/02/16 Save thyself!
-        kappaFit1D=kappafit1ds[-1]
-        gaussFit1D=gaussFit1Ds[-1]
-        SAVE,KF2D__Curvefit_opt, $
-             kappaFit1D, $
-             gaussFit1D, $
-             kappaParamStruct, $
-             gaussParamStruct, $
-             oneCurve, $
-             iTime, $
-             xRange, $
-             yRange, $
-             KF2D__strings, $
-             eps, $
-             units1D, $
-             orig, $
-             Xorig, $
-             Yorig, $
-             worig, $
-             energy_inds, $
-             eRange_fit, $
-             peak_ind, $
-             A, $
-             AGauss, $
-             kappa_fixA, $
-             gauss_fixA, $
-             tmpfit1denergies, $
-             out_paramStr, $
-             curdatastr, $
-             avgfactorarr, $
-             FILENAME='/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180216--soscrewed.sav'
+        ;; kappaFit1D=kappafit1ds[-1]
+        ;; gaussFit1D=gaussFit1Ds[-1]
+        ;; SAVE,KF2D__Curvefit_opt, $
+        ;;      kappaFit1D, $
+        ;;      gaussFit1D, $
+        ;;      kappaParamStruct, $
+        ;;      gaussParamStruct, $
+        ;;      oneCurve, $
+        ;;      iTime, $
+        ;;      xRange, $
+        ;;      yRange, $
+        ;;      KF2D__strings, $
+        ;;      eps, $
+        ;;      units1D, $
+        ;;      orig, $
+        ;;      Xorig, $
+        ;;      Yorig, $
+        ;;      worig, $
+        ;;      energy_inds, $
+        ;;      eRange_fit, $
+        ;;      peak_ind, $
+        ;;      A, $
+        ;;      AGauss, $
+        ;;      kappa_fixA, $
+        ;;      gauss_fixA, $
+        ;;      tmpfit1denergies, $
+        ;;      out_paramStr, $
+        ;;      curdatastr, $
+        ;;      avgfactorarr, $
+        ;;      FILENAME='/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180216--soscrewed.sav'
 
-        PLOT_KAPPA_FITS,orig,kappaFit1Ds[-1], $
-                        KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
-                        gaussFit1Ds[-1] : $
-                        !NULL, $
-                        oneCurve, $
-                        CLAMPED_TEMPERATURE=KF2D__Curvefit_opt.fit1D__clampTemperature, $
-                        ;; TITLE=title, $
-                        BOUNDS_I=iTime, $
-                        XRANGE=xRange, $
-                        YRANGE=yRange, $
-                        XLOG=xLog, $
-                        YLOG=yLog, $
-                        STRINGS=KF2D__strings, $
-                        ADD_GAUSSIAN_ESTIMATE=KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate), $
-                        /ADD_FITPARAMS_TEXT, $
-                        ;; /ADD_ANGLE_LABEL, $
-                        ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
-                        ;; ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
-                        /ADD_CHI_VALUE, $
-                        ADD_WINTITLE=add_winTitle, $
-                        /SAVE_FITPLOTS, $
-                        /PLOT_FULL_FIT, $
-                        ;; SKIP_BAD_FITS=skip_bad_fits, $
-                        USING_SDT_DATA=using_SDT_data, $
-                        ;; VERTICAL_LINES=vertical_lines, $
-                        /VERTICAL_LINES, $
-                        ;; PLOT_SAVENAME=plotSN, $
-                        /USE_PSYM_FOR_DATA, $
-                        PLOTDIR=plotDir, $
-                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/")', $
-                                                KF2D__strings.orbStr, $
-                                                KF2D__SDTData_opt.spec_avg_intvl), $
-                        POSTSCRIPT=~KEYWORD_SET(eps), $
-                        ;; OUT_WINDOWARR=windowArr, $
-                        /BUFFER, $
-                        UNITS=units1D, $
-                        EPS=eps
+
+        ;; qualified = 1
+        IF KEYWORD_SET(fit1D__save_if_kappa_below) THEN BEGIN
+           qualKappaBelow = (fit2DKappa_inf_list[-1].fitParams[2] LE fit1D__save_if_kappa_below) OR $
+                            (kappaFit1Ds[-1].A[2]               LE fit1D__save_if_kappa_below)
+        ENDIF
+
+        IF KEYWORD_SET(fit1D__save_every_nth_plot) THEN BEGIN
+           qualKappaNth = ((bounds[i] MOD fit1D__save_every_nth_plot) EQ 0)
+        ENDIF
+
+        CASE 1 OF
+           KEYWORD_SET(fit1D__save_if_kappa_below) AND KEYWORD_SET(fit1D__save_every_nth_plot): BEGIN
+              qualified  = qualKappaBelow OR qualKappaNth
+           END
+           KEYWORD_SET(fit1D__save_if_kappa_below): BEGIN
+              qualified  = qualKappaBelow
+           END
+           KEYWORD_SET(fit1D__save_every_nth_plot): BEGIN
+              qualified  = qualKappaNth
+           END
+           ELSE: BEGIN
+              qualified  = 1
+           END
+        ENDCASE
+
+        IF qualified GT 0 THEN BEGIN
+           PLOT_KAPPA_FITS,orig,kappaFit1Ds[-1], $
+                           KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
+                           gaussFit1Ds[-1] : $
+                           !NULL, $
+                           oneCurve, $
+                           CLAMPED_TEMPERATURE=KF2D__Curvefit_opt.fit1D__clampTemperature, $
+                           ;; TITLE=title, $
+                           BOUNDS_I=iTime, $
+                           XRANGE=xRange, $
+                           YRANGE=yRange, $
+                           XLOG=xLog, $
+                           YLOG=yLog, $
+                           STRINGS=KF2D__strings, $
+                           ADD_GAUSSIAN_ESTIMATE=KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate), $
+                           /ADD_FITPARAMS_TEXT, $
+                           ;; /ADD_ANGLE_LABEL, $
+                           ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
+                           ;; ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
+                           /ADD_CHI_VALUE, $
+                           ADD_WINTITLE=add_winTitle, $
+                           /SAVE_FITPLOTS, $
+                           /PLOT_FULL_FIT, $
+                           ;; SKIP_BAD_FITS=skip_bad_fits, $
+                           USING_SDT_DATA=using_SDT_data, $
+                           ;; VERTICAL_LINES=vertical_lines, $
+                           /VERTICAL_LINES, $
+                           ;; PLOT_SAVENAME=plotSN, $
+                           /USE_PSYM_FOR_DATA, $
+                           PLOTDIR=plotDir, $
+                           ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/")', $
+                                                   KF2D__strings.orbStr, $
+                                                   KF2D__SDTData_opt.spec_avg_intvl), $
+                           POSTSCRIPT=~KEYWORD_SET(eps), $
+                           ;; OUT_WINDOWARR=windowArr, $
+                           /BUFFER, $
+                           UNITS=units1D, $
+                           EPS=eps
+        ENDIF
 
      ENDIF
 
