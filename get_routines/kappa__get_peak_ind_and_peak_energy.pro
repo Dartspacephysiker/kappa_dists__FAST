@@ -14,6 +14,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    TEST_NOREV=test_noRev, $
+   FOR_DMSP=for_DMSP, $
    ONECOUNT_STR=oneCurve
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -130,26 +131,30 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
         ENDELSE
      END
      ELSE: BEGIN
-           inds         = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0)
-           IF inds[0] EQ -1 AND ~KEYWORD_SET(its_OK__everyone_has_feelings) THEN BEGIN
-              PRINT,"Can't find any good energy inds! Maybe lower your energy requirement."
-              STOP
-           ENDIF
-           max_y        = MAX(Yorig[inds],peak_ind)
-           peak_ind     = inds[peak_ind]
-           peak_ind    -= b_offset
-           peak_energy  = Xorig[peak_ind]
+        inds         = WHERE((Xorig GE minE) AND (Xorig LE maxE) AND (Yorig-minFlux) GE 0)
+        IF inds[0] EQ -1 AND ~KEYWORD_SET(its_OK__everyone_has_feelings) THEN BEGIN
+           PRINT,"Can't find any good energy inds! Maybe lower your energy requirement."
+           STOP
+        ENDIF
+        max_y        = MAX(Yorig[inds],peak_ind)
+        peak_ind     = inds[peak_ind]
+        peak_ind    -= b_offset
+        peak_energy  = Xorig[peak_ind]
      END
   ENDCASE
 
-  ;; minEInd        = (peak_ind - n_below_peak) > 0
-  ;; maxEInd        = (peak_ind + n_above_peak) < nEnergies-1
+  IF KEYWORD_SET(for_DMSP) THEN BEGIN
 
-  ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
-  ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
-  ;;  for fitting—namely, n_below_peak and n_above_peak
-  maxEInd           = (peak_ind + n_below_peak) < (nEnergies-1)
-  minEInd           = (peak_ind - n_above_peak) > 0
+     minEInd        = (peak_ind - n_below_peak) > 0
+     maxEInd        = (peak_ind + n_above_peak) < nEnergies-1
+
+  ENDIF ELSE BEGIN
+     ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
+     ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
+     ;;  for fitting—namely, n_below_peak and n_above_peak
+     maxEInd           = (peak_ind + n_below_peak) < (nEnergies-1)
+     minEInd           = (peak_ind - n_above_peak) > 0
+  ENDELSE
 
   ;; IF KEYWORD_SET(KF2D__Curvefit_opt.dont_fit_below_thresh_value) THEN BEGIN
   
@@ -168,8 +173,13 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
   ENDIF ELSE BEGIN
      ;; min_energy =  Xorig[(minEInd - 2) > 0]
      ;; max_energy =  Xorig[(maxEInd + 2) < (nEnergies - 1)]
-     min_energy = !NULL
-     max_energy = !NULL
+     IF KEYWORD_SET(for_DMSP) THEN BEGIN
+        min_energy =  Xorig[minEInd > 0]
+        max_energy =  Xorig[maxEInd < (nEnergies - 1)]
+     ENDIF ELSE BEGIN
+        min_energy = !NULL
+        max_energy = !NULL
+     ENDELSE
   ENDELSE
 
   eRange_fit      = [min_energy,max_energy]

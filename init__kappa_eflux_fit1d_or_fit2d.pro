@@ -1,5 +1,7 @@
 ;;02/14/17
 PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
+   T1=t1, $
+   T2=t2, $
    KF__CURVEFIT_OPT=KF__curveFit_opt, $
    KF__SDTDATA_OPT=KF__SDTData_opt, $
    KF__PLOT_OPT=KF__Plot_opt, $
@@ -17,6 +19,8 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    FIT_EACH_ANGLE=fit_each_angle, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+   FOR_DMSP=for_DMSP, $
+   IN_DMSP=dmsp, $
    OUT_SC_POT=sc_pot, $
    _REF_EXTRA=e
 
@@ -137,13 +141,13 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_DensPickMeUpAll = 1
            END
-           
+
         ENDCASE
 
      END
      ELSE:
   ENDCASE
-  
+
   CASE SIZE(KF__SDTData_opt.fit2D_temp_aRange,/TYPE) OF
      7: BEGIN
 
@@ -154,13 +158,13 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_temp_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_TempPickMeUpAll = 1
            END
-           
+
         ENDCASE
 
      END
      ELSE:
   ENDCASE
-  
+
   CASE SIZE(KF__SDTData_opt.fit2D_faCond_aRange,/TYPE) OF
      7: BEGIN
 
@@ -171,172 +175,225 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_faCond_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_FaCondPickMeUpAll = 1
            END
-           
+
         ENDCASE
 
      END
      ELSE:
   ENDCASE
-  
-  GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
-                              ;; IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
-                              LOAD_DAT_FROM_FILE=KEYWORD_SET(load_diff_eFlux_file) ? diff_eFlux_file : !NULL, $
-                              LOAD_DIR=loadDir, $
-                              EEB_OR_EES=KF__SDTData_opt.eeb_or_ees, $
-                              DIFF_EFLUX=diff_eFlux, $
-                              UPGOING=upgoing, $
-                              SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
-                              SC_POT=sc_pot, $
-                              OUT_ORB=orb, $
-                              OUT_ANGLERANGE=e_angle, $
-                              OUT_NORTHSOUTH=north_south, $
-                              FIT_EACH_ANGLE=fit_each_angle, $
-                              CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
-                              MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
-                              ALLEXCLATM_ARANGE=allExclAtm_aRange, $
-                              ANGLESTR=angleStr, $
-                              ;; ESPECUNITS=KF__Curvefit_opt.units, $
-                              ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
-                              SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
-                              _EXTRA=e
 
-  flip = WHERE(e_angle GT 180,nFlip)
-  IF nFlip GT 0 THEN BEGIN
-     e_angle[flip] -= 360.
-  ENDIF
+  IF ~KEYWORD_SET(for_DMSP) THEN BEGIN
+     GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
+                                 ;; IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+                                 LOAD_DAT_FROM_FILE=KEYWORD_SET(load_diff_eFlux_file) ? diff_eFlux_file : !NULL, $
+                                 LOAD_DIR=loadDir, $
+                                 EEB_OR_EES=KF__SDTData_opt.eeb_or_ees, $
+                                 DIFF_EFLUX=diff_eFlux, $
+                                 UPGOING=upgoing, $
+                                 SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                                 SC_POT=sc_pot, $
+                                 OUT_ORB=orb, $
+                                 OUT_ANGLERANGE=e_angle, $
+                                 OUT_NORTHSOUTH=north_south, $
+                                 FIT_EACH_ANGLE=fit_each_angle, $
+                                 CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
+                                 MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
+                                 ALLEXCLATM_ARANGE=allExclAtm_aRange, $
+                                 ANGLESTR=angleStr, $
+                                 ;; ESPECUNITS=KF__Curvefit_opt.units, $
+                                 ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
+                                 SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
+                                 _EXTRA=e
 
-  ;;Handle other angles
-  IF KEYWORD_SET(pickMeUpLater) THEN BEGIN
-     STR_ELEMENT,KF__SDTData_opt,'electron_angleRange',e_angle,/ADD_REPLACE
-     electron_angleRange = e_angle
-  ENDIF ELSE BEGIN
-     flip = WHERE(KF__SDTData_opt.electron_angleRange GT 180,nFlip)
+     flip = WHERE(e_angle GT 180,nFlip)
      IF nFlip GT 0 THEN BEGIN
-        KF__SDTData_opt.electron_angleRange[flip] -= 360.
+        e_angle[flip] -= 360.
      ENDIF
+
+     ;;Handle other angles
+     IF KEYWORD_SET(pickMeUpLater) THEN BEGIN
+        STR_ELEMENT,KF__SDTData_opt,'electron_angleRange',e_angle,/ADD_REPLACE
+        electron_angleRange = e_angle
+     ENDIF ELSE BEGIN
+        flip = WHERE(KF__SDTData_opt.electron_angleRange GT 180,nFlip)
+        IF nFlip GT 0 THEN BEGIN
+           KF__SDTData_opt.electron_angleRange[flip] -= 360.
+        ENDIF
+     ENDELSE
+
+     CASE 1 OF
+        KEYWORD_SET(fit2D_DensPickMeUpToo): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
+           fit2D__density_angleRange = e_angle
+        END
+        KEYWORD_SET(fit2D_DensPickMeUpAll): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',allExclAtm_aRange,/ADD_REPLACE
+           fit2D__density_angleRange = allExclAtm_aRange
+        END
+        ELSE: BEGIN
+           flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
+           IF nFlip GT 0 THEN BEGIN
+              KF__SDTData_opt.fit2D_dens_aRange[flip] -= 360.
+           ENDIF
+        END
+
+     ENDCASE
+
+     CASE 1 OF
+        KEYWORD_SET(fit2D_TempPickMeUpToo): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',e_angle,/ADD_REPLACE
+           fit2D__temperature_angleRange = e_angle
+        END
+        KEYWORD_SET(fit2D_TempPickMeUpAll): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',allExclAtm_aRange,/ADD_REPLACE
+           fit2D__temperature_angleRange = allExclAtm_aRange
+        END
+        ELSE: BEGIN
+           flip = WHERE(KF__SDTData_opt.fit2D_temp_aRange GT 180,nFlip)
+           IF nFlip GT 0 THEN BEGIN
+              KF__SDTData_opt.fit2D_temp_aRange[flip] -= 360.
+           ENDIF
+        END
+
+     ENDCASE
+
+     CASE 1 OF
+        KEYWORD_SET(fit2D_FaCondPickMeUpToo): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',e_angle,/ADD_REPLACE
+           fit2D__faConductance_angleRange = e_angle
+        END
+        KEYWORD_SET(fit2D_FaCondPickMeUpAll): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',allExclAtm_aRange,/ADD_REPLACE
+           fit2D__faConductance_angleRange = allExclAtm_aRange
+        END
+        ELSE: BEGIN
+           flip = WHERE(KF__SDTData_opt.fit2D_faCond_aRange GT 180,nFlip)
+           IF nFlip GT 0 THEN BEGIN
+              KF__SDTData_opt.fit2D_faCond_aRange[flip] -= 360.
+           ENDIF
+        END
+
+     ENDCASE
+
+     orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
+     ;; ENDIF ELSE BEGIN
+     ;;    orbStr                            = '???'
+     ;; ENDELSE
+
+     IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
+        PRINT,"Couldn't get diff_eFlux! Quitting ..."
+        RETURN
+     ENDIF
+
+     nBounds                           = N_ELEMENTS(diff_eFlux.time)
+     CASE 1 OF
+        KEYWORD_SET(do_all_times): BEGIN
+           PRINT,"Doing all times ..."
+           bounds                      = LINDGEN(nBounds)
+        END
+        KEYWORD_SET(time_arr): BEGIN
+           dims = SIZE(time_arr,/DIMENSIONS)
+           CASE N_ELEMENTS(dims) OF
+              1: BEGIN
+              END
+              2: BEGIN
+                 IF dims[0] NE 2 THEN STOP
+                 bounds = !NULL
+                 FOR k=0,dims[1] DO BEGIN
+                    extr_i = !NULL
+                    inds   = VALUE_CLOSEST2(diff_eFlux.time,time_arr[*,k],EXTREME_I=extr_i)
+                    IF (extr_i[0] NE -1) OR $
+                       ( (WHERE((inds LT 0) OR (inds GE nBounds)))[0] NE -1) $
+                    THEN STOP
+                    bounds = [bounds,[inds[0]:inds[1]]]
+                 ENDFOR
+              END
+              ELSE: BEGIN
+                 STOP
+              ENDELSE
+           ENDCASE
+        END
+     ENDCASE
+
+     ;;Onecount curve?
+     IF KEYWORD_SET(KF__Plot_opt.add_oneCount_curve) THEN BEGIN
+        GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
+                                ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
+                                EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
+                                SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                                SC_POT=sc_pot, $
+                                IN_PROTOSTRUCT=diff_eFlux, $
+                                SDT_NAME=dEF_oneCount_name, $
+                                ANGLE=e_angle, $
+                                ;; ESPECUNITS=KF__Curvefit_opt.units, $
+                                ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
+                                /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
+                                OUT_ONEDAT=out_oneDat, $
+                                DEF_ONECOUNT=dEF_oneCount, $
+                                QUIET=quiet
+
+        IF KEYWORD_SET(old_mode) THEN BEGIN
+           GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
+        ENDIF
+     ENDIF
+
+     ;;Times and strings
+     KF__strings                        = INIT_KAPPA_STRING_STRUCT(diff_eFlux, $
+                                                                   orbStr, $
+                                                                   angleStr, $
+                                                                   KF__SDTData_opt)
+
+  ENDIF ELSE BEGIN
+
+     IF KEYWORD_SET(t1) AND KEYWORD_SET(t2) THEN BEGIN
+
+        tmpBounds = WHERE(dmsp.time GE t1 AND dmsp.time LE t2)
+
+        IF SIZE(dmsp.aacgm,/TYPE) EQ 8 THEN BEGIN
+           aacgmTmp = {alt: dmsp.aacgm.alt[tmpBounds], $
+                       mlt: dmsp.aacgm.mlt[tmpBounds], $
+                       lat: dmsp.aacgm.lat[tmpBounds]}
+        ENDIF ELSE BEGIN
+           aacgmTmp = 'N/A'
+        ENDELSE
+        dmspTmp = {time          : dmsp.time[tmpBounds]             , $ ; Unix seconds, Number of seconds since UT midnight 1970-01-01
+                   orbit         : dmsp.orbit[tmpBounds]            , $
+                   mlt           : dmsp.mlt[tmpBounds]              , $ ; hour, Magnetic local time
+                   alt           : dmsp.alt[tmpBounds]              , $ ; km, Geodetic altitude (height)
+                   aacgm         : TEMPORARY(aacgmTmp)              , $
+                   mag           : {lat : dmsp.mag.lat[tmpBounds]   , $ ; deg, Magnetic latitude
+                                    lon  : dmsp.mag.lon[tmpBounds]} , $ ; deg, Magnetic Longitude
+                   geo           : {lat : dmsp.geo.lat[tmpBounds]   , $ ; deg, Geodetic latitude of measurement
+                                    lon  : dmsp.geo.lon[tmpBounds]} , $ ; deg, Geographic longitude of measurement
+                   el_i_ener     : dmsp.el_i_ener[tmpBounds]        , $ ; enFlux, Integr elect energy flux (eV/cm2s*ster)
+                   el_i_flux     : dmsp.el_i_flux[tmpBounds]        , $ ; numFlux, Integrated elect num flux (1/cm2s*ster)
+                   el_d_ener     : dmsp.el_d_ener[tmpBounds,*]      , $ ; enFlux, Diff electron energy flux (1/cm2s*ster)
+                   el_d_flux     : dmsp.el_d_flux[tmpBounds,*]      , $ ; numFlux, Diff electron num flux (1/cm2eVs*ster)
+                   el_m_ener     : dmsp.el_m_ener[tmpBounds]        , $ ; eV, Mean electron energy
+                   ion_i_ener    : dmsp.ion_i_ener[tmpBounds]       , $ ; enFlux, Integr ion energy flux (eV/cm2s*ster)
+                   ion_i_flux    : dmsp.ion_i_flux[tmpBounds]       , $ ; numFlux, Integrated ion num flux (1/cm2s*ster)
+                   ion_d_ener    : dmsp.ion_d_ener[tmpBounds,*]     , $ ; enFlux, Diff ion energy flux (1/cm2s*ster)
+                   ion_d_flux    : dmsp.ion_d_flux[tmpBounds,*]     , $ ; numFlux, Diff ion num flux (1/cm2eVs*ster)
+                   ion_m_ener    : dmsp.ion_m_ener[tmpBounds]       , $ ; eV, Mean ion energy
+                   ch_energy     : dmsp.ch_energy[tmpBounds,*]      , $ ; eV, Channel spacing energy
+                   ch_ctrl_ener  : dmsp.ch_ctrl_ener[tmpBounds,*]   , $ ; eV, Channel central energy
+                   sat_id        : dmsp.sat_id[tmpBounds]}              ; sat_id:
+
+        dmsp = TEMPORARY(dmspTmp)
+
+     ENDIF
+
+     nBounds    = N_ELEMENTS(dmsp.time)
+     bounds     = LINDGEN(nBounds)
+     angleStr   = "DMSP"
+
+     orbStr     = STRCOMPRESS(dmsp.orbit[0],/REMOVE_ALL)
+     KF__strings = INIT_KAPPA_STRING_STRUCT(dmsp, $
+                                            orbStr, $
+                                            angleStr, $
+                                            KF__SDTData_opt)
+
+
   ENDELSE
-
-  CASE 1 OF
-     KEYWORD_SET(fit2D_DensPickMeUpToo): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',e_angle,/ADD_REPLACE
-        fit2D__density_angleRange = e_angle
-     END
-     KEYWORD_SET(fit2D_DensPickMeUpAll): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',allExclAtm_aRange,/ADD_REPLACE
-        fit2D__density_angleRange = allExclAtm_aRange
-     END
-     ELSE: BEGIN
-        flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
-        IF nFlip GT 0 THEN BEGIN
-           KF__SDTData_opt.fit2D_dens_aRange[flip] -= 360.
-        ENDIF
-     END
-
-  ENDCASE
-
-  CASE 1 OF
-     KEYWORD_SET(fit2D_TempPickMeUpToo): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',e_angle,/ADD_REPLACE
-        fit2D__temperature_angleRange = e_angle
-     END
-     KEYWORD_SET(fit2D_TempPickMeUpAll): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',allExclAtm_aRange,/ADD_REPLACE
-        fit2D__temperature_angleRange = allExclAtm_aRange
-     END
-     ELSE: BEGIN
-        flip = WHERE(KF__SDTData_opt.fit2D_temp_aRange GT 180,nFlip)
-        IF nFlip GT 0 THEN BEGIN
-           KF__SDTData_opt.fit2D_temp_aRange[flip] -= 360.
-        ENDIF
-     END
-
-  ENDCASE
-
-  CASE 1 OF
-     KEYWORD_SET(fit2D_FaCondPickMeUpToo): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',e_angle,/ADD_REPLACE
-        fit2D__faConductance_angleRange = e_angle
-     END
-     KEYWORD_SET(fit2D_FaCondPickMeUpAll): BEGIN
-        STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',allExclAtm_aRange,/ADD_REPLACE
-        fit2D__faConductance_angleRange = allExclAtm_aRange
-     END
-     ELSE: BEGIN
-        flip = WHERE(KF__SDTData_opt.fit2D_faCond_aRange GT 180,nFlip)
-        IF nFlip GT 0 THEN BEGIN
-           KF__SDTData_opt.fit2D_faCond_aRange[flip] -= 360.
-        ENDIF
-     END
-
-  ENDCASE
-
-  orbStr                            = STRCOMPRESS(orb,/REMOVE_ALL)
-  ;; ENDIF ELSE BEGIN
-  ;;    orbStr                            = '???'
-  ;; ENDELSE
-
-  IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
-     PRINT,"Couldn't get diff_eFlux! Quitting ..."
-     RETURN
-  ENDIF
-
-  nBounds                           = N_ELEMENTS(diff_eFlux.time)
-  CASE 1 OF
-     KEYWORD_SET(do_all_times): BEGIN
-        PRINT,"Doing all times ..."
-        bounds                      = INDGEN(nBounds)
-     END
-     KEYWORD_SET(time_arr): BEGIN
-        dims = SIZE(time_arr,/DIMENSIONS)
-        CASE N_ELEMENTS(dims) OF
-           1: BEGIN
-           END
-           2: BEGIN
-              IF dims[0] NE 2 THEN STOP
-              bounds = !NULL
-              FOR k=0,dims[1] DO BEGIN
-                 extr_i = !NULL
-                 inds   = VALUE_CLOSEST2(diff_eFlux.time,time_arr[*,k],EXTREME_I=extr_i)
-                 IF (extr_i[0] NE -1) OR $
-                    ( (WHERE((inds LT 0) OR (inds GE nBounds)))[0] NE -1) $
-                 THEN STOP
-                 bounds = [bounds,[inds[0]:inds[1]]]
-              ENDFOR
-           END
-           ELSE: BEGIN
-              STOP
-           ENDELSE
-        ENDCASE
-     END
-  ENDCASE
-
-  ;;Onecount curve?
-  IF KEYWORD_SET(KF__Plot_opt.add_oneCount_curve) THEN BEGIN
-     GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
-                             ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
-                             EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
-                             SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
-                             SC_POT=sc_pot, $
-                             IN_PROTOSTRUCT=diff_eFlux, $
-                             SDT_NAME=dEF_oneCount_name, $
-                             ANGLE=e_angle, $
-                             ;; ESPECUNITS=KF__Curvefit_opt.units, $
-                             ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-                             /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
-                             OUT_ONEDAT=out_oneDat, $
-                             DEF_ONECOUNT=dEF_oneCount, $
-                             QUIET=quiet
-
-     IF KEYWORD_SET(old_mode) THEN BEGIN
-        GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount
-     ENDIF
-  ENDIF
-
-  ;;Times and strings
-  KF__strings                        = INIT_KAPPA_STRING_STRUCT(diff_eFlux, $
-                                                                  orbStr, $
-                                                                  angleStr, $
-                                                                  KF__SDTData_opt)
-
 
 END

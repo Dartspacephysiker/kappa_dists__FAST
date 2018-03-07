@@ -25,11 +25,17 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     BUFFER=buffer, $
                     UNITS=units, $
                     POSTSCRIPT=postscript, $
+                    DMSP=DMSP, $
                     EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   skipping             = KEYWORD_SET(skip_bad_fits)
+
+  legPos               = [0.55,0.87]
+  IF KEYWORD_SET(DMSP) THEN BEGIN
+     legPos            = [0.45,0.52]
+  ENDIF
 
   IF N_ELEMENTS(units) EQ 0 THEN BEGIN
      units             = 'eFlux'
@@ -47,7 +53,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         pPref          = '-nFlux_fit'
         unitTitle      = "e!E-!N # flux"
         yTitle         = "Differential Number Flux (#/cm$^2$-s-sr-eV)"      
-        lowerBound     = 1.0D2
+        lowerBound     = KEYWORD_SET(DMSP) ? 1.0D1 : 1.0D2
         upperBound     = 1.0D8
      END
      'JE_OVER_E': BEGIN
@@ -278,7 +284,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ENDIF
 
   ;; legend               = LEGEND(TARGET=targArr[*],POSITION=[0.55,0.85],/NORMAL)
-  legend               = LEGEND(TARGET=targArr[*],POSITION=[0.55,0.87],/NORMAL)
+  legend               = LEGEND(TARGET=targArr[*],POSITION=legPos,/NORMAL)
 
   IF KEYWORD_SET(vertical_lines) THEN BEGIN
      minX              = MIN(kappaFit.x)*0.96

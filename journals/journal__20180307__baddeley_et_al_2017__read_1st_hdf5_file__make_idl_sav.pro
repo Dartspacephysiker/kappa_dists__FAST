@@ -1,6 +1,6 @@
 ;2018/03/07
 ;; Reads DMSP F16 satellite file obtained from http://cedar.openmadrigal.org/showExperiment/?experiment_list=100125279
-PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AACGM=also_AACGM
+PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_1ST_HDF5_FILE__MAKE_IDL_SAV,ALSO_AACGM=also_AACGM
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -9,14 +9,9 @@ PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AA
   file = 'dms_20071227_16e.001__Baddeley_et_al_2007.hdf5'
   outFile = 'dms_20071227_16e.001__Baddeley_et_al_2007.sav'
 
-  remake  = 1
+  orbit = 21626
 
-  IF KEYWORD_SET(also_AACGM) THEN BEGIN
-     aacgm__saveFileName = 'dmsp_f16_orb21626__aacgm.sav'
-
-     PRINT,'remember to run to run @/home/spencerh/idl/lib/aacgm/compile_aacgm.pro before going!'
-     WAIT,1
-  ENDIF
+  remake  = 0
 
   IF FILE_TEST(dir+outFile) AND ~KEYWORD_SET(remake) THEN BEGIN
 
@@ -24,6 +19,13 @@ PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AA
      RESTORE,dir+outFile
 
   ENDIF ELSE BEGIN
+
+     IF KEYWORD_SET(also_AACGM) THEN BEGIN
+        aacgm__saveFileName = 'dmsp_f16_orb21626__aacgm.sav'
+
+        PRINT,'remember to run to run @/home/spencerh/idl/lib/aacgm/compile_aacgm.pro before going!'
+        WAIT,1
+     ENDIF
 
      result = H5F_OPEN(dir+file)
 
@@ -233,8 +235,10 @@ PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AA
      nTime = N_ELEMENTS(timestamps)
      ch_energy = TRANSPOSE(ch_energy # MAKE_ARRAY(nTime,/FLOAT,VALUE=1.))
      dmsp = {time          : TEMPORARY(timestamps)   , $ ; Unix seconds, Number of seconds since UT midnight 1970-01-01
+             orbit         : REPLICATE(orbit,nTime)  , $
              mlt           : TEMPORARY(mlt)          , $ ; hour, Magnetic local time
              alt           : TEMPORARY(gdalt)        , $ ; km, Geodetic altitude (height)
+             aacgm         : 'N/A'                   , $
              mag           : {lat         : TEMPORARY(mlat), $   ; deg, Magnetic latitude
                               lon         : TEMPORARY(mlong)}, $ ; deg, Magnetic Longitude
              geo           : {lat         : TEMPORARY(gdlat), $   ; deg, Geodetic latitude of measurement
@@ -266,6 +270,12 @@ PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AA
                                                  OUTPUT__SAVEFILENAME=aacgm__saveFileName, $
                                                  OUTDIR=outDir, $
                                                  /RESTORE_LASTCONV)
+
+        ;; dmspTmp = CREATE_STRUCT('AACGM',aacgm,dmsp)
+        ;; dmsp = TEMPORARY(dmspTmp)
+
+        STR_ELEMENT,dmsp,'AACGM',AACGM,/ADD_REPLACE
+        SAVE,dmsp,FILENAME=dir+outFile
      ENDIF
 
   ENDELSE

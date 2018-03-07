@@ -126,17 +126,21 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
            END
         ENDCASE
      ENDIF ELSE BEGIN
-        thesens           = WHERE(Y GT 0.)
-        weights           = MAKE_ARRAY(N_ELEMENTS(Y),/FLOAT,VALUE=0.)
+        thesens           = WHERE(Yorig GT 0.,COMPLEMENT=bad,/NULL)
+        weights           = MAKE_ARRAY(N_ELEMENTS(Yorig),/FLOAT,VALUE=1.)
 
-        CASE weighting OF
-           1: BEGIN             ;linear
-              weights[thesens]  = 1./ABS(Y[thesens])
-           END
-           2: BEGIN
-              weights[thesens]  = 1./ABS(Y[thesens])^2
-           END
-        ENDCASE
+        ;; CASE weighting OF
+        ;;    1: BEGIN             ;linear
+        ;;       weights[thesens]  = 1./ABS(Y[thesens])
+        ;;    END
+        ;;    2: BEGIN
+        ;;       weights[thesens]  = 1./ABS(Y[thesens])^2
+        ;;    END
+        ;; ENDCASE
+
+        weights[bad]      = 0.
+
+        weights           = weights[energy_inds[0]:energy_inds[1]]
 
      ENDELSE
 
