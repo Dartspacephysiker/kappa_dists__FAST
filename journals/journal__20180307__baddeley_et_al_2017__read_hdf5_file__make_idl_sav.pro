@@ -1,6 +1,6 @@
-;2018/12/08
+;2018/03/07
 ;; Reads DMSP F16 satellite file obtained from http://cedar.openmadrigal.org/showExperiment/?experiment_list=100125279
-PRO JOURNAL__20180306__BADDELEY_ET_AL_2017__KAPPA_ME
+PRO JOURNAL__20180307__BADDELEY_ET_AL_2017__READ_HDF5_FILE__MAKE_IDL_SAV,ALSO_AACGM=also_AACGM
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -9,7 +9,16 @@ PRO JOURNAL__20180306__BADDELEY_ET_AL_2017__KAPPA_ME
   file = 'dms_20071227_16e.001__Baddeley_et_al_2007.hdf5'
   outFile = 'dms_20071227_16e.001__Baddeley_et_al_2007.sav'
 
-  IF FILE_TEST(dir+outFile) THEN BEGIN
+  remake  = 1
+
+  IF KEYWORD_SET(also_AACGM) THEN BEGIN
+     aacgm__saveFileName = 'dmsp_f16_orb21626__aacgm.sav'
+
+     PRINT,'remember to run to run @/home/spencerh/idl/lib/aacgm/compile_aacgm.pro before going!'
+     WAIT,1
+  ENDIF
+
+  IF FILE_TEST(dir+outFile) AND ~KEYWORD_SET(remake) THEN BEGIN
 
      PRINT,"Restoring " + outFile + ' ...'
      RESTORE,dir+outFile
@@ -222,7 +231,7 @@ PRO JOURNAL__20180306__BADDELEY_ET_AL_2017__KAPPA_ME
      ;; ion_d_flux = (result['ion_d_flux'])['value']
 
      nTime = N_ELEMENTS(timestamps)
-     ch_energy = ch_energy # MAKE_ARRAY(nTime,/FLOAT,VALUE=1.)
+     ch_energy = TRANSPOSE(ch_energy # MAKE_ARRAY(nTime,/FLOAT,VALUE=1.))
      dmsp = {time          : TEMPORARY(timestamps)   , $ ; Unix seconds, Number of seconds since UT midnight 1970-01-01
              mlt           : TEMPORARY(mlt)          , $ ; hour, Magnetic local time
              alt           : TEMPORARY(gdalt)        , $ ; km, Geodetic altitude (height)
@@ -247,73 +256,21 @@ PRO JOURNAL__20180306__BADDELEY_ET_AL_2017__KAPPA_ME
      PRINT,"Saving DMSP struct to " + outFile + ' ...'
      SAVE,dmsp,FILENAME=dir+outFile
 
+     IF KEYWORD_SET(also_AACGM) THEN BEGIN
+
+        geoStruct = {lat: dmsp.geo.lat, lon: dmsp.geo.lon, alt: dmsp.alt}
+
+        outDir = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
+
+        AACGM = CONVERT_GEO_TO_AACGM__SINGLE_SET(dmsp.time,geoStruct, $
+                                                 OUTPUT__SAVEFILENAME=aacgm__saveFileName, $
+                                                 OUTDIR=outDir, $
+                                                 /RESTORE_LASTCONV)
+     ENDIF
+
   ENDELSE
-  @/SPENCEdata/software/spedas/idl/general/tplot/tplot_com
-
-  STORE_DATA,'ALT',DATA={x: dmsp.time, y: dmsp.alt}
-  STORE_DATA,'MLT',DATA={x: dmsp.time, y: dmsp.mlt}
-  STORE_DATA,'MLAT',DATA={x: dmsp.time, y: dmsp.mag.lat}
-
-  data = {x: dmsp.time, y: TRANSPOSE(dmsp.el_d_flux), v: TRANSPOSE(dmsp.ch_energy)}
-  ;; data.y = ALOG10(data.y)
-
-  var_name = 'el_d_flux'
-  STORE_DATA,var_name,DATA=data
-
-  OPTIONS,var_name,'spec',1	
-  ;; zlim,var_name, $
-  ;;      (MIN(data.y[WHERE(FINITE(data.y))]) > 1 ), $
-  ;;      (MAX(data.y[WHERE(FINITE(data.y))]) < 8),0
-  zlim,var_name, $
-       (MIN(data.y[WHERE(FINITE(data.y))]) > 1e2 ), $
-       (MAX(data.y[WHERE(FINITE(data.y))]) < 1e7),1
-  ylim,var_name,30,30000,1
-  OPTIONS,var_name,'ytitle','Electron!C!CEnergy (eV)'
-  OPTIONS,var_name,'ztitle','Log #!C!C/cm!U2!N-s-sr-eV'
-  OPTIONS,var_name,'x_no_interp',1
-  OPTIONS,var_name,'y_no_interp',1
-  OPTIONS,var_name,'panel_size',2
-  IF (N_ELEMENTS(tPlt_vars) eq 0) THEN tPlt_vars=[var_name] else tPlt_vars=[tPlt_vars,var_name]
-
-
-  ;; Energy flux
-
-  data = {x: dmsp.time, y: TRANSPOSE(dmsp.el_d_ener), v: TRANSPOSE(dmsp.ch_energy)}
-  ;; data.y = ALOG10(data.y)
-
-  var_name = 'el_d_ener'
-  STORE_DATA,var_name,DATA=data
-
-  OPTIONS,var_name,'spec',1	
-  ;; zlim,var_name, $
-  ;;      (MIN(data.y[WHERE(FINITE(data.y))]) > 1 ), $
-  ;;      (MAX(data.y[WHERE(FINITE(data.y))]) < 8),0
-  zlim,var_name, $
-       (MIN(data.y[WHERE(FINITE(data.y))]) > 1e5 ), $
-       (MAX(data.y[WHERE(FINITE(data.y))]) < 1e9),1
-  ylim,var_name,30,30000,1
-  OPTIONS,var_name,'ytitle','Electron!C!CEnergy (eV)'
-  OPTIONS,var_name,'ztitle','Log eV!C!C/cm!U2!N-s-sr-eV'
-  OPTIONS,var_name,'x_no_interp',1
-  OPTIONS,var_name,'y_no_interp',1
-  OPTIONS,var_name,'panel_size',2
-
-  t1 = S2T('1997-02-01/09:19:00')
-  t2 = S2T('1997-02-01/09:32:00')
-
-  ;; STOP
-
-  IF (N_ELEMENTS(tPlt_vars) eq 0) THEN tPlt_vars=[var_name] else tPlt_vars=[tPlt_vars,var_name]
-
-  wInd = 0
-  WINDOW,wInd,XSIZE=1200,YSIZE=700
-  ;; tplot_OPTIONS,'region',[0.,0.5,1.0,1.0]
-  loadct2,43
-  tplot,tPlt_vars,var=['ALT','MLAT','MLT'], $
-        WINDOW=wInd, $
-        TRANGE=[t1,t2]
-
   STOP
 
 END
+
 
