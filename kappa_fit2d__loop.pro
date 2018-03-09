@@ -466,6 +466,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                        y:REFORM(oneCount_eSpec.y[iTime,*]), $
                                        NAME:"One Count"}
               ENDIF
+
+              skipMe = N_ELEMENTS(Xorig) EQ N_ELEMENTS(WHERE(~FINITE(Xorig)))
            END
            ELSE: BEGIN
 
@@ -485,6 +487,15 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
            END
         ENDCASE
+
+        IF KEYWORD_SET(skipMe) THEN BEGIN
+           PRINT,"All NaNs!"
+           gotEm = 0
+           gotKappa = 0
+           gotGauss = 0
+           WAIT,1
+           CONTINUE
+        ENDIF
 
         KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
            Xorig,Yorig, $

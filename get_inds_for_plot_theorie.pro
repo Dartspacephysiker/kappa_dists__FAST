@@ -61,7 +61,7 @@ FUNCTION GET_INDS_FOR_PLOT_THEORIE,JVPlotData, $
            IF nTmp GT 0 THEN BEGIN
               useInds = [useInds,tmpInds]
            ENDIF ELSE BEGIN
-              PRINT,"Ingenting her!"
+              PRINT,"useInds__twoLumps : Ingenting her!"
               IF ~KEYWORD_SET(batch_mode) THEN STOP
            ENDELSE
            
@@ -73,13 +73,18 @@ FUNCTION GET_INDS_FOR_PLOT_THEORIE,JVPlotData, $
      ELSE: useInds = !NULL
   ENDCASE
 
-  IF N_ELEMENTS(outSideInds) GT 0 THEN BEGIN
+  IF (N_ELEMENTS(outSideInds) GT 0) THEN BEGIN
 
-     useInds = CGSETINTERSECTION(useInds,outSideInds,COUNT=nUsers)
+     IF N_ELEMENTS(useInds) GT 0 THEN BEGIN
+        useInds = CGSETINTERSECTION(useInds,outSideInds,COUNT=nUsers)
 
-     IF nUsers LE 1 THEN STOP
+        IF nUsers LE 1 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
+     ENDIF ELSE BEGIN
+        useInds = TEMPORARY(outSideInds)
+     ENDELSE
 
-  ENDIF
+  ENDIF ELSE IF N_ELEMENTS(useInds) EQ 0 THEN useInds = -1
+     
 
   IF KEYWORD_SET(max_TDown) THEN BEGIN
      useInds = CGSETINTERSECTION(useInds, $

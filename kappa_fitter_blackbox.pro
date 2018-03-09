@@ -558,7 +558,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                                              /DONT_SHRINK_PARSED_STRUCT) 
      
      PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData, $
-        /SOK_IF_INDS_DONT_MATCH
+        /SOK_IF_INDS_DONT_MATCH, $
+        BATCH_MODE=batch_mode
         ;; /ALSO_PARAM_STRUCTS, $
         ;; KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
         ;; GFIT2DPARAM_STRUCT=gFit2DParam_struct
@@ -722,14 +723,15 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         theseInds = WHERE(fit2DK.SDT.time GE STR_TO_TIME(tRanges[0]) AND $
                           fit2DK.SDT.time LE STR_TO_TIME(tRanges[1]),nHjar)
         IF nHjar EQ 0 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
-        FOR k=0,nHjar-1 DO BEGIN & $
-           PRINT,FORMAT='(A0,T30,F0.2)',TIME_TO_STR(fit2DK.SDT[theseInds[k]].time),fit2DK.fitParams[2,theseInds[k]] & $
+        FOR k=0,nHjar-1 DO BEGIN
+           PRINT,FORMAT='(A0,T30,F0.2)',TIME_TO_STR(fit2DK.SDT[theseInds[k]].time),fit2DK.fitParams[2,theseInds[k]]
         ENDFOR
         PRINT,''
-        PRINT,"Avg    kappa value: ",MEAN(fit2DK.fitParams[2,theseInds]) &         PRINT,"Median kappa value: ",MEDIAN(fit2DK.fitParams[2,theseInds])
+        PRINT,"Avg    kappa value: ",nHjar GT 1 ? MEAN(fit2DK.fitParams[2,theseInds]) : fit2DK.fitParams[2,theseInds]
+        PRINT,"Median kappa value: ",nHjar GT 1 ? MEDIAN(fit2DK.fitParams[2,theseInds]) : fit2DK.fitParams[2,theseInds]
      ENDIF
 
-     PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
+     IF ~KEYWORD_SET(batch_mode) THEN PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
 
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 

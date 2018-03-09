@@ -121,7 +121,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
         ENDIF
      ENDIF
 
-     IF ((WHERE(ABS(curPotList[0].time-curPotList[1].time) GT 1.))[0] NE -1) OR $
+     IF KEYWORD_SET(use_eu_current) OR KEYWORD_SET(use_iu_current) OR KEYWORD_SET(add_iu_pot) THEN $
+        IF ((WHERE(ABS(curPotList[0].time-curPotList[1].time) GT 1.))[0] NE -1) OR $
         ((WHERE(ABS(curPotList[0].time-curPotList[2].time) GT 1.))[0] NE -1)    $
      THEN BEGIN
         PRINT,"Whoa!"
@@ -133,7 +134,6 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   time        = curPotList[edind].time
   tDiff       = (time-time[0])
   tMag        = tDiff/tDiff[-1]
-
 
   ;;Current for plotting
   IF ~(KEYWORD_SET(use_all_currents) OR KEYWORD_SET(use_ed_current) OR $
@@ -310,8 +310,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                  IF nTmp GT 0 THEN BEGIN
                     useInds = [useInds,tmpInds]
                  ENDIF ELSE BEGIN
-                    PRINT,"Ingenting her!"
-                    STOP
+                    PRINT,"IUPot charE tids: Ingenting her!"
+                    IF ~KEYWORD_SET(batch_mode) THEN STOP
                  ENDELSE
                  
               ENDFOR
@@ -357,8 +357,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                  IF nTmp GT 0 THEN BEGIN
                     useInds = [useInds,tmpInds]
                  ENDIF ELSE BEGIN
-                    PRINT,"Ingenting her!"
-                    STOP
+                    PRINT,"IUPot peakE tids: ingenting her!"
+                    IF ~KEYWORD_SET(batch_mode) THEN STOP
                  ENDELSE
                  
               ENDFOR
@@ -437,10 +437,10 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   time_i                = WHERE(curPotList[edind].time GE t1 AND $
                                 curPotList[edind].time LE t2,nTime)
-  IF nTime LT 3 THEN STOP
+  IF nTime LT 3 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
   safe_i                = CGSETINTERSECTION(safe_i,time_i,COUNT=nSafe,NORESULT=-1)
   
-  IF nSafe LT 3 THEN STOP
+  IF nSafe LT 3 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
 
   momsForT = !NULL
   STR_ELEMENT,curPotList[edind],'momsForT',VALUE=momsForT
@@ -566,7 +566,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   avgs_JVfit  = {useInds : useInds}
 
   useInds     = useInds[SORT(jvPlotData.pot[useInds])]
-  
+  IF N_ELEMENTS(useInds) EQ 1 THEN useInds = useInds[0]
   fmtStr      = '(A0," (min, max,stdDev) ",T35,": ",F0.2," (",F0.2,", ",F0.2,", ",F0.2,")")'
 
   quantL      = LIST(jvPlotData.Tdown[useInds],jvPlotData.Ndown[useInds])
