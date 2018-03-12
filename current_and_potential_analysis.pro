@@ -231,6 +231,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF ELSE BEGIN
 
      nDEFLoop              = N_ELEMENTS(eeb_or_eesArr)
+     blacklist_list        = MAKE_ARRAY(nCalcLoop,/LONG,VALUE=0)
+
      dEF_list              = LIST()
      dEF_1c_list           = LIST()
      north_southArr_list   = LIST()
@@ -445,6 +447,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         eeb_k = label__which_eeb[k]
 
         diff_eFlux                   = dEF_list[eeb_k]
+
+        IF SIZE(diff_eFlux,/TYPE) NE 8 THEN BEGIN
+           PRINT,"Sorry, can't do this'n."
+           blacklist_list[k] = 1
+           CONTINUE
+        ENDIF
+
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            dEF_oneCount              = dEF_1c_list[eeb_k]
         ENDIF
@@ -1024,18 +1033,18 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpT1         = tmpT[0,segIter]
         tmpT2         = tmpT[1,segIter]
 
-        theseInds     = WHERE( ( time_list[k] GE tmpT1 ) AND $
-                               ( time_list[k] LE tmpT2 ), $
+        theseInds     = WHERE( ( time_list[0] GE tmpT1 ) AND $
+                               ( time_list[0] LE tmpT2 ), $
                                nThese)
 
         IF nThese EQ 0 THEN STOP
 
-        theseInds     = CGSETINTERSECTION(theseInds,UNIQ((time_list[k]),SORT((time_list[k]))),COUNT=nThese)
-        CHECK_SORTED,(time_list[k])[theseInds],is_sorted,/QUIET
+        theseInds     = CGSETINTERSECTION(theseInds,UNIQ((time_list[0]),SORT((time_list[0]))),COUNT=nThese)
+        CHECK_SORTED,(time_list[0])[theseInds],is_sorted,/QUIET
         IF ~is_sorted THEN STOP
         IF nThese EQ 0 THEN STOP
 
-        itvlTime      = [itvlTime,(time_list[k])[theseInds]]
+        itvlTime      = [itvlTime,(time_list[0])[theseInds]]
 
      ENDFOR
 
@@ -1048,6 +1057,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                            INFERRED_E_NUMFLUX=inferred_e_numFlux, $
                                            SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
                                            /STRANGEWAY_DECIMATE, $
+                                           /EXIT_ON_PROBLEMS, $
                                            QUIET=quiet)
 
      magCurrent = DATA_CUT(magCurrent,itvlTime)
@@ -1069,6 +1079,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      afterString = "Made "
 
      SAVE,t1,t2, $
+          blacklist_list, $
           north_southArr_list, $
           lc_angleRange, $
           err_list, $
@@ -1130,6 +1141,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      eeb_k = label__which_eeb[k]
 
      PRINT,label[k] + ' ...'
+
+     IF KEYWORD_SET(blacklist_list[k]) THEN BEGIN
+        PRINT,"Can't do this one, you know ..."
+        curPotList.Add,{time:-1,label:label[k]}
+        CONTINUE
+     ENDIF
 
      ;;electrons or ions?
      ions  = STRMATCH(STRUPCASE(eeb_or_eesArr[eeb_k]),'IE*')

@@ -75,6 +75,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    EPS=eps, $
    CAP_STRUCT=cAP_struct, $
    BATCH_MODE=batch_mode, $
+   MIN_PEAK_ENERGYARR=min_peak_energyArr, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -165,7 +166,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; units                = 'flux'
   ;; units                = 'dfStd'
 
-  outDir                  = '~/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
+  outDir                  = '/home/spencerh/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
   masterFile              = bonusPref + 'blkBox-Fig2_ingredients.sav'
 
   saveCurPotFile          = bonusPref + 'blkBox-Fig2__meal.sav'
@@ -232,8 +233,8 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
         moment_energyArr     = KEYWORD_SET(moment_energyArr) ? moment_energyArr : [[300,3.1e4],[100,3.1e4],[100,2.48e4]]
 
-        min_peak_energyArr   = [300,100,100]
-        max_peak_energyArr   = [3e4,3e4,2.4e4]
+        min_peak_energyArr   = KEYWORD_SET(min_peak_energyArr) ? min_peak_energyArr : [300,100,100]
+        max_peak_energyArr   = [3.1e4,3.1e4,2.4e4]
 
      END
   ENDCASE
