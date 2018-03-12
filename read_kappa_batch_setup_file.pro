@@ -1,5 +1,8 @@
 ;2018/03/02
-PRO READ_KAPPA_BATCH_SETUP_FILE,orbit,MLT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current
+PRO READ_KAPPA_BATCH_SETUP_FILE, $
+   orbit,MLT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current, $
+   DATE_OF_GENERATION=date, $
+   MLTRANGE=mltRange
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -8,8 +11,12 @@ PRO READ_KAPPA_BATCH_SETUP_FILE,orbit,MLT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_av
      RETURN
   ENDIF
 
+  mltR    = KEYWORD_SET(mltRange) ? mltRange : [-5,5]
+  mltStr  = STRING(FORMAT='("__",I0,"-",I0,"MLT")',mltR[0],mltR[1])
+  filsDate = KEYWORD_SET(date) ? date : '20180302'
+
   dir = '/SPENCEdata/Research/Satellites/FAST/espec_identification/txtOutput/'
-  fPref = '20180302--mono_aurora_streaks__-5-5MLT'
+  fPref = filsDate + '--mono_aurora_streaks__' + mltStr
   ;; Which orb range?
   startOrb = 1000L
   endOrb   = 3999L
