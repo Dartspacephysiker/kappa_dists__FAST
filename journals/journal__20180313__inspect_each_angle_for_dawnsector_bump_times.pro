@@ -24,7 +24,7 @@ PRO JOURNAL__20180313__INSPECT_EACH_ANGLE_FOR_DAWNSECTOR_BUMP_TIMES
           '1997-03-30/11:57:01.56']
 
   ;; k = 0
-  FOR k=1,2 DO BEGIN
+  FOR k=0,2 DO BEGIN
      RESTORE,dir+fils[k]
      RESTORE,dir+fitFils[k]
 
@@ -56,7 +56,7 @@ PRO JOURNAL__20180313__INSPECT_EACH_ANGLE_FOR_DAWNSECTOR_BUMP_TIMES
      orig = kappaFit1D.orig
      FOR j=0,nAngles-1 DO BEGIN
 
-        custom_plotSN = STRING(FORMAT='(A0,I02,A0)',customPSNPref,j,"__bumpers.png")
+        custom_plotSN = (STRING(FORMAT='(A0,I02,"__",F0.1,A0)',customPSNPref,j,curDataStr.theta[-1,j],"__bumpers")).Replace(".","_")+'.png'
         custom_title  = STRING(FORMAT='("Orbit ",I04,", #",I0,": ",F0.2)',orbs[k],j,curDataStr.theta[-1,j])
 
         print,custom_plotSN
