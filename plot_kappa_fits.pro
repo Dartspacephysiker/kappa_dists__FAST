@@ -18,6 +18,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     USING_SDT_DATA=using_SDT_data, $
                     VERTICAL_LINES=vertical_lines, $
                     ;; PLOT_SAVENAME=plotSN, $
+                    CUSTOM_PLOTSN=custom_plotSN, $
+                    CUSTOM_TITLE=custom_title, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
                     ADD_PLOTDIR_SUFF=add_plotDir_suff, $
@@ -67,20 +69,24 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ;;Need to know if OMNI2D is responsible for this, or something else
   pref                 = pPref + (KEYWORD_SET(using_sdt_data) ? '__SDT_data-' : '-')
 
-  plotSN               = STRING(FORMAT='(A0,A0,A0,"-",A0,A0,"-orb_",I0,"__",A0,A0,A0)', $
-                                strings.today, $
-                                pref, $
-                                strings.timeFNStrs[bounds_i], $
-                                strings.eeb_or_ees, $
-                                strings.avgStr, $
-                                strings.orbStr, $
-                                strings.orbDate[bounds_i], $
-                                strings.angleStr, $
-                                (KEYWORD_SET(clamped_temperature) ? '-clampT' : ''))
-  IF N_ELEMENTS(add_angle_label) GT 0  THEN BEGIN
-     ;; plotSN           += STRING(FORMAT='("-angle_",F0.1)',kappaFit.A[6])
-     plotSN      += STRING(FORMAT='("-angle_",F0.1)',add_angle_label)
-  ENDIF
+  IF ~KEYWORD_SET(custom_plotSN) THEN BEGIN
+     plotSN               = STRING(FORMAT='(A0,A0,A0,"-",A0,A0,"-orb_",I0,"__",A0,A0,A0)', $
+                                   strings.today, $
+                                   pref, $
+                                   strings.timeFNStrs[bounds_i], $
+                                   strings.eeb_or_ees, $
+                                   strings.avgStr, $
+                                   strings.orbStr, $
+                                   strings.orbDate[bounds_i], $
+                                   strings.angleStr, $
+                                   (KEYWORD_SET(clamped_temperature) ? '-clampT' : ''))
+     IF N_ELEMENTS(add_angle_label) GT 0  THEN BEGIN
+        ;; plotSN           += STRING(FORMAT='("-angle_",F0.1)',kappaFit.A[6])
+        plotSN      += STRING(FORMAT='("-angle_",F0.1)',add_angle_label)
+     ENDIF
+  ENDIF ELSE BEGIN
+     plotSN = custom_plotSN
+  ENDELSE
 
   CASE 1 OF
      KEYWORD_SET(eps): BEGIN
@@ -103,9 +109,13 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ;; title           = STRING(FORMAT='(A0,", (Orbit ",A0,")")', $
   ;;                          strings.timeFNStrs[bounds_i], $
   ;;                          strings.orbStr)
-  title           = STRING(FORMAT='("Orbit ",A0,", ",A0)', $
-                           strings.orbStr, $
-                           strings.yearStr+'/'+strings.timeStrs[bounds_i])
+  IF KEYWORD_SET(custom_title) THEN BEGIN
+     title = custom_title
+  ENDIF ELSE BEGIN
+     title           = STRING(FORMAT='("Orbit ",A0,", ",A0)', $
+                              strings.orbStr, $
+                              strings.yearStr+'/'+strings.timeStrs[bounds_i])
+  ENDELSE
 
   ;;plot things
   nPlots          = KEYWORD_SET(orig)+ $
@@ -144,7 +154,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   yRange          = [lowerBound, $
                      (MAX(orig.y[WHERE(orig.y GT 0)]) > $
                       MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
-  xRange[1]       = 3.4D4
+  xRange          = [20,3.4D4]
+  ;; xRange[1]       = 3.4D4
 
   iPlot           = 0
 
