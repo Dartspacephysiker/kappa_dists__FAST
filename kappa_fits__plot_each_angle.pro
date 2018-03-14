@@ -23,11 +23,13 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,kappaFit1Ds,'time',VALUE=kTimes
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,gaussFit1Ds,'time',VALUE=gTimes
 
-     junk = MIN(ABS(S2T(times[k])-diff_eFlux.time),minInd)
-     junk = MIN(ABS(S2T(times[k])-kTimes),kFitInd)
-     junk = MIN(ABS(S2T(times[k])-gTimes),gFitInd)
+     junk1 = MIN(ABS(S2T(times[k])-diff_eFlux.time),minInd)
+     junk2 = MIN(ABS(S2T(times[k])-kTimes),kFitInd)
+     junk3 = MIN(ABS(S2T(times[k])-gTimes),gFitInd)
      PRINT,T2S(diff_eFlux.time[k],/MS)
-     
+     PRINT,FORMAT='(A0,F0.2)',"diffEflux deltaT: ",junk1
+     PRINT,FORMAT='(A0,F0.2)',"kTimes    deltaT: ",junk2
+     PRINT,FORMAT='(A0,F0.2)',"gTimes    deltaT: ",junk3
      ;; this = SDT
      curDataStr = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,minInd)
      CONVERT_ESA_UNITS2,curDataStr,units1D
@@ -47,6 +49,8 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
 
      nAngles = curDataStr.nBins
      orig = kappaFit1D.orig
+
+     tidStr = (((times[k]).Replace('/','_')).Replace('.','__')).Replace(":",'-')
      FOR j=0,nAngles-1 DO BEGIN
 
         custom_plotSN = (STRING(FORMAT='(A0,I02,"__",F0.1,A0)',customPSNPref,j,curDataStr.theta[-1,j],"__bumpers")).Replace(".","_")
@@ -86,9 +90,10 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
                         CUSTOM_TITLE=custom_title, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
-                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/all_angles/")', $
+                        ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/",A0,"/")', $
                                                 orbStr, $
-                                                spec_avg_itvl), $
+                                                spec_avg_itvl, $
+                                                tidStr), $
                         POSTSCRIPT=~KEYWORD_SET(eps), $
                         ;; OUT_WINDOWARR=windowArr, $
                         /BUFFER, $
@@ -98,11 +103,10 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
 
      ENDFOR
 
-     tidStr = (((times[k]).Replace('/','_')).Replace('.','__')).Replace(":",'-')
      PRINT,"Converting all plots to single pdf ..."
      SPAWN,'export PS1=dude; . /home/spencerh/.bashrc; cd ' + tmpDir+ $
            '; pwd; convert_and_unite_eps ' + $
-           STRING(FORMAT='("orb",I0,"_",A0)',orbit,tidStr)
+           STRING(FORMAT='("orb",I0,"_",A0)',orbit,tidStr)+'.pdf'
 
   ENDFOR
 

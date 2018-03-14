@@ -10,9 +10,9 @@ PRO JOURNAL__20180314__GET_PLOTS_AT_EACH_ANGLE_FOR_A_HANDFUL_OF_ORBITS
 
   diffEFluxFile = 'orb_3458-diff_eflux-ees-avg_itvl'+avgItvl+'-05_53_55__000-05_55_48__000.sav'
   fitFile       = '20180314-orb_3458-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-TESTRUN-20180302-only_fit_peak_eRange-avg_itvl'+avgItvl+'.sav'
-  times         = ['1997−07−07/05:55:15.49', $
-                   '1997−07−07/05:55:17.39', $
-                   '1997−07−07/05:55:21.18']
+  times         = ['1997-07-07/05:55:15.49', $
+                   '1997-07-07/05:55:17.39', $
+                   '1997-07-07/05:55:21.18']
 
   KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
                               DIFFEFLUXFILE=diffEFluxFile, $
