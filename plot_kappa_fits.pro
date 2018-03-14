@@ -155,8 +155,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   yRange          = [lowerBound, $
                      (MAX(orig.y[WHERE(orig.y GT 0)]) > $
                       MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
-  xRange          = [20,3.4D4]
-  ;; xRange[1]       = 3.4D4
+  xRange[1]       = 3.4D4
 
   iPlot           = 0
 
