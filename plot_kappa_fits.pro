@@ -28,6 +28,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     UNITS=units, $
                     POSTSCRIPT=postscript, $
                     DMSP=DMSP, $
+                    OUT_TMPPLOTDIR=tmpDir, $
                     EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
