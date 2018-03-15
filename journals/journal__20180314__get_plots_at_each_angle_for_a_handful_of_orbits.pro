@@ -21,6 +21,7 @@ PRO JOURNAL__20180314__GET_PLOTS_AT_EACH_ANGLE_FOR_A_HANDFUL_OF_ORBITS
                               FITFILE=fitFile, $
                               TIMESTRINGARR=times, $
                               SPEC_AVG_ITVL=spec_avg_itvl, $
+                              USE_2D_FIT_INFO=use_2D_fit_info, $
                               EFLUX_UNITS_INSTEAD=eFlux_units_instead
 
 END
