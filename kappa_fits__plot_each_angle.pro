@@ -5,13 +5,16 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
                                 TIMESTRINGARR=times, $
                                 SPEC_AVG_ITVL=spec_avg_itvl, $
                                 USE_2D_FIT_INFO=use_2D_fit_info, $
-                                EFLUX_UNITS_INSTEAD=eFlux_units_instead
+                                EFLUX_UNITS_INSTEAD=eFlux_units_instead, $
+                                JUST_LOSSCONE_ANGLES=just_losscone_angles
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   SET_PLOT_DIR,plotDir,/FOR_SDT,/ADD_TODAY
 
   dir = '/home/spencerh/software/sdt/batch_jobs/saves_output_etc/'
+  SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bashrc;'
+  nye_plotSuff = '_NYE'
 
   ;; Check for files and return if no dice
   IF ~(FILE_TEST(dir+diffEFluxFile) AND FILE_TEST(dir+fitFile)) THEN BEGIN
@@ -26,7 +29,7 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
   CASE 1 OF
      KEYWORD_SET(eFlux_units_instead): BEGIN
         units1D    = 'EFLUX'
-        killFit    = 1
+        ;; killFit    = 1
      END
      ELSE: BEGIN
         units1D    = 'FLUX'
@@ -37,7 +40,10 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
   
   ;; Use 1D or 2D fit info?
   ;; CASE 1 OF
+  fitDimStr = '1DFits'
   IF KEYWORD_SET(use_2D_fit_info) THEN BEGIN
+     fitDimStr = '2DFits'
+
      nK     = N_ELEMENTS(fit2DKappa_inf_list)
      nG     = N_ELEMENTS(fit2DGauss_inf_list)
      kTimes2D = MAKE_ARRAY(nK,/DOUBLE)
@@ -77,10 +83,6 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      tmpTime = S2T(times[k])
      PRINT,times[k]
      
-     curDataStr = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,minInd)
-
-     IF STRUPCASE(units1D) NE 'EFLUX' THEN CONVERT_ESA_UNITS2,curDataStr,units1D
-
      customPSNPref = STRING(FORMAT='("Orb_",I0,"__")',orbit)
      orbStr        = STRING(FORMAT='(I0)',orbit)
 
@@ -89,15 +91,18 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      junkK1D = MIN(ABS(tmpTime-kTimes1D),kFitInd)
      junkG1D = MIN(ABS(tmpTime-gTimes1D),gFitInd)
      PRINT,T2S(diff_eFlux.time[minInd],/MS)
-     PRINT,FORMAT='(A0,F0.2)',"diffEflux deltaT: ",junk1
-     PRINT,FORMAT='(A0,F0.2)',"kTimes1D  deltaT: ",junkK1D
-     PRINT,FORMAT='(A0,F0.2)',"gTimes1D  deltaT: ",junkG1D
+     PRINT,FORMAT='(A0,F0.4)',"diffEflux deltaT: ",junk1
+     PRINT,FORMAT='(A0,F0.4)',"kTimes1D  deltaT: ",junkK1D
+     PRINT,FORMAT='(A0,F0.4)',"gTimes1D  deltaT: ",junkG1D
+
+     curDataStr = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,minInd)
+
+     IF STRUPCASE(units1D) NE 'EFLUX' THEN CONVERT_ESA_UNITS2,curDataStr,units1D
 
      ;; Pick up 1D fit structure
      kappaFit1D = kappaFit1Ds[kFitInd]
      gaussFit1D = gaussFit1Ds[gFitInd]
 
-     nAngles       = curDataStr.nBins
      orig          = kappaFit1D.orig
 
      ;; Replace info if user wants 2D fit info
@@ -105,8 +110,8 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      IF KEYWORD_SET(use_2D_fit_info) THEN BEGIN
         junkK2D = MIN(ABS(tmpTime-kTimes2D),match2DKInd)
         junkG2D = MIN(ABS(tmpTime-gTimes2D),match2DGInd)
-        PRINT,FORMAT='(A0,F0.2)',"kTimes2D  deltaT: ",junkK2D
-        PRINT,FORMAT='(A0,F0.2)',"gTimes2D  deltaT: ",junkG2D
+        PRINT,FORMAT='(A0,F0.4)',"kTimes2D  deltaT: ",junkK2D
+        PRINT,FORMAT='(A0,F0.4)',"gTimes2D  deltaT: ",junkG2D
 
         kappaFit2D = fit2DKappa_inf_list[match2DKInd]
         gaussFit2D = fit2DGauss_inf_list[match2DGInd]
@@ -115,7 +120,10 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
 
         kappaFit1D.chi2 = kappaFit2D.chi2/(kappaFit2D.dof-$
                                            kappaFit2D.nPegged)
-        provided_chi2Red = kappaFit1D.chi2
+        gaussFit1D.chi2 = gaussFit2D.chi2/(gaussFit2D.dof-$
+                                           gaussFit2D.nPegged)
+        provided_chi2RedK = kappaFit1D.chi2
+        provided_chi2RedG = gaussFit1D.chi2
         
         ;; Do this for fitParams text
         kappaFit1D.A = k2DParms
@@ -147,10 +155,21 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      ;; ENDIF
 
      tidStr = (((times[k]).Replace('/','_')).Replace('.','__')).Replace(":",'-')
-     FOR j=0,nAngles-1 DO BEGIN
 
-        custom_plotSN = (STRING(FORMAT='(A0,I02,"__",F0.1,"__",A0)',customPSNPref,j,curDataStr.theta[-1,j],STRLOWCASE(units1D))).Replace(".","_")
-        custom_title  = STRING(FORMAT='("Orbit ",I04,", #",I0,": ",F0.2)',orbit,j,curDataStr.theta[-1,j])
+     CASE 1 OF
+        KEYWORD_SET(just_losscone_angles): BEGIN
+           nAngles   = 2
+        END
+        ELSE: BEGIN
+           nAngles   = curDataStr.nBins
+           angleInds = LINDGEN(N_ELEMENTS(curDataStr.theta[-1,*]))
+        END
+     ENDCASE
+     FOR j=0,nAngles-1 DO BEGIN
+     ;; FOR j=0,3 DO BEGIN
+
+        custom_plotSN = (STRING(FORMAT='(A0,I02,"__",F0.1,"__",A0)',customPSNPref,j,curDataStr.theta[-1,j],STRLOWCASE(units1D))).Replace(".","_")+nye_plotSuff
+        custom_title  = STRING(FORMAT='("Orbit ",I04,", #",I0,": ",F0.1)',orbit,j,curDataStr.theta[-1,j])
 
         print,custom_plotSN
         print,custom_title
@@ -174,7 +193,8 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
                         ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
                         ;; ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
                         ADD_CHI_VALUE=~killFit, $
-                        PROVIDED_CHI2RED=provided_chi2Red, $
+                        PROVIDED_CHI2REDK=provided_chi2RedK, $
+                        PROVIDED_CHI2REDG=provided_chi2RedG, $
                         ADD_WINTITLE=add_winTitle, $
                         /SAVE_FITPLOTS, $
                         PLOT_FULL_FIT=~killFit, $
@@ -188,8 +208,9 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
                         /USE_PSYM_FOR_DATA, $
                         PLOTDIR=plotDir, $
                         ADD_PLOTDIR_SUFF= $
-                        STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/",A0,"/",A0,"/")', $
+                        STRING(FORMAT='("kappa_fits/Orbit_",A0,"/",A0,"/",I0,"avg/",A0,"/",A0,"/")', $
                                orbStr, $
+                               fitDimStr, $
                                spec_avg_itvl, $
                                tidStr, $
                                STRLOWCASE(units1D)), $
@@ -203,9 +224,18 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
      ENDFOR
 
      PRINT,"Converting all plots to single pdf ..."
-     SPAWN,'export PS1=dude; . /home/spencerh/.bashrc; cd ' + tmpDir+ $
-           '; pwd; convert_and_unite_eps ' + $
-           STRING(FORMAT='("orb",I0,"_",A0)',orbit,tidStr)+'.pdf'
+     SPAWN,SHELLCMDINIT + ' cd ' + tmpDir + '; ' $
+           + 'pwd; convert_and_unite_eps ' $
+           + STRING(FORMAT='("orb",I0,"_",A0)',orbit,tidStr)+'.pdf' $
+           + " " + STRING(FORMAT='(A0,A0,A0)',"'*",nye_plotSuff,".eps'")
+     ;; mv the nye_plotSuffs to regular file thing
+     SPAWN,SHELLCMDINIT + ' cd ' + tmpDir + '; ' $
+           + STRING(FORMAT='(A0,A0,A0,A0,A0)', $
+                    'for brud in *', $
+                    nye_plotSuff, $
+                    '.eps; do mv ${brud} ${brud%%', $
+                    nye_plotSuff, $
+                   '.eps}.eps; done')
 
   ENDFOR
 

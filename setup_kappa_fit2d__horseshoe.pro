@@ -46,11 +46,24 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
-        bro         = KF2D__SDTData_opt.electron_angleRange
-        aRange_i    = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
-                            (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])),nAnKeep)
-        aRange      = [MIN(curDataStr.theta[curDataStr.nEnergy/2,aRange_i]), $
-                       MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
+        bro = KF2D__SDTData_opt.electron_angleRange
+        CASE KF2D__SDTData_opt.north_south OF
+           1: BEGIN
+              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
+                                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+                                  nAnKeep)
+              aRange      = [MIN(curDataStr.theta[curDataStr.nEnergy/2,aRange_i]), $
+                             MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
+           END
+           -1: BEGIN
+              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) OR $
+                                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+                                  nAnKeep)
+              tmpAngles   = curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
+              aRange      = [MIN(tmpAngles[WHERE(tmpAngles GT 0)]), $
+                             MAX(tmpAngles[WHERE(tmpAngles LT 0)])]
+           END
+        ENDCASE
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
      ;;    bro         = KF2D__SDTData_opt.electron_lca

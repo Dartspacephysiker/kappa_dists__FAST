@@ -23,6 +23,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   defFit2D_dens_angleRange     = [-150,150]
   defFit2D_faCond_angleRange   = [-150,150]
   defFit2D_temp_angleRange     = 'lc'
+  defNorth_south               = 1 ;default north (indicate with 1); indicate south with -1
   defTempType                  = 'PAR'
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
@@ -36,6 +37,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    fit2D_dens_aRange   :defFit2D_dens_angleRange, $
                    fit2D_temp_aRange   :defFit2D_temp_angleRange, $ 
                    fit2D_faCond_aRange :defFit2D_faCond_angleRange, $ 
+                   north_south         : defNorth_south, $ ;default north
                    estimate_sourceCone_from_dist : 0B, $
                    fit2D__temperature_type : defTempType, $
                    densFunc            :'N_2D_FS'} ;the best choice for both EES and EEB—look at documentation

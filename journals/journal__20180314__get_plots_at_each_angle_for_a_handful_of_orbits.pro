@@ -6,6 +6,7 @@ PRO JOURNAL__20180314__GET_PLOTS_AT_EACH_ANGLE_FOR_A_HANDFUL_OF_ORBITS
   orbit = 3458
 
   eFlux_units_instead = 1
+  use_2D_fit_info     = 1
 
   spec_avg_itvl  = 1
   avgItvl        = STRING(FORMAT='(I0)',spec_avg_itvl)
@@ -22,6 +23,7 @@ PRO JOURNAL__20180314__GET_PLOTS_AT_EACH_ANGLE_FOR_A_HANDFUL_OF_ORBITS
                               TIMESTRINGARR=times, $
                               SPEC_AVG_ITVL=spec_avg_itvl, $
                               USE_2D_FIT_INFO=use_2D_fit_info, $
-                              EFLUX_UNITS_INSTEAD=eFlux_units_instead
+                              EFLUX_UNITS_INSTEAD=eFlux_units_instead, $
+                              JUST_LOSSCONE_ANGLES=just_losscone_angles
 
 END

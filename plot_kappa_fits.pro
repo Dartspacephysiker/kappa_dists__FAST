@@ -11,7 +11,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ADD_FITPARAMS_TEXT=add_fitParams_text, $
                     ADD_ANGLE_LABEL=add_angle_label, $
                     ADD_CHI_VALUE=add_chi_value, $
-                    PROVIDED_CHI2RED=provided_chi2Red, $
+                    PROVIDED_CHI2REDK=provided_chi2RedK, $
+                    PROVIDED_CHI2REDG=provided_chi2RedG, $
                     ADD_WINTITLE=add_winTitle, $
                     SAVE_FITPLOTS=save_fitPlots, $
                     PLOT_FULL_FIT=plot_full_fit, $
@@ -36,7 +37,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
 
   skipping             = KEYWORD_SET(skip_bad_fits)
 
-  legPos               = [0.55,0.87]
+  legPos               = [0.87,0.84]
   IF KEYWORD_SET(DMSP) THEN BEGIN
      legPos            = [0.45,0.52]
   ENDIF
@@ -154,8 +155,9 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   ;;                    (MAX(orig.y[WHERE(orig.y GT 0)]) > $
   ;;                    MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
   yRange          = [lowerBound, $
-                     (MAX(orig.y[WHERE(orig.y GT 0)]) > $
-                      MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)])) < upperBound]
+                     ( ( MAX(orig.y[WHERE(orig.y GT 0)]) * 1.02) > $
+                       ( MAX(kappaFit.yFull[WHERE(kappaFit.yFull GT 0)]) * 1.02 )) $
+                     < upperBound]
   xRange[1]       = 3.4D4
 
   iPlot           = 0
@@ -357,8 +359,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
         ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',kappaFit.chi2)]
         fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.3)', $
-                                        KEYWORD_SET(provided_chi2Red) ? $
-                                        provided_chi2Red              : $
+                                        KEYWORD_SET(provided_chi2RedK) ? $
+                                        provided_chi2RedK              : $
                                         kappaFit.chi2/(N_ELEMENTS(kappaFit.x)-4))]
         ;; chiInd     = 4 + KEYWORD_SET(add_angle_label)
         chiInd     = 3 + KEYWORD_SET(add_angle_label)
@@ -388,7 +390,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         fitInfoStr     = [STRING(FORMAT='(I-15)',gaussFit.A[0]), $
                           STRING(FORMAT='(F-15.1)',gaussFit.A[1]), $
                           ;; STRING(FORMAT='(F-7.3)',gaussFit.A[2]), $
-                          STRING(FORMAT='(F-8.4)',gaussFit.A[3])]
+                          STRING(FORMAT='(F-8.3)',gaussFit.A[3])]
 
         IF KEYWORD_SET(add_angle_label) THEN BEGIN
            fitTitle    = [fitTitle,"Angle         (deg)"]
@@ -400,7 +402,10 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
            fitTitle   = [fitTitle,'chi^2']
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(F-8.4)',kappaFit.A[6])]
            ;; fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',add_chi_value)]
-           fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.4)',gaussFit.chi2/(N_ELEMENTS(gaussFit.x)-3))]
+           fitInfoStr = [fitInfoStr,STRING(FORMAT='(G-9.3)', $
+                                           KEYWORD_SET(provided_chi2RedG) ? $
+                                           provided_chi2RedG              : $
+                                           gaussFit.chi2/(N_ELEMENTS(gaussFit.x)-3))]
            chiInd     = 3 + KEYWORD_SET(add_angle_label)
         ENDIF
 

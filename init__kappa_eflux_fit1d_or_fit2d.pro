@@ -343,9 +343,15 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                                                    angleStr, $
                                                                    KF__SDTData_opt)
 
+     KF__SDTData_opt.north_south = north_south[0]
+
   ENDIF ELSE BEGIN
 
      IF KEYWORD_SET(t1) AND KEYWORD_SET(t2) THEN BEGIN
+
+        PRINT,"Need to set whether north or south for DMSP!"
+        ;; KF__SDTData_opt.north_south = 
+        STOP
 
         tmpBounds = WHERE(dmsp.time GE t1 AND dmsp.time LE t2)
 
