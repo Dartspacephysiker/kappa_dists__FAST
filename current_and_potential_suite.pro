@@ -671,10 +671,11 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                   GAUSS_A=AGauss, $
                                   ORIGINATING_ROUTINE=routName, $
                                   ORBIT=orbit, $
+                                  PLOTDIR=plotDir, $
                                   SAVEPLOT=savePlot, $
                                   SPNAME=j_v__fixTandN__spName, $
-                                 J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
-                                 J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
+                                  J_V__FIXTANDN__SAVEPLOTDATA=j_v__fixTandN__savePlotData, $
+                                  J_V__FIXTANDN__DATAFILENAME=j_v__fixTandN__dataFilename, $
                                   ;; SAVEDATA=j_v__fixTandN__savePlotData, $
                                   ;; DATAFILENAME=j_v__fixTandN__dataFilename, $
                                   _EXTRA=e
