@@ -1006,6 +1006,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
               kappaFit2D = fit2DKappa_inf_list[-1]
               gaussFit2D = fit2DGauss_inf_list[-1]
+
               k2DParms = kappaFit2D.fitparams
               g2DParms = gaussFit2D.fitparams
 
@@ -1022,12 +1023,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               tmpKappaFit1D.yFull = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY(tmpKappaFit1D.xFull,k2DParms,UNITS=units1D)
               tmpGaussFit1D.yFull = MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY(tmpGaussFit1D.xFull,g2DParms,UNITS=units1D)
 
-              ;; Do this for fitParams text
+              ;; Do this for fitParams text and plot
               tmpKappaFit1D.A = k2DParms
               tmpGaussFit1D.A = g2DParms
               tmpKappaFit1D.A[3] *= kappaFit2D.nAngle
               tmpGaussFit1D.A[3] *= kappaFit2D.nAngle
 
+              tmpKappaFit1D.name = STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",tmpKappaFit1D.A[2])
            ENDIF
 
            PLOT_KAPPA_FITS,orig,tmpKappaFit1D, $

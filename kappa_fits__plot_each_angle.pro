@@ -115,8 +115,12 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
 
         kappaFit2D = fit2DKappa_inf_list[match2DKInd]
         gaussFit2D = fit2DGauss_inf_list[match2DGInd]
+
         k2DParms = kappaFit2D.fitparams
         g2DParms = gaussFit2D.fitparams
+
+        k2DParms[3] /= kappaFit2D.nAngle
+        g2DParms[3] /= gaussFit2D.nAngle
 
         kappaFit1D.chi2 = kappaFit2D.chi2/(kappaFit2D.dof-$
                                            kappaFit2D.nPegged)
@@ -125,12 +129,16 @@ PRO KAPPA_FITS__PLOT_EACH_ANGLE,orbit, $
         provided_chi2RedK = kappaFit1D.chi2
         provided_chi2RedG = gaussFit1D.chi2
         
-        ;; Do this for fitParams text
-        kappaFit1D.A = k2DParms
-        gaussFit1D.A = g2DParms
-
         kappaFit1D.yFull = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY(kappaFit1D.xFull,k2DParms,UNITS=units1D)
         gaussFit1D.yFull = MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY(gaussFit1D.xFull,g2DParms,UNITS=units1D)
+
+        ;; Do this for fitParams text and plot
+        kappaFit1D.A = k2DParms
+        gaussFit1D.A = g2DParms
+        kappaFit1D.A[3] *= kappaFit2D.nAngle
+        gaussFit1D.A[3] *= kappaFit2D.nAngle
+
+        kappaFit1D.name = STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",kappaFit1D.A[2])
 
      ENDIF ELSE IF STRUPCASE(units1D) NE 'FLUX' THEN BEGIN
         kappaFit1D.yFull = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY(kappaFit1D.xFull,kappaFit1D.A,UNITS=units1D)
