@@ -1116,6 +1116,17 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bashrc;'
      nyPDF = STRING(FORMAT='("orb",A0,"_",A0)',KF2D__strings.orbStr,fitDimStr)+'.pdf'
 
+     pdfCount = 0
+     WHILE FILE_TEST(tmpPlotDir+'/../../' + nyPDF) DO BEGIN
+        pdfCount++
+        nyPDF = STRING(FORMAT='("orb",A0,"_",A0,"__",I02,A0)', $
+                       KF2D__strings.orbStr, $
+                       fitDimStr, $
+                       pdfCount, $
+                       '.pdf')
+     ENDWHILE
+
+
      PRINT,"Converting all 1D plots into single pdf ..."
      SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
            + 'pwd; convert_and_unite_eps ' $
