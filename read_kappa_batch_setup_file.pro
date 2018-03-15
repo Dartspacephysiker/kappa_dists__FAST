@@ -1,6 +1,6 @@
 ;2018/03/02
 PRO READ_KAPPA_BATCH_SETUP_FILE, $
-   orbit,MLT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current, $
+   orbit,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current, $
    DATE_OF_GENERATION=date, $
    MLTRANGE=mltRange, $
    ALTRANGE=altRange, $
