@@ -52,6 +52,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
    FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
    FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
+   FIT1D__COMBINE_PLOTSLICES_IN_PDF=fit1D__combine_plotslices_in_PDF, $
    FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
    FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
@@ -212,6 +213,7 @@ PRO KAPPA_EFLUX_FIT2D, $
                     FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                     FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
                     FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
+                    FIT1D__COMBINE_PLOTSLICES_IN_PDF=fit1D__combine_plotslices_in_PDF, $
                     FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                     FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                     FIT2D__PA_ZRANGE=fit2D__PA_zRange, $

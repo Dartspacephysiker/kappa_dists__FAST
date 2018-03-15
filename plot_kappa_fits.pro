@@ -22,6 +22,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                     ;; PLOT_SAVENAME=plotSN, $
                     CUSTOM_PLOTSN=custom_plotSN, $
                     CUSTOM_TITLE=custom_title, $
+                    CUSTOM_PLOTSUFF=custom_plotSuff, $
                     USE_PSYM_FOR_DATA=psymData, $
                     PLOTDIR=plotDir, $
                     ADD_PLOTDIR_SUFF=add_plotDir_suff, $
@@ -73,7 +74,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
   pref                 = pPref + (KEYWORD_SET(using_sdt_data) ? '__SDT_data-' : '-')
 
   IF ~KEYWORD_SET(custom_plotSN) THEN BEGIN
-     plotSN               = STRING(FORMAT='(A0,A0,A0,"-",A0,A0,"-orb_",I0,"__",A0,A0,A0)', $
+     plotSN               = STRING(FORMAT='(A0,A0,A0,"-",A0,A0,"-orb_",I0,"__",A0,A0,A0,A0)', $
                                    strings.today, $
                                    pref, $
                                    strings.timeFNStrs[bounds_i], $
@@ -82,7 +83,8 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
                                    strings.orbStr, $
                                    strings.orbDate[bounds_i], $
                                    strings.angleStr, $
-                                   (KEYWORD_SET(clamped_temperature) ? '-clampT' : ''))
+                                   (KEYWORD_SET(clamped_temperature) ? '-clampT' : ''), $
+                                   (KEYWORD_SET(custom_plotSuff    ) ? custom_plotSuff : ''))
      IF N_ELEMENTS(add_angle_label) GT 0  THEN BEGIN
         ;; plotSN           += STRING(FORMAT='("-angle_",F0.1)',kappaFit.A[6])
         plotSN      += STRING(FORMAT='("-angle_",F0.1)',add_angle_label)

@@ -129,6 +129,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                       FIT1D__SAVE_PLOTSLICES=fit1D__save_plotSlices, $
                       FIT1D__SAVE_EVERY_NTH_PLOT=fit1D__save_every_nth_plot, $
                       FIT1D__SAVE_IF_KAPPA_BELOW=fit1D__save_if_kappa_below, $
+                      FIT1D__COMBINE_PLOTSLICES_IN_PDF=fit1D__combine_plotslices_in_PDF, $
                       FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2d__show_each_candidate, $
                       FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
                       FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -163,6 +164,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   nEnergies      = N_ELEMENTS(diff_eFlux.energy[*,0,0])
   nTotAngles     = N_ELEMENTS(diff_eFlux.theta[0,*,0])
 
+  nye_plotSuff = '_NYE'
   ;; dont_print_fitInfo                = 1
 
   ;;Gotta do this up front, or it plagues everyone
@@ -1023,9 +1025,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                                    KF2D__strings.orbStr, $
                                                    KF2D__SDTData_opt.spec_avg_intvl), $
                            POSTSCRIPT=~KEYWORD_SET(eps), $
+                           CUSTOM_PLOTSUFF=KEYWORD_SET(fit1D__combine_plotslices_in_PDF) ? $
+                           nye_plotSuff : !NULL, $
                            ;; OUT_WINDOWARR=windowArr, $
                            /BUFFER, $
                            UNITS=units1D, $
+                           OUT_TMPPLOTDIR=tmpPlotDir, $
                            EPS=eps
         ENDIF
 
@@ -1059,6 +1064,29 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ENDIF
 
   ENDFOR
+
+  IF KEYWORD_SET(fit1D__combine_plotslices_in_PDF) $
+     AND KEYWORD_SET(fit1D__save_plotSlices)       $
+     AND totSuccessesK GT 0                        $
+  THEN BEGIN
+
+     SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bashrc;'
+
+     PRINT,"Converting all 1D plots into single pdf ..."
+     SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
+           + 'pwd; convert_and_unite_eps ' $
+           + STRING(FORMAT='("orb",A0,"_1DFits")',KF2D__strings.orbStr)+'.pdf' $
+           + " " + STRING(FORMAT='(A0,A0,A0)',"'*",nye_plotSuff,".eps'")
+     ;; mv the nye_plotSuffs to regular file thing
+     SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
+           + STRING(FORMAT='(A0,A0,A0,A0,A0)', $
+                    'for brud in *', $
+                    nye_plotSuff, $
+                    '.eps; do mv ${brud} ${brud%%', $
+                    nye_plotSuff, $
+                    '.eps}.eps; done')
+
+  ENDIF
 
   IF KEYWORD_SET(synthPackage) AND ~KEYWORD_SET(KF2D__Curvefit_opt.only_1D_fits) THEN BEGIN
      
