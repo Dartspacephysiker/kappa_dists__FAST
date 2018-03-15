@@ -165,6 +165,12 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   nTotAngles     = N_ELEMENTS(diff_eFlux.theta[0,*,0])
 
   nye_plotSuff = '_NYE'
+  fitDimStr = '1DFits'
+  fit1D_plots__use_2D_fit_info = 1
+  IF KEYWORD_SET(fit1D_plots__use_2D_fit_info) THEN BEGIN
+     fitDimStr = '2DFits'
+  ENDIF
+
   ;; dont_print_fitInfo                = 1
 
   ;;Gotta do this up front, or it plagues everyone
@@ -992,9 +998,41 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         ENDCASE
 
         IF qualified GT 0 THEN BEGIN
-           PLOT_KAPPA_FITS,orig,kappaFit1Ds[-1], $
+
+           tmpKappaFit1D = kappaFit1Ds[-1]
+           tmpGaussFit1D = gaussFit1Ds[-1]
+
+           IF KEYWORD_SET(fit1D_plots__use_2D_fit_info) THEN BEGIN
+
+              kappaFit2D = fit2DKappa_inf_list[-1]
+              gaussFit2D = fit2DGauss_inf_list[-1]
+              k2DParms = kappaFit2D.fitparams
+              g2DParms = gaussFit2D.fitparams
+
+              k2DParms[3] /= kappaFit2D.nAngle
+              g2DParms[3] /= gaussFit2D.nAngle
+
+              tmpKappaFit1D.chi2 = kappaFit2D.chi2/(kappaFit2D.dof-$
+                                                 kappaFit2D.nPegged)
+              tmpGaussFit1D.chi2 = gaussFit2D.chi2/(gaussFit2D.dof-$
+                                                 gaussFit2D.nPegged)
+              provided_chi2RedK = tmpKappaFit1D.chi2
+              provided_chi2RedG = tmpGaussFit1D.chi2
+              
+              tmpKappaFit1D.yFull = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY(tmpKappaFit1D.xFull,k2DParms,UNITS=units1D)
+              tmpGaussFit1D.yFull = MAXWELL_FLUX__LINEAR_SHIFT_IN_ENERGY(tmpGaussFit1D.xFull,g2DParms,UNITS=units1D)
+
+              ;; Do this for fitParams text
+              tmpKappaFit1D.A = k2DParms
+              tmpGaussFit1D.A = g2DParms
+              tmpKappaFit1D.A[3] *= kappaFit2D.nAngle
+              tmpGaussFit1D.A[3] *= kappaFit2D.nAngle
+
+           ENDIF
+
+           PLOT_KAPPA_FITS,orig,tmpKappaFit1D, $
                            KEYWORD_SET(KF2D__Curvefit_opt.add_gaussian_estimate) ? $
-                           gaussFit1Ds[-1] : $
+                           tmpGaussFit1D : $
                            !NULL, $
                            oneCurve, $
                            CLAMPED_TEMPERATURE=KF2D__Curvefit_opt.fit1D__clampTemperature, $
@@ -1011,6 +1049,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                            ;; ADD_ANGLE_LABEL=KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec) ? MEAN(KF2D__SDTData_opt.electron_angleRange) : , $
                            ;; ADD_ANGLE_LABEL=MEAN(KF2D__SDTData_opt.electron_angleRange), $
                            /ADD_CHI_VALUE, $
+                           PROVIDED_CHI2REDK=provided_chi2RedK, $
+                           PROVIDED_CHI2REDG=provided_chi2RedG, $
                            ADD_WINTITLE=add_winTitle, $
                            /SAVE_FITPLOTS, $
                            /PLOT_FULL_FIT, $
@@ -1021,8 +1061,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                            ;; PLOT_SAVENAME=plotSN, $
                            /USE_PSYM_FOR_DATA, $
                            PLOTDIR=plotDir, $
-                           ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/1DFits/",I0,"avg/")', $
+                           ADD_PLOTDIR_SUFF=STRING(FORMAT='("kappa_fits/Orbit_",A0,"/",A0,"/",I0,"avg/")', $
                                                    KF2D__strings.orbStr, $
+                                                   fitDimStr, $
                                                    KF2D__SDTData_opt.spec_avg_intvl), $
                            POSTSCRIPT=~KEYWORD_SET(eps), $
                            CUSTOM_PLOTSUFF=KEYWORD_SET(fit1D__combine_plotslices_in_PDF) ? $
@@ -1071,12 +1112,15 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   THEN BEGIN
 
      SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bashrc;'
+     nyPDF = STRING(FORMAT='("orb",A0,"_",A0)',KF2D__strings.orbStr,fitDimStr)+'.pdf'
 
      PRINT,"Converting all 1D plots into single pdf ..."
      SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
            + 'pwd; convert_and_unite_eps ' $
-           + STRING(FORMAT='("orb",A0,"_1DFits")',KF2D__strings.orbStr)+'.pdf' $
+           + nyPDF $
            + " " + STRING(FORMAT='(A0,A0,A0)',"'*",nye_plotSuff,".eps'")
+     SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
+           + 'mv ' + nyPDF + ' ../../'
      ;; mv the nye_plotSuffs to regular file thing
      SPAWN,SHELLCMDINIT + ' cd ' + tmpPlotDir + '; ' $
            + STRING(FORMAT='(A0,A0,A0,A0,A0)', $
