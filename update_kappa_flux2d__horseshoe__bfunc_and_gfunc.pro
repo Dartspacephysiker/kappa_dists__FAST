@@ -171,9 +171,11 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
           SAVE_PLOTS=save_plots, $
           PLOTNAMES=plotNames, $
           EPS=eps)
-
+ 
   K_EA__bFunc   = peak_en   / peak_en[fitAngle_ii]
   K_EA__gFunc   = peak_flux / peak_flux[fitAngle_ii]
+
+  K_EA__gFunc   = 1.
 
   K_EA__angles  = peak_angle  
   K_EA__angle_i = peak_angle_i
@@ -234,6 +236,11 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   sortKEA = SORT(k_ea__angles)
   K_EA__ii    = sortKEA[VALUE_CLOSEST2(K_EA__angles[sortKEA],REFORM(Y2D[0,*]),/CONSTRAINED)]
 
+  ;; K_EA__anglesAlt = (K_EA__angles + 360.) MOD 360.
+  ;; Y2DAlt = (Y2D + 360.) MOD 360.
+  ;; sortKEAAlt = SORT(k_ea__anglesAlt)
+  ;; K_EA__iiAlt    = sortKEAAlt[VALUE_CLOSEST2(K_EA__anglesAlt[sortKEAAlt],REFORM(Y2DAlt[0,*]),/CONSTRAINED)]
+
   IF KF2D__SDTData_opt.north_south EQ 1 THEN BEGIN
 
      ;; redBy1 = 0
@@ -253,7 +260,55 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
  
   ENDIF ELSE BEGIN
      PRINT,"Gotta set it up for Southern hemi!"
-     STOP
+
+     IF N_ELEMENTS(K_EA__ii) NE N_ELEMENTS(UNIQ(K_EA__ii,SORT(K_EA__ii))) THEN BEGIN
+
+        dupes = !NULL
+        count = !NULL
+        locs  = LIST()
+        uniqs = UNIQ(K_EA__ii,SORT(K_EA__ii))
+        nUniq = N_ELEMENTS(uniqs)
+        FOR j=0,nUniq-1 DO BEGIN
+           tmp = WHERE(K_EA__ii EQ K_EA__ii[uniqs[j]],tmpCount)
+           IF tmpCount GT 1 THEN BEGIN
+              dupes = [dupes,K_EA__ii[uniqs[j]]]
+              count = [count,tmpCount]
+              locs.Add,tmp
+           ENDIF
+        ENDFOR
+
+        STOP
+        
+        nValsWithDupes = N_ELEMENTS(dupes)
+        FOR j=0,nValsWithDupes-1 DO BEGIN
+
+           nLocs = N_ELEMENTS(locs[j])
+           FOR jj=0,nLocs-1 DO BEGIN
+              origAngle = Y2D[0,locs[j,jj]]
+              ;; origAngle = K_EA__angles[K_EA__ii[locs[j,jj]]]
+
+              ;; Verify issue
+              ;; junk = MIN(ABS(origAngle-K_EA__angles[sortKEA]),verInd)
+              ;; origMin = MIN(ABS(origAngle-REFORM(Y2D[0,*])),verInd)
+              origMin = ABS(origAngle-K_EA__angles[K_EA__ii[locs[j,jj]]])
+
+              ;; IF verInd NE locs[j,jj] THEN STOP
+              ;; See what happens if we add 360
+              IF origAngle LT 0 THEN origAngle += 360. ELSE origAngle -= 360.
+
+              ;;Try again
+              newMin = MIN(ABS(origAngle-K_EA__angles[sortKEA]),verInd)
+
+              IF newMin LT origMin THEN K_EA__ii[locs[j,jj]] = verInd
+
+              ;; VALUE_CLOSEST2(K_EA__angles[sortKEA],REFORM(Y2D[0,*]),/CONSTRAINED)
+
+           ENDFOR
+
+        ENDFOR
+
+     ENDIF
+
   ENDELSE
 
   IF KEYWORD_SET(estimate_lossCone) THEN BEGIN
