@@ -15,7 +15,8 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                              FIT2D__SHOW__IS_MAXWELLIAN_FIT=is_Maxwellian_fit, $
                              FIT2D__SHOW__FITSTRING=fitString, $
                              PRINT_2DFITINFO=print_2DFitInfo, $
-                             TIMEFNSTR=timeFNStr
+                             TIMEFNSTR=timeFNStr, $
+                             EPS=eps
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -47,9 +48,10 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
      ;; fit2DStr.nEnergy = 51
      
   ;; ENDIF
-
+  ;; BKUPFit2DStr=fit2DStr & BKUPFit2DParams = fit2DParams & BKUPCurDataStr=curDataStr
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
+        ;; fit2DParams[2] = 2.08
         fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
                         fit2DStr.energy, $
                         SHIFT(fit2DStr.theta,0,shiftTheta), $
@@ -57,6 +59,9 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 
+        ;; 2018/03/16
+        ;;Kill below peak energy
+        toBeKilled = WHERE(fit2DStr.energy LT fit2DParams[0],nKillah,/NULL) & fit2DStr.data[toBeKilled] = 0. & fit2DStr.ddata[toBeKilled] = 0.
         ;; fit2DStr.data[WHERE(fit2DStr.energy LT MIN(eRange_fit),/NULL)] = 0.
 
         tmpStr          = CONV_UNITS(fit2DStr,'counts')

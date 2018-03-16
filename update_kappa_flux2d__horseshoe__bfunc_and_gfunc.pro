@@ -77,6 +77,8 @@ END
 PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
    angleBin_i, $
    fitAngle_i, $
+   X2D=X2D, $
+   Y2D=Y2D, $
    ESTIMATE_LOSSCONE=estimate_lossCone, $
    PEAK_ENERGY=peak_energy, $
    NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
@@ -98,6 +100,10 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
 
   @common__kappa_flux2d__horseshoe__eanisotropy.pro
   @common__kappa_fit2d_structs.pro
+
+  ;; Need the following lines in KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__LINEAR_ENERGY_SHIFT__COMMON
+  ;; K_EA__userSpecifiedAngleRange = KF2D__SDTData_opt.electron_angleRange
+  ;; K_EA__north_south             = KF2D__SDTData_opt.north_south
 
   IF KEYWORD_SET(save_plots) THEN BEGIN
      IF ~KEYWORD_SET(plotDir) THEN SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
@@ -175,11 +181,29 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
         bro              = KF2D__SDTData_opt.electron_angleRange
-        K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) AND $
-                                 (K_EA__angles LE CEIL(bro[1])),nAnKeep)
+
+        CASE KF2D__SDTData_opt.north_south OF
+           1: BEGIN
+              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
+              ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+              ;;                  nAnKeep)
+              K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) AND $
+                                       (K_EA__angles LE CEIL(bro[1])),nAnKeep)
+           END
+           -1: BEGIN
+              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) OR $
+              ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+              ;;                  nAnKeep)
+              K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) OR $
+                                       (K_EA__angles LE CEIL(bro[1])),nAnKeep)
+           END
+        ENDCASE
+
         ;; K_EA__fitAngles  = [MIN(K_EA__angles[K_EA__fitAngle_i]), $
         ;;                     MAX(K_EA__angles[K_EA__fitAngle_i])]
+
         K_EA__fitAngles  = K_EA__angles[K_EA__fitAngle_i]
+
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
      ;;    bro         = KF2D__SDTData_opt.electron_lca
@@ -205,6 +229,32 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
         ;; PRINT,'Angles for 2D fit: ALL'
      END
   ENDCASE
+
+  ;; Now make sure everything is hunky-dory — that is, that we won't have crooked/rotated fits
+  sortKEA = SORT(k_ea__angles)
+  K_EA__ii    = sortKEA[VALUE_CLOSEST2(K_EA__angles[sortKEA],REFORM(Y2D[0,*]),/CONSTRAINED)]
+
+  IF KF2D__SDTData_opt.north_south EQ 1 THEN BEGIN
+
+     ;; redBy1 = 0
+     ;; incBy1 = 0
+     incBy1 = (K_EA__angles[K_EA__ii])[0] LT KF2D__SDTData_opt.electron_angleRange[0]
+     redBy1 = (K_EA__angles[K_EA__ii])[-1] GT KF2D__SDTData_opt.electron_angleRange[1]
+
+     CASE 1 OF
+        (redBy1 AND incBy1): BEGIN
+           PRINT,"Crussicles!!"
+           STOP
+        END
+        incBy1: K_EA__ii = K_EA__ii + 1
+        redBy1: K_EA__ii = K_EA__ii - 1
+        ELSE: 
+     ENDCASE
+ 
+  ENDIF ELSE BEGIN
+     PRINT,"Gotta set it up for Southern hemi!"
+     STOP
+  ENDELSE
 
   IF KEYWORD_SET(estimate_lossCone) THEN BEGIN
 

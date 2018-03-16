@@ -1,6 +1,11 @@
 ;2016/09/02
 PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            hadSuccess, $
+                           X2D=X2D, $
+                           Y2D=Y2D, $
+                           DATATOFIT=dataToFit, $
+                           WEIGHTS=wtsForFit, $
+                           FUNCTARGS=fa, $
                            IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
                            ;; TIMEFNSTR=timeFNStr, $
                            ERANGE_FIT=eRange_fit, $
@@ -11,6 +16,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                            FITSTRING=fitString, $
                            ;; IN_ESTIMATED_LC=estimated_lc, $
                            UNITS=units, $
+                           FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                            OUT_FIT2DPARAMS=fit2DParams, $
                            MAKE_FIT2D_INFO=make_fit2D_info, $
                            OUT_FIT2D_FITINFO=fit2D_info, $
@@ -44,16 +50,8 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
   ENDELSE
 
-  SETUP_KAPPA_FIT2D__HORSESHOE, $
-     eRange_fit, $
-     curDataStr, $
-     wtsForFit,X2D,Y2D,dataToFit, $
-     fa, $
-     IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
-     UNITS=units, $
-     ;; IN_ESTIMATED_LC=estimated_lc, $
-     OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
-  
+  IF KEYWORD_SET(is_maxwellian_fit) THEN fa.is_maxwellian_fit = 1
+
   IF STRUPCASE(fitParamStruct[1].parName) EQ 'T' THEN BEGIN
      fitParamStruct[1].fixed = KF2D__curveFit_opt.fit2D__clampTemperature
      fitParamStruct[3].fixed = KF2D__curveFit_opt.fit2D__clampDensity

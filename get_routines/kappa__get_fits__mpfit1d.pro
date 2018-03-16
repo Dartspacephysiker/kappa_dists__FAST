@@ -371,6 +371,7 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
         ADD_STR_ELEMENT,kappaFit,'bulkAngleInf',add_angleStr
      ENDIF
 
+     ;; multiply density by number of angles over which spectrum is averaged
      IF have_curveFit_opt THEN IF KEYWORD_SET(kCurvefit_opt.fit1D__sc_eSpec) THEN BEGIN
         A[3] *= avgFactorArr[bounds_i]
         kappaFit.A[3] *= avgFactorArr[bounds_i]

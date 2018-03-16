@@ -58,10 +58,22 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
   ;;Units for later
   INIT_KAPPA_UNITCONV,curDataStr
 
+  SETUP_KAPPA_FIT2D__HORSESHOE, $
+     eRange_fit, $
+     curDataStr, $
+     wtsForFit,X2D,Y2D,dataToFit, $
+     fa, $
+     IS_MAXWELLIAN_FIT=is_maxwellian_fit, $
+     UNITS=units, $
+     ;; IN_ESTIMATED_LC=estimated_lc, $
+     OUT_FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo
+
   UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
      ;; bestAngle_i, $
      ;; angleBin_i, $
      !NULL, $
+     X2D=X2D, $
+     Y2D=Y2D, $
      KEYWORD_SET(only_Gaussian_estimate) ? gaussFitAngle_index : kappaFitAngle_index, $
      ESTIMATE_LOSSCONE=KF2D__SDTData_opt.estimate_sourceCone_from_dist, $
      ;; /ESTIMATE_LOSSCONE, $
@@ -88,6 +100,11 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
 
      KAPPA_FIT2D__HORSESHOE,curDataStr, $
                             hadSuccessK, $
+                            X2D=X2D, $
+                            Y2D=Y2D, $
+                            DATATOFIT=dataToFit, $
+                            WEIGHTS=wtsForFit, $
+                            FUNCTARGS=fa, $
                             ERANGE_FIT=eRange_fit, $
                             FITPARAMSTRUCT=kappaParamStruct, $
                             ;; FIT2DPARAMSTRUCT=fit2DParamStruct, $
@@ -95,6 +112,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                             FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
                             ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                             UNITS=units, $
+                            FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                             OUT_FIT2DPARAMS=kappaFit2DParams, $
                             MAKE_FIT2D_INFO=make_fit2D_info, $
                             OUT_FIT2D_FITINFO=kappaFit2D_info, $
@@ -124,7 +142,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                  FIT2D__SHOW__IS_MAXWELLIAN_FIT=0, $
                                  FIT2D__SHOW__FITSTRING='Kappa', $
                                  PRINT_2DFITINFO=print_2DFitInfo, $
-                                 TIMEFNSTR=timeFNStr
+                                 TIMEFNSTR=timeFNStr, $
+                                 EPS=eps
 
 
      ENDIF
@@ -165,6 +184,11 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
         
         KAPPA_FIT2D__HORSESHOE,curDataStr, $
                                hadSuccessG, $
+                               X2D=X2D, $
+                               Y2D=Y2D, $
+                               DATATOFIT=dataToFit, $
+                               WEIGHTS=wtsForFit, $
+                               FUNCTARGS=fa, $
                                /IS_MAXWELLIAN_FIT, $
                                ERANGE_FIT=eRange_fit, $
                                FITPARAMSTRUCT=gaussParamStruct, $
@@ -173,6 +197,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                FIT__LINEAR_ENERGY_SHIFT=KF2D__Curvefit_opt.fit__linear_energy_shift, $
                                ;; FIT__LES__TAKE_STOCK_OF_RB=KF2D__Curvefit_opt.fit__LES__take_stock_of_RB, $
                                UNITS=units, $
+                               FIT2D_DENS_ANGLEINFO=fit2D_dens_angleInfo, $
                                OUT_FIT2DPARAMS=gaussFit2DParams, $
                                MAKE_FIT2D_INFO=make_fit2D_info, $
                                OUT_FIT2D_FITINFO=gaussFit2D_info, $
@@ -200,7 +225,8 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                     /FIT2D__SHOW__IS_MAXWELLIAN_FIT, $
                                     FIT2D__SHOW__FITSTRING='Maxwell', $
                                     PRINT_2DFITINFO=print_2DFitInfo, $
-                                    TIMEFNSTR=timeFNStr
+                                    TIMEFNSTR=timeFNStr, $
+                                    EPS=eps
 
         ENDIF
 
