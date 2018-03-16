@@ -61,7 +61,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
 
         ;; 2018/03/16
         ;;Kill below peak energy
-        toBeKilled = WHERE(fit2DStr.energy LT fit2DParams[0],nKillah,/NULL) & fit2DStr.data[toBeKilled] = 0. & fit2DStr.ddata[toBeKilled] = 0.
+        ;; toBeKilled = WHERE(fit2DStr.energy LT fit2DParams[0],nKillah,/NULL) & fit2DStr.data[toBeKilled] = 0. & fit2DStr.ddata[toBeKilled] = 0.
         ;; fit2DStr.data[WHERE(fit2DStr.energy LT MIN(eRange_fit),/NULL)] = 0.
 
         tmpStr          = CONV_UNITS(fit2DStr,'counts')
