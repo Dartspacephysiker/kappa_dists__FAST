@@ -435,7 +435,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         
         dEF_list.Add,TEMPORARY(diff_eFlux)
 
-        diff_eFlux_files = [diff_eFlux_files,diffEfluxDir+diff_eFlux_file]
+        diff_eFlux_files = [diff_eFlux_files,loadDir+diffEFluxSuffDir+diff_eFlux_file]
 
      ENDFOR
 
