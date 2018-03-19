@@ -1113,7 +1113,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      AND totSuccessesK GT 0                        $
   THEN BEGIN
 
-     SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bashrc;'
+     SHELLCMDINIT = 'export PS1=dude; . /home/spencerh/.bash_funcs;'
      nyPDF = STRING(FORMAT='("orb",A0,"_",A0)',KF2D__strings.orbStr,fitDimStr)+'.pdf'
 
      pdfCount = 0
