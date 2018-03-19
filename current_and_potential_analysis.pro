@@ -771,18 +771,19 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,""
 
         PRINT,"Getting eSpecs ..."
+        eSpecUnits            = 'flux'
         eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 diff_eFlux, $
                                 /RETRACE, $
                                 ANGLE=aRange__peakEn, $
-                                UNITS=units)
+                                UNITS=eSpecUnits)
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            oneCount_eSpec     = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 dEF_oneCount, $
                                 /RETRACE, $
                                 ANGLE=aRange__peakEn, $
-                                UNITS=units)
+                                UNITS=eSpecUnits)
         ENDIF
         
         angles                = TRANSPOSE(diff_eFlux.theta,[1,0,2])

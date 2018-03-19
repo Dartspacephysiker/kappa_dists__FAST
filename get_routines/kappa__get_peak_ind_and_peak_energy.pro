@@ -92,7 +92,7 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
         ;;Less strict
         ;; candidate       = (Yorig[k] GT Yorig[k+whichWy]) + (Yorig[k] GT Yorig[k+whichWy+whichWy])
         ;;Stricter
-        facDecrease     = 0.05
+        facDecrease     = 0.025
         CASE (minEInd-k) OF
            2: BEGIN
               candidate       = ((Yorig[k        ] - Yorig[k+whichWy  ])/Yorig[k        ] GT facDecrease) + $
