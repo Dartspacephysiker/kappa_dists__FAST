@@ -215,7 +215,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      SAVECURPOTFILE=saveCurPotFile
 
   IF KEYWORD_SET(outDir) THEN BEGIN
-     diffEfluxDir = outDir.Replace('cur_and_pot_analysis/','diff_eFlux/')
+     loadDir = outDir.Replace('cur_and_pot_analysis/','')
+     diffEFluxSuffDir = 'diff_eFlux/'
   ENDIF
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -346,7 +347,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
            SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
            ;; FITFILE=fitFile, $
-           LOADDIR=diffEfluxDir
+           LOADDIR=loadDir
 
         pot__fName = diff_eflux_file.Replace('diff_eflux','sc_pot')
         preString = diff_eFlux_file + ' ...'
@@ -364,11 +365,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
 
         gotIt = 0B
-        IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(diffEfluxDir+diff_eFlux_file)) AND $
+        IF (FILE_TEST(diff_eFlux_file) OR FILE_TEST(loadDir+diffEFluxSuffDir+diff_eFlux_file)) AND $
            KEYWORD_SET(load_diff_eFlux_file) $
         THEN BEGIN
            afterString = "Restored "
-           realFile    = (FILE_TEST(diff_eFlux_file) ? '' : diffEfluxDir ) + diff_eFlux_file
+           realFile    = (FILE_TEST(diff_eFlux_file) ? '' : loadDir+diffEFluxSuffDir ) + diff_eFlux_file
            RESTORE,realFile
            gotIt = SIZE(diff_eFlux,/TYPE) EQ 8
         ENDIF
@@ -400,7 +401,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
                           LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
                           DIFF_EFLUX_FILE=diff_eFlux_file, $
-                          LOAD_DIR=diffEfluxDir
+                          LOAD_DIR=loadDir
         ENDELSE
         PRINT,preString + afterString
 
@@ -423,7 +424,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                    SAVE_DEF_ONECOUNT_TO_FILE=save_dEF_oneCount_to_file, $
                                    LOAD_DAT_FROM_FILE=load_diff_eFlux_file, $
                                    DIFF_EFLUX_FILE=diff_eFlux_file, $
-                                   LOAD_DIR=diffEfluxDir, $
+                                   LOAD_DIR=loadDir, $
                                    QUIET=quiet
 
            also_oneCount = N_ELEMENTS(dEF_oneCount) GT 0
