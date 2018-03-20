@@ -1064,7 +1064,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                            SDTNAME__INFERRED_E_NUMFLUX=e_numFluxName, $
                                            /STRANGEWAY_DECIMATE, $
                                            /EXIT_ON_PROBLEMS, $
-                                           QUIET=quiet)
+                                           /QUIET)
 
      magCurrent = DATA_CUT(magCurrent,itvlTime)
 
