@@ -771,7 +771,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,""
 
         PRINT,"Getting eSpecs ..."
-        eSpecUnits            = 'flux'
+        eSpecUnits            = 'eflux'
         eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 diff_eFlux, $
                                 /RETRACE, $
@@ -864,6 +864,10 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            peak_indArr[iTime]        = TEMPORARY(peak_ind)
            peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(maxEInd)],Xorig[TEMPORARY(minEInd)]]
         ENDFOR
+
+        ;; 2018/03/19
+        ;; Trying to figure out why identification of peaks in ion data is so bad
+        ;; iTime = 89 & xOrig = reform(espec.v[itime,*]) & yOrig = reform(espec.y[itime,*]) & tmpInds = WHERE(xOrig GE min_peak_energy AND xOrig LE max_peak_energy) & maxFlux = MAX(yOrig[tmpInds],maxInd_ii) & PRINT,FORMAT='(A0,G0.2," (",G0.2,")")',"Max flux (edgery): ",maxFlux,xOrig[tmpInds[maxInd_ii]] & junkPlot = PLOT(xOrig,yOrig,/xlog,/ylog,title=T2S(eSpec.x[iTime],/mS),YRANGE=MINMAX(yOrig) > 1E4) & linePlot = PLOT(REPLICATE(xOrig[tmpInds[maxInd_ii]],12),10.^(LINDGEN(12)),LINESTYLE='--',COLOR='RED',/OVERPLOT,YRANGE=MINMAX(yOrig) > 1E4)
 
         kill = WHERE(peak_energyArr LT -0.5,/NULL)
         peak_energyarr[kill] = 0.
