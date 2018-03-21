@@ -45,7 +45,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    WHICH_EEB__LABEL=label__which_eeb, $
    WHICH_TIMES__LABEL=label__which_times, $
    MOMENT_ENERGYARR=moment_energyArr, $
-   USE_PEAKE_BOUNDS_FOR_MOMENT_CALC=use_peakE_bounds_for_moments, $
+   USE_PEAKE_BOUNDS_FOR_MOMENT_CALC=use_peakE_bounds_for_moment_calc, $
+   PEAKE_BOUNDS_INDSHIFT=peakE_bounds_indShift, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    POT__FROM_FA_POTENTIAL=pot__from_fa_potential, $
    POT__ALL=pot__all, $
@@ -137,6 +138,21 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      e_above_peak_temp       = [0,0,0]
   ENDELSE
   
+  peakE_bounds_for_moment_calc = [0,0,0]
+  IF KEYWORD_SET(use_peakE_bounds_for_moment_calc) THEN BEGIN
+     CASE N_ELEMENTS(use_peakE_bounds_for_moment_calc) OF
+        1: BEGIN
+           peakE_bounds_for_moment_calc = [1,1,1] * use_peakE_bounds_for_moment_calc
+        END
+        2: BEGIN
+           peakE_bounds_for_moment_calc = [use_peakE_bounds_for_moment_calc,0]
+        END
+        3: BEGIN
+           peakE_bounds_for_moment_calc = use_peakE_bounds_for_moment_calc
+        END
+     ENDCASE
+  ENDIF
+
   IF KEYWORD_SET(elphic1998_defaults) THEN BEGIN
      eeb_or_eesArr           = KEYWORD_SET(eeb_or_eesArr) ? eeb_or_eesArr : ['ees','ies']
 
@@ -467,6 +483,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         eeb_or_ees                   = eeb_or_eesArr[eeb_k]
 
+        use_peakE_bounds_for_moments = peakE_bounds_for_moment_calc[k]
         ;; energy                       = moment_energyArr[*,k]
         energy                       = MAKE_ENERGY_ARRAYS__FOR_DIFF_EFLUX(diff_eFlux, $
                                                                           ENERGY=moment_energyArr[*,k], $
@@ -798,6 +815,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_energyArr        = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
         peak_dEArr            = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
         peak_EBoundsArr       = MAKE_ARRAY(2,nHere,VALUE=-999,/FLOAT)
+        peakE_indShift        = KEYWORD_SET(peakE_bounds_indShift) ? peakE_bounds_indShift : [0,0]
+
         FOR iTime=0,nHere-1 DO BEGIN
 
            XorigArr           = energies[*,*,iTime]
@@ -847,7 +866,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
               /CONTINUE_IF_NOMATCH, $
               /TEST_NOREV, $
-              ONECOUNT_STR=oneCurve
+              ONECOUNT_STR=oneCurve, $
+              WHICHWY=whichWy
 
            ;;Note that while these are called maxE and minE, suggesting they refer to the max energy and min energy, they do NOT. 
            ;;Rather, they refer to the lowest and highest indices falling within the user-specified parameters 
@@ -864,7 +884,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            peak_dEArr[iTime]         = eSpec.vErr[iTime,peak_ind]
            peak_energyArr[iTime]     = TEMPORARY(peak_energy)
            peak_indArr[iTime]        = TEMPORARY(peak_ind)
-           peak_EBoundsArr[*,iTime]  = [Xorig[TEMPORARY(maxEInd)],Xorig[TEMPORARY(minEInd)]]
+           peak_EBoundsArr[*,iTime]  = [Xorig[(TEMPORARY(maxEInd)-peakE_indShift[0]*whichWy) < (nEnergies-1)], $
+                                        Xorig[(TEMPORARY(minEInd)-peakE_indShift[1]*whichWy) > 0]]
         ENDFOR
 
         ;; 2018/03/19

@@ -15,7 +15,8 @@ PRO KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
    CONTINUE_IF_NOMATCH=its_OK__everyone_has_feelings, $
    TEST_NOREV=test_noRev, $
    FOR_DMSP=for_DMSP, $
-   ONECOUNT_STR=oneCurve
+   ONECOUNT_STR=oneCurve, $
+   WHICHWY=whichWy
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
