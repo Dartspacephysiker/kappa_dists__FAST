@@ -303,6 +303,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
      diff_eFlux_files      = !NULL
 
+     eSpec_list            = LIST()
      peak_ind_list         = LIST()
      peak_energy_list      = LIST()
      peak_dE_list          = LIST()
@@ -777,6 +778,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                 /RETRACE, $
                                 ANGLE=aRange__peakEn, $
                                 UNITS=eSpecUnits)
+        eSpec_list.Add,eSpec
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            oneCount_eSpec     = GET_EN_SPEC__FROM_DIFF_EFLUX( $
@@ -1121,6 +1123,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           cur1Err_list, $
           charE1Err_list, $
           T1err_list, $
+          eSpec_list, $
           peak_ind_list, $
           peak_energy_list,peak_dE_list, $
           aRange_oMoments_list, $
@@ -1185,6 +1188,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlJ          = !NULL
      itvlJe         = !NULL
      itvlCur        = !NULL
+     itvlESpecX     = !NULL
+     itvlESpecY     = !NULL
+     itvlESpecYErr  = !NULL
+     itvlESpecV     = !NULL
+     itvlESpecVErr  = !NULL
      itvlcharE      = !NULL
      itvlPeakE      = !NULL
      itvlT          = !NULL
@@ -1256,7 +1264,15 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpPeakE            = (peak_energy_list[k])[theseInds]
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
         tmpT                = (T_list[k])[*,theseInds]
-
+        ;; tmpeSpecX           = {x: (eSpec_list[k]).x[theseInds], $
+        ;;                        y: (eSpec_list[k]).y[theseInds,*], $
+        ;;                        v: (eSpec_list[k]).v[theseInds,*]}
+        tmpESpecX           = (eSpec_list[k]).x[theseInds]
+        tmpESpecY           = (eSpec_list[k]).y[theseInds,*]
+        tmpESpecYErr        = (eSpec_list[k]).yErr[theseInds,*]
+        tmpESpecV           = (eSpec_list[k]).v[theseInds,*]
+        tmpESpecVErr        = (eSpec_list[k]).vErr[theseInds,*]
+        
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            
            ;; tmpN1            = (N1_list[k]).y[theseInds]
@@ -1397,6 +1413,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            ENDIF
         ENDIF
 
+        ;; itvlESpec            = [itvlESpec     ,tmpESpec     ]
+        itvlESpecX           = [itvlESpecX    ,tmpESpecX    ]
+        itvlESpecY           = [itvlESpecY    ,tmpESpecY    ]
+        itvlESpecYErr        = [itvlESpecYErr ,tmpESpecYErr ]
+        itvlESpecV           = [itvlESpecV    ,tmpESpecV    ]
+        itvlESpecVErr        = [itvlESpecVErr ,tmpESpecVErr ]
         itvlPeakE            = [itvlPeakE     ,tmpPeakE     ]
         itvlPeakdE           = [itvlPeakdE    ,tmpPeakdE    ]
 
@@ -1440,7 +1462,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               tmpStruct   = CREATE_STRUCT(TEMPORARY(tmpStruct),TEMPORARY(tmp1Struct))
            ENDIF
 
-           bonus          = {peakE    : TEMPORARY(itvlPeakE)               , $
+           bonus          = {eSpec    : {x:TEMPORARY(itvlESpecX), $
+                                         y:TEMPORARY(itvlESpecY), $
+                                         v:TEMPORARY(itvlESpecV), $
+                                         yErr:TEMPORARY(itvlESpecYErr), $
+                                         vErr:TEMPORARY(itvlESpecVErr)}, $
+                             ;; TEMPORARY(itvlESpec)               , $
+                             peakE    : TEMPORARY(itvlPeakE)               , $
                              peakErr  : TEMPORARY(itvlPeakdE)              , $
                              energy   : moment_energyArr[*,k]              , $
                              angles   : {charE   : aRange_oCharE_list[k]   , $

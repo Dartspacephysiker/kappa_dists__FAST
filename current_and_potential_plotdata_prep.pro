@@ -275,6 +275,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Et potential
   potErr      = MAKE_ARRAY(nHere,1+KEYWORD_SET(add_iu_pot),/DOUBLE,VALUE=0.D) ;You'll see why
+;; FOR plo=266,278 DO BEGIN & tmpTString = T2S(curPotList[iuInd].time[plo],/MS) & tString = ((STRMID(tmpTString,11,STRLEN(tmpTString))).Replace('.','__')).Replace(':','_') & fName = 'orbit1612_upward_ions__'+tString+'.eps' & window=WINDOW(DIMENSIONS=[800,600],/BUFFER) & xData = REFORM(curPotList[iuInd].eSpec.v[plo,*]) & yData = REFORM(curPotList[iuInd].eSpec.y[plo,*]) & yErrData = REFORM(curPotList[iuInd].eSpec.yErr[plo,*]) & errPlot=errorplot(xData,yData,yErrData,/XLOG,/YLOG,TITLE="Upward Ions, " + T2S(curPotList[iuInd].time[plo],/MS),YRANGE=[1E4,MAX(yData)*1.1],XTITLE="Energy (eV)",YTITLE="Differential Energy Flux (eV/cm$^2$-s-sr-eV)",/CURRENT) & PRINT,"Saving " + fName + " ..." & window.Save,fName & window.close & window=!NULL & ENDFOR
   CASE 1 OF
      KEYWORD_SET(use_charE_for_downPot): BEGIN
 
