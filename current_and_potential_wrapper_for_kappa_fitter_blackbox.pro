@@ -76,6 +76,8 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    CAP_STRUCT=cAP_struct, $
    BATCH_MODE=batch_mode, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
+   ARANGE__MOMENTS_LIST=aRange__moments_list, $
+   ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS

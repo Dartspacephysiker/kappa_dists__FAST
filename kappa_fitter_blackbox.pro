@@ -467,6 +467,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+        ARANGE__MOMENTS_LIST=aRange__moments_list, $
+        ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
         OUT_CURPOTLIST=curPotList, $
         OUT_JVPLOTDATA=jvPlotData, $
         OUT_AVGS_FOR_FITTING=avgs_JVfit, $
@@ -770,6 +772,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            LOWDENSITY_THRESHOLD=lowDens_thresh, $
                            DIFFEFLUX_THRESHOLD=diffEflux_thresh, $
                            N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
+                           ION_ANGLERANGE=curPotList[2].angles.peakEn, $
+                           ION_ENERGYRANGE=curPotList[2].energy, $
                            SAVE_PS=sway__save_ps, $
                            SAVE_PNG=sway__save_png, $
                            EPS=eps, $

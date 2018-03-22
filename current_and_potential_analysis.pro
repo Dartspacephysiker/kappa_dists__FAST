@@ -828,7 +828,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,""
 
         PRINT,"Getting eSpecs ..."
-        eSpecUnits            = 'flux'
+        eSpecUnits            = 'eflux'
         eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 diff_eFlux, $
                                 /RETRACE, $
