@@ -347,6 +347,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
            saveStr += 'energy_electrons,'
         ENDIF
 
+        IF N_ELEMENTS(energy_electron_tBounds) GT 0 THEN BEGIN
+           saveStr += 'energy_electron_tBounds,'
+        ENDIF
+
         IF N_ELEMENTS(kappaFit1Ds) GT 0 THEN BEGIN
            saveStr += 'kappaFit1Ds,'
         ENDIF
@@ -475,8 +479,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   lastFile = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/lastFile.sav'
   PRINT,"Saving lastFile stuff: "
-  PRINT,"avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh"
-  SAVE,avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh, $
+  PRINT,"avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,energy_electron_tBounds,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh"
+  SAVE,avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,energy_electron_tBounds,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh, $
        FILENAME=lastFile
 
   ;;Can we do 2D action?
@@ -743,6 +747,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            TPLT_VARS=tPlt_vars, $
                            EEB_OR_EES=eeb_or_ees, $
                            ENERGY_ELECTRONS=energy_electrons, $
+                           ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
                            TLIMIT_NORTH=tlimit_north, $
                            TLIMIT_SOUTH=tlimit_south, $
                            TLIMIT_ALL=tlimit_all, $
@@ -782,6 +787,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              TPLT_VARS=tPlt_vars, $
                              EEB_OR_EES=eeb_or_ees, $
                              ENERGY_ELECTRONS=energy_electrons, $
+                             ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
                              ELECTRON_ANGLERANGE=KEYWORD_SET(kSum__eAngle) ? kSum__eAngle : electron_angleRange, $
                              TLIMIT_NORTH=tlimit_north, $
                              TLIMIT_SOUTH=tlimit_south, $

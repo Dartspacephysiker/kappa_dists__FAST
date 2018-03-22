@@ -62,9 +62,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ERANGE__TEMP_LIST=eRange__temp_list, $
    ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
-   MIN_PEAK_ENERGY_TBOUNDS_LIST=min_peak_energy_tBounds_list, $
-   MIN_PEAK_ENERGY_TBOUNDED_LIST=min_peak_energy_tBounded_list, $
    MAX_PEAK_ENERGYARR=max_peak_energyArr, $
+   MIN_PEAK_ENERGY_TSTRUCT=min_peak_energy_tStruct, $
+   MAX_PEAK_ENERGY_TSTRUCT=max_peak_energy_tStruct, $
    PEAK_ENERGY__START_AT_HIGHEARR=peak_energy__start_at_highEArr, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
@@ -498,12 +498,44 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                                           EEB_OR_EES=eeb_or_ees)
         ENDIF
 
-        IF KEYWORD_SET(min_peak_energy_tBounds_list) THEN BEGIN
-           
-        ENDIF ELSE BEGIN
-           min_peak_energy           = min_peak_energyArr[k]
-        ENDELSE
-        max_peak_energy              = max_peak_energyArr[k]
+        minpeType                   = 'F0.2'
+        min_peak_energy           = min_peak_energyArr[k]
+        has_minpe_struct            = KEYWORD_SET(min_peak_energy_tStruct)
+        IF has_minpe_struct THEN BEGIN
+
+           IF (WHERE(min_peak_energy_tStruct.forWhom EQ k))[0] NE -1 THEN BEGIN
+
+              min_peak_energy        = 'tStruct'
+              minpeType                = 'A0'
+
+           ENDIF ELSE BEGIN
+
+              min_peak_energy        = min_peak_energyArr[k]
+              has_minpe_struct       = 0
+              
+           ENDELSE
+
+        ENDIF
+
+        maxpeType                   = 'F0.2'
+        max_peak_energy           = max_peak_energyArr[k]
+        has_maxpe_struct            = KEYWORD_SET(max_peak_energy_tStruct)
+        IF has_maxpe_struct THEN BEGIN
+
+           IF (WHERE(max_peak_energy_tStruct.forWhom EQ k))[0] NE -1 THEN BEGIN
+
+              max_peak_energy        = 'tStruct'
+              maxpeType                = 'A0'
+
+           ENDIF ELSE BEGIN
+
+              max_peak_energy        = max_peak_energyArr[k]
+              has_maxpe_struct       = 0
+              
+           ENDELSE
+
+        ENDIF
+        ;; max_peak_energy              = max_peak_energyArr[k]
         peak_energy__start_at_highE  = peak_energy__start_at_highEArr[k]
         upgoing                      = upgoingArr[k]
 
@@ -788,8 +820,9 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         ENDIF
         ;; PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"angleRange",angleRange
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"energy",MEAN(energy,DIMENSION=2)
-        PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"min_peak_energy",min_peak_energy
-        PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"max_peak_energy",max_peak_energy
+        PRINT,FORMAT='(A0,T30,":",T35,2('+minpeType+',:,","))',"min_peak_energy",min_peak_energy
+        PRINT,FORMAT='(A0,T30,":",T35,2('+maxpeType+',:,","))',"max_peak_energy",max_peak_energy
+        ;; PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"max_peak_energy",max_peak_energy
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"peak_energy__start_at_highE",peak_energy__start_at_highE
         PRINT,FORMAT='(A0,T30,":",T35,2(F0.2,:,","))',"upgoing",upgoing
         PRINT,""
@@ -823,6 +856,24 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_EBoundsArr       = MAKE_ARRAY(2,nHere,VALUE=-999,/FLOAT)
         peakE_indShift        = KEYWORD_SET(peakE_bounds_indShift) ? peakE_bounds_indShift : [0,0]
 
+        IF has_minpe_struct THEN BEGIN
+
+           minpe_arr          = KAPPA__MAKE_ENERGY_ARR_FOR_SPECIFIED_TBOUNDS( $
+                                eSpec.x, $
+                                min_peak_energy_tStruct, $
+                                k)
+
+        ENDIF
+
+        IF has_maxpe_struct THEN BEGIN
+
+           maxpe_arr          = KAPPA__MAKE_ENERGY_ARR_FOR_SPECIFIED_TBOUNDS( $
+                                eSpec.x, $
+                                max_peak_energy_tStruct, $
+                                k)
+
+        ENDIF
+
         FOR iTime=0,nHere-1 DO BEGIN
 
            XorigArr           = energies[*,*,iTime]
@@ -845,15 +896,36 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                  NAME:"One Count"}
            ENDIF
            
-           IF KEYWORD_SET(min_peak_energy) THEN BEGIN
+           CASE 1 OF
+              has_minpe_struct: BEGIN
+                 minpe = minpe_arr[iTime]
+                 ;; PRINT,"MINPE : ",minpe
+              END
+              ELSE: BEGIN
+                 minpe = KEYWORD_SET(min_peak_energy) ? min_peak_energy : !NULL
+              END
+           ENDCASE
+
+           IF KEYWORD_SET(minpe) THEN BEGIN
               ;;Try taking it from the top
-              min_peak_ind    = MAX(WHERE(REFORM(XorigArr[0,*]) GE min_peak_energy))
+              min_peak_ind    = MAX(WHERE(REFORM(XorigArr[0,*]) GE minpe))
               IF min_peak_ind EQ -1 THEN BEGIN
                  STOP
               ENDIF
            ENDIF ELSE BEGIN
               min_peak_ind    = nEnergies-1
            ENDELSE
+
+           CASE 1 OF
+              has_maxpe_struct: BEGIN
+                 maxpe = maxpe_arr[iTime]
+                 ;; PRINT,"MAXPE : ",maxpe
+              END
+              ELSE: BEGIN
+                 maxpe = KEYWORD_SET(max_peak_energy) ? max_peak_energy : !NULL
+              END
+           ENDCASE
+
 
            KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
               Xorig,Yorig, $
@@ -867,8 +939,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
               N_ABOVE_PEAK=n_above_peak, $
               BULK_OFFSET=bulk_offset, $
               CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
-              MIN_PEAK_ENERGY=min_peak_energy, $
-              MAX_PEAK_ENERGY=max_peak_energy, $
+              MIN_PEAK_ENERGY=minpe, $
+              MAX_PEAK_ENERGY=maxpe, $
               PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
               /CONTINUE_IF_NOMATCH, $
               /TEST_NOREV, $
@@ -896,7 +968,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         ;; 2018/03/19
         ;; Trying to figure out why identification of peaks in ion data is so bad
-        ;; iTime = 89 & xOrig = reform(espec.v[itime,*]) & yOrig = reform(espec.y[itime,*]) & tmpInds = WHERE(xOrig GE min_peak_energy AND xOrig LE max_peak_energy) & maxFlux = MAX(yOrig[tmpInds],maxInd_ii) & PRINT,FORMAT='(A0,G0.2," (",G0.2,")")',"Max flux (edgery): ",maxFlux,xOrig[tmpInds[maxInd_ii]] & junkPlot = PLOT(xOrig,yOrig,/xlog,/ylog,title=T2S(eSpec.x[iTime],/mS),YRANGE=MINMAX(yOrig) > 1E4) & linePlot = PLOT(REPLICATE(xOrig[tmpInds[maxInd_ii]],12),10.^(LINDGEN(12)),LINESTYLE='--',COLOR='RED',/OVERPLOT,YRANGE=MINMAX(yOrig) > 1E4)
+        ;; iTime = 89 & xOrig = reform(espec.v[itime,*]) & yOrig = reform(espec.y[itime,*]) & tmpInds = WHERE(xOrig GE minpe AND xOrig LE maxpe) & maxFlux = MAX(yOrig[tmpInds],maxInd_ii) & PRINT,FORMAT='(A0,G0.2," (",G0.2,")")',"Max flux (edgery): ",maxFlux,xOrig[tmpInds[maxInd_ii]] & junkPlot = PLOT(xOrig,yOrig,/xlog,/ylog,title=T2S(eSpec.x[iTime],/mS),YRANGE=MINMAX(yOrig) > 1E4) & linePlot = PLOT(REPLICATE(xOrig[tmpInds[maxInd_ii]],12),10.^(LINDGEN(12)),LINESTYLE='--',COLOR='RED',/OVERPLOT,YRANGE=MINMAX(yOrig) > 1E4)
 
         kill = WHERE(peak_energyArr LT -0.5,/NULL)
         peak_energyarr[kill] = 0.
