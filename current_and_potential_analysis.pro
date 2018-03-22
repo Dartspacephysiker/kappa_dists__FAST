@@ -62,6 +62,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ERANGE__TEMP_LIST=eRange__temp_list, $
    ELPHIC1998_DEFAULTS=Elphic1998_defaults, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
+   MIN_PEAK_ENERGY_TBOUNDS_LIST=min_peak_energy_tBounds_list, $
+   MIN_PEAK_ENERGY_TBOUNDED_LIST=min_peak_energy_tBounded_list, $
    MAX_PEAK_ENERGYARR=max_peak_energyArr, $
    PEAK_ENERGY__START_AT_HIGHEARR=peak_energy__start_at_highEArr, $
    UPGOINGARR=upgoingArr, $
@@ -216,7 +218,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      max_peak_energyArr      = KEYWORD_SET(max_peak_energyArr) ? max_peak_energyArr : [3.1D4,3.1D4,2.4e4]
 
      ;;If doing upgoing electrons
-     peak_energy__start_at_highEArr  = [0,1,1]
+     peak_energy__start_at_highEArr  = [0,1,0]
      upgoingArr                      = [0,1,1]
 
   ENDIF
@@ -496,7 +498,11 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                                                           EEB_OR_EES=eeb_or_ees)
         ENDIF
 
-        min_peak_energy              = min_peak_energyArr[k]
+        IF KEYWORD_SET(min_peak_energy_tBounds_list) THEN BEGIN
+           
+        ENDIF ELSE BEGIN
+           min_peak_energy           = min_peak_energyArr[k]
+        ENDELSE
         max_peak_energy              = max_peak_energyArr[k]
         peak_energy__start_at_highE  = peak_energy__start_at_highEArr[k]
         upgoing                      = upgoingArr[k]
@@ -789,7 +795,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         PRINT,""
 
         PRINT,"Getting eSpecs ..."
-        eSpecUnits            = 'eflux'
+        eSpecUnits            = 'flux'
         eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 diff_eFlux, $
                                 /RETRACE, $

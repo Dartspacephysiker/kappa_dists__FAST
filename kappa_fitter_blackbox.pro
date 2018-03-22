@@ -4,6 +4,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           ;; ELECTRON_LOSSCONEANGLE=electron_lca, $
                           MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                           ENERGY_ELECTRONS=energy_electrons, $
+                          ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
                           JUST_DIFF_EFLUX=just_diff_eFlux, $
                           DIFF_EFLUX=diff_eFlux, $
                           DEF_ONECOUNT=dEF_oneCount, $
@@ -217,6 +218,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         SDT_TIME_INDS=bounds, $
         DO_ALL_TIMES=do_all_times, $
         ENERGY_ELECTRONS=energy_electrons, $
+        ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
         JUST_DIFF_EFLUX=just_diff_eFlux, $
         DIFF_EFLUX=diff_eFlux, $
         DEF_ONECOUNT=dEF_oneCount, $

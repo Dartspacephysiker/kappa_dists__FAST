@@ -366,6 +366,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ;;We won't want to use this anymore. We're outrightly fitting 2D, you know
   ;; INIT_KAPPA_FIT2DPARAMS_INFO,fit2DParamStruct
 
+  ;; See if we need to plan on swapping energy_electrons on the fly
+  swapEnergyBounds = TAG_EXIST(KF2D__SDTData_opt,'energy_electron_tBounds')
+
   ;;Some plot things
   ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),MAX(Xorig)]
   ;; xRange                                      = [MIN(Xorig[WHERE(Xorig GT 0)]),defXRange[1]]
@@ -404,6 +407,31 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         FOR jjBleakerStreet=0,N_ELEMENTS(breakTime)-1 DO BEGIN
            IF ABS(t-breakTime[jjBleakerStreet]) LT 0.5 THEN STOP
         ENDFOR
+     ENDIF
+
+     ;; Check if we need to change energy_electrons
+     IF swapEnergyBounds THEN BEGIN
+        
+        KF2D__SDTData_opt.energy_electrons = KAPPA__UPDATE_ENERGY_ELECTRONS( $
+                                             t, $
+                                             KF2D__SDTData_opt.energy_electron_tBounds, $
+                                             KF2D__SDTData_opt.energy_electrons_arr, $
+                                             KF2D__SDTData_opt.energy_electrons_curInd, $
+                                             KF2D__SDTData_opt.energy_electron_NtBounds, $
+                                             UPDATED_INDEX=updateInd)
+        KF2D__SDTData_opt.energy_electrons_curInd = updateInd
+        ;; IF t GT KF2D__SDTData_opt.energy_electron_tBounds[1,KF2D__SDTData_opt.energy_electrons_curInd] THEN BEGIN
+        ;;    OK = 0
+        ;;    WHILE ~OK DO BEGIN
+        ;;       OK = t LT KF2D__SDTData_opt.energy_electron_tBounds[1,KF2D__SDTData_opt.energy_electrons_curInd+1]
+        ;;       IF OK THEN BEGIN
+        ;;          KF2D__SDTData_opt.energy_electrons_curInd += 1
+        ;;          BREAK
+        ;;       ENDIF
+        ;;    ENDWHILE
+        ;;    KF2D__SDTData_opt.energy_electrons = KF2D__SDTData_opt.energy_electron_arr[*,KF2D__SDTData_opt.energy_electrons_curInd]
+        ;; ENDIF
+
      ENDIF
 
      ;;And now the order becomes [angle,energy] for each of these arrays

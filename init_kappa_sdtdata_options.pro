@@ -2,6 +2,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                                     DO_ALL_TIMES=do_all_times, $
                                     ENERGY_ELECTRONS=energy_electrons, $
+                                    ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
                                     ELECTRON_ANGLERANGE=electron_angleRange, $
                                     MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                                     ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
@@ -30,6 +31,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                    spec_avg_intvl      :defSpectra_average_interval, $
                    do_all_times        :0, $
                    energy_electrons    :[4,3.5e4], $
+                   ;; energy_electrons_arr : !NULL
+                   ;; energy_electron_tBounds : !NULL, $
                    routine             :'get_fa_' + defEEB_or_EES, $
                    electron_anglerange :defElectron_angleRange, $
                    manual_angle_correction : 0, $
@@ -65,10 +68,44 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
   ENDIF
 
   IF N_ELEMENTS(energy_electrons) GT 0 THEN BEGIN
-     kSDTData_opt.energy_electrons          = energy_electrons
+
+     IF (WHERE(SIZE(energy_electrons,/TYPE) EQ [2,3,4,5]))[0] EQ -1 THEN BEGIN
+        PRINT,"Invalid data type for energy_electrons!"
+        STOP
+     ENDIF
+
+     IF N_ELEMENTS(energy_electrons) EQ 2 THEN BEGIN
+        kSDTData_opt.energy_electrons          = energy_electrons
+        ;; PRINT,FORMAT='("SDT electron energy range",T45,":",T48,2(F0.2))', $
+        PRINT,FORMAT='("kSDTData_opt.energy_electrons",T45,":",T48,2(F0.2,:,", "))', $
+              kSDTData_opt.energy_electrons
+     ENDIF ELSE BEGIN
+        PRINT,"In anticipation of energy_electron_tBounds ..."
+        anticipation = 1
+     ENDELSE
+
+  ENDIF
+
+  IF N_ELEMENTS(energy_electron_tBounds) GT 0 THEN BEGIN
      ;; PRINT,FORMAT='("SDT electron energy range",T45,":",T48,2(F0.2))', $
-     PRINT,FORMAT='("kSDTData_opt.energy_electrons",T45,":",T48,2(F0.2,:,", "))', $
-           kSDTData_opt.energy_electrons
+     IF N_ELEMENTS(energy_electrons) NE N_ELEMENTS(energy_electron_tBounds) THEN BEGIN
+        PRINT,"UNEQUAL NUMBERS OF ENERGY_ELECTRON_RANGES AND ENERGY_ELECTRON_TBOUNDS SPECIFIED"
+        STOP
+     ENDIF
+     kSDTData_opt.energy_electrons = energy_electrons[*,0]
+     
+     STR_ELEMENT,kSDTData_opt,'energy_electrons_arr',energy_electrons,/ADD_REPLACE
+     STR_ELEMENT,kSDTData_opt,'energy_electrons_curInd',0S,/ADD_REPLACE
+     STR_ELEMENT,kSDTData_opt,'energy_electron_NtBounds',N_ELEMENTS(energy_electron_tBounds[0,*]),/ADD_REPLACE
+     STR_ELEMENT,kSDTData_opt,'energy_electron_tBounds',REFORM(S2T(energy_electron_tBounds),2,N_ELEMENTS(energy_electron_tBounds[0,*])),/ADD_REPLACE
+     STR_ELEMENT,kSDTData_opt,'energy_electron_tBoundsStr',energy_electron_tBounds,/ADD_REPLACE
+     PRINT,FORMAT='("kSDTData_opt.energy_electron_tBounds",T45,":",T48,2(F0.2,:,", "))', $
+           kSDTData_opt.energy_electron_tBounds
+     anticipation = 0
+  ENDIF
+  IF anticipation EQ 1 THEN BEGIN
+     PRINT,"Expected energy_electron_tBounds, but is not provided!"
+     STOP
   ENDIF
 
   IF N_ELEMENTS(electron_angleRange) GT 0 THEN BEGIN

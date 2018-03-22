@@ -85,6 +85,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                      DO_ALL_TIMES=do_all_times, $
                      ENERGY_ELECTRONS=energy_electrons, $
+                     ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
                      ELECTRON_ANGLERANGE=electron_angleRange, $
                      MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $

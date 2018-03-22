@@ -274,8 +274,32 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Et potential
+
+  ;; Kluge stuff from 2018/03/21, working with orbit 1612. Line below plots upward ion differential energy spectrum for 'plo' indices 
+;; FOR plo=145,155 DO BEGIN & tmpTString = T2S(curPotList[iuInd].time[plo],/MS) & tString = ((STRMID(tmpTString,11,STRLEN(tmpTString))).Replace('.','__')).Replace(':','_') & fName = 'orbit1612_upward_ions__'+tString+'.eps' & window=WINDOW(DIMENSIONS=[800,600],/BUFFER) & xData = REFORM(curPotList[iuInd].eSpec.v[plo,*]) & yData = REFORM(curPotList[iuInd].eSpec.y[plo,*]) & yErrData = REFORM(curPotList[iuInd].eSpec.yErr[plo,*]) & errPlot=errorplot(xData,yData,yErrData,/XLOG,/YLOG,TITLE="Upward Ions, " + T2S(curPotList[iuInd].time[plo],/MS),YRANGE=[1E4,MAX(yData)*1.1],XTITLE="Energy (eV)",YTITLE="Differential Energy Flux (eV/cm$^2$-s-sr-eV)",/CURRENT) & PRINT,"Saving " + fName + " ..." & window.Save,fName & window.close & window=!NULL & ENDFOR
+
+  ;; hammerTimeOrbit1612 = 1 ;2018/03/21
+  ;; IF KEYWORD_SET(hammerTimeOrbit1612) THEN BEGIN
+  ;;    tmpStruct = curPotList[iuInd]
+  ;;    tmpStruct.peakE[145] = 16.9 ; 145   1997-01-17/12:01:09.837       
+  ;;    tmpStruct.peakE[146] = 40.04 ; 146   1997-01-17/12:01:10.152       
+  ;;    tmpStruct.peakE[147] = 46.2	; 147   1997-01-17/12:01:10.467       
+  ;;    tmpStruct.peakE[148] = 46.2	; 148   1997-01-17/12:01:10.783       
+  ;;    tmpStruct.peakE[149] = 40.04 ; 149   1997-01-17/12:01:11.098       
+  ;;    tmpStruct.peakE[150] = 40.0	; 150   1997-01-17/12:01:11.413       
+  ;;    tmpStruct.peakE[151] = 16.9	; 151   1997-01-17/12:01:11.729       
+  ;;    tmpStruct.peakE[152] = 13.9	; 152   1997-01-17/12:01:12.044       
+  ;;    tmpStruct.peakE[153] = 13.9	; 153   1997-01-17/12:01:12.359       
+  ;;    tmpStruct.peakE[154] = 23.1	; 154   1997-01-17/12:01:12.675       
+  ;;    tmpStruct.peakE[155] = 0.0	; 155   1997-01-17/12:01:12.990       
+  ;;    tmpStruct.peakE[206] = 110.8 ; 206   1997-01-17/12:01:29.073
+  ;;    tmpStruct.peakE[208] = 110.8 ; 208   1997-01-17/12:01:29.703
+  ;;    curPotList[iuInd] = TEMPORARY(tmpStruct)
+  ;;    PRINT,"HAMMERTIMEORBIT1612 IN CURPOTPLOTPREP"
+  ;;    WAIT,1
+  ;; ENDIF
+
   potErr      = MAKE_ARRAY(nHere,1+KEYWORD_SET(add_iu_pot),/DOUBLE,VALUE=0.D) ;You'll see why
-;; FOR plo=266,278 DO BEGIN & tmpTString = T2S(curPotList[iuInd].time[plo],/MS) & tString = ((STRMID(tmpTString,11,STRLEN(tmpTString))).Replace('.','__')).Replace(':','_') & fName = 'orbit1612_upward_ions__'+tString+'.eps' & window=WINDOW(DIMENSIONS=[800,600],/BUFFER) & xData = REFORM(curPotList[iuInd].eSpec.v[plo,*]) & yData = REFORM(curPotList[iuInd].eSpec.y[plo,*]) & yErrData = REFORM(curPotList[iuInd].eSpec.yErr[plo,*]) & errPlot=errorplot(xData,yData,yErrData,/XLOG,/YLOG,TITLE="Upward Ions, " + T2S(curPotList[iuInd].time[plo],/MS),YRANGE=[1E4,MAX(yData)*1.1],XTITLE="Energy (eV)",YTITLE="Differential Energy Flux (eV/cm$^2$-s-sr-eV)",/CURRENT) & PRINT,"Saving " + fName + " ..." & window.Save,fName & window.close & window=!NULL & ENDFOR
   CASE 1 OF
      KEYWORD_SET(use_charE_for_downPot): BEGIN
 

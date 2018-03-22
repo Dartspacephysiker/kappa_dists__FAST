@@ -5,6 +5,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    SDT_TIME_INDS=bounds, $
    DO_ALL_TIMES=do_all_times, $
    ENERGY_ELECTRONS=energy_electrons, $
+   ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
    SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
    JUST_DIFF_EFLUX=just_diff_eFlux, $
    DIFF_EFLUX=diff_eFlux, $
@@ -180,6 +181,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      DO_ALL_TIMES=do_all_times, $
      TIME_ARR=time_arr, $
      ENERGY_ELECTRONS=energy_electrons, $
+     ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
      ELECTRON_ANGLERANGE=electron_angleRange, $
      MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
      ;; ELECTRON_LOSSCONE_ANGLE=electron_lca, $
