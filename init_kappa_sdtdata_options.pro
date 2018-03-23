@@ -74,6 +74,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
         STOP
      ENDIF
 
+     anticipation = 0
      IF N_ELEMENTS(energy_electrons) EQ 2 THEN BEGIN
         kSDTData_opt.energy_electrons          = energy_electrons
         ;; PRINT,FORMAT='("SDT electron energy range",T45,":",T48,2(F0.2))', $
