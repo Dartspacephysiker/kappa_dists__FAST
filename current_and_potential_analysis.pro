@@ -325,6 +325,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      peak_ind_list         = LIST()
      peak_energy_list      = LIST()
      peak_dE_list          = LIST()
+     peak_eBounds_list     = LIST()
      aRange_oMoments_list  = LIST()
      aRange_oPeakEn_list   = LIST()
      aRange_oCharE_list    = LIST()
@@ -976,6 +977,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         peak_ind_list.Add,TEMPORARY(peak_indArr)
         peak_energy_list.Add,TEMPORARY(peak_energyArr)
         peak_dE_list.Add,TEMPORARY(peak_dEArr)
+        peak_eBounds_list.Add,peak_EBoundsArr
 
         IF KEYWORD_SET(use_peakE_bounds_for_moments) THEN BEGIN
            energy[0,*]               = peak_EBoundsArr[0,*] > energy[0,*]
@@ -1224,7 +1226,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
           T1err_list, $
           eSpec_list, $
           peak_ind_list, $
-          peak_energy_list,peak_dE_list, $
+          peak_energy_list,peak_dE_list,peak_eBounds_list, $
           aRange_oMoments_list, $
           aRange_oCharE_list, $
           aRange_oPeakEn_list, $
@@ -1301,6 +1303,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      itvlJeErr      = !NULL
      itvlcharEErr   = !NULL
      itvlPeakdE     = !NULL
+     itvlPeakEBounds = !NULL
      itvlTerr       = !NULL
      itvlCurErr     = !NULL
      itvlErrors     = !NULL
@@ -1362,6 +1365,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         tmpCharE            = (chare_list[k])[theseInds]
         tmpPeakE            = (peak_energy_list[k])[theseInds]
         tmpPeakdE           = (peak_dE_list[k])[theseInds]
+        tmpPeakEBounds      = (peak_eBounds_list[k])[*,theseInds]
         tmpT                = (T_list[k])[*,theseInds]
         ;; tmpeSpecX           = {x: (eSpec_list[k]).x[theseInds], $
         ;;                        y: (eSpec_list[k]).y[theseInds,*], $
@@ -1520,6 +1524,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         itvlESpecVErr        = [itvlESpecVErr ,tmpESpecVErr ]
         itvlPeakE            = [itvlPeakE     ,tmpPeakE     ]
         itvlPeakdE           = [itvlPeakdE    ,tmpPeakdE    ]
+        itvlPeakEBounds      = [itvlPeakEBounds,tmpPeakEBounds    ]
 
      ENDFOR
 
@@ -1569,6 +1574,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                              ;; TEMPORARY(itvlESpec)               , $
                              peakE    : TEMPORARY(itvlPeakE)               , $
                              peakErr  : TEMPORARY(itvlPeakdE)              , $
+                             peakEBounds : TEMPORARY(itvlPeakEBounds)      , $
                              energy   : moment_energyArr[*,k]              , $
                              angles   : {charE   : aRange_oCharE_list[k]   , $
                                          moments : aRange_oMoments_list[k] , $

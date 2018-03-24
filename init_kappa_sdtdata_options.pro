@@ -82,6 +82,8 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
               kSDTData_opt.energy_electrons
      ENDIF ELSE BEGIN
         PRINT,"In anticipation of energy_electron_tBounds ..."
+        PRINT,"And REMEMBER, the lower bound of energy_electrons will also determine KF2D__CurveFit_opt.min_peak_energy!"
+        WAIT,1
         anticipation = 1
      ENDELSE
 

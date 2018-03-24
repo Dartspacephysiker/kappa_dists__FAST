@@ -70,6 +70,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                    
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  threshV         = 5. ;minimum voltage for participation as potential
+
   nListMem        = N_ELEMENTS(curPotList)         
   nHere           = N_ELEMENTS(curPotList[0].time)
   errorBarFac     = KEYWORD_SET(errorBarFac) ? errorBarFac : 1.
@@ -321,7 +323,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
            ;; Neue as of 2018/01/15
            iuPot = blankArr
            iuPotErr = blankArr
-           inds  = WHERE(curPotList[iuind].charE GT 62.5,nIUPot)
+           inds  = WHERE(curPotList[iuind].charE GT threshV,nIUPot)
 
            IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
 
@@ -333,7 +335,19 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                  curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
 
                  IF nTmp GT 0 THEN BEGIN
+                    
                     useInds = [useInds,tmpInds]
+
+                    PRINT,FORMAT='("UPGOING ION INTERVAL #",I0)',k+1
+                    PRINT,'========================='
+                    tmps = curpotlist[iuind].charE[tmpInds]
+                    tmps[WHERE(tmps LT threshV,/NULL)] = 0.
+                    FOR jj=0,nTmp-1 DO BEGIN
+                       PRINT,FORMAT='(I0,T6,A25,T36,F0.2)',tmpInds[jj], $
+                             T2S(curpotlist[iuind].time[tmpInds[jj]],/MS), $
+                             tmps[jj]
+                    ENDFOR
+                    
                  ENDIF ELSE BEGIN
                     PRINT,"IUPot charE tids: Ingenting her!"
                     IF ~KEYWORD_SET(batch_mode) THEN STOP
@@ -368,7 +382,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
            iuPot = blankArr
            iuPotErr = blankArr
-           inds  = WHERE(curPotList[iuind].peakE GT 62.5,nIUPot)
+           inds  = WHERE(curPotList[iuind].peakE GT threshV,nIUPot)
 
            IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
 
@@ -380,7 +394,20 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                  curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
 
                  IF nTmp GT 0 THEN BEGIN
+
                     useInds = [useInds,tmpInds]
+
+                    PRINT,FORMAT='("UPGOING ION INTERVAL #",I0)',k+1
+                    PRINT,'========================='
+                    tmps = curpotlist[iuind].peakE[tmpInds]
+                    tmps[WHERE(tmps LT threshV,/NULL)] = 0.
+                    FOR jj=0,nTmp-1 DO BEGIN
+                       PRINT,FORMAT='(I0,T6,A25,T36,F0.2,T46,"(",F8.2,", ",F8.2,")")',tmpInds[jj], $
+                             T2S(curpotlist[iuind].time[tmpInds[jj]],/MS), $
+                             tmps[jj], $
+                             curpotlist[iuind].peakEBounds[*,tmpInds[jj]]
+                    ENDFOR
+
                  ENDIF ELSE BEGIN
                     PRINT,"IUPot peakE tids: ingenting her!"
                     IF ~KEYWORD_SET(batch_mode) THEN STOP
@@ -392,6 +419,7 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
               IF nIUPot EQ 0 THEN STOP
 
            ENDIF
+
            IF nIUPot GT 0 THEN BEGIN
               iuPot[inds]    = curPotList[iuind].peakE[inds]
               iuPotErr[inds] = curPotList[iuind].peakErr[inds]

@@ -420,6 +420,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                              KF2D__SDTData_opt.energy_electron_NtBounds, $
                                              UPDATED_INDEX=updateInd)
         KF2D__SDTData_opt.energy_electrons_curInd = updateInd
+        KF2D__Curvefit_opt.min_peak_energy = KF2D__SDTData_opt.energy_electrons[0]
         ;; IF t GT KF2D__SDTData_opt.energy_electron_tBounds[1,KF2D__SDTData_opt.energy_electrons_curInd] THEN BEGIN
         ;;    OK = 0
         ;;    WHILE ~OK DO BEGIN
