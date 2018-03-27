@@ -70,6 +70,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__ADD_NEWELL_PANEL=sway__add_Newell_panel, $
                           SWAY__NEWELL_INTERP=sway__Newell_interp, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
+                          SWAY__ADD_IU_POT=sway__add_iu_pot, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__EANGLE=kSum__eAngle, $
                           KSUM__SAVE_PS=kSum__save_ps, $
@@ -758,6 +759,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            ADD_CHARE_PANEL=sway__add_chare_panel, $
                            ADD_NEWELL_PANEL=sway__add_Newell_panel, $
                            NEWELL_2009_INTERP=sway__Newell_interp, $
+                           ADD_IU_POT=sway__add_iu_pot, $
                            LOG_KAPPAPLOT=sway__log_kappaPlot, $
                            USE_FAC_V=use_fac_v, $
                            USE_FAC_NOT_V=use_fac, $
@@ -774,6 +776,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            N_PEAKS_ABOVE_DEF_THRESHOLD=nPkAbove_dEF_thresh, $
                            ION_ANGLERANGE=curPotList[2].angles.peakEn, $
                            ION_ENERGYRANGE=curPotList[2].energy, $
+                           CURPOTLIST=curPotList, $
+                           CAP_STRUCT=cAP_struct, $
                            SAVE_PS=sway__save_ps, $
                            SAVE_PNG=sway__save_png, $
                            EPS=eps, $

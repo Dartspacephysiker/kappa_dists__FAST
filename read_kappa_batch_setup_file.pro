@@ -1,6 +1,7 @@
 ;2018/03/02
 PRO READ_KAPPA_BATCH_SETUP_FILE, $
    orbit,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current, $
+   NTOSKIP=nToSkip, $
    DATE_OF_GENERATION=date, $
    MLTRANGE=mltRange, $
    ALTRANGE=altRange, $
@@ -8,6 +9,8 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
    PRINT_SUMMARY=print_summary
 
   COMPILE_OPT IDL2,STRICTARRSUBS
+
+  skipRem = KEYWORD_SET(nToSkip)? nToSkip : 0
 
   IF N_ELEMENTS(orbit) EQ 0 THEN BEGIN
      PRINT,"Bogus!"
@@ -64,34 +67,40 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
            tmpOrb,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current
 
      ;; PRINT,tmpOrb
-     cont = tmpOrb EQ orbit
+     IF tmpOrb EQ orbit THEN BEGIN
+        cont = (skipRem EQ 0)
+        skipRem--
+
+        IF KEYWORD_SET(print_summary) THEN BEGIN
+           SPAWN,"wc -l " + dir+file + " | awk '{ print $1 }'",lineCount
+           lineCount = LONG(lineCount)-1
+           PRINT,'============================================================'
+           PRINT,FORMAT='("INFO FOR ORBIT ",I0, " (entry #",I0,"/",I0,")")', $
+                 orbit,count,lineCount
+           PRINT,'============================================================'
+           PRINT,FORMAT='(A5,T7,A4,T13,A4,T19,A4,T25,A19,T46,A8,T56,A8,T66,A5,T73,A6,T81,A8)', $
+                 'Orbit', $
+                 'MLT', $
+                 'ILAT', $
+                 'Alt', $
+                 'Start T', $
+                 'Stop T', $
+                 'Len (s)', $
+                 'N pts', $
+                 'Avg dt', $
+                 'Current'
+           PRINT,FORMAT='(I05,T7,F04.1,T12,F05.1,T19,I4,T25,A19,T46,A8,T56,G-8.5,T66,I-5,T73,G-6.3,T81,G-8.4)', $
+                 tmpOrb,MLT,ILAT,ALT,t1Str,STRMID(t2Str,11,8),t_streakLen,nPts,dt_avg,avg_current
+        ENDIF
+
+     ENDIF
+
      count++
+     
   ENDWHILE
 
   date = STRMID(t1Str,0,11)
   t2Str = date + t2Str
-
-  IF KEYWORD_SET(print_summary) THEN BEGIN
-     SPAWN,"wc -l " + dir+file + " | awk '{ print $1 }'",lineCount
-     lineCount = LONG(lineCount)-1
-     PRINT,'============================================================'
-     PRINT,FORMAT='("INFO FOR ORBIT ",I0, " (entry #",I0,"/",I0,")")', $
-           orbit,count,lineCount
-     PRINT,'============================================================'
-     PRINT,FORMAT='(A5,T7,A4,T13,A4,T19,A4,T25,A19,T46,A8,T56,A8,T66,A5,T73,A6,T81,A8)', $
-           'Orbit', $
-           'MLT', $
-           'ILAT', $
-           'Alt', $
-           'Start T', $
-           'Stop T', $
-           'Len (s)', $
-           'N pts', $
-           'Avg dt', $
-           'Current'
-     PRINT,FORMAT='(I05,T7,F04.1,T12,F05.1,T19,I4,T25,A19,T46,A8,T56,G-8.5,T66,I-5,T73,G-6.3,T81,G-8.4)', $
-        tmpOrb,MLT,ILAT,ALT,t1Str,STRMID(t2Str,11,8),t_streakLen,nPts,dt_avg,avg_current
-  ENDIF
 
   CLOSE,lun
 
