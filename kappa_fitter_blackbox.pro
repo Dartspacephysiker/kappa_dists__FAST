@@ -71,6 +71,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__NEWELL_INTERP=sway__Newell_interp, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
                           SWAY__ADD_IU_POT=sway__add_iu_pot, $
+                          SWAY__SPECTROGRAM_UNITS=sway__spectrogram_units, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__EANGLE=kSum__eAngle, $
                           KSUM__SAVE_PS=kSum__save_ps, $
@@ -82,6 +83,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                           KSUM__GRL=kSum__GRL, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
+                          KSUM__SPECTROGRAM_UNITS=kSum__spectrogram_units, $
                           KSUM__ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
                           KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                           KSUM__ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
@@ -760,6 +762,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            ADD_NEWELL_PANEL=sway__add_Newell_panel, $
                            NEWELL_2009_INTERP=sway__Newell_interp, $
                            ADD_IU_POT=sway__add_iu_pot, $
+                           SPECTROGRAM_UNITS=sway__spectrogram_units, $
                            LOG_KAPPAPLOT=sway__log_kappaPlot, $
                            USE_FAC_V=use_fac_v, $
                            USE_FAC_NOT_V=use_fac, $
@@ -831,6 +834,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                              GRL=kSum__GRL, $
                              OPLOT_POT=kSum__oPlot_pot, $
+                             SPECTROGRAM_UNITS=kSum__spectrogram_units, $
                              ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
                              ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                              ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
