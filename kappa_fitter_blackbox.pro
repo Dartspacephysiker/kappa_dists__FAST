@@ -745,6 +745,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      ENDIF
 
      IF ~KEYWORD_SET(batch_mode) THEN PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DKappa_inf_list,'obsmoms',VALUE=kObsMoms
+     STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DGauss_inf_list,'obsmoms',VALUE=gObsMoms
+     PRINT,STRING(FORMAT='("kFAConduct={",' + STRING(N_ELEMENTS(kObsMoms)) + '(G-0.4,:,", "),"}")',kObsMoms.scfaconduct)+'};'
+     PRINT,STRING(FORMAT='("gFAConduct={",' + STRING(N_ELEMENTS(gObsMoms)) + '(G-0.4,:,", "),"}")',gObsMoms.scfaconduct)+'};'
 
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
