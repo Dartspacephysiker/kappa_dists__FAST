@@ -1,0 +1,1077 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     39492,       1069]
+NotebookOptionsPosition[     36959,       1018]
+NotebookOutlinePosition[     37297,       1033]
+CellTagsIndexPosition[     37254,       1030]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Load up packages", "Subsection",
+ CellChangeTimes->{{3.728317940792157*^9, 
+  3.728317942903636*^9}},ExpressionUUID->"bddd7719-6c2a-4230-8c1f-\
+0314aaf1a821"],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<ErrorBarPlots`\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.7277985681983147`*^9, 
+  3.727798578766698*^9}},ExpressionUUID->"928c71ae-8ad2-4c40-a93d-\
+3aede5531c77"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+  "dir", "=", 
+   "\"\</SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/\>\""}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", "dir", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"<<", 
+  "Liemohn_and_Khazanov__mapped_Maxwellian_density.wl"}], \
+"\[IndentingNewLine]", 
+ RowBox[{"<<", "jvFuncs.wl"}]}], "Input",
+ CellChangeTimes->{{3.728317943862924*^9, 
+  3.728317961519827*^9}},ExpressionUUID->"0a27c0f4-8640-4d70-aa77-\
+47b9e1ec7cbf"],
+
+Cell[CellGroupData[{
+
+Cell["Maxwellian data (2018/03/27)", "Subsubsection",
+ CellChangeTimes->{{3.731160127895752*^9, 
+  3.731160135688175*^9}},ExpressionUUID->"a03281e0-abf5-44e2-9c19-\
+8fd30af350f9"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"jErrData", "=", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1330.56`", ",", "1.06`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.054`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1205.12`", ",", "0.994`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1012.48`", ",", "0.915`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.033`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1012.48`", ",", "0.883`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.034`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"913.92`", ",", "0.823`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"777.28`", ",", "0.874`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"840.`", ",", "0.791`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.039`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"777.28`", ",", "0.736`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.043`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"777.28`", ",", "0.755`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.039`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"840.`", ",", "0.75`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.036`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"913.92`", ",", "0.742`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.038`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"913.92`", ",", "0.793`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1012.48`", ",", "0.824`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"934.08`", ",", "0.693`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.045`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"741.44`", ",", "0.642`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.05`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"592.48`", ",", "0.557`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.043`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"480.48`", ",", "0.509`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"412.72`", ",", "0.466`"}], "}"}], ",", 
+      RowBox[{"ErrorBar", "[", "0.048`", "]"}]}], "}"}]}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.731159262783601*^9, 
+  3.7311592691232967`*^9}},ExpressionUUID->"85e6bf0a-9b5e-49d0-8548-\
+7ca3e6917c93"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1330.56`", ",", "1.06`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.054`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1205.12`", ",", "0.994`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1012.48`", ",", "0.915`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.033`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1012.48`", ",", "0.883`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.034`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"913.92`", ",", "0.823`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"777.28`", ",", "0.874`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"840.`", ",", "0.791`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.039`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"777.28`", ",", "0.736`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.043`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"777.28`", ",", "0.755`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.039`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"840.`", ",", "0.75`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.036`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"913.92`", ",", "0.742`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.038`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"913.92`", ",", "0.793`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.042`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1012.48`", ",", "0.824`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"934.08`", ",", "0.693`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.045`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"741.44`", ",", "0.642`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.05`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"592.48`", ",", "0.557`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.043`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"480.48`", ",", "0.509`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"412.72`", ",", "0.466`"}], "}"}], ",", 
+     RowBox[{"ErrorBar", "[", "0.048`", "]"}]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.731159286274652*^9},ExpressionUUID->"9ab1f75d-e9f3-4080-86b3-\
+0dc359a17b80"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"jeErrData", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1330.56`", ",", "0.814`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.178`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1205.12`", ",", "0.672`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.126`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1012.48`", ",", "0.549`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.087`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1012.48`", ",", "0.502`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.096`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.447`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.096`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"777.28`", ",", "0.461`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.105`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"840.`", ",", "0.44`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.089`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"777.28`", ",", "0.377`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.112`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"777.28`", ",", "0.405`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.089`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"840.`", ",", "0.428`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.099`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.434`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.093`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.467`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.103`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1012.48`", ",", "0.482`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.1`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"934.08`", ",", "0.477`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.111`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"741.44`", ",", "0.406`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.124`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"592.48`", ",", "0.316`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.125`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"480.48`", ",", "0.277`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.091`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"412.72`", ",", "0.24`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.117`", "]"}]}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.731159327433783*^9, 
+  3.731159332739133*^9}},ExpressionUUID->"d73275fb-ad92-4ca9-ae21-\
+0b703e07b41f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Kappa data (2018/03/27)", "Subsubsection",
+ CellChangeTimes->{{3.731160140106701*^9, 
+  3.7311601457412252`*^9}},ExpressionUUID->"5f5288dc-363a-44dd-8799-\
+d31ad8982572"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"jErrData", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "1.361`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.052`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "1.243`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.119`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "1.299`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.169`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "1.19`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.106`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"616.`", ",", "1.121`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.107`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"616.`", ",", "1.185`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.102`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"566.72`", ",", "1.106`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.117`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"529.76`", ",", "0.815`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.136`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"393.12`", ",", "0.501`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.078`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"346.08`", ",", "0.568`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.045`", "]"}]}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.731160160767956*^9, 
+  3.731160165243746*^9}},ExpressionUUID->"c63a5338-e09c-490c-b3c4-\
+3596b19b1dad"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"jeErrData", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.885`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.151`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.778`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.355`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.831`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.377`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"913.92`", ",", "0.75`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.27`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"616.`", ",", "0.605`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.208`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"616.`", ",", "0.643`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.241`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"566.72`", ",", "0.6`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.213`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"529.76`", ",", "0.436`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.466`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"393.12`", ",", "0.305`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.129`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"346.08`", ",", "0.355`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.097`", "]"}]}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.731160151065096*^9, 
+  3.7311601582381687`*^9}},ExpressionUUID->"088d8270-2b3f-4a46-8438-\
+3129c174142e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Turn-on data (2018/03/27)", "Subsubsection",
+ CellChangeTimes->{{3.7311617214933558`*^9, 
+  3.731161727765609*^9}},ExpressionUUID->"c9a8c3af-7b12-4ec2-9201-\
+e61c85677128"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"jErrData", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"453.88`", ",", "1.576`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.096`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"441.56`", ",", "1.634`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.091`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"358.82`", ",", "1.658`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.089`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"352.66`", ",", "1.571`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.11`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"282.24`", ",", "1.24`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.093`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"235.2`", ",", "0.83`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.097`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"235.2`", ",", "0.755`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.041`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"172.48`", ",", "0.396`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.036`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"141.12`", ",", "0.291`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.021`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"141.12`", ",", "0.35`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.026`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"172.48`", ",", "0.46`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.03`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"203.84`", ",", "0.556`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.046`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"344.96`", ",", "1.389`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.053`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"430.78`", ",", "1.548`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.046`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"504.28`", ",", "1.72`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.056`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"605.92`", ",", "1.327`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.057`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"605.92`", ",", "1.591`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.056`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"749.28`", ",", "1.581`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.051`", "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"749.28`", ",", "1.602`"}], "}"}], ",", 
+       RowBox[{"ErrorBar", "[", "0.055`", "]"}]}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.7311616953293447`*^9, 
+  3.731161701366186*^9}},ExpressionUUID->"a8f6db94-2647-4990-abaf-\
+b6062b93035a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Plots", "Subsubsection",
+ CellChangeTimes->{{3.731160147957199*^9, 
+  3.731160148514145*^9}},ExpressionUUID->"33b21aca-bd09-4dce-82e6-\
+b7422196c44d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"minPot", "=", "10"}], ";", 
+  RowBox[{"maxPot", "=", "1000"}], ";"}]], "Input",
+ CellChangeTimes->{{3.730878091281567*^9, 3.730878105341096*^9}, {
+  3.731160213901535*^9, 
+  3.731160217988529*^9}},ExpressionUUID->"fb6da485-1d50-4da3-b9b0-\
+46f9efdf27f3"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Tinit", "=", "140"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"nInit", "=", "0.4"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"kappaInit", "=", "35"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"RBinit", "=", "20"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.730878304154036*^9, 3.7308783234738617`*^9}, {
+  3.73087866461613*^9, 3.730878675971946*^9}, {3.731061441140957*^9, 
+  3.731061443597022*^9}, {3.731159303930121*^9, 
+  3.731159315993698*^9}},ExpressionUUID->"c4f9ae46-63e6-4c4a-b3c2-\
+e7799021802d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Show", "[", 
+    RowBox[{
+     RowBox[{"Plot", "[", 
+      RowBox[{
+       RowBox[{"JVKappa", "[", 
+        RowBox[{"pot", ",", "RB", ",", "T", ",", "n", ",", "kappa"}], "]"}], 
+       ",", 
+       RowBox[{"{", 
+        RowBox[{"pot", ",", "minPot", ",", "maxPot"}], "}"}], ",", 
+       RowBox[{"PlotRange", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"minPot", ",", "maxPot"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"0", ",", "Automatic"}], "}"}]}], "}"}]}], ",", 
+       RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+       RowBox[{"FrameLabel", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Pot\>\"", ",", "\"\<Current\>\""}], "}"}]}]}], "]"}], 
+     ",", 
+     RowBox[{"ErrorListPlot", "[", 
+      RowBox[{"jErrData", ",", 
+       RowBox[{"PlotStyle", "\[Rule]", "Gray"}]}], "]"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"RB", ",", "RBinit"}], "}"}], ",", "2", ",", "200"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"T", ",", "Tinit"}], "}"}], ",", "2", ",", "500"}], "}"}], ",", 
+   
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"n", ",", "nInit"}], "}"}], ",", "0.01", ",", "5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"kappa", ",", "kappaInit"}], "}"}], ",", "1.501", ",", "35"}], 
+    "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.730878047420135*^9, 3.7308782938431187`*^9}, {
+  3.730878328195904*^9, 3.730878368621777*^9}, {3.7308783997112303`*^9, 
+  3.73087843316083*^9}, {3.730878554800291*^9, 3.730878584097355*^9}, {
+  3.731061657301841*^9, 
+  3.731061657379259*^9}},ExpressionUUID->"29cfcf38-2cb6-4193-ae57-\
+e9072977098a"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`kappa$$ = 1.53, $CellContext`n$$ = 
+    1.6, $CellContext`RB$$ = 14, $CellContext`T$$ = 150, Typeset`show$$ = 
+    True, Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`RB$$], 20}, 2, 200}, {{
+       Hold[$CellContext`T$$], 140}, 2, 500}, {{
+       Hold[$CellContext`n$$], 0.4}, 0.01, 5}, {{
+       Hold[$CellContext`kappa$$], 35}, 1.501, 35}}, Typeset`size$$ = {
+    360., {116., 119.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`RB$16094$$ = 
+    0, $CellContext`T$16095$$ = 0, $CellContext`n$16096$$ = 
+    0, $CellContext`kappa$16097$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`kappa$$ = 35, $CellContext`n$$ = 
+        0.4, $CellContext`RB$$ = 20, $CellContext`T$$ = 140}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`RB$$, $CellContext`RB$16094$$, 0], 
+        Hold[$CellContext`T$$, $CellContext`T$16095$$, 0], 
+        Hold[$CellContext`n$$, $CellContext`n$16096$$, 0], 
+        Hold[$CellContext`kappa$$, $CellContext`kappa$16097$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Show[
+        Plot[
+         jvFuncs`JVKappa[$CellContext`pot, $CellContext`RB$$, \
+$CellContext`T$$, $CellContext`n$$, $CellContext`kappa$$], {$CellContext`pot, \
+$CellContext`minPot, $CellContext`maxPot}, 
+         PlotRange -> {{$CellContext`minPot, $CellContext`maxPot}, {
+           0, Automatic}}, Frame -> True, FrameLabel -> {"Pot", "Current"}], 
+        ErrorBarPlots`ErrorListPlot[$CellContext`jErrData, PlotStyle -> 
+         Gray]], 
+      "Specifications" :> {{{$CellContext`RB$$, 20}, 2, 
+         200}, {{$CellContext`T$$, 140}, 2, 500}, {{$CellContext`n$$, 0.4}, 
+         0.01, 5}, {{$CellContext`kappa$$, 35}, 1.501, 35}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{407., {242., 247.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.731061639701563*^9, 3.731061657968357*^9}, 
+   3.7310651398320723`*^9, 3.731159318398245*^9, {3.731160174352043*^9, 
+   3.7311601798921547`*^9}, 
+   3.731161732410378*^9},ExpressionUUID->"c23202a4-0c9a-4c46-afbe-\
+c1fe8681264d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Show", "[", 
+    RowBox[{
+     RowBox[{"Plot", "[", 
+      RowBox[{
+       RowBox[{"JEVKappa", "[", 
+        RowBox[{"pot", ",", "RB", ",", "T", ",", "n", ",", "kappa"}], "]"}], 
+       ",", 
+       RowBox[{"{", 
+        RowBox[{"pot", ",", "minPot", ",", "maxPot"}], "}"}], ",", 
+       RowBox[{"PlotRange", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"minPot", ",", "maxPot"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"0", ",", "Automatic"}], "}"}]}], "}"}]}], ",", 
+       RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+       RowBox[{"FrameLabel", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Pot\>\"", ",", "\"\<Current\>\""}], "}"}]}]}], "]"}], 
+     ",", 
+     RowBox[{"ErrorListPlot", "[", 
+      RowBox[{"jeErrData", ",", 
+       RowBox[{"PlotStyle", "\[Rule]", "Gray"}]}], "]"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"RB", ",", "RBinit"}], "}"}], ",", "2", ",", "200"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"T", ",", "Tinit"}], "}"}], ",", "2", ",", "500"}], "}"}], ",", 
+   
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"n", ",", "nInit"}], "}"}], ",", "0.01", ",", "5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"kappa", ",", "kappaInit"}], "}"}], ",", "1.51", ",", "35"}], 
+    "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.730878047420135*^9, 3.7308782938431187`*^9}, {
+   3.730878328195904*^9, 3.730878368621777*^9}, {3.7308783997112303`*^9, 
+   3.73087843316083*^9}, {3.730878554800291*^9, 3.730878584097355*^9}, 
+   3.7310609119066343`*^9, {3.731061024218586*^9, 3.731061045298523*^9}, {
+   3.731061430852933*^9, 
+   3.7310614323177147`*^9}},ExpressionUUID->"e7dfa729-6853-4f76-8351-\
+e9207ec74b97"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`kappa$$ = 
+    1.5300000000000369`, $CellContext`n$$ = 
+    1.6000000000000016`, $CellContext`RB$$ = 
+    14.000000000000341`, $CellContext`T$$ = 149.99999999999935`, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`RB$$], 20}, 2, 200}, {{
+       Hold[$CellContext`T$$], 140}, 2, 500}, {{
+       Hold[$CellContext`n$$], 0.4}, 0.01, 5}, {{
+       Hold[$CellContext`kappa$$], 35}, 1.51, 35}}, Typeset`size$$ = {
+    360., {116., 119.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`RB$164774$$ = 
+    0, $CellContext`T$164775$$ = 0, $CellContext`n$164776$$ = 
+    0, $CellContext`kappa$164777$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`kappa$$ = 35, $CellContext`n$$ = 
+        0.4, $CellContext`RB$$ = 20, $CellContext`T$$ = 140}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`RB$$, $CellContext`RB$164774$$, 0], 
+        Hold[$CellContext`T$$, $CellContext`T$164775$$, 0], 
+        Hold[$CellContext`n$$, $CellContext`n$164776$$, 0], 
+        Hold[$CellContext`kappa$$, $CellContext`kappa$164777$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Show[
+        Plot[
+         jvFuncs`JEVKappa[$CellContext`pot, $CellContext`RB$$, \
+$CellContext`T$$, $CellContext`n$$, $CellContext`kappa$$], {$CellContext`pot, \
+$CellContext`minPot, $CellContext`maxPot}, 
+         PlotRange -> {{$CellContext`minPot, $CellContext`maxPot}, {
+           0, Automatic}}, Frame -> True, FrameLabel -> {"Pot", "Current"}], 
+        ErrorBarPlots`ErrorListPlot[$CellContext`jeErrData, PlotStyle -> 
+         Gray]], "Specifications" :> {{{$CellContext`RB$$, 20}, 2, 
+         200}, {{$CellContext`T$$, 140}, 2, 500}, {{$CellContext`n$$, 0.4}, 
+         0.01, 5}, {{$CellContext`kappa$$, 35}, 1.51, 35}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{407., {242., 247.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.731061030157918*^9, 3.7310610459150047`*^9}, {
+   3.731061432608161*^9, 3.731061446872244*^9}, 
+   3.731159346427217*^9},ExpressionUUID->"97523dd9-6f41-4013-8256-\
+10558e556b5b"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Row", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"Show", "[", 
+       RowBox[{
+        RowBox[{"Plot", "[", 
+         RowBox[{
+          RowBox[{"JEVKappa", "[", 
+           RowBox[{"pot", ",", "RB", ",", "T", ",", "n", ",", "kappa"}], 
+           "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"pot", ",", "minPot", ",", "maxPot"}], "}"}], ",", 
+          RowBox[{"PlotRange", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"minPot", ",", "maxPot"}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "Automatic"}], "}"}]}], "}"}]}], ",", 
+          RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+          RowBox[{"FrameLabel", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Pot\>\"", ",", "\"\<Current\>\""}], "}"}]}], ",", 
+          RowBox[{"ImageSize", "\[Rule]", "500"}]}], "]"}], ",", 
+        RowBox[{"ErrorListPlot", "[", 
+         RowBox[{"jeErrData", ",", 
+          RowBox[{"PlotStyle", "\[Rule]", "Gray"}]}], "]"}]}], "]"}], ",", 
+      RowBox[{"Show", "[", 
+       RowBox[{
+        RowBox[{"Plot", "[", 
+         RowBox[{
+          RowBox[{"JVKappa", "[", 
+           RowBox[{"pot", ",", "RB", ",", "T", ",", "n", ",", "kappa"}], 
+           "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"pot", ",", "minPot", ",", "maxPot"}], "}"}], ",", 
+          RowBox[{"PlotRange", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"minPot", ",", "maxPot"}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "Automatic"}], "}"}]}], "}"}]}], ",", 
+          RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+          RowBox[{"FrameLabel", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Pot\>\"", ",", "\"\<Current\>\""}], "}"}]}], ",", 
+          RowBox[{"ImageSize", "\[Rule]", "500"}]}], "]"}], ",", 
+        RowBox[{"ErrorListPlot", "[", 
+         RowBox[{"jErrData", ",", 
+          RowBox[{"PlotStyle", "\[Rule]", "Gray"}]}], "]"}]}], "]"}]}], "}"}],
+     "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"RB", ",", "RBinit"}], "}"}], ",", "2", ",", "200"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"T", ",", "Tinit"}], "}"}], ",", "2", ",", "500"}], "}"}], ",", 
+   
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"n", ",", "nInit"}], "}"}], ",", "0.01", ",", "5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"kappa", ",", "kappaInit"}], "}"}], ",", "1.51", ",", "35"}], 
+    "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.730878047420135*^9, 3.7308782938431187`*^9}, {
+   3.730878328195904*^9, 3.730878368621777*^9}, {3.7308783997112303`*^9, 
+   3.73087843316083*^9}, {3.730878554800291*^9, 3.730878584097355*^9}, 
+   3.7310609119066343`*^9, {3.731061024218586*^9, 3.731061045298523*^9}, {
+   3.731061430852933*^9, 3.7310614323177147`*^9}, {3.731159369779359*^9, 
+   3.73115944129567*^9}},ExpressionUUID->"945e8065-9ca3-4cbb-bac6-\
+0a8aa7014807"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`kappa$$ = 35, $CellContext`n$$ = 
+    0.2, $CellContext`RB$$ = 100, $CellContext`T$$ = 40, Typeset`show$$ = 
+    True, Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`RB$$], 20}, 2, 200}, {{
+       Hold[$CellContext`T$$], 140}, 2, 500}, {{
+       Hold[$CellContext`n$$], 0.4}, 0.01, 5}, {{
+       Hold[$CellContext`kappa$$], 35}, 1.51, 35}}, Typeset`size$$ = {
+    1000., {156., 161.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`RB$167636$$ = 
+    0, $CellContext`T$167637$$ = 0, $CellContext`n$167638$$ = 
+    0, $CellContext`kappa$167639$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`kappa$$ = 35, $CellContext`n$$ = 
+        0.4, $CellContext`RB$$ = 20, $CellContext`T$$ = 140}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`RB$$, $CellContext`RB$167636$$, 0], 
+        Hold[$CellContext`T$$, $CellContext`T$167637$$, 0], 
+        Hold[$CellContext`n$$, $CellContext`n$167638$$, 0], 
+        Hold[$CellContext`kappa$$, $CellContext`kappa$167639$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Row[{
+         Show[
+          Plot[
+           
+           jvFuncs`JEVKappa[$CellContext`pot, $CellContext`RB$$, \
+$CellContext`T$$, $CellContext`n$$, $CellContext`kappa$$], {$CellContext`pot, \
+$CellContext`minPot, $CellContext`maxPot}, 
+           PlotRange -> {{$CellContext`minPot, $CellContext`maxPot}, {
+             0, Automatic}}, Frame -> True, FrameLabel -> {"Pot", "Current"}, 
+           ImageSize -> 500], 
+          
+          ErrorBarPlots`ErrorListPlot[$CellContext`jeErrData, PlotStyle -> 
+           Gray]], 
+         Show[
+          Plot[
+           
+           jvFuncs`JVKappa[$CellContext`pot, $CellContext`RB$$, \
+$CellContext`T$$, $CellContext`n$$, $CellContext`kappa$$], {$CellContext`pot, \
+$CellContext`minPot, $CellContext`maxPot}, 
+           PlotRange -> {{$CellContext`minPot, $CellContext`maxPot}, {
+             0, Automatic}}, Frame -> True, FrameLabel -> {"Pot", "Current"}, 
+           ImageSize -> 500], 
+          
+          ErrorBarPlots`ErrorListPlot[$CellContext`jErrData, PlotStyle -> 
+           Gray]]}], 
+      "Specifications" :> {{{$CellContext`RB$$, 20}, 2, 
+         200}, {{$CellContext`T$$, 140}, 2, 500}, {{$CellContext`n$$, 0.4}, 
+         0.01, 5}, {{$CellContext`kappa$$, 35}, 1.51, 35}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{1047., {239., 244.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.731159393754678*^9, 
+  3.7311594418880243`*^9}},ExpressionUUID->"e949e4b4-9480-4ca4-8935-\
+56f3df458d53"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1280, 997},
+WindowMargins->{{0, Automatic}, {0, Automatic}},
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 164, 3, 55, "Subsection",ExpressionUUID->"bddd7719-6c2a-4230-8c1f-0314aaf1a821"],
+Cell[747, 27, 207, 4, 31, "Input",ExpressionUUID->"928c71ae-8ad2-4c40-a93d-3aede5531c77"],
+Cell[957, 33, 513, 14, 101, "Input",ExpressionUUID->"0a27c0f4-8640-4d70-aa77-47b9e1ec7cbf"],
+Cell[CellGroupData[{
+Cell[1495, 51, 179, 3, 45, "Subsubsection",ExpressionUUID->"a03281e0-abf5-44e2-9c19-8fd30af350f9"],
+Cell[CellGroupData[{
+Cell[1699, 58, 3287, 96, 147, "Input",ExpressionUUID->"85e6bf0a-9b5e-49d0-8548-7ca3e6917c93"],
+Cell[4989, 156, 3141, 95, 151, "Output",ExpressionUUID->"9ab1f75d-e9f3-4080-86b3-0dc359a17b80"]
+}, Open  ]],
+Cell[8145, 254, 3398, 98, 147, "Input",ExpressionUUID->"d73275fb-ad92-4ca9-ae21-0b703e07b41f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11580, 357, 176, 3, 45, "Subsubsection",ExpressionUUID->"5f5288dc-363a-44dd-8799-d31ad8982572"],
+Cell[11759, 362, 1987, 58, 101, "Input",ExpressionUUID->"c63a5338-e09c-490c-b3c4-3596b19b1dad"],
+Cell[13749, 422, 1987, 58, 101, "Input",ExpressionUUID->"088d8270-2b3f-4a46-8438-3129c174142e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[15773, 485, 178, 3, 45, "Subsubsection",ExpressionUUID->"c9a8c3af-7b12-4ec2-9201-e61c85677128"],
+Cell[15954, 490, 3569, 103, 170, "Input",ExpressionUUID->"a8f6db94-2647-4990-abaf-b6062b93035a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19560, 598, 156, 3, 45, "Subsubsection",ExpressionUUID->"33b21aca-bd09-4dce-82e6-b7422196c44d"],
+Cell[19719, 603, 289, 7, 31, "Input",ExpressionUUID->"fb6da485-1d50-4da3-b9b0-46f9efdf27f3"],
+Cell[20011, 612, 571, 13, 101, "Input",ExpressionUUID->"c4f9ae46-63e6-4c4a-b3c2-e7799021802d"],
+Cell[CellGroupData[{
+Cell[20607, 629, 1817, 51, 78, "Input",ExpressionUUID->"29cfcf38-2cb6-4193-ae57-e9072977098a"],
+Cell[22427, 682, 2950, 57, 565, "Output",ExpressionUUID->"c23202a4-0c9a-4c46-afbe-c1fe8681264d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[25414, 744, 1898, 52, 78, "Input",ExpressionUUID->"e7dfa729-6853-4f76-8351-e9207ec74b97"],
+Cell[27315, 798, 2975, 57, 508, "Output",ExpressionUUID->"97523dd9-6f41-4013-8256-10558e556b5b"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[30327, 860, 3152, 80, 170, "Input",ExpressionUUID->"945e8065-9ca3-4cbb-bac6-0a8aa7014807"],
+Cell[33482, 942, 3437, 71, 502, "Output",ExpressionUUID->"e949e4b4-9480-4ca4-8935-56f3df458d53"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
