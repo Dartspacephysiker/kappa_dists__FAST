@@ -131,13 +131,13 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
   fFAConduct  = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                 fit2DStr, $
                 ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                ;; ENERGY=eRange_fit, $
+                ENERGY=eRange_fit, $
                 ANGLE=tmpFaCondSourceConeRange)
 
   oFAConduct  = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                 curDataStr, $
-                ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                ENERGY=eRange_fit, $
+                ENERGY=KF2D__SDTData_opt.energy_electrons, $
+                ;; ENERGY=eRange_fit, $
                 ANGLE=tmpFaCondSourceConeRange)
 
   NK_EA        = N_ELEMENTS(K_EA__gFunc)
