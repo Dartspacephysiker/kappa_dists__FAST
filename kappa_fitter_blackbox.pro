@@ -744,6 +744,26 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PRINT,"Median kappa value: ",nHjar GT 1 ? MEDIAN(fit2DK.fitParams[2,theseInds]) : fit2DK.fitParams[2,theseInds]
      ENDIF
 
+     ;; kStart = 42
+     FOR k=0,kStart DO PRINT,k,",",T2S(jvplotdata.time[avgs_jvfit.useinds[k]])
+     inds=[0:29]
+     FOR k=0,N_ELEMENTS(inds)-1 DO $
+        PRINT,FORMAT='(I3,TR1,A22,TR5,F6.2,TR5,F6.2,TR5,F6.2)', $
+              k, $
+              T2S(jvPlotData.time[avgs_jvFit.useInds[inds[k]]]), $
+              jvPlotData.tDown[avgs_jvFit.useInds[inds[k]]], $
+              fit2DK.fitParams[1,avgs_jvFit.useInds[inds[k]]], $
+              fit2DG.fitParams[1,avgs_jvFit.useInds[inds[k]]]
+
+     PRINT,FORMAT='(TR31,F6.2,TR5,F6.2,TR5,F6.2)', $
+           MEAN(jvPlotData.tDown[avgs_jvFit.useInds[inds]]), $
+           MEAN(fit2DK.fitParams[1,avgs_jvFit.useInds[inds]]), $
+           MEAN(fit2DG.fitParams[1,avgs_jvFit.useInds[inds]])
+     PRINT,FORMAT='(TR31,F6.2,TR5,F6.2,TR5,F6.2)', $
+           MEDIAN(jvPlotData.tDown[avgs_jvFit.useInds[inds]]), $
+           MEDIAN(fit2DK.fitParams[1,avgs_jvFit.useInds[inds]]), $
+           MEDIAN(fit2DG.fitParams[1,avgs_jvFit.useInds[inds]])
+     
      IF ~KEYWORD_SET(batch_mode) THEN PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DKappa_inf_list,'obsmoms',VALUE=kObsMoms
      STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DGauss_inf_list,'obsmoms',VALUE=gObsMoms
