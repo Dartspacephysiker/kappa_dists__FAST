@@ -482,7 +482,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   ENDIF
 
+
   lastFile = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/lastFile.sav'
+  ;; String of contents updated 2018/04/03
   PRINT,"Saving lastFile stuff: "
   PRINT,"avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,energy_electron_tBounds,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh"
   SAVE,avgs_JVfit,jvPlotData,curPotList,cAP_struct,fitFile,KF2D__SDTData_opt,KF2D__Curvefit_opt,KF2D__strings,KF2D__plot_opt,electron_angleRange,energy_electrons,energy_electron_tBounds,kappaFit1Ds,gaussFit1Ds,fit2DKappa_inf_list,fit2DGauss_inf_list,use_mpFit1D,nPkAbove_dEF_thresh,diffEflux_thresh,lowDens_thresh,highDens_thresh,chi2_over_dof_thresh,chi2_thresh, $
@@ -744,32 +746,17 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         PRINT,"Median kappa value: ",nHjar GT 1 ? MEDIAN(fit2DK.fitParams[2,theseInds]) : fit2DK.fitParams[2,theseInds]
      ENDIF
 
-     ;; kStart = 42
-     FOR k=0,kStart DO PRINT,k,",",T2S(jvplotdata.time[avgs_jvfit.useinds[k]])
-     inds=[0:29]
-     FOR k=0,N_ELEMENTS(inds)-1 DO $
-        PRINT,FORMAT='(I3,TR1,A22,TR5,F6.2,TR5,F6.2,TR5,F6.2)', $
-              k, $
-              T2S(jvPlotData.time[avgs_jvFit.useInds[inds[k]]]), $
-              jvPlotData.tDown[avgs_jvFit.useInds[inds[k]]], $
-              fit2DK.fitParams[1,avgs_jvFit.useInds[inds[k]]], $
-              fit2DG.fitParams[1,avgs_jvFit.useInds[inds[k]]]
-
-     PRINT,FORMAT='(TR31,F6.2,TR5,F6.2,TR5,F6.2)', $
-           MEAN(jvPlotData.tDown[avgs_jvFit.useInds[inds]]), $
-           MEAN(fit2DK.fitParams[1,avgs_jvFit.useInds[inds]]), $
-           MEAN(fit2DG.fitParams[1,avgs_jvFit.useInds[inds]])
-     PRINT,FORMAT='(TR31,F6.2,TR5,F6.2,TR5,F6.2)', $
-           MEDIAN(jvPlotData.tDown[avgs_jvFit.useInds[inds]]), $
-           MEDIAN(fit2DK.fitParams[1,avgs_jvFit.useInds[inds]]), $
-           MEDIAN(fit2DG.fitParams[1,avgs_jvFit.useInds[inds]])
+     IF ~KEYWORD_SET(batch_mode) THEN PRINT_J_V_INFO_FOR_MATHEMATICA, $
+        JVPLOTDATA=jvPlotData, $
+        AVGS_JVFIT=avgs_jvFit, $
+        KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
+        GFIT2DPARAM_STRUCT=gFit2DParam_struct, $
+        FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
+        FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
+        KAPPA2D=fit2DK, $
+        GAUSS2D=fit2DG, $
+        CAP_STRUCT=cAP_struct
      
-     IF ~KEYWORD_SET(batch_mode) THEN PRINT_J_V_INFO_FOR_MATHEMATICA,jvPlotData,kFit2DParam_struct,gFit2DParam_struct
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DKappa_inf_list,'obsmoms',VALUE=kObsMoms
-     STR_ELEMENT_FROM_LIST_OF_STRUCTS,fit2DGauss_inf_list,'obsmoms',VALUE=gObsMoms
-     PRINT,STRING(FORMAT='("kFAConduct={",' + STRING(N_ELEMENTS(kObsMoms)) + '(G-0.4,:,", "),"}")',kObsMoms.scfaconduct)+'};'
-     PRINT,STRING(FORMAT='("gFAConduct={",' + STRING(N_ELEMENTS(gObsMoms)) + '(G-0.4,:,", "),"}")',gObsMoms.scfaconduct)+'};'
-
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
@@ -808,7 +795,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            SAVE_PS=sway__save_ps, $
                            SAVE_PNG=sway__save_png, $
                            EPS=eps, $
-                           SAVEKAPPA_BONUSPREF=bonusPref, $
+                           OUTPLOT_BONUSPREF=bonusPref, $
+                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                            ;; GRL=sway__GRL, $
                            PLOTDIR=plotDir
 
@@ -849,7 +837,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              SAVE_PS=kSum__save_ps, $
                              SAVE_PNG=kSum__save_png, $
                              EPS=eps, $
-                             SAVEKAPPA_BONUSPREF=bonusPref, $
+                             SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                             OUTPLOT_BONUSPREF=bonusPref, $
                              PLOTDIR=plotDir, $
                              SAVE_FOR_OFFLINE=save_for_offline, $
                              LOAD_FROM_OFFLINE=load_from_offline, $

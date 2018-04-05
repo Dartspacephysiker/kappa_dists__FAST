@@ -24,7 +24,15 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   yWinSize    = 700
 
   ;;Some stuff in case we decide to write a few of these chocolatiers
-  cont2DLims  = {zrange:[10^(6.6),10^9]}
+  ;; cont2DLims  = {zrange:[10^(6.6),10^9]}
+  ;; spec2DLims = {yrange:[1e6,1e10]}
+
+  ;; More fings?
+  cont2DLims  = {zrange:[10.^(6.),10.^9], $
+                 xrange:[-4.4,4.4], $
+                 yrange:[-4.4,4.4], $
+                 xstyle:1, $
+                 ystyle:1}
   spec2DLims = {yrange:[1e6,1e10]}
 
   ;; upLim       = MAX(curDataStr.data) > (KEYWORD_SET(only_data) ? MAX(curDataStr.data) : MAX(fit2DStruct.bestFitStr.data))
@@ -34,7 +42,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   IF curDataStr.mass GT 5.7D-06 THEN BEGIN
      fit2D__PA_zRange = 10.D^([5.5,8.5])
   ENDIF ELSE BEGIN
-     fit2D__PA_zRange = 10.D^([6.5,9.5])
+     fit2D__PA_zRange = 10.D^([5.5,9.5])
   ENDELSE
   
   ;; IF KEYWORD_SET(fit2D__PA_zRange) THEN BEGIN
@@ -114,9 +122,34 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            XSIZE=xSize, $
            YSIZE=ySize, $
            LAND=land, $
-           ENCAPSULATED=eps
+           ENCAPSULATED=eps, $
+           OPTIONS={charsize:1.5}
      
-     PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,curDataStr, $
+     tmp2DStruct = fit2DStruct
+     ;; these = WHERE((tmp2DStruct.SDT.energy LT KF2D__SDTData_opt.energy_electrons[0]) OR $
+     ;;               (tmp2DStruct.SDT.energy GT KF2D__SDTData_opt.energy_electrons[1]),nThese)
+     ;; these = WHERE((tmp2DStruct.SDT.energy LT tmp2DStruct.extra_info.eRange_fit[0]) OR $
+     ;;               (tmp2DStruct.SDT.energy GT tmp2DStruct.extra_info.eRange_fit[1]),nThese)
+
+     ;; The reason it looks like you're getting points that you're not supposed
+     ;; to (I suppose), is that diff energy flux emphasizes higher energies over
+     ;; lower ones.
+     ;; zeroVal = 700087.25
+     zeroVal = 1.0E3
+     tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
+     ;; tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[(tmp2DStruct.fit1d.orig.energy_inds-1) > 0,0])
+     these = WHERE((tmp2DStruct.SDT.energy LT tmpEBounds[0]) OR $
+                   (tmp2DStruct.SDT.energy GT tmpEBounds[1]),nThese)
+
+     IF nThese GT 0 THEN tmp2DStruct.SDT.data[these] = zeroVal
+     PRINT,FORMAT='("nEnergy: ",I0)',nThese
+     these = WHERE((tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] LT $
+                    KF2D__SDTData_opt.electron_angleRange[0]) OR $
+                   (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
+                    KF2D__SDTData_opt.electron_angleRange[1]),nThese)
+     IF nThese GT 0 THEN tmp2DStruct.SDT.data[*,these] = zeroVal
+     PRINT,FORMAT='("nangle: ",I0)',nThese
+     PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,tmp2DStruct,curDataStr, $
         ONLY_DATA=only_data, $ 
         FOR_HORSESHOE_FIT=for_horseshoe_fit, $
         LIMITS=cont2DLims, $

@@ -50,14 +50,16 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /FILL, $
                   /MSEC, $
                   LIMITS=limits, $
-                  /LABEL
+                  /LABEL, $
+                  NCONT=nCont
         CONTOUR2D,dataSDT, $
                   ;; ANGLE=angle, $
                   /POLAR, $
                   /OVERPLOT, $
                   /MSEC, $
                   LIMITS=limits, $
-                  /LABEL
+                  /LABEL, $
+                  NCONT=nCont
 
         IF KEYWORD_SET(KF2D__plot_opt.fit2D__add_boundaries) THEN BEGIN
 

@@ -142,7 +142,9 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_DensPickMeUpAll = 1
            END
-
+           STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_dens_aRange),'*ALL_EARTHWARD'): BEGIN
+              fit2D_DensPickMeUpEarthward = 1
+           END
         ENDCASE
 
      END
@@ -158,6 +160,9 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            END
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_temp_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_TempPickMeUpAll = 1
+           END
+           STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_temp_aRange),'*ALL_EARTHWARD'): BEGIN
+              fit2D_TempPickMeUpEarthward = 1
            END
 
         ENDCASE
@@ -175,6 +180,9 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            END
            STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_faCond_aRange),'*ALL__EXCL_ATM'): BEGIN
               fit2D_FaCondPickMeUpAll = 1
+           END
+           STRMATCH(STRUPCASE(KF__SDTData_opt.fit2D_faCond_aRange),'*ALL_EARTHWARD'): BEGIN
+              fit2D_FaCondPickMeUpEarthward = 1
            END
 
         ENDCASE
@@ -200,6 +208,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                  CUSTOM_E_ANGLERANGE=custom_e_angleRange, $
                                  MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                                  ALLEXCLATM_ARANGE=allExclAtm_aRange, $
+                                 EARTHWARD_ARANGE=earthward_aRange, $
                                  ANGLESTR=angleStr, $
                                  ;; ESPECUNITS=KF__Curvefit_opt.units, $
                                  ELECTRON_ENERGY_LIMS=KF__SDTData_opt.energy_electrons, $
@@ -231,6 +240,10 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',allExclAtm_aRange,/ADD_REPLACE
            fit2D__density_angleRange = allExclAtm_aRange
         END
+        KEYWORD_SET(fit2D_DensPickMeUpEarthward): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_dens_aRange',earthward_aRange,/ADD_REPLACE
+           fit2D__density_angleRange = earthward_aRange
+        END
         ELSE: BEGIN
            flip = WHERE(KF__SDTData_opt.fit2D_dens_aRange GT 180,nFlip)
            IF nFlip GT 0 THEN BEGIN
@@ -249,6 +262,10 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
            STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',allExclAtm_aRange,/ADD_REPLACE
            fit2D__temperature_angleRange = allExclAtm_aRange
         END
+        KEYWORD_SET(fit2D_TempPickMeUpEarthward): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_temp_aRange',earthward_aRange,/ADD_REPLACE
+           fit2D__temperature_angleRange = earthward_aRange
+        END
         ELSE: BEGIN
            flip = WHERE(KF__SDTData_opt.fit2D_temp_aRange GT 180,nFlip)
            IF nFlip GT 0 THEN BEGIN
@@ -266,6 +283,10 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
         KEYWORD_SET(fit2D_FaCondPickMeUpAll): BEGIN
            STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',allExclAtm_aRange,/ADD_REPLACE
            fit2D__faConductance_angleRange = allExclAtm_aRange
+        END
+        KEYWORD_SET(fit2D_FaCondPickMeUpEarthward): BEGIN
+           STR_ELEMENT,KF__SDTData_opt,'fit2D_faCond_aRange',earthward_aRange,/ADD_REPLACE
+           fit2D__faConductance_angleRange = earthward_aRange
         END
         ELSE: BEGIN
            flip = WHERE(KF__SDTData_opt.fit2D_faCond_aRange GT 180,nFlip)
