@@ -180,8 +180,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      
      ;; If we get stopped here, we are about to fit utter garbage below the peak value.
      ;; NEITHER distribution function gives anything meaningful for E < Φ_0
-     IF eRange_fit[0] LT Pkappa[0] THEN STOP
-     IF eRange_fit[0] LT Pgauss[0] THEN STOP
+     IF eRange_fit[0] LT Pkappa[0] THEN eRange_fit[0] = Pkappa[0]
+     IF eRange_fit[0] LT Pgauss[0] THEN eRange_fit[0] = Pgauss[0]
 
      peak_energyK           = peak_energy
      peak_energyG           = peak_energy
@@ -321,6 +321,17 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
         curGDataStr.data = gaussDataStr.data + gaussDataStr.ddata*dataG_gaussError[*,*,k] > 0.
      ENDELSE
 
+     shouldBePos = WHERE(curKDataStr.energy GE eRange_fitK[0],nShouldBePos)
+     IF nShouldBePos EQ 0 THEN STOP
+     IF (WHERE(~FINITE(curKDataStr.data[shouldBePos]) OR $
+               (curKDataStr.data[shouldBePos] LT 0)))[0] NE -1 $
+     THEN PRINT,"BOGUS"
+     shouldBePos = WHERE(curGDataStr.energy GE eRange_fitK[0],nShouldBePos)
+     IF nShouldBePos EQ 0 THEN STOP
+     IF (WHERE(~FINITE(curGDataStr.data[shouldBePos]) OR $
+               (curGDataStr.data[shouldBePos] LT 0)))[0] NE -1 $
+     THEN PRINT,"BOGUS"
+
      ;;copy paramStruct
      tmpKappaParamStruct = kappaParamStruct
      tmpGaussParamStruct = gaussParamStruct
@@ -329,6 +340,16 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      tmpKappaParamStruct[2].value = simKappas[k]
      
      IF ((k MOD 100) EQ 0) THEN PRINT,FORMAT='(A0,I05)',"iter_",k
+
+     ;; tmpCurDataStr = curDataStr
+     ;; CONVERT_ESA_UNITS2,tmpCurDataStr,'FLUX'
+     ;; this = ERRORPLOT(tmpCurDataStr.energy[*,42], $
+     ;;                  tmpCurDataStr.data[*,42], $
+     ;;                  tmpCurDataStr.ddata[*,42], $
+     ;;                  /XLOG, $
+     ;;                  /YLOG, $
+     ;;                  YRANGE=[1e5,max(tmpCurDataStr.data[*,42])*1.2], $
+     ;;                  XRANGE=MINMAX(tmpCurDataStr.energy[*,42]))
 
      curKappaStr = curKDataStr
 

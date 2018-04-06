@@ -47,10 +47,10 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; print_2DWinInfo = 1
 
   ;; 'chine 1
-  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '12:00:29.79'
-  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '12:00:48.7'
-  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '12:01:12.044'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '12:01:12.999'
+  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:00:29.79'
+  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:00:48.7'
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:01:12.044'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:01:12.999'
 
   ;; Some are already done
   ;; carloTimeStart = '09:26:11'
@@ -251,11 +251,28 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP
 
      ;; Just checking to see what we get back
-     this = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E( $
-            carloK.energy[*,42], $
-            Pkappa, $
-            UNITS='Eflux')
-     
+     ;; energy = (carloK.energy[*,42])[WHERE(carloK.energy[*,42] GE fit2dkappa_info.extra_info.erange_fit[0])]
+     ;; this = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY( $
+     ;;        energy, $
+     ;;        Pkappa, $
+     ;;        UNITS='Flux', $
+     ;;        MASS=carloK.mass)
+     ;; thisPlot = PLOT(energy, $
+     ;;                 this, $
+     ;;                 /XLOG, $
+     ;;                 /YLOG, $
+     ;;                 YRANGE=[MIN(this)>1E1,max(this)*1.2], $
+     ;;                 XRANGE=MINMAX(energy))     
+     ;; tmpCarloK = carloK
+     ;; CONVERT_ESA_UNITS2,tmpCarloK,'FLUX'
+     ;; thatPlot = ERRORPLOT(tmpCarloK.energy[*,42], $
+     ;;                      tmpCarloK.data[*,42], $
+     ;;                      tmpCarloK.ddata[*,42], $
+     ;;                      /XLOG, $
+     ;;                      /YLOG, $
+     ;;                      /OVERPLOT, $
+     ;;                      LINESTYLE='--', $
+     ;;                      COLOR='RED')
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carloK,carloG,Pkappa,Pgauss, $
                                          CURDATASTR=obsStructArr[match_i], $
