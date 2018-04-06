@@ -1,10 +1,11 @@
-;2016/09/02
+; 2016/09/02
+; 2018/04/06 Basically … it's deprecated. As far as I can tell, only KAPPA_FLUX2D__HORSESHOE
 PRO INIT_KAPPA_UNITCONV,curDataStr
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
 
-  @kappa_unitconversion_common.pro
+  ;; @kappa_unitconversion_common.pro
 
   U__init     = 1
   U__geom     = curDataStr.geom

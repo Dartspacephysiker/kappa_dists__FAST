@@ -56,7 +56,7 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
   @common__kappa_fit2d_structs.pro
 
   ;;Units for later
-  INIT_KAPPA_UNITCONV,curDataStr
+  ;; INIT_KAPPA_UNITCONV,curDataStr
 
   SETUP_KAPPA_FIT2D__HORSESHOE, $
      eRange_fit, $

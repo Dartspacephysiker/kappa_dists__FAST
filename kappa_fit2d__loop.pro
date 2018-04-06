@@ -564,12 +564,9 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                                   MINEIND=minEInd, $
                                   ERANGE_FIT=eRange_fit, $
                                   KAPPA_EST=KF2D__Curvefit_opt.fitA[2], $
-                                  ;; MASS=mass, $
                                   E_ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                                   ANGLES=tempAngleEstRange, $
                                   ;; N_ANGLES_IN_RANGE=nAngles, $
-                                  ;; BULKANGLE_STRUCT=angleStr, $
-                                  ;; DONT_TAKE_STOCK_OF_BULKANGLE=dont_take_stock_of_bulkangle, $
                                   ADD_GAUSSIAN_ESTIMATE=KF2D__Curvefit_opt.add_gaussian_estimate, $
                                   USE_SDT_GAUSSIAN_FIT=KF2D__Curvefit_opt.use_SDT_Gaussian_fit, $
                                   ESTFACS=estFacs, $

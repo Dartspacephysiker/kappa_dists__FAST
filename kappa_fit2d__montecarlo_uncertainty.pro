@@ -8,6 +8,7 @@
 ;; energy_inds: The indices of the high- and low-energy bins, in that order, that were used to do the initial fit
 ;; Foundations laid in JOURNAL__20171221__BOOTSTRAP_ORB_1773_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
 PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss, $
+                                        CURDATASTR=curDataStr, $
                                         TIDFNSTR=tidFNStr, $
                                         NROLLS=nRolls, $
                                         NOT_MPFIT1D=not_mpFit1D, $
@@ -40,7 +41,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   ;; IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
   nEnergiesG      = gaussDataStr.nEnergy
 
-  eRange_peak    = fit2DKappa_info.extra_info.eRange_peak
+  eRange_fit    = fit2DKappa_info.extra_info.eRange_fit
   ;; make_fit2D_info = 1
 
   IF N_ELEMENTS(kCurvefit_opt) GT 0 THEN BEGIN
@@ -61,28 +62,137 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      ;; ENDCASE
   ENDIF
 
-  KAPPA_FIT2D__MONTECARLO__1DINIT,kappaDataStr, $
-                                  IS_MAXWELLIAN=0, $
-                                  ;; PEAK_IND=peak_indK, $
-                                  NENERGIES=nEnergiesK, $
-                                  PEAK_ENERGY=peak_energyK, $
-                                  ERANGE_PEAK=eRange_peakK, $
-                                  OUT_1DPARAMSTRUCT=kappaParamStruct, $
-                                    MC__OKStatus=MC__OKStatus
-                                  
-  IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+  swapEnergyBounds = TAG_EXIST(KF2D__SDTData_opt,'energy_electron_tBounds')
+  IF swapEnergyBounds THEN BEGIN
 
-     KAPPA_FIT2D__MONTECARLO__1DINIT,gaussDataStr, $
-                                     /IS_MAXWELLIAN, $
+     PRINT,"Need to figure out what to do with KF2D__SDTData_opt.energy_electrons_curInd when (I presume) it comes to this routine after having already been altered by KAPPA_FIT2D__LOOP."
+     PRINT,"Maybe just reinitialize????"
+     PRINT,"I've already got the machinery located inside KAPPA_FIT2D__MONTECARLO__1DINIT; you just need to fickit!"
+     STOP
+  ENDIF
+
+  IF KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) THEN BEGIN
+
+     nEnergies         = N_ELEMENTS(kappaDataStr.energy[*,0])
+     ATmp              = DOUBLE([1e3,100.,3.0,0.01,0])
+
+     fixA        = [0, $                                                ;Vary bulk E [0]
+                    KF2D__Curvefit_opt.fit1D__clampTemperature, $       ;Temperature [1] (maybe)
+                    1, $
+                    KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not kappa or angle)
+                    1]
+
+     fixAGauss   = [0, $                                                ;Vary bulk E [0]                              
+                    KF2D__Curvefit_opt.fit1D__clampTemperature, $       ;Temperature [1] (maybe)                         
+                    0, $                                                ;kappa       [2]
+                    KF2D__CurveFit_opt.fit1D__clampDensity    , $       ;and density [3] (but not angle)
+                    1] 
+
+     kappaParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,fixA)
+     gaussParamStruct  = INIT_KAPPA_FITPARAM_INFO(ATmp,fixAGauss)
+
+     IF kappaParamStruct[1].limited[1] EQ 0 THEN BEGIN
+        ;; When the upperbound of T is not limited, xTol will become irreducible in
+        ;; the course of the fit and status 7 will be reported. To avoid this, we
+        ;; allow xTol = unminimizable to be an allowable outcome
+        ;;See INIT_KAPPA_FITPARAM_INFO<f> for more informaciones
+
+        MC__OKStatus  = [1,2,3,4,7] ;These are the acceptable outcomes of fitting with MPFIT2DFUN
+
+     ENDIF ELSE BEGIN
+        MC__OKStatus  = [1,2,3,4]
+     ENDELSE
+
+     CASE 1 OF
+        KEYWORD_SET(KF2D__Curvefit_opt.fit1D__nFlux): BEGIN
+           units1D = 'flux'
+           eSpecUnits = 'flux'
+        END
+        KEYWORD_SET(KF2D__Curvefit_opt.fit__JE_over_E): BEGIN
+           units1D = 'je_over_E'
+           eSpecUnits = 'flux'
+        END
+        ELSE: BEGIN
+           units1D = 'eFlux'
+           eSpecUnits = 'eFlux'
+        END
+     ENDCASE
+
+     CASE 1 OF
+        KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
+
+           ;;Get energy spectrum, if that's what you're into
+           eSpec = GET_EN_SPEC__SINGLE_STRUCT( $
+                   curDataStr, $
+                   /RETRACE, $
+                   ANGLE=KF2D__SDTData_opt.electron_angleRange, $
+                   UNITS=units1D, $
+                   OUT_AVGFACTORARR=avgFactorArr, $
+                   OUT_NORMARR=normArr)
+
+           Xorig    = eSpec.v
+           Yorig    = eSpec.y
+           worig    = eSpec.yerr
+           ;; nAngles          = 1
+           ;; nReqSCAngles     = 1
+
+        END
+        ELSE: BEGIN
+
+        END
+     ENDCASE
+
+     KAPPA__GET_PEAK_IND_AND_PEAK_ENERGY, $
+        Xorig,Yorig, $
+        peak_ind,peak_energy, $
+        NENERGIES=nEnergies, $
+        MAXEIND=maxEInd, $
+        MINEIND=minEInd, $
+        ENERGY_INDS=energy_inds, $
+        ERANGE_FIT=eRange_fit, $
+        N_BELOW_PEAK=KF2D__Curvefit_opt.n_below_peak, $
+        N_ABOVE_PEAK=KF2D__Curvefit_opt.n_above_peak, $
+        BULK_OFFSET=KF2D__Curvefit_opt.bulk_offset, $
+        CHECK_FOR_HIGHER_FLUX_PEAKS=check_higher_peaks_set_peakEn, $
+        MIN_PEAK_ENERGY=KF2D__Curvefit_opt.min_peak_energy, $
+        MAX_PEAK_ENERGY=TAG_EXIST(KF2D__Curvefit_opt,'max_peak_energy') ? KF2D__Curvefit_opt.max_peak_energy : !NULL, $
+        PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
+        /CONTINUE_IF_NOMATCH, $
+        /TEST_NOREV, $
+        ONECOUNT_STR=oneCurve     
+
+     kappaParamStruct.value = pKappa
+     gaussParamStruct.value = pGauss
+     peak_energyK           = peak_energy
+     peak_energyG           = peak_energy
+     eRange_fitK            = eRange_fit
+     eRange_fitG            = eRange_fit
+
+  ENDIF ELSE BEGIN
+
+     KAPPA_FIT2D__MONTECARLO__1DINIT,kappaDataStr, $
+                                     IS_MAXWELLIAN=0, $
                                      ;; PEAK_IND=peak_indK, $
-                                     NENERGIES=nEnergiesG, $
-                                     PEAK_ENERGY=peak_energyG, $
-                                     ERANGE_PEAK=eRange_peakG, $
-                                     OUT_1DPARAMSTRUCT=gaussParamStruct, $
+                                     NENERGIES=nEnergiesK, $
+                                     PEAK_ENERGY=peak_energyK, $
+                                     ERANGE_FIT=eRange_fitK, $
+                                     OUT_1DPARAMSTRUCT=kappaParamStruct, $
                                      MC__OKStatus=MC__OKStatus
      
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
 
-  ENDIF
+        KAPPA_FIT2D__MONTECARLO__1DINIT,gaussDataStr, $
+                                        /IS_MAXWELLIAN, $
+                                        ;; PEAK_IND=peak_indK, $
+                                        NENERGIES=nEnergiesG, $
+                                        PEAK_ENERGY=peak_energyG, $
+                                        ERANGE_FIT=eRange_fitG, $
+                                        OUT_1DPARAMSTRUCT=gaussParamStruct, $
+                                        MC__OKStatus=MC__OKStatus
+     ENDIF
+
+
+  ENDELSE
 
   ;; How many sims?
   default_Nsim = 200
@@ -115,9 +225,9 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   ;; ENDIF
 
   ;;Units for later
-  INIT_KAPPA_UNITCONV,kappaDataStr
+  ;; INIT_KAPPA_UNITCONV,kappaDataStr
   ;; IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-  INIT_KAPPA_UNITCONV,gaussDataStr
+  ;; INIT_KAPPA_UNITCONV,gaussDataStr
 
   angle = 0                     ;in degrees
   IF ~KEYWORD_SET(hemi) THEN BEGIN
@@ -216,7 +326,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
         UNITS=units2D, $
         SHIFTTHETA=shiftTheta, $
         PEAK_ENERGY=peak_energyK, $
-        ERANGE_PEAK=eRange_peakK, $
+        ERANGE_FIT=eRange_fitK, $
         EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
         MAKE_FIT2D_INFO=make_fit2D_info, $
         MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
@@ -263,7 +373,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
            UNITS=units2D, $
            SHIFTTHETA=shiftTheta, $
            PEAK_ENERGY=peak_energyG, $
-           ERANGE_PEAK=eRange_peakG, $
+           ERANGE_FIT=eRange_fitG, $
            EXTEND_FITSTRUCT_ERANGE=extend_fitStruct_eRange, $
            MAKE_FIT2D_INFO=make_fit2D_info, $
            MAKE_FIT2DPARAMARRS=make_fit2DParamArrs, $
