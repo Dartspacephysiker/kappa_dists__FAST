@@ -181,8 +181,11 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ENDFOR
 
   ;; match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
-  match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
-  match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
+  ;; match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
+  ;; match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
+
+  match_iStart = VALUE_CLOSEST2(tid,S2T(carloTimeStart),/CONSTRAINED)
+  match_iStop  = VALUE_CLOSEST2(tid,S2T(carloTimeStop),/CONSTRAINED)
 
   nRollStr    = STRING(FORMAT='("-",I0,"Rolls")',nRolls)
 
