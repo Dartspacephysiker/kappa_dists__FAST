@@ -59,6 +59,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D__TEMPERATURE_TYPE=fit2D__temperature_type, $
                           ADD_ONECOUNT_CURVE=add_oneCount_curve, $
                           SAVE_POSTKAPPA_PLOTS=save_postKappa_plot, $
+                          ADD_FITPARAMS_TEXT=add_fitParams_text, $
                           SAVEKAPPA_BONUSPREF=bonusPref, $
                           CLOSE_KAPPAPLOTS_AFTER_SAVE=close_kp_after_save, $
                           PLOTDIR=plotDir, $

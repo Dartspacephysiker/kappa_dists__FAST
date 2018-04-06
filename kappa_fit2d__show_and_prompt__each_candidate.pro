@@ -16,6 +16,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
   @common__kappa_fit2d_structs.pro
 
+  ;; xSize       = 8.
+  ;; ySize       = 6.4
   xSize       = 9.5
   ySize       = 9.5
   land        = 1
@@ -29,8 +31,8 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
 
   ;; More fings?
   cont2DLims  = {zrange:[10.^(6.),10.^9], $
-                 xrange:[-4.4,4.4], $
-                 yrange:[-4.4,4.4], $
+                 xrange:[-4.6,4.6], $
+                 yrange:[-4.6,4.6], $
                  xstyle:1, $
                  ystyle:1}
   spec2DLims = {yrange:[1e6,1e10]}
@@ -42,7 +44,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
   IF curDataStr.mass GT 5.7D-06 THEN BEGIN
      fit2D__PA_zRange = 10.D^([5.5,8.5])
   ENDIF ELSE BEGIN
-     fit2D__PA_zRange = 10.D^([5.5,9.5])
+     fit2D__PA_zRange = 10.D^([6.0,8.5])
   ENDELSE
   
   ;; IF KEYWORD_SET(fit2D__PA_zRange) THEN BEGIN
@@ -122,6 +124,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            XSIZE=xSize, $
            YSIZE=ySize, $
            LAND=land, $
+           CTABLE=43, $
            ENCAPSULATED=eps, $
            OPTIONS={charsize:1.5}
      
@@ -136,7 +139,7 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
      ;; lower ones.
      ;; zeroVal = 700087.25
      zeroVal = 1.0E3
-     tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
+     tmpEBounds = KEYWORD_SET(is_Maxwellian_fit) ? tmp2dstruct.extra_info.erange_fit : REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
      ;; tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[(tmp2DStruct.fit1d.orig.energy_inds-1) > 0,0])
      these = WHERE((tmp2DStruct.SDT.energy LT tmpEBounds[0]) OR $
                    (tmp2DStruct.SDT.energy GT tmpEBounds[1]),nThese)
@@ -148,14 +151,16 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
                    (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
                     KF2D__SDTData_opt.electron_angleRange[1]),nThese)
      IF nThese GT 0 THEN tmp2DStruct.SDT.data[*,these] = zeroVal
-     PRINT,FORMAT='("nangle: ",I0)',nThese
+     ;; PRINT,FORMAT='("nangle: ",I0)',nThese
+     nCont = 8
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,tmp2DStruct,curDataStr, $
         ONLY_DATA=only_data, $ 
         FOR_HORSESHOE_FIT=for_horseshoe_fit, $
         LIMITS=cont2DLims, $
         ADD_FITPARAMS_TEXT=KF2D__Plot_opt.add_fitParams_text, $
         ;; KF2D__SDTDATA_OPT=KF2D__SDTData_opt, $
-        FITSTRING=fitString
+        FITSTRING=fitString, $
+        NCONT=nCont
 
      PCLOSE
 

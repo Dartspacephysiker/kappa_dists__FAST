@@ -139,7 +139,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         winTitle  = winTitle + ', chi^2 ' + STRING(FORMAT='(G-9.4)',add_chi_value)
      ENDIF
   ENDIF
-  window          = WINDOW(DIMENSION=[800,600],TITLE=winTitle,BUFFER=buffer)
+  window          = WINDOW(DIMENSION=[800,640],TITLE=winTitle,BUFFER=buffer)
   windowArr       = N_ELEMENTS(windowArr) GT 0 ? [windowArr,window] : window
 
   plotArr         = MAKE_ARRAY(nPlots,/OBJ) 

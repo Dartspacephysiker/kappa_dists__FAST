@@ -4,7 +4,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
    LIMITS=limits, $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    FITSTRING=fitString, $
-   SKIP_ORNAMENTATION=skip_ornamentation
+   SKIP_ORNAMENTATION=skip_ornamentation, $
+   NCONT=nCont
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -31,6 +32,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
   bFuncSym      = 2 ;asterisk
   
   symSize       = 0.8
+  thick         = 4.0
 
   CASE 1 OF
      KEYWORD_SET(only_data): BEGIN
@@ -41,7 +43,8 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   ;; /OVERPLOT, $
                   /MSEC, $
                   LIMITS=limits, $
-                  /LABEL
+                  /LABEL, $
+                  THICK=thick
      END
      ELSE: BEGIN
         CONTOUR2D,fit2DStruct.SDT, $
@@ -59,7 +62,26 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /MSEC, $
                   LIMITS=limits, $
                   /LABEL, $
-                  NCONT=nCont
+                  NCONT=nCont, $
+                  THICK=thick
+
+        ;; CONTOUR2D,dataSDT, $
+        ;;           ;; ANGLE=angle, $
+        ;;           /POLAR, $
+        ;;           /FILL, $
+        ;;           /MSEC, $
+        ;;           LIMITS=limits, $
+        ;;           /LABEL, $
+        ;;           NCONT=nCont
+        ;; CONTOUR2D,fit2DStruct.SDT, $
+        ;;           ;; ANGLE=angle, $
+        ;;           /OVERPLOT, $
+        ;;           THICK=thick, $
+        ;;           /POLAR, $
+        ;;           /MSEC, $
+        ;;           LIMITS=limits, $
+        ;;           /LABEL, $
+        ;;           NCONT=nCont
 
         IF KEYWORD_SET(KF2D__plot_opt.fit2D__add_boundaries) THEN BEGIN
 
@@ -172,14 +194,14 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                           "Density (cm!U-3!N)", $
                           CGGREEK('chi',/PS)+'!11!U2!N!Dred!N']
            ;; "Angle (deg)"]
-           fitInfoStr  = [STRING(FORMAT='(F-15.2)',tmpA[0]), $
+           fitInfoStr  = [STRING(FORMAT='(I-15)',tmpA[0]), $
                           (is_kappa ? $
-                           STRING(FORMAT='(F-10.2,T11,"(",F-7.2,")")',tmpA[1],tmpA[1]*(tmpA[2]-1.5D)/tmpA[2]) : $
-                           STRING(FORMAT='(F-15.2)',tmpA[1])), $
-                          STRING(FORMAT='(F-7.3)',tmpA[2]), $
-                          STRING(FORMAT='(F-8.4)',fit2DStruct.fitMoms.scDens), $
+                           STRING(FORMAT='(I-10,T11,"(",I-7,")")',tmpA[1],tmpA[1]*(tmpA[2]-1.5D)/tmpA[2]) : $
+                           STRING(FORMAT='(I-15)',tmpA[1])), $
+                          STRING(FORMAT='(G-7.3)',tmpA[2]), $
+                          STRING(FORMAT='(G-8.3)',fit2DStruct.fitMoms.scDens), $
                           ;; STRING(FORMAT='(F-8.4)',tmpA[3]), $
-                          STRING(FORMAT='(G-9.4)',fit2DStruct.chi2/(fit2DStruct.dof-fit2DStruct.nPegged))]
+                          STRING(FORMAT='(G-9.3)',fit2DStruct.chi2/(fit2DStruct.dof-fit2DStruct.nPegged))]
 
            ;; theString   = STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[0],fitInfoStr[0]) + '!C' + $
            ;;               STRING(FORMAT='(A0,T20,": ",A0)',fitTitle[1],fitInfoStr[1]) + '!C' + $

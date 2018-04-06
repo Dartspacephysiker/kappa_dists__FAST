@@ -155,7 +155,8 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                    nIter        : nIter      , $
                    angleRange   : fit2D_dens_angleInfo.aRange, $
                    angle_i      : fit2D_dens_angleInfo.angle_i, $
-                   nAngle       : fit2D_dens_angleInfo.nAngle}
+                   nAngle       : fit2D_dens_angleInfo.nAngle, $
+                   fitFunc      : func}
 
   ENDIF
 

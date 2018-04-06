@@ -52,7 +52,8 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
         ;; fit2DParams[2] = 2.08
-        fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
+        fit2DStr.data = CALL_FUNCTION( $
+                        fit2D_info.fitFunc, $
                         fit2DStr.energy, $
                         SHIFT(fit2DStr.theta,0,shiftTheta), $
                         [fit2DParams[0],fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $

@@ -121,7 +121,7 @@
   save_fitPlots                 = 1
   saveData                      = 1
   plot_full_fit                 = 1
-  add_fitParams_text            = 1
+  add_fitParams_text            = N_ELEMENTS(add_fitParams_text) GT 0 ? add_fitParams_text : 1
   add_angle_label               = 1
 
   max_iter                      = 10000
