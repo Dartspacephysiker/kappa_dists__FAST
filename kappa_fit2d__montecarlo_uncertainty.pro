@@ -44,6 +44,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   eRange_fit    = fit2DKappa_info.extra_info.eRange_fit
   ;; make_fit2D_info = 1
 
+  
+
   IF N_ELEMENTS(kCurvefit_opt) GT 0 THEN BEGIN
 
      kCurvefit_opt.trim_energies_below_peak = 0 ; Make sure this is turned off
@@ -121,6 +123,12 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      CASE 1 OF
         KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
 
+           shouldBePos = WHERE(curDataStr.energy GE Pkappa[0],nShouldBePos)
+           IF nShouldBePos EQ 0 THEN STOP
+           IF (WHERE(~FINITE(curDataStr.data[shouldBePos]) OR $
+                     (curDataStr.data[shouldBePos] LT 0)))[0] NE -1 $
+           THEN STOP
+
            ;;Get energy spectrum, if that's what you're into
            eSpec = GET_EN_SPEC__SINGLE_STRUCT( $
                    curDataStr, $
@@ -163,6 +171,18 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
 
      kappaParamStruct.value = pKappa
      gaussParamStruct.value = pGauss
+
+     ;; Need to reduce these by number of fitAngles---'s'way too high!
+     ;; Decided to do this in JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
+     ;; extraDensDivFac = 5.
+     ;; kappaParamStruct[3].value = kappaParamStruct[3].value / fit2DKappa_info.nAngle / extraDensDivFac
+     ;; gaussParamStruct[3].value = gaussParamStruct[3].value / fit2DGauss_info.nAngle / extraDensDivFac
+     
+     ;; If we get stopped here, we are about to fit utter garbage below the peak value.
+     ;; NEITHER distribution function gives anything meaningful for E < Φ_0
+     IF eRange_fit[0] LT Pkappa[0] THEN STOP
+     IF eRange_fit[0] LT Pgauss[0] THEN STOP
+
      peak_energyK           = peak_energy
      peak_energyG           = peak_energy
      eRange_fitK            = eRange_fit

@@ -4,8 +4,11 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
    origParamEst, $
    binSize, $
    layoutNommer, $
+   REDUCE_STD_DEV_FACTOR=redStdDevFac, $
    XTITLE=xTitle, $
+   XMAX=xMax, $
    WINDOW=window, $
+   WINTITLE=winTitle, $
    OUT_ESTIMATE=gEst
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -14,15 +17,43 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
 ;Arise from histo binning
   histVals = HISTOGRAM(curParam,BINSIZE=binSize,LOCATIONS=locs)
 
-;Normalize hist vals
-  nHistVals = INT_TABULATED(locs,histVals)
+  IF N_ELEMENTS(locs) LE 5 THEN BEGIN
+     
+     tmpBinSize = binSize
+     WHILE N_ELEMENTS(locs) LE 5 DO BEGIN
+        tmpBinSize /= 2.
+        histVals = HISTOGRAM(curParam,BINSIZE=tmpBinSize,LOCATIONS=locs)
 
-  gMaxValEst  = MAX(nHistVals)
+     ENDWHILE
+     
+     binSize = tmpBinSize
+
+  ENDIF
+
+  IF N_ELEMENTS(locs) GE 1000 THEN BEGIN
+     
+     tmpBinSize = binSize
+     WHILE N_ELEMENTS(locs) GT 1000 DO BEGIN
+        tmpBinSize *= 1.5
+        histVals = HISTOGRAM(curParam,BINSIZE=tmpBinSize,LOCATIONS=locs)
+
+     ENDWHILE
+     
+     binSize = tmpBinSize
+
+  ENDIF
+
+;Normalize hist vals
+  nHistVals = histVals/INT_TABULATED(locs,FLOAT(histVals))
+
+  gMaxVal     = MAX(nHistVals,maxInd)
+  gMaxValEst  = locs[maxInd]
   gMeanEst    = INT_TABULATED(locs,nHistVals*locs)/INT_TABULATED(locs,nHistVals)
   gStdDevEst1 = SQRT(INT_TABULATED(locs,nHistVals*(locs-gMeanEst)^2.)/INT_TABULATED(locs,nHistVals))
   gStdDevEst2 = SQRT(INT_TABULATED(locs,nHistVals*(locs^2.))/INT_TABULATED(locs,nHistVals)-gMeanEst^2.)
   IF ABS(gStdDevEst2-gStdDevEst1)/gStdDevEst1 GT 0.1 THEN STOP
 
+  IF KEYWORD_SET(redStdDevFac) THEN gStdDevEst1 /= redStdDevFac
   gEstimates = [gMaxValEst,gMeanEst,gStdDevEst1]
   nTerms = 3
   gFit = GAUSSFIT(locs,nHistVals,gCoeffs,ESTIMATES=gEstimates,NTERMS=3)
@@ -42,7 +73,7 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
         xTitle = "Temperature (eV)"
         yTitle = !NULL
      END
-     2: BEGIN
+     4: BEGIN
         xTitle = "Kappa"
         yTitle = 'Probability density'
      END
@@ -51,24 +82,27 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
   nRow = 2
   nCol = 2
 
-  IF layoutNommer EQ 1 THEN window = WINDOW(DIMENSIONS=[600,600])
+  IF layoutNommer EQ 2 THEN window = WINDOW(DIMENSIONS=[800,800],TITLE=winTitle)
+
+  xRange = [MIN(locs),(KEYWORD_SET(xMax) ? (xMax < MAX(locs)) : MAX(locs))]
 
   p1 = PLOT(locs, nHistVals, $
             LAYOUT=[nCol,nRow,layoutNommer], $
             CURRENT=window, $
 ;;	DIMENSIONS=[800,200], $
-            MARGIN=[0.1,0.2,0.1,0.2], $
+            MARGIN=[0.1,0.1,0.1,0.2], $
             XRANGE=xRange, $
             YRANGE=yRange, $
             XTITLE=xTitle, $
             YTITLE=yTitle)
 
-  p2 = PLOT(locs, gFit, THICK=2, /OVERPLOT,COLOR='RED')
-  p3 = PLOT(REPLICATE(gMeanEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='--',COLOR='RED')
-  p4 = PLOT(REPLICATE(origParamEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='--',COLOR='BLUE')
+  p2 = PLOT(locs, gFit, THICK=2, /OVERPLOT,COLOR='RED',CURRENT=window)
+  p3 = PLOT(REPLICATE(gMeanEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='--',COLOR='RED',CURRENT=window)
+  p4 = PLOT(REPLICATE(origParamEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='--',COLOR='BLUE',CURRENT=window)
 
   gEst = {coeff: gCoeffs, $$
           locs: locs, $
+          binSize : binSize, $
           nHistVals : nHistVals, $
           histVals : histVals, $
           init_coeff_est : gEstimates}

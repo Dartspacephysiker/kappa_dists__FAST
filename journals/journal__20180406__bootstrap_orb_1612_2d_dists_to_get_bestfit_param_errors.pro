@@ -3,7 +3,8 @@
 
 ;; JOURNAL__20180117__BOOTSTRAP_ORB_1773_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,CARLOTIMESTART='09:26:41.669', $
 ;;    CARLOTIMESTOP='09:26:42.301'
-PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,CARLOTIMESTART=carloTimeStart, $
+PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
+   CARLOTIMESTART=carloTimeStart, $
    CARLOTIMESTOP=carloTimeStop
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -19,7 +20,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,C
   orbit = 1612
   orbString = STRING(FORMAT='(I0)',orbit)
 
-  nRolls         = 100
+  nRolls         = 1000
   ;; nRolls         = 10000
   ;; nRolls         = 10000
 
@@ -44,14 +45,12 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,C
 
   print_2DFitInfo = 0
   ;; print_2DWinInfo = 1
-  ;; carloTime = '09:27:01.57'     ;Time shown in Figure 2a title
-  ;; carloTime = '09:27:01.261'    ;The correct time, since the average of this time and the next time (09:27:01.893) gives 09:27:01.57
-  ;; carloTimeStart = '09:26:55'
-  ;; carloTimeStop  = '09:27:05'
 
   ;; 'chine 1
-  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '12:00:29.79'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '12:00:48.7'
+  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '12:00:29.79'
+  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '12:00:48.7'
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '12:01:12.044'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '12:01:12.999'
 
   ;; Some are already done
   ;; carloTimeStart = '09:26:11'
@@ -221,11 +220,20 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,C
         carloG.ddata = (obsStructArr[match_i]).ddata
      ENDIF
 
-     ;; Params
-     Pkappa         = fit2DKappa_inf_list[match_i].fitParams
-     Pgauss         = fit2DGauss_inf_list[match_i].fitParams
+     fit2DKappa_info = fit2DKappa_inf_list[match_i]
+     fit2DGauss_info = fit2DGauss_inf_list[match_i]
 
-     mass           = fit2DKappa_inf_list[match_i].sdt.mass
+     ;; Params
+     Pkappa         = fit2DKappa_info.fitParams
+     Pgauss         = fit2DGauss_info.fitParams
+
+     ;; extraDensDivFac = 1.
+     ;; Pkappa[3] = Pkappa[3] / fit2DKappa_info.nAngle / extraDensDivFac
+     ;; Pgauss[3] = Pgauss[3] / fit2DGauss_info.nAngle / extraDensDivFac
+     Pkappa[3] = fit2DKappa_info.fit1D.A[3] / fit2DKappa_info.nAngle
+     Pgauss[3] = fit2DKappa_info.fit1D.A[3] / fit2DKappa_info.nAngle
+
+     mass           = fit2DKappa_info.sdt.mass
 
      tmpTidString = STRSPLIT(tidString[match_i],'/',/EXTRACT)
      IF N_ELEMENTS(tmpTidString) GT 0 THEN tmpTidString = tmpTidString[1] ELSE tmpTidString = tmpTidString[0]
@@ -237,10 +245,14 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS,C
      utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr
      utFil = utFil+'.sav'
 
-     fit2DKappa_info = fit2DKappa_inf_list[match_i]
-     fit2DGauss_info = fit2DGauss_inf_list[match_i]
-
      IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP
+
+     ;; Just checking to see what we get back
+     this = KAPPA_FLUX__LINEAR_SHIFT_IN_ENERGY__JE_OVER_E( $
+            carloK.energy[*,42], $
+            Pkappa, $
+            UNITS='Eflux')
+     
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carloK,carloG,Pkappa,Pgauss, $
                                          CURDATASTR=obsStructArr[match_i], $
