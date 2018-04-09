@@ -10,6 +10,8 @@ PRO JOURNAL__20180406__CHECKOUT_ORB1612_MONTECARLO_OUTPUT
   nRollsString   = STRING(FORMAT='(I0)',nRolls)
   file           = 'orb1612_2DMCarlo_ests__12_01_12__044_synthetic_wGauss-' $
                    + nRollsString + 'Rolls-fit2DParams.sav'
+  ;; for spectra_average_interval = 3
+  file           = 'orb1612_2DMCarlo_ests__12_01_12__359_synthetic_wGauss-1000Rolls-fit2DParams.sav"'
 
   RESTORE,dir+file
 
