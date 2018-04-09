@@ -114,6 +114,7 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
 
   gEst = {name            : name      , $
           coeff           : gCoeffs   , $
+          ;; CI              : 
           locs            : locs      , $
           binSize         : binSize   , $
           nHistVals       : nHistVals , $
