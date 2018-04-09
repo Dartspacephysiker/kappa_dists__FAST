@@ -208,29 +208,6 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
 
      match_i = (inds[k])[0]
 
-     ;; Now get the data
-     IF observed_dist THEN BEGIN
-        carloK = obsStructArr[match_i]
-
-        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-           carloG = obsStructArr[match_i]
-        ENDIF
-
-     ENDIF ELSE BEGIN
-        carloK = fit2DKappa_inf_list[match_i].sdt
-
-        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-           carloG = fit2DGauss_inf_list[match_i].sdt
-        ENDIF
-
-     ENDELSE
-
-     ;; Whatever the case, use observed uncertainties
-     carloK.ddata = (obsStructArr[match_i]).ddata
-     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-        carloG.ddata = (obsStructArr[match_i]).ddata
-     ENDIF
-
      fit2DKappa_info = fit2DKappa_inf_list[match_i]
      fit2DGauss_info = fit2DGauss_inf_list[match_i]
 
@@ -243,6 +220,31 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      ;; Pgauss[3] = Pgauss[3] / fit2DGauss_info.nAngle / extraDensDivFac
      Pkappa[3] = fit2DKappa_info.fit1D.A[3] / fit2DKappa_info.nAngle
      Pgauss[3] = fit2DKappa_info.fit1D.A[3] / fit2DKappa_info.nAngle
+
+     ;; Now get the data
+     IF observed_dist THEN BEGIN
+        carloK = obsStructArr[match_i]
+
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           carloG = obsStructArr[match_i]
+        ENDIF
+
+     ENDIF ELSE BEGIN
+        carloK = fit2DKappa_info.sdt
+
+        IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+           carloG = fit2DGauss_info.sdt
+        ENDIF
+
+     ENDELSE
+
+     curDataStr = obsStructArr[match_i]
+
+     ;; Whatever the case, use observed uncertainties
+     carloK.ddata = (curDataStr).ddata
+     IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
+        carloG.ddata = (curDataStr).ddata
+     ENDIF
 
      mass           = fit2DKappa_info.sdt.mass
 
@@ -283,7 +285,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      ;;                      COLOR='RED')
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carloK,carloG,Pkappa,Pgauss, $
-                                         CURDATASTR=obsStructArr[match_i], $
+                                         CURDATASTR=curDataStr, $
                                          TIDFNSTR=tidFNStr, $
                                          NROLLS=nRolls, $
                                          NOT_MPFIT1D=not_mpFit1D, $
