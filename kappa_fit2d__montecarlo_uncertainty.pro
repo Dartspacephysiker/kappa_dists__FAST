@@ -80,13 +80,13 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
 
      fixA        = [0, $                                                ;Vary bulk E [0]
                     KF2D__Curvefit_opt.fit1D__clampTemperature, $       ;Temperature [1] (maybe)
-                    1, $
+                    0, $
                     KF2D__CurveFit_opt.fit1D__clampDensity    , $ ;and density [3] (but not kappa or angle)
                     1]
 
      fixAGauss   = [0, $                                                ;Vary bulk E [0]                              
                     KF2D__Curvefit_opt.fit1D__clampTemperature, $       ;Temperature [1] (maybe)                         
-                    0, $                                                ;kappa       [2]
+                    1, $                                                ;kappa       [2]
                     KF2D__CurveFit_opt.fit1D__clampDensity    , $       ;and density [3] (but not angle)
                     1] 
 

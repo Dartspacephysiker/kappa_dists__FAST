@@ -11,16 +11,16 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
 
   @common__kappa_fit2d_structs.pro
 
-  spectra_average_interval = 3
-  SAIstring = STRING(FORMAT='(I0)',spectra_average_interval)
+  spectra_average_interval = 2
+  avgItvlStr = STRING(FORMAT='("-avg_itvl",I0)',spectra_average_interval)
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180409-orb_1612-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-AUTO-only_fit_peak_eRange-avg_itvl' + $
-        SAIstring + '.sav'
+  fil = '20180409-orb_1612-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-AUTO-only_fit_peak_eRange' + $
+        avgItvlStr + '.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1612-diff_eflux-ees-avg_itvl' + $
-                   SAIstring + (spectra_average_interval EQ 3      ? $
+  diff_eFlux_fil = 'orb_1612-diff_eflux-ees' + $
+                   avgItvlStr + (spectra_average_interval EQ 3      ? $
                                 '-12_00_24__000-12_01_47__000.sav' : $
                                 '-12_00_04__000-12_02_07__000.sav')
 
@@ -176,7 +176,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; represent the start of the period over which ESA obs are integrated, I here need to
   ;; artificially set back the diff_eFlux times by half the sample period
   offset = (tid[1]-tid[0])/2.
-  offset = 0.
+  ;; offset = 0.
   diff_eFlux_inds = VALUE_CLOSEST2((diff_eFlux.time-offset),tid,/CONSTRAINED)
   badObsSynth_i   = WHERE(ABS((diff_eFlux.time[diff_eFlux_inds]-offset)-tid) GT 0.05,nBadObsSynth)
   IF nBadObsSynth GT 0 THEN STOP
@@ -248,6 +248,9 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
 
      mass           = fit2DKappa_info.sdt.mass
 
+     ;;2018/04/60 DIAGNOSTIC PLOT
+     ;;s=curdatastr & junk = MIN(ABS(s.theta[0,*]),ind) & wind = WINDOW(DIMENSIONS=[800,800]) & this = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,LINESTYLE='',SYMBOL='+',YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],XTITLE='$\Delta \Phi$ (V)',YTITLE='Diff. Energy Flux',CURRENT=wind) & s = carlok & that = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],COLOR='red',ERRORBAR_COLOR='RED',/OVERPLOT,CURRENT=wind) & vert = PLOT(REPLICATE(fit2dkappa_info.extra_info.eRange_fit[0],10),10.D^(DINDGEN(10)+1.D),LINESTYLE='--',COLOR='GREEN',/OVERPLOT,CURRENT=wind)
+
      tmpTidString = STRSPLIT(tidString[match_i],'/',/EXTRACT)
      IF N_ELEMENTS(tmpTidString) GT 0 THEN tmpTidString = tmpTidString[1] ELSE tmpTidString = tmpTidString[0]
      PRINT,FORMAT='(I05,T10,A0)',k,tmpTidString
@@ -255,7 +258,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      tidFNStr = STRJOIN(STRSPLIT(tmpTidString,':',/EXTRACT),'_')
      tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
 
-     utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr
+     utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr + avgItvlStr
      utFil = utFil+'.sav'
 
      IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP

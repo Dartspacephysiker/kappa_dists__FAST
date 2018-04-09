@@ -3,15 +3,30 @@ PRO JOURNAL__20180406__CHECKOUT_ORB1612_MONTECARLO_OUTPUT
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180406/'
+  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180409/'
   nRolls         = 1000
   ;; nRolls         = 10000
 
   nRollsString   = STRING(FORMAT='(I0)',nRolls)
-  file           = 'orb1612_2DMCarlo_ests__12_01_12__044_synthetic_wGauss-' $
-                   + nRollsString + 'Rolls-fit2DParams.sav'
+
   ;; for spectra_average_interval = 3
-  file           = 'orb1612_2DMCarlo_ests__12_01_12__359_synthetic_wGauss-1000Rolls-fit2DParams.sav'
+  spectra_average_interval = 2
+  avgItvlStr = STRING(FORMAT='("-avg_itvl",I0)',spectra_average_interval)
+  CASE spectra_average_interval OF
+     2: BEGIN
+        file           = 'orb1612_2DMCarlo_ests__12_01_12__044_synthetic_wGauss-' $
+                         + nRollsString + 'Rolls-fit2DParams' $
+                         + avgItvlStr + '.sav'
+        file           = 'orb1612_2DMCarlo_ests__12_01_12__675_synthetic_wGauss-1000Rolls-fit2DParams-avg_itvl2.sav'
+     END
+     3: BEGIN
+        ;; file           = 'orb1612_2DMCarlo_ests__12_01_12__359_synthetic_wGauss-1000Rolls-fit2DParams.sav'
+        ;; file           = 'orb1612_2DMCarlo_ests__12_01_12__675_synthetic_wGauss-1000Rolls-fit2DParams' $
+        ;;                  + avgItvlStr + '.sav'
+        ;; file           = 'orb1612_2DMCarlo_ests__12_01_13__305_synthetic_wGauss-1000Rolls-fit2DParams' $
+        ;;                  + avgItvlStr + '.sav'
+     END
+  ENDCASE
 
   RESTORE,dir+file
 
@@ -26,9 +41,10 @@ PRO JOURNAL__20180406__CHECKOUT_ORB1612_MONTECARLO_OUTPUT
 ; P[2]: kappa,     Kappa (of course!)--or more specifically 3D kappa index, so that kappa eq kappa_0 + 3/2
 ; P[3]: n,         Plasma density (cm^-3)
   layoutNommers  = [2,3,4,1]
-  binSizes       = [5.,5.,0.5,0.05]
-  xMaxList       = LIST(!NULL,!NULL,35.,30.)
-  redStdDevFacs  = LIST(10.,!NULL,10.,10.)
+  binSizes       = [5.,5.,0.1,0.05]
+  xMaxList       = LIST(!NULL,!NULL,100.,30.)
+  ;; redStdDevFacs  = LIST(10.,!NULL,10.,10.)
+  redStdDevFacs  = LIST(!NULL,!NULL,!NULL,!NULL)
 
   p              = kP
   ests           = kOrigEsts
@@ -39,8 +55,6 @@ PRO JOURNAL__20180406__CHECKOUT_ORB1612_MONTECARLO_OUTPUT
 
   maxwellian     = 1
   FOR k=0,3 DO BEGIN
-
-     IF KEYWORD_SET(nowMaxwellian) AND k EQ 2 THEN k++
 
      curParam      = REFORM(p[k,*])
      origParamEst  = ests[k]
