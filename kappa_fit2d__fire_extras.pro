@@ -60,6 +60,9 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 
+        ;; 2018/04/09 DIAGNOSTIC PLOT
+        ;;IF ~KEYWORD_SET(is_Maxwellian_fit) THEN BEGIN & junk = MIN(ABS(fit2dstr.theta[0,*]),ind) & s=curdatastr & wind = WINDOW(DIMENSIONS=[800,800]) & this = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,LINESTYLE='',SYMBOL='+',YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],XTITLE='$\Delta \Phi$ (V)',YTITLE='Diff. Energy Flux',CURRENT=wind) & s = fit2dstr & that = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],COLOR='red',ERRORBAR_COLOR='RED',/OVERPLOT,CURRENT=wind) & vert = PLOT(REPLICATE(eRange_fit[0],10),10.D^(DINDGEN(10)+1.D),LINESTYLE='--',COLOR='GREEN',/OVERPLOT,CURRENT=wind) & ENDIF
+
         ;; 2018/03/16
         ;;Kill below peak energy
         ;; toBeKilled = WHERE(fit2DStr.energy LT fit2DParams[0],nKillah,/NULL) & fit2DStr.data[toBeKilled] = 0. & fit2DStr.ddata[toBeKilled] = 0.
