@@ -54,9 +54,9 @@ PRO JOURNAL__20180406__CHECKOUT_ORB1612_MONTECARLO_OUTPUT
   dirForCheck = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/' + dateToCheck + '/'
   filsPref    = 'orb1612_2DMCarlo_ests__12_0'
   orbDate     = '1997-01-17'
-  ;; tBoundsStr  = orbDate + '/' + ['12:01:22.766','12:01:29.703']
+  tBoundsStr  = orbDate + '/' + ['12:01:22.766','12:01:29.703']
   ;; tBoundsStr  = orbDate + '/' + ['12:01:15.766','12:01:29.703']
-  tBoundsStr  = orbDate + '/' + ['12:01:00.00','12:01:14.703']
+  ;; tBoundsStr  = orbDate + '/' + ['12:01:00.00','12:01:14.703']
   tBounds     = S2T(tBoundsStr)
   
   IF FILE_TEST(dirForCheck,/DIRECTORY) AND KEYWORD_SET(checkForFiles) THEN BEGIN
