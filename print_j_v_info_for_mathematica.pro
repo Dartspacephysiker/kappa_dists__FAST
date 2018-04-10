@@ -19,6 +19,7 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
   ;; PRINT,FORMAT='("time={",' + nHerStr + '(A25,:,", "),"}")','"'+T2S(jvPlotData.time[inds],/MS)+'"'
   PRINT,STRING(FORMAT='("time={",' + nHerStr + '(A0,:,", "),"}")','"'+STRMID(T2S(jvPlotData.time[inds],/MS),11,23)+'"')+'};'
   PRINT,STRING(FORMAT='("pots={",' + nHerStr + '(F-0.2,:,", "),"}")',jvPlotData.pot[inds])+'};'
+  PRINT,STRING(FORMAT='("potErrs={",' + nHerStr + '(F-0.2,:,", "),"}")',jvPlotData.potErr[inds])+'};'
   PRINT,STRING(FORMAT='("curs={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.cur[inds]*(-1.D))+'};'
   PRINT,STRING(FORMAT='("curErrs={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.curErr[inds])+'};'
   PRINT,STRING(FORMAT='("jes={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.je[inds])+'};'

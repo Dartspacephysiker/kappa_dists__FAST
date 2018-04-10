@@ -27,8 +27,8 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   orbit = 1612
   orbString = STRING(FORMAT='(I0)',orbit)
 
-  nRolls         = 1000
-  ;; nRolls         = 10000
+  ;; nRolls         = 1000
+  nRolls         = 10000
   ;; nRolls         = 10000
 
   make_fit2D_info     = 0       ;Much more info than we need
@@ -192,8 +192,16 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
   ;; match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
-  match_iStart = VALUE_CLOSEST2(tid,S2T(carloTimeStart),/CONSTRAINED)
-  match_iStop  = VALUE_CLOSEST2(tid,S2T(carloTimeStop),/CONSTRAINED)
+  ;; match_iStart = VALUE_CLOSEST2(tid,S2T(carloTimeStart),/CONSTRAINED)
+  ;; match_iStop  = VALUE_CLOSEST2(tid,S2T(carloTimeStop),/CONSTRAINED)
+
+  inds = WHERE((tid GE S2T(carloTimeStart)) AND $
+               (tid LT S2T(carloTimeStop )), $
+               nInds)
+  IF nInds EQ 0 THEN BEGIN
+     PRINT,"Nussing!"
+     RETURN
+  ENDIF
 
   nRollStr    = STRING(FORMAT='("-",I0,"Rolls")',nRolls)
 
@@ -202,7 +210,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   saveInfStr  = KEYWORD_SET(make_fit2D_info      ) ? '-info_lists'  : ''
   saveParmStr = KEYWORD_SET(make_fit2DParamArrs  ) ? '-fit2DParams' : ''
 
-  inds = [match_iStart[0]:match_iStop[0]]
+  ;; inds = [match_iStart[0]:match_iStop[0]]
   nHjar = N_ELEMENTS(inds)
   FOR k=0,nHjar-1 DO BEGIN
 
