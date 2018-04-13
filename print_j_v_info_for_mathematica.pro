@@ -1,4 +1,61 @@
 ;2018/03/01
+PRO PRINT_MMA_FITSTATS,tRanges,time,stat,kStat,gStat,useInds, $
+                           fmtStrs
+
+        nTRanges = N_ELEMENTS(tRanges[0,*])
+
+        PRINT,""
+
+        PRINT,FORMAT=fmtStrs[0],fmtStrs[1],fmtStrs[2],fmtStrs[3],fmtStrs[4],fmtStrs[5]
+
+        FOR j=0,nTRanges-1 DO BEGIN
+
+           tmpInds = WHERE(time[useInds] GE STR_TO_TIME(tRanges[0,j]) AND $
+                           time[useInds] LE STR_TO_TIME(tRanges[1,j]),nTmp)
+
+           IF nTmp GT 0 THEN BEGIN
+
+              FOR k=0,N_ELEMENTS(tmpInds)-1 DO $
+                 PRINT,FORMAT='(I3,TR1,A22,TR5,F6.2,TR5,F6.2,TR5,F6.2)', $
+                       k, $
+                       T2S(time[useInds[tmpInds[k]]],/MS), $
+                       stat[useInds[tmpInds[k]]], $
+                       kStat[useInds[tmpInds[k]]], $
+                       gStat[useInds[tmpInds[k]]]
+
+              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
+                    'MEAN', $
+                    MEAN(stat[useInds[tmpInds]]), $
+                    MEAN(kStat[useInds[tmpInds]]), $
+                    MEAN(gStat[useInds[tmpInds]])
+              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
+                    'MEDIAN', $
+                    MEDIAN(stat[useInds[tmpInds]]), $
+                    MEDIAN(kStat[useInds[tmpInds]]), $
+                    MEDIAN(gStat[useInds[tmpInds]])
+              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
+                    'MIN', $
+                    MIN(stat[useInds[tmpInds]]), $
+                    MIN(kStat[useInds[tmpInds]]), $
+                    MIN(gStat[useInds[tmpInds]])
+              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
+                    'MAX', $
+                    MAX(stat[useInds[tmpInds]]), $
+                    MAX(kStat[useInds[tmpInds]]), $
+                    MAX(gStat[useInds[tmpInds]])
+              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
+                    'STDDEV', $
+                    STDDEV(stat[useInds[tmpInds]]), $
+                    STDDEV(kStat[useInds[tmpInds]]), $
+                    STDDEV(gStat[useInds[tmpInds]])
+
+              PRINT,''
+           ENDIF
+
+        ENDFOR
+
+
+END
 PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
    JVPLOTDATA=jvPlotData, $
    AVGS_JVFIT=avgs_jvFit, $
@@ -74,7 +131,7 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
      
      IF KEYWORD_SET(ParmUncert_2D__useMostProbK) THEN BEGIN
 
-        ;; ka[matchieK]  = k2DParmErr.mostProb.kappa[matchieK2]
+        k2DPArms.kappa      [matchieK]  = k2DParmErr.mostProb.kappa[matchieK2]
         k2DParms.bulk_energy[matchieK]  = k2DParmErr.mostProb.bulk_energy[matchieK2]
         k2DParms.temperature[matchieK]  = k2DParmErr.mostProb.temperature[matchieK2]
         k2DParms.N          [matchieK]  = k2DParmErr.mostProb.N[matchieK2]
@@ -128,48 +185,53 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
      STR_ELEMENT,cAP_struct,'tRanges',tRanges
      IF N_ELEMENTS(tRanges) GT 0 THEN IF SIZE(tRanges,/TYPE) EQ 7 THEN BEGIN
 
-        PRINT,""
-
-        PRINT,FORMAT='(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
+        ;; Now temperatures
+        fmtStrs = ['(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
               'k', $
               'Time', $
               'Tcalc', $
               'TKappa', $
-              'TGauss'
+              'TGauss']
 
-        nTRanges = N_ELEMENTS(tRanges[0,*])
-        useInds  = !NULL
-        FOR j=0,nTRanges-1 DO BEGIN
+        PRINT_MMA_FITSTATS,tRanges, $
+                           jvPlotData.time, $
+                           jvPlotData.tDown, $
+                           k2DParms.temperature, $
+                           g2DParms.temperature, $
+                           avgs_jvFit.useInds, $
+                           fmtStrs
 
-           tmpInds = WHERE(JVPlotData.time[avgs_jvFit.useInds] GE STR_TO_TIME(tRanges[0,j]) AND $
-                           JVPlotData.time[avgs_jvFit.useInds] LE STR_TO_TIME(tRanges[1,j]),nTmp)
+        ;; Now density
+        fmtStrs=['(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
+              'k', $
+              'Time', $
+              'Ncalc', $
+              'NKappa', $
+              'NGauss']
 
-           IF nTmp GT 0 AND N_ELEMENTS(avgs_jvFit) GT 0 THEN BEGIN
+        PRINT_MMA_FITSTATS,tRanges, $
+                           jvPlotData.time, $
+                           jvPlotData.source.NDown, $
+                           k2DParms.N, $
+                           g2DParms.N, $
+                           avgs_jvFit.useInds, $
+                           fmtStrs
 
-              FOR k=0,N_ELEMENTS(tmpInds)-1 DO $
-                 PRINT,FORMAT='(I3,TR1,A22,TR5,F6.2,TR5,F6.2,TR5,F6.2)', $
-                       k, $
-                       T2S(jvPlotData.time[avgs_jvFit.useInds[tmpInds[k]]],/MS), $
-                       jvPlotData.tDown[avgs_jvFit.useInds[tmpInds[k]]], $
-                       k2DParms.temperature[avgs_jvFit.useInds[tmpInds[k]]], $
-                       g2DParms.temperature[avgs_jvFit.useInds[tmpInds[k]]]
+        ;; Now kappa
+        fmtStrs=['(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
+              'k', $
+              'Time', $
+              '', $
+              'Kappa', $
+              '']
 
-              ;; Now temperatures
-              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
-                    'MEAN', $
-                    MEAN(jvPlotData.tDown[avgs_jvFit.useInds[tmpInds]]), $
-                    MEAN(k2DParms.temperature[avgs_jvFit.useInds[tmpInds]]), $
-                    MEAN(g2DParms.temperature[avgs_jvFit.useInds[tmpInds]])
-              PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
-                    'MEDIAN', $
-                    MEDIAN(jvPlotData.tDown[avgs_jvFit.useInds[tmpInds]]), $
-                    MEDIAN(k2DParms.temperature[avgs_jvFit.useInds[tmpInds]]), $
-                    MEDIAN(g2DParms.temperature[avgs_jvFit.useInds[tmpInds]])
-
-              PRINT,''
-           ENDIF
-
-        ENDFOR
+        PRINT_MMA_FITSTATS,tRanges, $
+                           jvPlotData.time, $
+                           REPLICATE(0.,N_ELEMENTS(k2DParms.kappa)), $
+                           k2DParms.kappa, $
+                           REPLICATE(100.,N_ELEMENTS(k2DParms.kappa)), $
+                           avgs_jvFit.useInds, $
+                           fmtStrs
 
      ENDIF
 
