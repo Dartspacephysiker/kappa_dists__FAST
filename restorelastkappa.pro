@@ -182,9 +182,12 @@ PRO RESTORELASTKAPPA
      GFIT2DPARAM_STRUCT=gFit2DParam_struct, $
      FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
      FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
-     KAPPA2D=fit2DK, $
-     GAUSS2D=fit2DG, $
-     CAP_STRUCT=cAP_struct
+     ;; KAPPA2D=fit2DK, $
+     ;; GAUSS2D=fit2DG, $
+     CAP_STRUCT=cAP_struct, $
+     ADD_PARM_ERRORS_FROM_FILE=add_parm_errors_from_file, $
+     ADD_PARM_ERRORS__NROLLS=add_parm_errors__nRolls, $
+     ADD_PARM_ERRORS__USE_MOST_PROB=add_parm_errors__use_most_prob
 
   STOP
 

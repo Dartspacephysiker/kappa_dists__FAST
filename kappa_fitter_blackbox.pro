@@ -121,7 +121,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                   ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  outDir                        = '~/software/sdt/batch_jobs/saves_output_etc/'
+  outDir                        = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
 
   @kappa_fitter__defaults.pro
   
@@ -754,10 +754,15 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         GFIT2DPARAM_STRUCT=gFit2DParam_struct, $
         FIT2DKAPPA_INF_LIST=fit2DKappa_inf_list, $
         FIT2DGAUSS_INF_LIST=fit2DGauss_inf_list, $
-        KAPPA2D=fit2DK, $
-        GAUSS2D=fit2DG, $
-        CAP_STRUCT=cAP_struct
-     
+        ;; KAPPA2D=fit2DK, $
+        ;; GAUSS2D=fit2DG, $
+        CAP_STRUCT=cAP_struct, $
+        ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
+        ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
+        ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
+        FIT2DPARMERRFILE=fit2DParmErrFile, $
+        FIT2DPARMERRDIR=outDir
+
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
