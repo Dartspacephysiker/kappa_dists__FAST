@@ -11,6 +11,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
                                         CURDATASTR=curDataStr, $
                                         TIDFNSTR=tidFNStr, $
                                         NROLLS=nRolls, $
+                                        FACTOR_BY_WHICH_TO_INCREASE_UNCERT_ARRAY=extraFactor, $
                                         NOT_MPFIT1D=not_mpFit1D, $
                                         KCURVEFIT_OPT=kCurvefit_opt, $
                                         OBSERVED_DIST=observed_dist, $
@@ -218,7 +219,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   default_Nsim = 200
   Nsim = N_ELEMENTS(nRolls) GT 0 ? nRolls : default_Nsim
 
-  extraFactor = 3.0             ;In case some fits fail
+  extraFactor = KEYWORD_SET(extraFactor) ? extraFactor : 3.0 ;In case some fits fail
   nMaxTry     = LONG(Nsim*extraFactor)
 
   ;; Generate random inds, kappas 'twixt 1.5 and 35 for data

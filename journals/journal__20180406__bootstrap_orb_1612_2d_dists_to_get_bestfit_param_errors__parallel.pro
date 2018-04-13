@@ -7,6 +7,9 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
 
   routineName = 'JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS'
 
+  check_for_and_only_do_baddies = 0
+  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180409/"
+
   proDir1     = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/'
   routineArr1 = STRLOWCASE( $
                 ['KAPPA_FIT2D__MONTECARLO_UNCERTAINTY', $
@@ -132,6 +135,12 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
                   ;; 'CARLOTIMESTOP="' +carloTimeArr[1,i]+'"'
                   'CARLOTIMESTART=carloTimeStart,' + $
                   'CARLOTIMESTOP=carloTimeStop'
+
+        IF KEYWORD_SET(check_for_and_only_do_baddies) THEN BEGIN
+           oBridge[i]->SetVar,'dir_to_check', dir_to_check
+           execStr += ',/CHECK_FOR_AND_ONLY_DO_BADDIES,' + $
+                      'DIR_TO_CHECK=dir_to_check'
+        ENDIF
 
            oBridge[i]->Execute,'.compile ' + mainRoutine
 

@@ -5,11 +5,26 @@
 ;;    CARLOTIMESTOP='09:26:42.301'
 PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
    CARLOTIMESTART=carloTimeStart, $
-   CARLOTIMESTOP=carloTimeStop
+   CARLOTIMESTOP=carloTimeStop, $
+   CHECK_FOR_AND_ONLY_DO_BADDIES=check_for_and_only_do_baddies, $
+   DIR_TO_CHECK=dir_to_check
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__kappa_fit2d_structs.pro
+
+  IF KEYWORD_SET(check_for_and_only_do_baddies) THEN BEGIN
+
+     IF ~KEYWORD_SET(dir_to_check) THEN BEGIN
+        PRINT,"If you want me to check, gotta provide a directory to check, fool!"
+        RETURN
+     ENDIF
+
+     extraFactor = 5.0
+
+     PRINT,FORMAT='("Check for baddies dir : ",A0  )',dir_to_check
+     PRINT,FORMAT='("Extra factor          : ",F0.2)',extraFactor
+  ENDIF
 
   spectra_average_interval = 2
   avgItvlStr = STRING(FORMAT='("-avg_itvl",I0)',spectra_average_interval)
@@ -56,12 +71,12 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; 'chine 1
   ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:00:29.79'
   ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:00:48.7'
-  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:01:12.044'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:01:12.999'
+  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:01:12.044'
+  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:01:12.999'
 
-  ;; Some are already done
-  ;; carloTimeStart = '09:26:11'
-  ;; carloTimeStop  = '09:26:55'
+  ;; Testing CHECK_FOR_BADDIES stuff
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:00:24'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:00:30'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
@@ -188,13 +203,16 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      obsStructArr[k] = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,diff_eFlux_inds[k])
   ENDFOR
 
+  ;; Old old way
   ;; match_i      = WHERE(STRMATCH(tid, '*' + carloTime      + '*', /FOLD_CASE))
   ;; match_iStart = WHERE(STRMATCH(tidString, '*' + carloTimeStart + '*', /FOLD_CASE))
   ;; match_iStop  = WHERE(STRMATCH(tidString, '*' + carloTimeStop  + '*', /FOLD_CASE))
 
+  ;; Old way
   ;; match_iStart = VALUE_CLOSEST2(tid,S2T(carloTimeStart),/CONSTRAINED)
   ;; match_iStop  = VALUE_CLOSEST2(tid,S2T(carloTimeStop),/CONSTRAINED)
 
+  ;; new way
   inds = WHERE((tid GE S2T(carloTimeStart)) AND $
                (tid LT S2T(carloTimeStop )), $
                nInds)
@@ -215,6 +233,30 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   FOR k=0,nHjar-1 DO BEGIN
 
      match_i = (inds[k])[0]
+
+     tmpTidString = STRSPLIT(tidString[match_i],'/',/EXTRACT)
+     IF N_ELEMENTS(tmpTidString) GT 0 THEN tmpTidString = tmpTidString[1] ELSE tmpTidString = tmpTidString[0]
+     PRINT,FORMAT='(I05,T10,A0)',k,tmpTidString
+
+     tidFNStr = STRJOIN(STRSPLIT(tmpTidString,':',/EXTRACT),'_')
+     tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
+
+     utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr + avgItvlStr
+     utFil = utFil+'.sav'
+
+
+     IF KEYWORD_SET(check_for_and_only_do_baddies) THEN BEGIN
+
+        checkFil = utFil.Replace('.sav','__BAD.sav')
+        IF ~FILE_TEST(dir_to_check+checkFil) THEN BEGIN
+           PRINT,FORMAT='("Nowhere in sight: ",A0)',checkFil
+           PRINT,"Continuing!"
+           CONTINUE
+        ENDIF
+
+        PRINT,FORMAT='("Got '+"'"+'im: ",A0)',checkFil
+
+     ENDIF
 
      fit2DKappa_info = fit2DKappa_inf_list[match_i]
      fit2DGauss_info = fit2DGauss_inf_list[match_i]
@@ -259,16 +301,6 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      ;;2018/04/60 DIAGNOSTIC PLOT
      ;;s=curdatastr & junk = MIN(ABS(s.theta[0,*]),ind) & wind = WINDOW(DIMENSIONS=[800,800]) & this = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,LINESTYLE='',SYMBOL='+',YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],XTITLE='$\Delta \Phi$ (V)',YTITLE='Diff. Energy Flux',CURRENT=wind) & s = carlok & that = ERRORPLOT(s.energy[*,ind],s.data[*,ind],s.ddata[*,ind],/XLOG,/YLOG,YRANGE=[1e5,1e10],XRANGE=[5e0,3e4],COLOR='red',ERRORBAR_COLOR='RED',/OVERPLOT,CURRENT=wind) & vert = PLOT(REPLICATE(fit2dkappa_info.extra_info.eRange_fit[0],10),10.D^(DINDGEN(10)+1.D),LINESTYLE='--',COLOR='GREEN',/OVERPLOT,CURRENT=wind)
 
-     tmpTidString = STRSPLIT(tidString[match_i],'/',/EXTRACT)
-     IF N_ELEMENTS(tmpTidString) GT 0 THEN tmpTidString = tmpTidString[1] ELSE tmpTidString = tmpTidString[0]
-     PRINT,FORMAT='(I05,T10,A0)',k,tmpTidString
-
-     tidFNStr = STRJOIN(STRSPLIT(tmpTidString,':',/EXTRACT),'_')
-     tidFNStr = STRJOIN(STRSPLIT(tidFNStr,'.',/EXTRACT),'__')
-
-     utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr + avgItvlStr
-     utFil = utFil+'.sav'
-
      IF fit2DKappa_info.sdt.time NE fit2DGauss_info.sdt.time THEN STOP
 
      ;; Just checking to see what we get back
@@ -299,6 +331,7 @@ PRO JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
                                          CURDATASTR=curDataStr, $
                                          TIDFNSTR=tidFNStr, $
                                          NROLLS=nRolls, $
+                                         FACTOR_BY_WHICH_TO_INCREASE_UNCERT_ARRAY=extraFactor, $
                                          NOT_MPFIT1D=not_mpFit1D, $
                                          KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
                                          OBSERVED_DIST=observed_dist, $

@@ -8,7 +8,10 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
    XTITLE=xTitle, $
    XMAX=xMax, $
    WINDOW=window, $
+   ;; BUFFER=buffer, $
    WINTITLE=winTitle, $
+   SAVEPLOT=savePlot, $
+   PLOTDIR=plotDir, $
    OUT_ESTIMATE=gEst
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -93,7 +96,9 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
   nRow = 2
   nCol = 2
 
-  IF layoutNommer EQ 2 THEN window = WINDOW(DIMENSIONS=[800,800],TITLE=winTitle)
+  IF layoutNommer EQ 2 THEN window = WINDOW(DIMENSIONS=[800,800], $
+                                            TITLE=winTitle, $
+                                            BUFFER=KEYWORD_SET(savePlot) OR KEYWORD_SET(buffer))
 
   xRange = [MIN(locs),(KEYWORD_SET(xMax) ? (xMax < MAX(locs)) : MAX(locs))]
 
