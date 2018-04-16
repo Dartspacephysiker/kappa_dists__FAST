@@ -13,9 +13,11 @@ PRO KAPPA_EFLUX_FIT2D, $
    UPGOING=upgoing, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+   MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
    LOAD_DIR=loadDir, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
@@ -122,6 +124,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      T2=t2, $
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
      IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+     MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
      LOAD_DIR=loadDir, $
      SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
      KF__CURVEFIT_OPT=KF2D__curveFit_opt, $
@@ -178,6 +181,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      KAPPA_EST=kappa, $
      EEB_OR_EES=eeb_or_ees, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
      DO_ALL_TIMES=do_all_times, $
      TIME_ARR=time_arr, $
      ENERGY_ELECTRONS=energy_electrons, $

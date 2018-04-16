@@ -5,6 +5,7 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
    USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
    ADD_ONECOUNT_STATS=add_oneCount_stats, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    MASTERFILE=masterFile, $
    SAVECURPOTFILE=saveCurPotFile
 
@@ -119,17 +120,33 @@ PRO GET_CURRENT_AND_POTENTIAL_FILENAMES, $
 
   ENDIF
 
+  CASE 1 OF
+     KEYWORD_SET(enforce_diff_eFlux_sRate): BEGIN
+        fSuff = '-sRate' + (STRING(FORMAT='(F0.2)',enforce_diff_eFlux_sRate)).Replace('.','_')
+
+        IF KEYWORD_SET(masterFile) THEN BEGIN
+           ADD_FNAME_SUFF,masterFile,fSuff
+        ENDIF
+
+        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+           ADD_FNAME_SUFF,saveCurPotFile,fSuff
+        ENDIF
+     END
+     KEYWORD_SET(spectra_average_interval): BEGIN
+        fSuff = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
+
+        IF KEYWORD_SET(masterFile) THEN BEGIN
+           ADD_FNAME_SUFF,masterFile,fSuff
+        ENDIF
+
+        IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
+           ADD_FNAME_SUFF,saveCurPotFile,fSuff
+        ENDIF
+     END
+  ENDCASE
+
   IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
      ;;Whatever masterFile is, tack one '-oneCount' before the prefix
-
-     fSuff = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
-     IF KEYWORD_SET(masterFile) THEN BEGIN
-        ADD_FNAME_SUFF,masterFile,fSuff
-     ENDIF
-
-     IF KEYWORD_SET(saveCurPotFile) THEN BEGIN
-        ADD_FNAME_SUFF,saveCurPotFile,fSuff
-     ENDIF
 
   ENDIF
 

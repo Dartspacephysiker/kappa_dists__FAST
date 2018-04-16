@@ -1,5 +1,6 @@
 FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
                                     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                                    ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                                     DO_ALL_TIMES=do_all_times, $
                                     ENERGY_ELECTRONS=energy_electrons, $
                                     ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
@@ -17,6 +18,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
 
   defEEB_or_EES                = 'eeb'
   defSpectra_average_interval  = 0
+  defEnforce_sRate             = 0
   defEnergy_electrons          = [4,3.5e4]
   ;; defElectron_angleRange       = [-32,32]
   ;; defElectron_angleRange       = [150,-150]
@@ -30,6 +32,7 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
 
   kSDTData_opt  = {eeb_or_ees          :defEEB_or_EES, $
                    spec_avg_intvl      :defSpectra_average_interval, $
+                   enforce_sRate       :defEnforce_sRate, $
                    do_all_times        :0, $
                    energy_electrons    :[4,3.5e4], $
                    ;; energy_electrons_arr : !NULL
@@ -62,6 +65,15 @@ FUNCTION INIT_KAPPA_SDTDATA_OPTIONS,EEB_OR_EES=eeb_or_ees, $
 
   ENDIF
 
+  IF N_ELEMENTS(enforce_diff_eFlux_sRate) GT 0 THEN BEGIN
+     kSDTData_opt.enforce_sRate  = enforce_diff_eFlux_sRate
+
+     ;;Note, only if enforce_diff_eFlux_sRate is GT 0 do we do something about it 
+     IF KEYWORD_SET(enforce_diff_eFlux_sRate) THEN BEGIN
+        kSDTData_opt.routine += '_ts'
+     ENDIF
+
+  ENDIF
   IF N_ELEMENTS(do_all_times) GT 0 THEN BEGIN
      kSDTData_opt.do_all_times              = do_all_times
      PRINT,FORMAT='(A0)', $

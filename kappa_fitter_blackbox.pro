@@ -14,6 +14,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
                           PHI__USE_ENERGY_BEFORE_PEAK=phi__use_energy_before_peak, $
                           EEB_OR_EES=eeb_or_ees, $
+                          ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                           SOUTH=south, $
                           CHI2_THRESHOLD=chi2_thresh, $
@@ -96,6 +97,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT2D_GAUSS_INF_LIST=fit2DGauss_inf_list, $
                           SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file, $
                           LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file, $
+                          MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
                           KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
                           KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops,$
                           DEBUG__SKIP_TO_THIS_TIME=debug__skip_to_this_time, $
@@ -136,6 +138,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
      SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
      LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+     MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
      OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
      FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
      FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
@@ -147,6 +150,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
      ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
      FITFILE=fitFile, $
      FIT2DPARMERRFILE=fit2DParmErrFile, $
      LOADDIR=outDir
@@ -229,10 +233,12 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         UPGOING=upgoing, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+        MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
         LOAD_DIR=outDir, $
         SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file, $
         EEB_OR_EES=eeb_or_ees, $
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+        ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
         MIN_PEAK_ENERGY=min_peak_energy, $
         MAX_PEAK_ENERGY=max_peak_energy, $
         PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
@@ -471,6 +477,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
         SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+        ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
         ARANGE__MOMENTS_LIST=aRange__moments_list, $
         ARANGE__PEAKEN_LIST=aRange__peakEn_list, $
         OUT_CURPOTLIST=curPotList, $
@@ -658,20 +665,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      ENDIF
 
-     ;; DAT_EFLUX_TO_DIFF_EFLUX,fit2DK.SDT[*],kappa_eFlux, $
-     ;;                         ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-     ;;                         FIT_EACH_ANGLE=fit_each_angle, $
-     ;;                         ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-     ;;                         TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
-     ;;                         CALC_GEOM_FACTORS=calc_geom_factors
-
-     ;; DAT_EFLUX_TO_DIFF_EFLUX,fit2DG.SDT[*],Gauss_eFlux, $
-     ;;                         ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
-     ;;                         FIT_EACH_ANGLE=fit_each_angle, $
-     ;;                         ;; SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-     ;;                         TRY_SYNTHETIC_SDT_STRUCT=try_synthetic_SDT_struct, $
-     ;;                         CALC_GEOM_FACTORS=calc_geom_factors
-
      ;; MOMENT_SUITE_2D,kappa_eFlux, $
      ;;                 ENERGY=energy, $
      ;;                 ARANGE__MOMENTS=electron_angleRange, $
@@ -803,6 +796,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            EPS=eps, $
                            OUTPLOT_BONUSPREF=bonusPref, $
                            SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                           ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                            ;; GRL=sway__GRL, $
                            PLOTDIR=plotDir
 
@@ -844,6 +838,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              SAVE_PNG=kSum__save_png, $
                              EPS=eps, $
                              SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                             ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                              OUTPLOT_BONUSPREF=bonusPref, $
                              PLOTDIR=plotDir, $
                              SAVE_FOR_OFFLINE=save_for_offline, $

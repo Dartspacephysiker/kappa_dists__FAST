@@ -11,6 +11,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+   MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
    OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
    FIT1D__CLAMPTEMPERATURE=fit1D__clampTemperature, $
    FIT1D__CLAMPDENSITY=fit1D__clampDensity, $
@@ -21,6 +22,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    FITFILE=fitFile, $
    FIT2DPARMERRFILE=fit2DParmErrFile, $
@@ -100,10 +102,20 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ;; ENDIF
 
   avgItvlStr       = ''
-  IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
-     avgItvlStr    = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
-     plotNamePref += avgItvlStr
-  ENDIF
+  CASE 1 OF
+     KEYWORD_SET(enforce_diff_eFlux_sRate): BEGIN
+        avgItvlStr    = '-sRate' + (STRING(FORMAT='(F0.2)',enforce_diff_eFlux_sRate)).Replace('.','_')
+        plotNamePref += avgItvlStr
+     END
+     KEYWORD_SET(spectra_average_interval): BEGIN
+        avgItvlStr    = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
+        plotNamePref += avgItvlStr
+     END
+  ENDCASE
+  ;; IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
+  ;;    avgItvlStr    = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
+  ;;    plotNamePref += avgItvlStr
+  ;; ENDIF
 
   fitAngleStr      = ''
   ;; dEFAngleStr         = '-allAngles'
@@ -175,8 +187,10 @@ PRO KAPPA_FITTER__FSTRINGS, $
 
   ENDIF
   
-  defEFluxFile = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux-' + $
-                 eeb_or_ees + avgItvlStr + dEFAngleStr + t1Str + t2Str + '.sav'
+  McFaddenString = KEYWORD_SET(McFadden_diff_eFlux) ? '-McFaddenStyle' : ''
+
+  defEFluxFile = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux' + McFaddenString $
+                 + '-' + eeb_or_ees + avgItvlStr + dEFAngleStr + t1Str + t2Str + '.sav'
 
   IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
      CASE SIZE(save_diff_eFlux_file,/TYPE) OF
@@ -209,7 +223,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ;; ENDIF
 
   defFitFile           = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
-                        '-Kappa_fits_and_Gauss_fits-' + eeb_or_ees + '-horseshoe2d' + plotNamePref + '.sav'
+                        '-KandGfits' + McFaddenString + '-' + eeb_or_ees + plotNamePref + '.sav'
   ;; IF KEYWORD_SET(fitFile) THEN BEGIN
      CASE SIZE(fitFile,/TYPE) OF
         7: BEGIN

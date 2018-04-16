@@ -69,6 +69,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    MAP_TO_100KM=map_to_100km, $
    JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
    JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $
@@ -229,6 +230,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
      ADD_ONECOUNT_STATS=add_oneCount_stats, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
      MASTERFILE=masterFile, $
      SAVECURPOTFILE=saveCurPotFile
 
@@ -340,10 +342,12 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            t1Str             = orbBurstTimes[0]
            t2Str             = orbBurstTimes[1]
            spectra_avg_itvl  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : !NULL
+           enforce_sRate     = KEYWORD_SET(enforce_diff_eFlux_sRate) ? enforce_diff_eFlux_sRate : !NULL
         ENDIF ELSE BEGIN
            t1Str             = orbTimes[0]
            t2Str             = orbTimes[1]
            spectra_avg_itvl  = KEYWORD_SET(spectra_average_interval) ? spectra_average_interval : !NULL
+           enforce_sRate     = KEYWORD_SET(enforce_diff_eFlux_sRate) ? enforce_diff_eFlux_sRate : !NULL
         ENDELSE
         t1                   = STR_TO_TIME(t1Str)
         t2                   = STR_TO_TIME(t2Str)
@@ -366,6 +370,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            FIT2D__DISABLE_BFUNC=fit2D__disable_bFunc ,$
            ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc ,$
            SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
+           ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
            ;; FITFILE=fitFile, $
            LOADDIR=loadDir
 
@@ -415,6 +420,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           ;; UNITS=eSpecUnits, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
+                          ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                           MANUAL_ANGLE_CORRECTION=manual_angle_correction, $
                           SC_POT=tmpSc_pot, $
                           OUT_DIFF_EFLUX=diff_eflux, $
@@ -432,6 +438,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
            GET_ONECOUNT_DIFF_EFLUX,t1,t2, $
                                    EEB_OR_EES=eeb_or_ees, $
                                    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                                   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                                    SC_POT=tmpSc_pot, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $

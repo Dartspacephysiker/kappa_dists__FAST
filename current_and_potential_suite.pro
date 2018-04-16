@@ -181,6 +181,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    UPGOINGARR=upgoingArr, $
    ERROR_ESTIMATES=error_estimates, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    MAP_TO_100KM=map_to_100km, $
    SAVECURPOTFILE=saveCurPotFile, $
    OUT_CURPOTLIST=curPotList, $
@@ -308,6 +309,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      UPGOINGARR=upgoingArr, $
      ERROR_ESTIMATES=error_estimates, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
      MAP_TO_100KM=map_to_100km, $
      JV_THEOR__INITIAL_SOURCE_R_E=jv_theor__initial_source_R_E, $
      JV_THEOR__INITIAL_SOURCE__POLARSAT=jv_theor__initial_source__Polar, $

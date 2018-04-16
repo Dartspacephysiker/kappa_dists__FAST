@@ -66,6 +66,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+   ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
    PLOTPREF=plotPref, $
    PLOTS_IN_BUFFER=plots_in_buffer, $
    OUT_CURPOTLIST=curPotList, $
@@ -330,6 +331,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      UPGOINGARR=upgoingArr, $
      ERROR_ESTIMATES=error_estimates, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
      MAP_TO_100KM=map_to_100km, $
      SAVECURPOTFILE=saveCurPotFile, $
      USE_ALL_CURRENTS=use_all_currents, $

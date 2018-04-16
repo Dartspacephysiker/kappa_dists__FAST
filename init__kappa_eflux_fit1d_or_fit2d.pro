@@ -19,6 +19,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
    FIT_EACH_ANGLE=fit_each_angle, $
    LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
    IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
+   MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
    FOR_DMSP=for_DMSP, $
    IN_DMSP=dmsp, $
    OUT_SC_POT=sc_pot, $
@@ -83,6 +84,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
   KF__SDTData_opt  = INIT_KAPPA_SDTDATA_OPTIONS( $
                      EEB_OR_EES=eeb_or_ees, $
                      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                      DO_ALL_TIMES=do_all_times, $
                      ENERGY_ELECTRONS=energy_electrons, $
                      ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
@@ -195,11 +197,13 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
      GET_LOSSCONE_AND_EFLUX_DATA,T1=t1,T2=t2, $
                                  ;; IN_DIFF_EFLUX_FILE=diff_eFlux_file, $
                                  LOAD_DAT_FROM_FILE=KEYWORD_SET(load_diff_eFlux_file) ? diff_eFlux_file : !NULL, $
+                                 MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
                                  LOAD_DIR=loadDir, $
                                  EEB_OR_EES=KF__SDTData_opt.eeb_or_ees, $
                                  DIFF_EFLUX=diff_eFlux, $
                                  UPGOING=upgoing, $
                                  SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                                 ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                                  SC_POT=sc_pot, $
                                  OUT_ORB=orb, $
                                  OUT_ANGLERANGE=e_angle, $
@@ -343,6 +347,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                 ;; LOAD_DAT_FROM_FILE=loadFile, $ ;;handled through proto
                                 EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
                                 SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
+                                ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                                 SC_POT=sc_pot, $
                                 IN_PROTOSTRUCT=diff_eFlux, $
                                 SDT_NAME=dEF_oneCount_name, $
