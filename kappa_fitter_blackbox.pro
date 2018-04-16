@@ -70,6 +70,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__ADD_KAPPA_PANEL=sway__add_kappa_panel, $
                           SWAY__ADD_CHARE_PANEL=sway__add_chare_panel, $
                           SWAY__ADD_NEWELL_PANEL=sway__add_Newell_panel, $
+                          SWAY__SAVE_NEWELL_DATA=sway__save_Newell_data, $
                           SWAY__NEWELL_INTERP=sway__Newell_interp, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
                           SWAY__ADD_IU_POT=sway__add_iu_pot, $
@@ -772,6 +773,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            ADD_CHARE_PANEL=sway__add_chare_panel, $
                            ADD_NEWELL_PANEL=sway__add_Newell_panel, $
                            NEWELL_2009_INTERP=sway__Newell_interp, $
+                           SAVE_NEWELL_DATA=sway__save_Newell_data, $
                            ADD_IU_POT=sway__add_iu_pot, $
                            SPECTROGRAM_UNITS=sway__spectrogram_units, $
                            LOG_KAPPAPLOT=sway__log_kappaPlot, $

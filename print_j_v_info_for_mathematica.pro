@@ -19,35 +19,35 @@ PRO PRINT_MMA_FITSTATS,tRanges,time,stat,kStat,gStat,useInds, $
                  PRINT,FORMAT='(I3,TR1,A22,TR5,F6.2,TR5,F6.2,TR5,F6.2)', $
                        k, $
                        T2S(time[useInds[tmpInds[k]]],/MS), $
-                       stat[useInds[tmpInds[k]]], $
+                       stat [useInds[tmpInds[k]]], $
                        kStat[useInds[tmpInds[k]]], $
                        gStat[useInds[tmpInds[k]]]
 
               PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
                     'MEAN', $
-                    MEAN(stat[useInds[tmpInds]]), $
-                    MEAN(kStat[useInds[tmpInds]]), $
-                    MEAN(gStat[useInds[tmpInds]])
+                    MEAN(stat [useInds[tmpInds]],/NAN), $
+                    MEAN(kStat[useInds[tmpInds]],/NAN), $
+                    MEAN(gStat[useInds[tmpInds]],/NAN)
               PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
                     'MEDIAN', $
-                    MEDIAN(stat[useInds[tmpInds]]), $
+                    MEDIAN(stat [useInds[tmpInds]]), $
                     MEDIAN(kStat[useInds[tmpInds]]), $
                     MEDIAN(gStat[useInds[tmpInds]])
               PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
                     'MIN', $
-                    MIN(stat[useInds[tmpInds]]), $
+                    MIN(stat [useInds[tmpInds]]), $
                     MIN(kStat[useInds[tmpInds]]), $
                     MIN(gStat[useInds[tmpInds]])
               PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
                     'MAX', $
-                    MAX(stat[useInds[tmpInds]]), $
-                    MAX(kStat[useInds[tmpInds]]), $
-                    MAX(gStat[useInds[tmpInds]])
+                    MAX(stat [useInds[tmpInds]],/NAN), $
+                    MAX(kStat[useInds[tmpInds]],/NAN), $
+                    MAX(gStat[useInds[tmpInds]],/NAN)
               PRINT,FORMAT='(A6,TR25,F6.2,TR5,F6.2,TR5,F6.2)', $
                     'STDDEV', $
-                    STDDEV(stat[useInds[tmpInds]]), $
-                    STDDEV(kStat[useInds[tmpInds]]), $
-                    STDDEV(gStat[useInds[tmpInds]])
+                    STDDEV(stat [useInds[tmpInds]],/NAN), $
+                    STDDEV(kStat[useInds[tmpInds]],/NAN), $
+                    STDDEV(gStat[useInds[tmpInds]],/NAN)
 
               PRINT,''
            ENDIF
@@ -81,19 +81,19 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
   k2DParms = kFit2DParam_struct
   g2DParms = gFit2DParam_struct
   
+  nHereK    = N_ELEMENTS(fit2DKappa_inf_list)
+  nHereG    = N_ELEMENTS(fit2DGauss_inf_list)
+  
+  kappa2DTime = MAKE_ARRAY(nHereK,/DOUBLE,VALUE=0.0D)
+  gauss2DTime = MAKE_ARRAY(nHereG,/DOUBLE,VALUE=0.0D)
+
+  FOR k=0,nHereK-1 DO $
+     kappa2DTime[k] = fit2DKappa_inf_list[k].sdt.time 
+
+  FOR k=0,nHereG-1 DO $
+     gauss2DTime[k] = fit2DGauss_inf_list[k].sdt.time
+
   IF KEYWORD_SET(add_parm_errors_from_file) THEN BEGIN
-
-     nHereK    = N_ELEMENTS(fit2DKappa_inf_list)
-     nHereG    = N_ELEMENTS(fit2DGauss_inf_list)
-     
-     kappa2DTime = MAKE_ARRAY(nHereK,/DOUBLE,VALUE=0.0D)
-     gauss2DTime = MAKE_ARRAY(nHereG,/DOUBLE,VALUE=0.0D)
-
-     FOR k=0,nHereK-1 DO $
-        kappa2DTime[k] = fit2DKappa_inf_list[k].sdt.time 
-
-     FOR k=0,nHereG-1 DO $
-        gauss2DTime[k] = fit2DGauss_inf_list[k].sdt.time
 
      ParmUncertainty_2D = 1
      ParmUncert_2D__useMostProbK = KEYWORD_SET(add_parm_errors__use_most_prob)
@@ -185,6 +185,30 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
      STR_ELEMENT,cAP_struct,'tRanges',tRanges
      IF N_ELEMENTS(tRanges) GT 0 THEN IF SIZE(tRanges,/TYPE) EQ 7 THEN BEGIN
 
+        ;; Match 'em up
+        kMatchieInd = VALUE_CLOSEST2(jvPlotData.time,kappa2DTime,/CONSTRAINED)
+        gMatchieInd = VALUE_CLOSEST2(jvPlotData.time,gauss2DTime,/CONSTRAINED)
+
+        kKeep       = WHERE((ABS(jvPlotData.time[kMatchieInd]-kappa2DTime) $
+                             / MEAN(jvPlotData.time[1:-1]-jvPlotData.time[0:-2])) $
+                            LT 0.5,nKKeep)
+        gKeep       = WHERE((ABS(jvPlotData.time[gMatchieInd]-gauss2DTime) $
+                             / MEAN(jvPlotData.time[1:-1]-jvPlotData.time[0:-2])) $
+                            LT 0.5,nGKeep)
+
+        nTime       = N_ELEMENTS(jvPlotData.time)
+        kTemp       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
+        gTemp       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
+        kDens       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
+        gDens       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
+        kKappa      = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
+        
+        kTemp[kMatchieInd[kKeep]] = k2DParms.temperature
+        gTemp[gMatchieInd[gKeep]] = g2DParms.temperature
+        kDens[kMatchieInd[kKeep]] = k2DParms.N
+        gDens[gMatchieInd[gKeep]] = g2DParms.N
+        kKappa[kMatchieInd[kKeep]] = k2DParms.kappa
+
         ;; Now temperatures
         fmtStrs = ['(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
               'k', $
@@ -196,8 +220,8 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
         PRINT_MMA_FITSTATS,tRanges, $
                            jvPlotData.time, $
                            jvPlotData.tDown, $
-                           k2DParms.temperature, $
-                           g2DParms.temperature, $
+                           kTemp, $
+                           gTemp, $
                            avgs_jvFit.useInds, $
                            fmtStrs
 
@@ -212,8 +236,8 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
         PRINT_MMA_FITSTATS,tRanges, $
                            jvPlotData.time, $
                            jvPlotData.source.NDown, $
-                           k2DParms.N, $
-                           g2DParms.N, $
+                           kDens, $
+                           gDens, $
                            avgs_jvFit.useInds, $
                            fmtStrs
 
@@ -227,9 +251,9 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
 
         PRINT_MMA_FITSTATS,tRanges, $
                            jvPlotData.time, $
-                           REPLICATE(0.,N_ELEMENTS(k2DParms.kappa)), $
-                           k2DParms.kappa, $
-                           REPLICATE(100.,N_ELEMENTS(k2DParms.kappa)), $
+                           REPLICATE(0.,N_ELEMENTS(kKappa)), $
+                           kKappa, $
+                           REPLICATE(100.,N_ELEMENTS(kKappa)), $
                            avgs_jvFit.useInds, $
                            fmtStrs
 
