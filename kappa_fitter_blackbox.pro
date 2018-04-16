@@ -763,6 +763,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            EEB_OR_EES=eeb_or_ees, $
                            ENERGY_ELECTRONS=energy_electrons, $
                            ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
+                           ELECTRON_ANGLERANGE=electron_angleRange, $
                            TLIMIT_NORTH=tlimit_north, $
                            TLIMIT_SOUTH=tlimit_south, $
                            TLIMIT_ALL=tlimit_all, $
