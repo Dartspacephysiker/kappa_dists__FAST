@@ -82,6 +82,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    OUT_SOURCECONE=out_sourcecone, $
    OUT_LOSSCONE=out_losscone, $
    OUT_MRATIO=mRatio, $
+   BATCH_MODE=batch_mode, $
    _EXTRA=e
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -1029,7 +1030,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         OUT_ERR_CURRENT=curErr, $
                         OUT_ERR_CHARE=charEErr, $
                         INOUT_MAPRATIO=mapRatio, $
-                        OUT_STRUCT=momStruct
+                        OUT_STRUCT=momStruct, $
+                        BATCH_MODE=batch_mode
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
 
@@ -1062,7 +1064,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            OUT_ERR_T=T1Err, $
                            OUT_ERR_CURRENT=cur1Err, $
                            OUT_ERR_CHARE=charE1Err, $
-                           INOUT_MAPRATIO=mapRatio;; , $
+                           INOUT_MAPRATIO=mapRatio, $
+                           BATCH_MODE=batch_mode ;; , $
                            ;; OUT_STRUCT=oneStruct
 
         ENDIF

@@ -59,7 +59,7 @@ PRO PLOT_KAPPA_FITS,orig,kappaFit,gaussFit,oneCurve, $
         pPref          = '-nFlux_fit'
         unitTitle      = "e!E-!N # flux"
         yTitle         = "Differential Number Flux (#/cm$^2$-s-sr-eV)"      
-        lowerBound     = KEYWORD_SET(DMSP) ? 1.0D1 : 1.0D2
+        lowerBound     = KEYWORD_SET(DMSP) ? 1.0D1 : 1.0D1
         upperBound     = 1.0D8
      END
      'JE_OVER_E': BEGIN

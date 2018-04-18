@@ -322,6 +322,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      OUT_SOURCECONE=out_sourcecone, $
      OUT_LOSSCONE=out_losscone, $
      OUT_MRATIO=mRatio, $
+     BATCH_MODE=batch_mode, $
      _EXTRA=cAP_struct
  
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
@@ -1084,7 +1085,7 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
 
   ENDIF
 
-  PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
+  IF ~KEYWORD_SET(batch_mode) THEN PRINT_CURRENT_AND_POTENTIAL_SUMMARY,jvPlotData,useInds
 
   ;; STOP
 
