@@ -401,9 +401,10 @@ PRO KAPPA__GET_FITS__MPFIT1D,Xorig,Yorig, $
                               NFEV=nfev, $
                               FTOL=have_curveFit_opt ? $
                               (KEYWORD_SET(kCurvefit_opt.fit_tol) ? $
-                               kCurvefit_opt.fit_tol : 1e-3) $
-                              : 1e-3, $
-                              GTOL=1e-13, $
+                               kCurvefit_opt.fit_tol : 1D-13) $
+                              : 1D-13, $
+                              GTOL=1D-13, $
+                              XTOL=1D-13, $
                               STATUS=gaussStatus, $
                               BEST_RESID=best_resid, $
                               PFREE_INDEX=iGaussFree, $

@@ -834,8 +834,10 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            hadSuccessG  = 0
 
            ;;2018/01/10 Try the whole "energy right below peak" thing
-           kappaParamStruct[0].value = bulkEOrigEstimate
+           kappaParamStruct[0].value     = bulkEOrigEstimate
            kappaParamStruct[0].limits[0] = bulkEOrigEstimate
+           gaussParamStruct[0].value     = bulkEOrigEstimate
+           gaussParamStruct[0].limits[0] = bulkEOrigEstimate
 
            KAPPA_FIT2D__FIREINTHEHOLE, $
               curDataStr, $

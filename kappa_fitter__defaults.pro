@@ -12,7 +12,7 @@
   N_est_fac                     = 1.0
   bulkE_est_fac                 = 1.0
 
-  TGauss_est_fac                = 1.0
+  TGauss_est_fac                = 4.0
   NGauss_est_fac                = 1.0
   bulkEGauss_est_fac            = 1.0
 
