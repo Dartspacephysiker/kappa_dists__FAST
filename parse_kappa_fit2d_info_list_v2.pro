@@ -19,7 +19,8 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
                                         OUT_GOOD_T=include_t, $
                                         OUT_BAD_I=exclude_i, $
                                         OUT_BAD_T=exclude_t, $                                        
-                                        FIT_TYPE=fit_type
+                                        FIT_TYPE=fit_type, $
+                                        QUIET=quiet
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -226,40 +227,40 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   ENDELSE
 
   IF KEYWORD_SET(highDens_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_highDens,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_highDens,/REMOVE_ALL) + $
            " fits on the basis of density threshold (dens must be LE " + $
            STRCOMPRESS(highDens_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(lowDens_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_lowDens,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_lowDens,/REMOVE_ALL) + $
            " fits on the basis of low density threshold (dens must be GE " + $
            STRCOMPRESS(lowDens_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(lKappa_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_lKappa,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_lKappa,/REMOVE_ALL) + $
            " fits on the basis of low kappa threshold (kappa GE " + $
            STRCOMPRESS(lKappa_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(hKappa_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_hKappa,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_hKappa,/REMOVE_ALL) + $
            " fits on the basis of high kappa threshold (kappa LE " + STRCOMPRESS(hKappa_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(chi2_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
            " fits on the basis of chi^2 threshold ( chi^2 GT " + STRCOMPRESS(chi2_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(chi2_over_dof_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_chi2,/REMOVE_ALL) + $
            " fits on the basis of chi^2/dof threshold ( chi^2/dof GT " + STRCOMPRESS(chi2_over_dof_thresh,/REMOVE_ALL) + ")"
   ENDIF
 
   IF KEYWORD_SET(nPkAbove_dEF_thresh) THEN BEGIN
-     PRINT,exclString + STRCOMPRESS(nExcluded_dEf,/REMOVE_ALL) + $
+     IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + STRCOMPRESS(nExcluded_dEf,/REMOVE_ALL) + $
            " fits on the basis of low differential energy flux threshold at peak (peak must be GE " + $
            STRCOMPRESS(diffEFlux_thresh,/REMOVE_ALL) + ' for at least ' + $
            STRCOMPRESS(nPkAbove_dEF_thresh,/REMOVE_ALL) + " angles)"
@@ -278,7 +279,7 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
         exclude_i = exclude_i[SORT(exclude_i)]
         exclude_t = (SDTStr.time)[exclude_i]
 
-        PRINT,exclString + " an additional " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
+        IF ~KEYWORD_SET(quiet) THEN PRINT,exclString + " an additional " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + ' inds based on user-provided (presumably kappa-i) input'
      ENDIF
 
      nKept = nAft
@@ -288,11 +289,11 @@ FUNCTION PARSE_KAPPA_FIT2D_INFO_LIST_V2,fit2D_inf_list, $
   IF KEYWORD_SET(dont_shrink) THEN BEGIN
      keep_i = INDGEN(nFits)
      nKept  = nFits
-     PRINT,"N should have kept: " + STRCOMPRESS(N_ELEMENTS(include_i),/REMOVE_ALL)
+     IF ~KEYWORD_SET(quiet) THEN PRINT,"N should have kept: " + STRCOMPRESS(N_ELEMENTS(include_i),/REMOVE_ALL)
   ENDIF ELSE BEGIN
      keep_i = include_i
   ENDELSE
-  PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)
+  IF ~KEYWORD_SET(quiet) THEN PRINT,"N Kept: " + STRCOMPRESS(nKept,/REMOVE_ALL)
 
   ;; best2DFit            = {SDT: SDTStr, $
   ;;                         params1D:fitParams}
