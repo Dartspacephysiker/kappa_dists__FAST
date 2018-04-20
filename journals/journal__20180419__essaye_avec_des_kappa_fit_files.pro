@@ -22,7 +22,7 @@ PRO KAPPA_RAWSAVE_PARSER, $
                                      POSITIONS=g1DTInds)
 
   IF ~ARRAY_EQUAL(k1DTInds,g1DTInds) THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
-  
+
   kappaFit1Ds = kappaFit1Ds[k1DTInds]
   gaussFit1Ds = gaussFit1Ds[g1DTInds]
 
@@ -85,8 +85,8 @@ PRO KAPPA_RAWSAVE_PARSER, $
                                           OUT_GOOD_I=includeG_i, $
                                           OUT_FITPARAM_STRUCT=gFit2DParam_struct, $
                                           /DONT_SHRINK_PARSED_STRUCT, $
-                                          /QUIET) 
-  
+                                          /QUIET)
+
   ;; PRINT_KAPPA_FIT2D_STATS_FOR_CURANDPOT_TRANGES,fit2DK,fit2DG,cAP_struct,jvPlotData, $
   ;;    /SOK_IF_INDS_DONT_MATCH, $
   ;;    BATCH_MODE=batch_mode
@@ -125,7 +125,7 @@ PRO KAPPA_RAWSAVE_PARSER, $
                           covar        : fit2DK.covar       [*,*,include_i], $
                           pError       : fit2DK.pError      [*,include_i], $
                           nIter        : fit2DK.nIter       [include_i]}
-     
+
      fit2DG            = {SDT          : fit2DG.SDT         [include_i], $
                           fitParams    : fit2DG.fitParams   [*,include_i], $
                           obsMoms      : fit2DG.obsMoms     [include_i], $
@@ -179,139 +179,418 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  restoreFile = 1
+
+  outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
+  outFName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'-parsedKappa.sav' 
+
   inDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
   CAPDir = inDir + 'cur_and_pot_analysis/'
-  
+
   CAPpref = 'Orbit_'
   CAPmidM = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD'
   CAPmidI = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD'
   CAPsuff = '-sc_pot-sRate1_25.sav'
 
+  Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/20180420/'
+  Newellpref = 'NewellData-'
+  Newellsuff = '-GETKLOWBOUND-'
+
+  newellListe = FILE_SEARCH(Newelldir+Newellpref+'*'+Newellsuff+'*'+'.sav')
+
+  IF KEYWORD_SET(restoreFile) THEN BEGIN
+     makeNewFile = ~FILE_TEST(outDir+outFName)
+     IF makeNewFile THEN BEGIN
+        PRINT,"Couldn't find " + outFName + '! Remaking ...'
+        STOP
+     ENDIF
+  ENDIF ELSE makeNewFile = 1
+
+  IF KEYWORD_SET(makeNewFile) THEN BEGIN
+
 ;; Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 ;;   Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 
-  dato  = '20180419'
-  pref  = dato + '-orb_'
-  suff  = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25.sav'
-  SPAWN,'cd ' + inDir + '; ls ' + pref + '*' + suff,liste
+     ;; dato  = '20180419'
+     dato  = '20180420'
+     pref  = dato + '-orb_'
+     suff  = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25.sav'
+     SPAWN,'cd ' + inDir + '; ls ' + pref + '*' + suff,liste
 
-  timeagoStr  = '-mmin -600'
-  findIString = "find . " + timeagoStr + " -iname '*" $
-                + CAPpref + "*" + CAPmidI + "*" + CAPsuff $
-                + "' -print0 | xargs -0 ls -1"
-  findMString = "find . " + timeagoStr + " -iname '*" $
-                + CAPpref + "*" + CAPmidM + "*" + CAPsuff $
-                + "' -print0 | xargs -0 ls -1"
+     timeagoStr  = '-mtime -3'
+     findIString = "find . " + timeagoStr + " -iname '*" $
+                   + CAPpref + "*" + CAPmidI + "*" + CAPsuff $
+                   + "' -print0 | xargs -0 ls -1"
+     findMString = "find . " + timeagoStr + " -iname '*" $
+                   + CAPpref + "*" + CAPmidM + "*" + CAPsuff $
+                   + "' -print0 | xargs -0 ls -1"
 
-  ;; SPAWN,'cd ' + CAPDir + '; ls ' + CAPpref + '*' + CAPmidI + '*' + CAPsuff,CAPIliste
-  ;; SPAWN,'cd ' + CAPDir + '; ls ' + CAPpref + '*' + CAPmidM + '*' + CAPsuff,CAPMliste
-  SPAWN,'cd ' + CAPDir + '; ' + findIString,CAPIliste
-  SPAWN,'cd ' + CAPDir + '; ' + findMString,CAPMliste
+     ;; SPAWN,'cd ' + CAPDir + '; ls ' + CAPpref + '*' + CAPmidI + '*' + CAPsuff,CAPIliste
+     ;; SPAWN,'cd ' + CAPDir + '; ls ' + CAPpref + '*' + CAPmidM + '*' + CAPsuff,CAPMliste
+     SPAWN,'cd ' + CAPDir + '; ' + findIString,CAPIliste
+     SPAWN,'cd ' + CAPDir + '; ' + findMString,CAPMliste
 
-  nFil  = N_ELEMENTS(liste)
-  nCAPI = N_ELEMENTS(CAPIliste)
-  nCAPM = N_ELEMENTS(CAPMliste)
-  
-  ;; IF nFil NE nCAPI OR nFil NE nCAPM OR nCAPI NE nCAPM THEN BEGIN
+     nFil  = N_ELEMENTS(liste)
+     nCAPI = N_ELEMENTS(CAPIliste)
+     nCAPM = N_ELEMENTS(CAPMliste)
 
-  ;;    STOP
-  ;; ENDIF
+     ;; IF nFil NE nCAPI OR nFil NE nCAPM OR nCAPI NE nCAPM THEN BEGIN
 
-  use_mpFit1D = 1
+     ;;    STOP
+     ;; ENDIF
 
+     use_mpFit1D = 1
 
-  bArr      = MAKE_ARRAY(30000,/FLOAT,VALUE=0.)
-  KF2DParms = {bulk_energy : bArr, $
-               temperature : bArr, $
-               kappa       : bArr, $
-               N           : bArr, $
-               chi2red     : bArr}
-  GF2DParms = KF2DParms
-  ephem     = {time        : DOUBLE(bArr), $
-               MLT         : bArr, $
-               ILAT        : bArr, $
-               ALT         : bArr}
+     maks      = 30000
+     bArr      = MAKE_ARRAY(maks,/FLOAT,VALUE=0.)
+     KF2DParms = {time              : DOUBLE(bArr), $
+                  bulk_energy       : bArr, $
+                  temperature       : bArr, $
+                  kappa             : bArr, $
+                  N                 : bArr, $
+                  chi2red           : bArr}
+     GF2DParms = KF2DParms
+     andre     = {time              : DOUBLE(bArr), $
+                  orbit             : LONG(bArr), $
+                  MLT               : bArr, $
+                  ILAT              : bArr, $
+                  ALT               : bArr, $
+                  mono              : BYTE(bArr), $
+                  broad             : BYTE(bArr), $
+                  diffuse           : BYTE(bArr), $
+                  newell_tMismatch  : bArr}
 
-  bArr      = !NULL
-  
-  curInd    = 0
-  ;; KF2DParms = !NULL
-  ;; GF2DParms = !NULL
-  FOR k=0,nFil-1 DO BEGIN
+     bArr      = !NULL
 
-     kappaFit1Ds         = !NULL
-     gaussFit1Ds         = !NULL
-     fit2DKappa_inf_list = !NULL
-     fit2DGauss_inf_list = !NULL
-     kFit2DParam_struct  = !NULL
-     gFit2DParam_struct  = !NULL
-     fit2DK              = !NULL
-     fit2DG              = !NULL
+     curInd    = 0
+     ;; KF2DParms = !NULL
+     ;; GF2DParms = !NULL
+     nIkkeHa   = 0
+     totT      = 0.D
+     orbArr    = !NULL
+     FOR k=0,nFil-1 DO BEGIN
 
-     orbit = LONG(STRMID(liste[k],STRLEN(pref),4))
-     PRINT,orbit
+        kappaFit1Ds         = !NULL
+        gaussFit1Ds         = !NULL
+        fit2DKappa_inf_list = !NULL
+        fit2DGauss_inf_list = !NULL
+        kFit2DParam_struct  = !NULL
+        gFit2DParam_struct  = !NULL
+        fit2DK              = !NULL
+        fit2DG              = !NULL
 
-     ingInd  = WHERE(STRMATCH(CAPIliste,'*' + STRING(FORMAT='(I4)',orbit) + '*'),nIng)
-     mealInd = WHERE(STRMATCH(CAPMliste,'*' + STRING(FORMAT='(I4)',orbit) + '*'),nMeal)
+        orbStr = STRMID(liste[k],STRLEN(pref),4)
+        orbit = LONG(orbStr)
+        PRINT,orbit
 
-     IF nIng NE 1 OR nMeal NE 1 THEN BEGIN
-        PRINT,CAPIliste[ingInd]
-        PRINT,CAPMliste[mealInd]
+        ;; ingInd  = WHERE(STRMATCH(CAPIliste,'*' + orbStr + '*'),nIng)
+        mealInd = WHERE(STRMATCH(CAPMliste,'./'+CAPpref+'*' + orbStr + '*'),nMeal)
+        newellInd = WHERE(STRMATCH(newellListe,'*'+Newellpref+'*' + orbStr + '*'),nNewell)
+
+        ;; IF (nIng      NE  1) OR (nMeal      NE  1) THEN BEGIN
+        ;;    PRINT,CAPIliste[ingInd]
+        ;;    PRINT,CAPMliste[mealInd]
+        ;;    STOP
+        ;; ENDIF
+
+        ;; IF (ingInd[0] EQ -1) THEN BEGIN
+        ;;    PRINT,"Couldn't find ingredients for orb " + orbStr + "!"
+        ;; nIkkeHa++
+        ;;    CONTINUE
+        ;; ENDIF
+
+        IF nMeal NE 1 THEN BEGIN
+           IF mealInd[0] EQ -1 THEN PRINT,"No Meal!" $
+           ELSE PRINT,"Too many meals: ",CAPMliste[mealInd]
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        IF (mealInd[0] EQ -1) THEN BEGIN
+           PRINT,"Couldn't find meal for orb " + orbStr + "!"
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        IF nNewell NE 1 THEN BEGIN
+           IF newellInd[0] EQ -1 THEN PRINT,"No Newell!" $
+           ELSE PRINT,"Too many Newells: ",newellListe[newellInd]
+           IF nNewell GT 5 THEN STOP
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        IF (newellInd[0] EQ -1) THEN BEGIN
+           PRINT,"Couldn't find Newellfile for orb " + orbStr + "!"
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        RESTORE,inDir+liste[k]
+        RESTORE,newellListe[newellInd]
+        ;; RESTORE,CAPDir+CAPIliste[ingInd]
+        RESTORE,CAPDir+CAPMliste[mealInd]
+
+        KAPPA_RAWSAVE_PARSER, $
+           KAPPAFIT1DS=kappaFit1Ds, $
+           GAUSSFIT1DS=gaussFit1Ds, $
+           KAPPA_INF_LIST=fit2DKappa_inf_list, $
+           GAUSS_INF_LIST=fit2DGauss_inf_list, $
+           KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
+           GFIT2DPARAM_STRUCT=gFit2DParam_struct, $
+           FIT2DK=fit2DK, $
+           FIT2DG=fit2DG, $
+           USE_MPFIT1D=use_mpFit1D, $
+           /BATCH_MODE
+
+        kTid                            = fit2DK.sdt.time
+        gTid                            = fit2DG.sdt.time
+        IF N_ELEMENTS(kTid) NE N_ELEMENTS(gTid) THEN BEGIN
+           PRINT,"Unequal number of K and G tider!"
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        IF (WHERE(ABS(kTid-gTid) GT MEDIAN(kTid[1:-1]-kTid[0:-2])))[0] NE -1 THEN BEGIN
+           PRINT,"K and G tider not equal!"
+           nIkkeHa++
+           CONTINUE
+        ENDIF
+
+        nHere                           = N_ELEMENTS(kFit2DParam_struct.bulk_energy)
+
+        curInds                         = [curInd:((curInd+nHere-1) < (maks-1))]
+        KF2DParms.bulk_energy[curInds]  = kFit2DParam_struct.bulk_energy
+        KF2DParms.temperature[curInds]  = kFit2DParam_struct.temperature
+        KF2DParms.kappa[curInds]        = kFit2DParam_struct.kappa
+        KF2DParms.N[curInds]            = kFit2DParam_struct.N
+        KF2DParms.chi2Red[curInds]      = fit2DK.chi2/(fit2DK.dof-fit2DK.nFree)
+
+        GF2DParms.time[curInds]         = gTid
+        GF2DParms.bulk_energy[curInds]  = gFit2DParam_struct.bulk_energy
+        GF2DParms.temperature[curInds]  = gFit2DParam_struct.temperature
+        GF2DParms.kappa[curInds]        = gFit2DParam_struct.kappa
+        GF2DParms.N[curInds]            = gFit2DParam_struct.N
+        GF2DParms.chi2Red[curInds]      = fit2DG.chi2/(fit2DG.dof-fit2DG.nFree)
+
+        ;; Match 'em up with events struct
+        evtInds = VALUE_CLOSEST2(events.x,kTid,/CONSTRAINED)
+
+        orbArr  = [orbArr,orbit]
+        totT   += events.x[-1]-events.x[0]
+
+        tDiffs  = events.x[evtInds]-kTid
+        baddies = WHERE(ABS(tDiffs)/MEDIAN(events.x[1:-1]-events.x[0:-2]) GT 1,nBaddies)
+        IF nBaddies GT 0 THEN BEGIN
+           ;; STOP
+           andre.newell_tMismatch[curInds[baddies]] = tDiffs[baddies]
+        ENDIF
+
+        andre.orbit[curInds]   = orbit
+        andre.mlt[curInds]     = events.mlt[evtInds]
+        andre.ilat[curInds]    = events.ilat[evtInds]
+        andre.mono[curInds]    = events.mono[evtInds]
+        andre.broad[curInds]   = events.broad[evtInds]
+        andre.diffuse[curInds] = events.diffuse[evtInds]
+
+        KF2DParms.time[curInds]         = kTid
+        GF2DParms.time[curInds]         = gTid
+        andre.time[curInds]             = events.x[evtInds]
+
+        IF curInds[-1] EQ (maks-1) THEN BEGIN
+           PRINT,"Cutting out early! Reached maks ind ..."
+           BREAK
+        ENDIF
+
+        curInd += nHere
+
+     ENDFOR
+
+     PRINT,"Nlost: ",nIkkeHa
+
+     STOP
+
+     ;; Now shrink 'em
+     finalInds = [0:(curInd-1)]
+
+     mismatches = WHERE(ABS(andre.newell_tMismatch) GT 0.01,nMismatch)
+     PRINT,FORMAT='(I5," total mismatches")',nMismatch
+
+     finalInds = CGSETDIFFERENCE(finalInds,mismatches,COUNT=nFinal)
+
+     CHECK_SORTED,andre.time[finalInds],is_sorted,/QUIET
+     IF ~is_sorted THEN BEGIN
+        PRINT,"Not sorted! Figure it, son"
         STOP
      ENDIF
 
-     RESTORE,inDir+liste[k]
-     ;; RESTORE,CAPDir+CAPIliste[ingInd]
-     RESTORE,CAPDir+CAPMliste[mealInd]
-
-     KAPPA_RAWSAVE_PARSER, $
-        KAPPAFIT1DS=kappaFit1Ds, $
-        GAUSSFIT1DS=gaussFit1Ds, $
-        KAPPA_INF_LIST=fit2DKappa_inf_list, $
-        GAUSS_INF_LIST=fit2DGauss_inf_list, $
-        KFIT2DPARAM_STRUCT=kFit2DParam_struct, $
-        GFIT2DPARAM_STRUCT=gFit2DParam_struct, $
-        FIT2DK=fit2DK, $
-        FIT2DG=fit2DG, $
-        USE_MPFIT1D=use_mpFit1D, $
-        /BATCH_MODE
-
-     nHere = N_ELEMENTS(kFit2DParam_struct.bulk_energy)
-
-     curInds = [curInd:(curInd+nHere-1)]
-     KF2DParms.bulk_energy[curInds] = kFit2DParam_struct.bulk_energy
-     KF2DParms.temperature[curInds] = kFit2DParam_struct.temperature
-     KF2DParms.kappa[curInds]       = kFit2DParam_struct.kappa
-     KF2DParms.N[curInds]           = kFit2DParam_struct.N
-     KF2DParms.chi2Red[curInds]     = fit2DK.chi2/(fit2DK.dof-fit2DK.nFree)
-
-     GF2DParms.bulk_energy[curInds] = gFit2DParam_struct.bulk_energy
-     GF2DParms.temperature[curInds] = gFit2DParam_struct.temperature
-     GF2DParms.kappa[curInds]       = gFit2DParam_struct.kappa
-     GF2DParms.N[curInds]           = gFit2DParam_struct.N
-     GF2DParms.chi2Red[curInds]     = fit2DG.chi2/(fit2DG.dof-fit2DG.nFree)
-
-     kTid = fit2DK.sdt.time
-     gTid = fit2DG.sdt.time
-     IF N_ELEMENTS(kTid) NE N_ELEMENTS(gTid) THEN BEGIN
-        PRINT,"Unequal number of K and G tider!"
-        CONTINUE
+     uniq_final = UNIQ(andre.time[finalInds],SORT(andre.time[finalInds]))
+     nUniq      = N_ELEMENTS(uniq_final)
+     IF nUniq NE nFinal THEN BEGIN
+        PRINT,"You're dupin'"
+        STOP
+        finalInds = finalInds[uniq_final]
+        nFinal    = N_ELEMENTS(finalInds)
      ENDIF
-     IF (WHERE(ABS(kTid-gTid) GT MEDIAN(kTid[1:-1]-kTid[0:-2])))[0] NE -1 THEN BEGIN
-        PRINT,"K and G tider not equal!" 
-        CONTINUE
-     ENDIF
-     
-     ephem.time[curInds]            = kTid
 
-     ;; fit2DK.chi2/(fit2DK.dof-fit2DK.nFree)
-     ;; fit2DG.chi2/(fit2DG.dof-fit2DG.nFree)
+     PRINT,"NFinal: ",nFinal
 
-     ;; KF2DParms = [KF2DParms,kFit2DParam_struct]
-     ;; GF2DParms = [GF2DParms,gFit2DParam_struct]
+     KF2DParms = {time              : KF2DParms.time[finalInds]        , $        
+                  bulk_energy       : KF2DParms.bulk_energy[finalInds] , $ 
+                  temperature       : KF2DParms.temperature[finalInds] , $ 
+                  kappa             : KF2DParms.kappa[finalInds]       , $       
+                  N                 : KF2DParms.N[FINALINDS]           , $           
+                  chi2red           : KF2DParms.chi2red[finalInds]}
+     GF2DParms = {time              : GF2DParms.time[finalInds]        , $        
+                  bulk_energy       : GF2DParms.bulk_energy[finalInds] , $ 
+                  temperature       : GF2DParms.temperature[finalInds] , $ 
+                  kappa             : GF2DParms.kappa[finalInds]       , $       
+                  N                 : GF2DParms.N[FINALINDS]           , $           
+                  chi2red           : GF2DParms.chi2red[finalInds]}
+     andre     = {time              : andre.time[finalInds]            , $            
+                  orbit             : andre.orbit[finalInds]           , $
+                  MLT               : andre.MLT[finalInds]             , $             
+                  ILAT              : andre.ILAT[finalInds]            , $            
+                  ALT               : andre.ALT[finalInds]             , $             
+                  mono              : andre.mono[finalInds]            , $            
+                  broad             : andre.broad[finalInds]           , $           
+                  diffuse           : andre.diffuse[finalInds]         , $         
+                  newell_tMismatch  : andre.newell_tMismatch[finalInds]}
 
-     curInd += nHere
+     PRINT,"Saving " + outFName + ' ...'
+     SAVE,andre,KF2DParms,GF2DParms,totT,orbArr,FILENAME=outDir+outFName
 
-  ENDFOR
+  ENDIF ELSE BEGIN
 
+     PRINT,"Restoring " + outFName + ' ...'
+     RESTORE,outDir+outFName
+
+  ENDELSE
+
+  minM  = -3
+  maxM  = 1
+  minI  = 60
+  maxI  = 77
+  hemi  = 'BOTH'
+
+  SET_DEFAULT_MLT_ILAT_AND_MAGC,MINMLT=minM, $
+                                MAXMLT=maxM, $
+                                BINMLT=binM, $
+                                SHIFTMLT=shiftM, $
+                                USE_LNG=use_lng, $
+                                MINLNG=minLng, $
+                                MAXLNG=maxLng, $
+                                BINLNG=binLng, $
+                                SHIFTLNG=shiftLng, $
+                                MINILAT=minI, $
+                                MAXILAT=maxI, $
+                                BINILAT=binI, $
+                                SHIFTILAT=shiftI, $
+                                DONT_CORRECT_ILATS=dont_correct_ilats, $
+                                DO_LSHELL=do_lShell, $
+                                MINLSHELL=minL, $
+                                MAXLSHELL=maxL, $
+                                BINLSHELL=binL, $
+                                REVERSE_LSHELL=reverse_lShell, $
+                                COORDINATE_SYSTEM=coordinate_system, $
+                                USE_AACGM_COORDS=use_AACGM, $
+                                USE_GEI_COORDS=use_GEI, $
+                                USE_GEO_COORDS=use_GEO, $
+                                USE_MAG_COORDS=use_MAG, $
+                                USE_SDT_COORDS=use_SDT, $
+                                MIN_MAGCURRENT=minMC, $
+                                MAX_NEGMAGCURRENT=maxNegMC, $
+                                HEMI=hemi, $
+                                NORTH=north, $
+                                SOUTH=south, $
+                                BOTH_HEMIS=both_hemis, $
+                                GLOBE=globe, $
+                                DAYSIDE=dayside, $
+                                NIGHTSIDE=nightside, $
+                                MIMC_STRUCT=MIMC_struct, $
+                                MAP_PROJECTION=map_projection, $
+                                _EXTRA=e, $
+                                LUN=lun
+
+  mlt_i = GET_MLT_INDS(andre,minM,maxM, $
+                       DAWNSECTOR=dawnSector, $
+                       DUSKSECTOR=duskSector, $
+                       DAYSIDE=dayside, $
+                       NIGHTSIDE=nightside, $
+                       N_MLT=n_mlt, $
+                       N_OUTSIDE_MLT=n_outside_MLT, $
+                       DIRECT_MLTS=direct_mlts, $
+                       /GET_COMPLEMENT_INDS, $
+                       NOTMLT_I=notMlt_i, $
+                       NNOTMLT=nNotMlt)
+
+  ;; mlt_i = notMlt_i
+  
+  ilat_i            = GET_ILAT_INDS(andre, $
+                                    minI, $
+                                    maxI, $
+                                    hemi, $
+                                    N_ILAT=n_ilat, $
+                                    N_NOT_ILAT=n_not_ilat, $
+                                    LUN=lun)
+  region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
+
+  mono_i            = WHERE(andre.mono  EQ 1 OR andre.mono  EQ 2,nMono,NCOMPLEMENT=nNotMono)
+  broad_i           = WHERE(andre.broad EQ 1 OR andre.broad EQ 2,nBroad,NCOMPLEMENT=nNotBroad)
+
+  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE 1.5) AND $
+                            (KF2DParms.chi2red LT 5),nChi2,NCOMPLEMENT=nNotChi2)
+  final_i           = CGSETINTERSECTION(region_i,mono_i,COUNT=count)
+  IF count EQ 0 THEN STOP
+  final_i           = CGSETINTERSECTION(final_i,chi2_i,COUNT=count)
+  IF count EQ 0 THEN STOP
+  STOP
+
+  ;; Unique low kappa-ers
+  
+  lowKappa_i        = WHERE(KF2DParms.kappa LE 2,nLowKappa,COMPLEMENT=notLowKappa_i,NCOMPLEMENT=nNotLowKappa)
+  lowKappa_i        = CGSETINTERSECTION(lowKappa_i,final_i,COUNT=nLowKappa)
+  lowKappaOrbs      = andre.orbit[lowkappa_i[UNIQ(andre.orbit[lowkappa_i],SORT(andre.orbit[lowkappa_i]))]]
+
+  plot_i            = final_i
+
+  nNorth            = FLOAT(N_ELEMENTS(WHERE(andre.ilat[final_i] GE 0)))
+  nSouth            = FLOAT(N_ELEMENTS(WHERE(andre.ilat[final_i] LT 0)))
+  pctNorth          = nNorth/count
+  pctSouth          = nSouth/count
+
+  !P.multi = [0,1,1,0,0]
+  WINDOW,1,XSIZE=600,YSIZE=600
+  CGHISTOPLOT,KF2DParms.kappa[plot_i],BINSIZE=0.15,MININPUT=1.5,MAXINPUT=10
+
+  !P.multi = [0,2,2,0,0]
+  WINDOW,0,XSIZE=600,YSIZE=600
+  CGHISTOPLOT,ALOG10(GF2DParms.chi2red[plot_i]),TITLE="Maxwellian"
+  CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
+  CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
+
+  kHist = HISTOGRAM(KF2DParms.kappa[plot_i],BINSIZE=0.20,MIN=1.45,LOCATIONS=kBins)
+
+  titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
+                    minM+24,maxM, $
+                    minI,maxI, $
+                    MIN(orbArr),MAX(orbArr), $
+                    N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
+  winder   = WINDOW(DIMENSIONS=[800,800])
+  histPlot = PLOT(kBins,kHist,/HISTOGRAM,XRANGE=[1.5,10],YRANGE=[0,MAX(kHist)*1.2], $
+                  XTITLE='$\kappa$',YTITLE='Count',TITLE=titleStr,FONT_SIZE=16,THICK=2.5, $
+                 CURRENT=winder)
+  linePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2,YRANGE=[0,MAX(kHist)*1.2], $
+                  THICK=2.,COLOR='GREEN',/OVERPLOT, $
+                  CURRENT=winder)
+  text     = TEXT(0.25,0.8,"$\kappa_t$ = 2.45",/NORMAL,FONT_SIZE=16,FONT_COLOR='GREEN',TARGET=winder)
+
+  outDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
+  outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT.png")', $
+                         (minM LT 0 ? minM + 24 : minM),maxM)
+  PRINT,"Saving to " + outPlotName
+  winder.Save,outDir+outPlotName
+  winder.Close
+  
 END
