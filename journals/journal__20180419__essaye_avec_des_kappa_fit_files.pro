@@ -185,7 +185,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ;; restoreD = '20180420' ;2018/04/23 Making a new one, calling it 20180424 for kicks
   restoreD = '20180424'
-  outFName = restoreD+'-parsedKappa.sav' 
+  outFName = restoreD+'-parsedKappa.sav'
 
   IF KEYWORD_SET(restoreFile) THEN BEGIN
      makeNewFile = ~FILE_TEST(outDir+outFName)
@@ -309,26 +309,23 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         ;;    CONTINUE
         ;; ENDIF
 
-        IF nMeal NE 1 THEN BEGIN
-           IF mealInd[0] EQ -1 THEN PRINT,"No Meal!" $
-           ELSE PRINT,"Too many meals: ",CAPMliste[mealInd]
-           nIkkeHa++
-           CONTINUE
-        ENDIF
+        ;; IF nMeal NE 1 THEN BEGIN
+        ;;    IF mealInd[0] EQ -1 THEN PRINT,"No Meal!" $
+        ;;    ELSE BEGIN
+        ;;       PRINT,"Too many meals: ",CAPMliste[mealInd]
+        ;;       STOP
+        ;;    ENDELSE
+        ;;    nIkkeHa++
+        ;;    CONTINUE
+        ;; ENDIF
 
-        IF (mealInd[0] EQ -1) THEN BEGIN
-           PRINT,"Couldn't find meal for orb " + orbStr + "!"
-           nIkkeHa++
-           CONTINUE
-        ENDIF
+        ;; IF (mealInd[0] EQ -1) THEN BEGIN
+        ;;    PRINT,"Couldn't find meal for orb " + orbStr + "!"
+        ;;    nIkkeHa++
+        ;;    CONTINUE
+        ;; ENDIF
 
-        IF nNewell NE 1 THEN BEGIN
-           IF newellInd[0] EQ -1 THEN PRINT,"No Newell!" $
-           ELSE PRINT,"Too many Newells: ",newellListe[newellInd]
-           IF nNewell GT 5 THEN STOP
-           nIkkeHa++
-           CONTINUE
-        ENDIF
+        IF nNewell GT 5 THEN STOP
 
         IF (newellInd[0] EQ -1) THEN BEGIN
            PRINT,"Couldn't find Newellfile for orb " + orbStr + "!"
@@ -337,9 +334,53 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         ENDIF
 
         RESTORE,inDir+liste[k]
-        RESTORE,newellListe[newellInd]
+
+        IF nNewell GT 1 THEN BEGIN
+           x           = !NULL
+           mlt         = !NULL
+           ilat        = !NULL
+           mono        = !NULL
+           broad       = !NULL
+           diffuse     = !NULL
+           je          = !NULL
+           jee         = !NULL
+           nbad_espec  = !NULL
+           info        = !NULL
+
+           nHere = N_ELEMENTS(events.x)
+           FOR bro=0,nNewell-1 DO BEGIN
+              events = !NULL
+              RESTORE,newellListe[newellInd[bro]]
+
+              x           = [x         ,events.x            ]
+              mlt         = [mlt       ,events.mlt          ]
+              ilat        = [ilat      ,events.ilat         ]
+              mono        = [mono      ,events.mono         ]
+              broad       = [broad     ,events.broad        ]
+              diffuse     = [diffuse   ,events.diffuse    ]
+              je          = [je        ,events.je           ]
+              jee         = [jee       ,events.jee          ]
+              nbad_espec  = [nbad_espec,events.nbad_espec ]
+              info        = [info      ,events.info       ]
+
+           ENDFOR
+
+           sorti  = SORT(x)
+           events = {x         : (TEMPORARY(x         ))[sorti], $
+                    mlt        : (TEMPORARY(mlt       ))[sorti], $
+                    ilat       : (TEMPORARY(ilat      ))[sorti], $
+                    mono       : (TEMPORARY(mono      ))[sorti], $
+                    broad      : (TEMPORARY(broad     ))[sorti], $
+                    diffuse    : (TEMPORARY(diffuse   ))[sorti], $
+                    je         : (TEMPORARY(je        ))[sorti], $
+                    jee        : (TEMPORARY(jee       ))[sorti], $
+                    nbad_espec : (TEMPORARY(nbad_espec))[sorti], $
+                    info       : TEMPORARY(info      )}
+        ENDIF ELSE BEGIN
+           RESTORE,newellListe[newellInd]
+        ENDELSE
         ;; RESTORE,CAPDir+CAPIliste[ingInd]
-        RESTORE,CAPDir+CAPMliste[mealInd]
+        ;; RESTORE,CAPDir+CAPMliste[mealInd]
 
         KAPPA_RAWSAVE_PARSER, $
            KAPPAFIT1DS=kappaFit1Ds, $
@@ -445,26 +486,26 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
      PRINT,"NFinal: ",nFinal
 
-     KF2DParms = {time              : KF2DParms.time[finalInds]        , $        
-                  bulk_energy       : KF2DParms.bulk_energy[finalInds] , $ 
-                  temperature       : KF2DParms.temperature[finalInds] , $ 
-                  kappa             : KF2DParms.kappa[finalInds]       , $       
-                  N                 : KF2DParms.N[FINALINDS]           , $           
+     KF2DParms = {time              : KF2DParms.time[finalInds]        , $
+                  bulk_energy       : KF2DParms.bulk_energy[finalInds] , $
+                  temperature       : KF2DParms.temperature[finalInds] , $
+                  kappa             : KF2DParms.kappa[finalInds]       , $
+                  N                 : KF2DParms.N[FINALINDS]           , $
                   chi2red           : KF2DParms.chi2red[finalInds]}
-     GF2DParms = {time              : GF2DParms.time[finalInds]        , $        
-                  bulk_energy       : GF2DParms.bulk_energy[finalInds] , $ 
-                  temperature       : GF2DParms.temperature[finalInds] , $ 
-                  kappa             : GF2DParms.kappa[finalInds]       , $       
-                  N                 : GF2DParms.N[FINALINDS]           , $           
+     GF2DParms = {time              : GF2DParms.time[finalInds]        , $
+                  bulk_energy       : GF2DParms.bulk_energy[finalInds] , $
+                  temperature       : GF2DParms.temperature[finalInds] , $
+                  kappa             : GF2DParms.kappa[finalInds]       , $
+                  N                 : GF2DParms.N[FINALINDS]           , $
                   chi2red           : GF2DParms.chi2red[finalInds]}
-     andre     = {time              : andre.time[finalInds]            , $            
+     andre     = {time              : andre.time[finalInds]            , $
                   orbit             : andre.orbit[finalInds]           , $
-                  MLT               : andre.MLT[finalInds]             , $             
-                  ILAT              : andre.ILAT[finalInds]            , $            
-                  ALT               : andre.ALT[finalInds]             , $             
-                  mono              : andre.mono[finalInds]            , $            
-                  broad             : andre.broad[finalInds]           , $           
-                  diffuse           : andre.diffuse[finalInds]         , $         
+                  MLT               : andre.MLT[finalInds]             , $
+                  ILAT              : andre.ILAT[finalInds]            , $
+                  ALT               : andre.ALT[finalInds]             , $
+                  mono              : andre.mono[finalInds]            , $
+                  broad             : andre.broad[finalInds]           , $
+                  diffuse           : andre.diffuse[finalInds]         , $
                   newell_tMismatch  : andre.newell_tMismatch[finalInds]}
 
      PRINT,"Saving " + outFName + ' ...'
@@ -535,7 +576,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                        NNOTMLT=nNotMlt)
 
   ;; mlt_i = notMlt_i
-  
+
   ilat_i            = GET_ILAT_INDS(andre, $
                                     minI, $
                                     maxI, $
@@ -557,7 +598,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   STOP
 
   ;; Unique low kappa-ers
-  
+
   lowKappa_i        = WHERE(KF2DParms.kappa LE 2,nLowKappa,COMPLEMENT=notLowKappa_i,NCOMPLEMENT=nNotLowKappa)
   lowKappa_i        = CGSETINTERSECTION(lowKappa_i,final_i,COUNT=nLowKappa)
   lowKappaOrbs      = andre.orbit[lowkappa_i[UNIQ(andre.orbit[lowkappa_i],SORT(andre.orbit[lowkappa_i]))]]
@@ -579,7 +620,13 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
   CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
 
-  kHist = HISTOGRAM(KF2DParms.kappa[plot_i],BINSIZE=0.20,MIN=1.45,LOCATIONS=kBins,REVERSE_INDICES=rInds)
+  binSize = 0.5
+  histMin = 1.45
+  kHist = HISTOGRAM(KF2DParms.kappa[plot_i], $
+                    BINSIZE=binSize, $
+                    MIN=histMin, $
+                    LOCATIONS=kBins, $
+                    REVERSE_INDICES=rInds)
 
   ;; Where are they less than .245?
   lt245inds = !NULL
@@ -597,13 +644,20 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                     MIN(orbArr),MAX(orbArr), $
                     N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
   winder   = WINDOW(DIMENSIONS=[800,800])
-  histPlot = PLOT(kBins,kHist,/HISTOGRAM,XRANGE=[1.5,10],YRANGE=[0,MAX(kHist)*1.2], $
-                  XTITLE='$\kappa$',YTITLE='Count',TITLE=titleStr,FONT_SIZE=16,THICK=2.5, $
+
+  xRange   = [1.5,15]
+  histPlot = PLOT(kBins,kHist,/HISTOGRAM, $
+                  XRANGE=xRange,YRANGE=[0,MAX(kHist)*1.2], $
+                  XTITLE='$\kappa$',YTITLE='Count',TITLE=titleStr, $
+                  FONT_SIZE=16,THICK=2.5, $
                  CURRENT=winder)
-  linePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2,YRANGE=[0,MAX(kHist)*1.2], $
+  linePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2, $
+                  YRANGE=[0,MAX(kHist)*1.2], $
                   THICK=2.,COLOR='GREEN',/OVERPLOT, $
                   CURRENT=winder)
-  text     = TEXT(0.25,0.8,"$\kappa_t$ = 2.45",/NORMAL,FONT_SIZE=16,FONT_COLOR='GREEN',TARGET=winder)
+  text     = TEXT(0.25,0.8,"$\kappa_t$ = 2.45",/NORMAL, $
+                  FONT_SIZE=16,FONT_COLOR='GREEN', $
+                  TARGET=winder)
 
   outDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
   outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
@@ -612,5 +666,5 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   PRINT,"Saving to " + outPlotName
   winder.Save,outDir+outPlotName
   winder.Close
-  
+
 END
