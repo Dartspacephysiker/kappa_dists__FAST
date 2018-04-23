@@ -223,7 +223,7 @@ PRO KAPPA_FITTER__FSTRINGS, $
   ;; ENDIF
 
   defFitFile           = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
-                        '-KandGfits' + McFaddenString + '-' + eeb_or_ees + plotNamePref + '.sav'
+                        '-KandGfits' + McFaddenString + '-' + eeb_or_ees + plotNamePref + t1Str + t2Str + '.sav'
   ;; IF KEYWORD_SET(fitFile) THEN BEGIN
      CASE SIZE(fitFile,/TYPE) OF
         7: BEGIN
