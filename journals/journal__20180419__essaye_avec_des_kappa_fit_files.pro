@@ -182,21 +182,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   restoreFile = 1
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
-  outFName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'-parsedKappa.sav' 
-
-  inDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  CAPDir = inDir + 'cur_and_pot_analysis/'
-
-  CAPpref = 'Orbit_'
-  CAPmidM = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD'
-  CAPmidI = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD'
-  CAPsuff = '-sc_pot-sRate1_25.sav'
-
-  Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/20180420/'
-  Newellpref = 'NewellData-'
-  Newellsuff = '-GETKLOWBOUND-'
-
-  newellListe = FILE_SEARCH(Newelldir+Newellpref+'*'+Newellsuff+'*'+'.sav')
+  ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  ;; restoreD = '20180420' ;2018/04/23 Making a new one, calling it 20180424 for kicks
+  restoreD = '20180424'
+  outFName = restoreD+'-parsedKappa.sav' 
 
   IF KEYWORD_SET(restoreFile) THEN BEGIN
      makeNewFile = ~FILE_TEST(outDir+outFName)
@@ -208,16 +197,32 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   IF KEYWORD_SET(makeNewFile) THEN BEGIN
 
+     badOrbs = [1257,1635,1693,1875,1945,3123,3268,3353]
+
+     inDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
+     CAPDir = inDir + 'cur_and_pot_analysis/'
+
+     CAPpref = 'Orbit_'
+     CAPmidM = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD'
+     CAPmidI = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD'
+     CAPsuff = '-sc_pot-sRate1_25.sav'
+
+     Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/20180424/'
+     Newellpref = 'NewellData-'
+     Newellsuff = '-GETKLOWBOUND-'
+
+     newellListe = FILE_SEARCH(Newelldir+Newellpref+'*'+Newellsuff+'*'+'.sav')
+
 ;; Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 ;;   Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 
      ;; dato  = '20180419'
-     dato  = '20180420'
+     dato  = '20180424'
      pref  = dato + '-orb_'
      suff  = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25.sav'
      SPAWN,'cd ' + inDir + '; ls ' + pref + '*' + suff,liste
 
-     timeagoStr  = '-mtime -3'
+     timeagoStr  = '-mtime -5'
      findIString = "find . " + timeagoStr + " -iname '*" $
                    + CAPpref + "*" + CAPmidI + "*" + CAPsuff $
                    + "' -print0 | xargs -0 ls -1"
@@ -282,6 +287,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         orbStr = STRMID(liste[k],STRLEN(pref),4)
         orbit = LONG(orbStr)
         PRINT,orbit
+
+        IF (WHERE(orbit EQ badOrbs))[0] NE -1 THEN BEGIN
+           PRINT,FORMAT='("Bad orbit: ",I0,". Skipping ...")',orbit
+           CONTINUE
+        ENDIF
 
         ;; ingInd  = WHERE(STRMATCH(CAPIliste,'*' + orbStr + '*'),nIng)
         mealInd = WHERE(STRMATCH(CAPMliste,'./'+CAPpref+'*' + orbStr + '*'),nMeal)
@@ -569,7 +579,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
   CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
 
-  kHist = HISTOGRAM(KF2DParms.kappa[plot_i],BINSIZE=0.20,MIN=1.45,LOCATIONS=kBins)
+  kHist = HISTOGRAM(KF2DParms.kappa[plot_i],BINSIZE=0.20,MIN=1.45,LOCATIONS=kBins,REVERSE_INDICES=rInds)
+
+  ;; Where are they less than .245?
+  lt245inds = !NULL
+  bin245 = VALUE_CLOSEST2(kBins,2.45,/CONSTRAINED)
+  FOR k=0,bin245-1 DO BEGIN
+     IF rInds[k] NE rInds[k+1] THEN $
+        lt245inds = [lt245inds,rInds[rInds[k] : rInds[k+1]-1]]
+  ENDFOR
+
+  STOP
 
   titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                     minM+24,maxM, $
