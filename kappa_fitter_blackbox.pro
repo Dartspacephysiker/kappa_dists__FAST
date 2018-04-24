@@ -84,6 +84,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__ADD_CHI2_LINE=kSum__add_chi2_line, $
                           KSUM__CHI2BOUNDS=kSum__chi2Bounds, $
                           KSUM__ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
+                          KSUM__ADD_ONLY_MEAS_N=kSum__add_only_meas_N, $
                           KSUM__INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
                           KSUM__GRL=kSum__GRL, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
@@ -788,6 +789,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              DIFF_EFLUX=diff_eFlux, $
                              JVPLOTDATA=jvPlotData, $
                              ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
+                             ADD_ONLY_MEAS_N=kSum__add_only_meas_N, $
                              SC_POT=sc_pot, $
                              CONVERT_DESPECS_TO_NEWELL_INTERP=kSum__convert_to_Newell_interp, $
                              SAVE_PS=kSum__save_ps, $
