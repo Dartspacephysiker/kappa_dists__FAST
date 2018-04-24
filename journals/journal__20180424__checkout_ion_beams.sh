@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#2018/04/24
+
+orbs=(1182 1259 1450 1504 1562 1563 1567 1569 1576 1578 1579 1607 1612 1615 1626 1633 1637 1650 1662 1664 1694 1696 1697 1702 1715 1719 1720 1727 1728 1731 1743 1744 1745 1747 1750 1756 1758 1760 1774 1776 1790 1797 1801 1804 1805 1822 1829 1845 1849 1858 1861 1867 1869 1877 1880 1884 1892 1902 1906 1909 1911 1917 1918 1940 1944 1947 1954 1957 1990 2006 2008 2009 2030 2037 2044 2062 2069 2072 2074 2081 2082 2526 2685 2760 2789 2817 2822 2891 2892 2897 2957 2968 2976 3011 3061 3069 3075 3086 3097 3099 3100 3102 3108 3119 3130 3133 3154 3155 3157 3160 3161 3166 3167 3186 3218 3220 3231 3245 3270 3274 3299 3301 3319 3324 3341 3368 3383 3414 3423 3437 3458 3465 3523 3576 3609 3630 3639 3661 3694 3705 3725 3738 3759 3780 3781 3785 3814 3833 3857 3878 3907 3918 3931 3942 3986 3991)
+
+CHKDIRBASE=/SPENCEdata/software/sdt/batch_jobs/plots
+CHKDIRDATES=(20180421 20180423)
+OUTFILE=whereat.txt
+
+if [ -e ${OUTFILE} ]; then
+    echo "Making new ${OUTFILE}"
+    rm ${OUTFILE};
+fi
+
+dirArr=()
+noGet=()
+for bro in ${orbs[@]}; do
+    echo ${bro}
+    gotIt=0
+    for date in ${CHKDIRDATES}; do
+	curDir=${CHKDIRBASE}/${date}/kappa_fits/Orbit_${bro}/
+	if [ -d ${curDir} ]; then
+	   gotIt=1 
+	   echo "Got dir for orb ${bro}"
+	   dirArr=(${dirArr[@]} ${curDir}) 
+	   echo ${curDir} >> ${OUTFILE}
+	fi
+    done
+    if [ ${gotIt} -eq 0 ]; then
+	noGet=(${noGet[@]} ${bro})
+    fi
+done
+
+echo "Couldn't get these'ns:"
+for bro in ${noGet[@]}; do
+    echo ${bro}
+done
+

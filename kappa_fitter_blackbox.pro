@@ -75,6 +75,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__LOG_KAPPAPLOT=sway__log_kappaPlot, $
                           SWAY__ADD_IU_POT=sway__add_iu_pot, $
                           SWAY__SPECTROGRAM_UNITS=sway__spectrogram_units, $
+                          SWAY__CHECKFORIONBEAMS=sway__checkForIonBeams, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__EANGLE=kSum__eAngle, $
                           KSUM__SAVE_PS=kSum__save_ps, $
@@ -216,7 +217,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         IF ~foundFitFile THEN BEGIN
            PRINT,"Couldn't get file!"
-           IF ~KEYWORD_SET(batch_mode) THEN STOP
+           IF KEYWORD_SET(batch_mode) THEN RETURN ELSE STOP
         ENDIF
         
   ENDIF ELSE BEGIN
@@ -666,57 +667,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
      ENDIF
 
-     ;; MOMENT_SUITE_2D,kappa_eFlux, $
-     ;;                 ENERGY=energy, $
-     ;;                 ARANGE__MOMENTS=electron_angleRange, $
-     ;;                 ARANGE__CHARE=electron_angleRange, $
-     ;;                 SC_POT=sc_pot, $
-     ;;                 EEB_OR_EES=eeb_or_ees, $
-     ;;                 /ERROR_ESTIMATES, $
-     ;;                 /MAP_TO_100KM, $ 
-     ;;                 ORBIT=orbit, $
-     ;;                 QUIET=quiet, $
-     ;;                 OUT_N=nKappa, $
-     ;;                 OUT_J_=jKappa, $
-     ;;                 OUT_JE=jeKappa, $
-     ;;                 OUT_T=TKappa, $
-     ;;                 OUT_CHARE=charEKappa, $
-     ;;                 OUT_CURRENT=curKappa, $
-     ;;                 OUT_JJE_COVAR=jje_coVarKappa, $
-     ;;                 OUT_ERRORS=errorsKappa, $
-     ;;                 OUT_ERR_N=nErrKappa, $
-     ;;                 OUT_ERR_J_=jErrKappa, $
-     ;;                 OUT_ERR_JE=jeErrKappa, $
-     ;;                 OUT_ERR_T=TErrKappa, $
-     ;;                 OUT_ERR_CURRENT=curErrKappa, $
-     ;;                 OUT_ERR_CHARE=charEErrKappa
-
-     ;; MOMENT_SUITE_2D,Gauss_eFlux, $
-     ;;                 ENERGY=energy, $
-     ;;                 ARANGE__MOMENTS=electron_angleRange, $
-     ;;                 ARANGE__CHARE=electron_angleRange, $
-     ;;                 SC_POT=sc_pot, $
-     ;;                 EEB_OR_EES=eeb_or_ees, $
-     ;;                 /ERROR_ESTIMATES, $
-     ;;                 /MAP_TO_100KM, $ 
-     ;;                 ORBIT=orbit, $
-     ;;                 QUIET=quiet, $
-     ;;                 OUT_N=nGauss, $
-     ;;                 OUT_J_=jGauss, $
-     ;;                 OUT_JE=jeGauss, $
-     ;;                 OUT_T=TGauss, $
-     ;;                 OUT_CHARE=charEGauss, $
-     ;;                 OUT_CURRENT=curGauss, $
-     ;;                 OUT_JJE_COVAR=jje_coVarGauss, $
-     ;;                 OUT_ERRORS=errorsGauss, $
-     ;;                 OUT_ERR_N=nErrGauss, $
-     ;;                 OUT_ERR_J_=jErrGauss, $
-     ;;                 OUT_ERR_JE=jeErrGauss, $
-     ;;                 OUT_ERR_T=TErrGauss, $
-     ;;                 OUT_ERR_CURRENT=curErrGauss, $
-     ;;                 OUT_ERR_CHARE=charEErrGauss
-
-
      IF KEYWORD_SET(show_post_plots) THEN BEGIN
 
         POST_KAPPA2D_FIT_PLOTS,fit2DK,fit2DG,orbit,plotNamePref,plotDir,save_postKappa_plot, $
@@ -801,6 +751,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                            ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                            ;; GRL=sway__GRL, $
+                           SC_POT=sc_pot, $
+                           CHECKFORIONBEAMS=sway__checkForIonBeams, $
                            PLOTDIR=plotDir
 
      ENDIF

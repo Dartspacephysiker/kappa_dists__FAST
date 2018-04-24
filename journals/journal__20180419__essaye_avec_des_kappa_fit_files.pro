@@ -486,6 +486,16 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
      PRINT,"NFinal: ",nFinal
 
+     GET_FA_ORBIT,andre.time[finalInds],/TIME_ARRAY,/NO_STORE,STRUC=struc
+
+     andre.alt[finalInds] = struc.alt
+
+     LOAD_DST_AE_DBS,Dst,AE
+     match_ae_i = VALUE_CLOSEST2(ae.time,andre.time[finalInds],/CONSTRAINED)
+     match_dst_i = VALUE_CLOSEST2(dst.time,andre.time[finalInds],/CONSTRAINED)
+
+     STOP
+
      KF2DParms = {time              : KF2DParms.time[finalInds]        , $
                   bulk_energy       : KF2DParms.bulk_energy[finalInds] , $
                   temperature       : KF2DParms.temperature[finalInds] , $
@@ -506,6 +516,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                   mono              : andre.mono[finalInds]            , $
                   broad             : andre.broad[finalInds]           , $
                   diffuse           : andre.diffuse[finalInds]         , $
+                  AE                : AE.AE[match_ae_i]                , $
+                  DST               : DST.DST[match_dst_i]             , $
                   newell_tMismatch  : andre.newell_tMismatch[finalInds]}
 
      PRINT,"Saving " + outFName + ' ...'
@@ -518,10 +530,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   ENDELSE
 
-  minM  = -3
-  maxM  = 1
+  minM  = -5
+  maxM  = 5
   minI  = 60
-  maxI  = 77
+  maxI  = 89
   hemi  = 'BOTH'
 
   SET_DEFAULT_MLT_ILAT_AND_MAGC,MINMLT=minM, $
@@ -589,7 +601,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   mono_i            = WHERE(andre.mono  EQ 1 OR andre.mono  EQ 2,nMono,NCOMPLEMENT=nNotMono)
   broad_i           = WHERE(andre.broad EQ 1 OR andre.broad EQ 2,nBroad,NCOMPLEMENT=nNotBroad)
 
-  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE 1.5) AND $
+  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE 2.0) AND $
                             (KF2DParms.chi2red LT 5),nChi2,NCOMPLEMENT=nNotChi2)
   final_i           = CGSETINTERSECTION(region_i,mono_i,COUNT=count)
   IF count EQ 0 THEN STOP
