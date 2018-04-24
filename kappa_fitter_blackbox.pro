@@ -753,6 +753,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            ;; GRL=sway__GRL, $
                            SC_POT=sc_pot, $
                            CHECKFORIONBEAMS=sway__checkForIonBeams, $
+                           BATCH_MODE=batch_mode, $
                            PLOTDIR=plotDir
 
      ENDIF
