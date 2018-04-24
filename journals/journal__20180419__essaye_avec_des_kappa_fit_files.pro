@@ -180,6 +180,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   restoreFile = 1
+  requireIons = 1
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
@@ -263,6 +264,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                   mono              : BYTE(bArr), $
                   broad             : BYTE(bArr), $
                   diffuse           : BYTE(bArr), $
+                  ionBeam           : BYTE(bArr), $
                   newell_tMismatch  : bArr}
 
      bArr      = !NULL
@@ -344,6 +346,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
            diffuse     = !NULL
            je          = !NULL
            jee         = !NULL
+           ionBeam     = !NULL
            nbad_espec  = !NULL
            info        = !NULL
 
@@ -352,16 +355,22 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
               events = !NULL
               RESTORE,newellListe[newellInd[bro]]
 
+              ;; Har vi ions?
+              junk = !NULL
+              STR_ELEMENT,events,'ionBeam',VALUE=junk
+              tmpIonBeam  = N_ELEMENTS(junk) GT 0 ? events.ionBeam : BYTE(events.ilat)*0B
+
               x           = [x         ,events.x            ]
               mlt         = [mlt       ,events.mlt          ]
               ilat        = [ilat      ,events.ilat         ]
               mono        = [mono      ,events.mono         ]
               broad       = [broad     ,events.broad        ]
-              diffuse     = [diffuse   ,events.diffuse    ]
+              diffuse     = [diffuse   ,events.diffuse      ]
+              ionBeam     = [ionBeam   ,tmpIonBeam          ] 
               je          = [je        ,events.je           ]
               jee         = [jee       ,events.jee          ]
-              nbad_espec  = [nbad_espec,events.nbad_espec ]
-              info        = [info      ,events.info       ]
+              nbad_espec  = [nbad_espec,events.nbad_espec   ]
+              info        = [info      ,events.info         ]
 
            ENDFOR
 
@@ -372,6 +381,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                     mono       : (TEMPORARY(mono      ))[sorti], $
                     broad      : (TEMPORARY(broad     ))[sorti], $
                     diffuse    : (TEMPORARY(diffuse   ))[sorti], $
+                    ionBeam    : (TEMPORARY(ionBeam   ))[sorti], $
                     je         : (TEMPORARY(je        ))[sorti], $
                     jee        : (TEMPORARY(jee       ))[sorti], $
                     nbad_espec : (TEMPORARY(nbad_espec))[sorti], $
@@ -443,6 +453,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         andre.mono[curInds]    = events.mono[evtInds]
         andre.broad[curInds]   = events.broad[evtInds]
         andre.diffuse[curInds] = events.diffuse[evtInds]
+        andre.ionBeam[curInds] = events.ionBeam[evtInds]
 
         KF2DParms.time[curInds]         = kTid
         GF2DParms.time[curInds]         = gTid
@@ -516,6 +527,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                   mono              : andre.mono[finalInds]            , $
                   broad             : andre.broad[finalInds]           , $
                   diffuse           : andre.diffuse[finalInds]         , $
+                  ionBeam           : andre.ionBeam[finalInds]         , $
                   AE                : AE.AE[match_ae_i]                , $
                   DST               : DST.DST[match_dst_i]             , $
                   newell_tMismatch  : andre.newell_tMismatch[finalInds]}
@@ -607,6 +619,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   IF count EQ 0 THEN STOP
   final_i           = CGSETINTERSECTION(final_i,chi2_i,COUNT=count)
   IF count EQ 0 THEN STOP
+
+  IF KEYWORD_SET(requireIons) THEN BEGIN
+     ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
+     final_i        = CGSETINTERSECTION(final_i,ion_i,COUNT=count)
+  ENDIF
   STOP
 
   ;; Unique low kappa-ers
