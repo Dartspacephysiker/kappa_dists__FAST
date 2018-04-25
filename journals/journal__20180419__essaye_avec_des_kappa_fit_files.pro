@@ -182,11 +182,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   restoreFile = 1
   requireIons = 1
 
+  makeMLTILATplot = 1
+
   outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ;; restoreD = '20180420' ;2018/04/23 Making a new one, calling it 20180424 for kicks
-  restoreD = '20180424'
+  restoreD = '20180425'
   outFName = restoreD+'-parsedKappa.sav'
+
+  newellDate    = restoreD
+  KandGFitDate  = restoreD
+  CAPtimeagoStr = '-mtime -2'
 
   IF KEYWORD_SET(restoreFile) THEN BEGIN
      makeNewFile = ~FILE_TEST(outDir+outFName)
@@ -204,11 +210,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      CAPDir = inDir + 'cur_and_pot_analysis/'
 
      CAPpref = 'Orbit_'
-     CAPmidM = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD'
-     CAPmidI = '-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD'
+     CAPmidM = '--GETKLOWBOUND-meal'
+     CAPmidI = '--GETKLOWBOUND-ingredients'
      CAPsuff = '-sc_pot-sRate1_25.sav'
 
-     Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/20180424/'
+     Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/' + newellDate + '/'
      Newellpref = 'NewellData-'
      Newellsuff = '-GETKLOWBOUND-'
 
@@ -217,17 +223,16 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 ;; Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 ;;   Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 
-     ;; dato  = '20180419'
-     dato  = '20180424'
-     pref  = dato + '-orb_'
-     suff  = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25.sav'
-     SPAWN,'cd ' + inDir + '; ls ' + pref + '*' + suff,liste
+     ;; KandGFitDate  = '20180419'
+     KandGPref  = KandGFitDate + '-orb_'
+     KandGMid   = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25'
+     KandGSuff  = '.sav'
+     SPAWN,'cd ' + inDir + '; ls ' + KandGPref + '*' + KandGMid + '*' + KandGSuff,KandGliste
 
-     timeagoStr  = '-mtime -5'
-     findIString = "find . " + timeagoStr + " -iname '*" $
+     findIString = "find . " + CAPtimeagoStr + " -iname '*" $
                    + CAPpref + "*" + CAPmidI + "*" + CAPsuff $
                    + "' -print0 | xargs -0 ls -1"
-     findMString = "find . " + timeagoStr + " -iname '*" $
+     findMString = "find . " + CAPtimeagoStr + " -iname '*" $
                    + CAPpref + "*" + CAPmidM + "*" + CAPsuff $
                    + "' -print0 | xargs -0 ls -1"
 
@@ -236,7 +241,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      SPAWN,'cd ' + CAPDir + '; ' + findIString,CAPIliste
      SPAWN,'cd ' + CAPDir + '; ' + findMString,CAPMliste
 
-     nFil  = N_ELEMENTS(liste)
+     nFil  = N_ELEMENTS(KandGliste)
      nCAPI = N_ELEMENTS(CAPIliste)
      nCAPM = N_ELEMENTS(CAPMliste)
 
@@ -286,7 +291,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         fit2DK              = !NULL
         fit2DG              = !NULL
 
-        orbStr = STRMID(liste[k],STRLEN(pref),4)
+        orbStr = STRMID(KandGliste[k],STRLEN(KandGPref),4)
         orbit = LONG(orbStr)
         PRINT,orbit
 
@@ -335,7 +340,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
            CONTINUE
         ENDIF
 
-        RESTORE,inDir+liste[k]
+        RESTORE,inDir+KandGliste[k]
 
         IF nNewell GT 1 THEN BEGIN
            x           = !NULL
@@ -489,7 +494,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      uniq_final = UNIQ(andre.time[finalInds],SORT(andre.time[finalInds]))
      nUniq      = N_ELEMENTS(uniq_final)
      IF nUniq NE nFinal THEN BEGIN
-        PRINT,"You're dupin'"
+        PRINT,FORMAT='("You' + "'" + 're dupin' + "'" + ' wif ",I0," inds")',nFinal-nUniq
         STOP
         finalInds = finalInds[uniq_final]
         nFinal    = N_ELEMENTS(finalInds)
@@ -665,8 +670,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
         lt245inds = [lt245inds,rInds[rInds[k] : rInds[k+1]-1]]
   ENDFOR
 
-  STOP
-
   titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                     minM+24,maxM, $
                     minI,maxI, $
@@ -688,12 +691,29 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                   FONT_SIZE=16,FONT_COLOR='GREEN', $
                   TARGET=winder)
 
-  outDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
+  outPlotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
   outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                 + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT.png")', $
                          (minM LT 0 ? minM + 24 : minM),maxM)
   PRINT,"Saving to " + outPlotName
-  winder.Save,outDir+outPlotName
+  winder.Save,outPlotDir+outPlotName
   winder.Close
+
+  IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
+     MLTs = andre.mlt[final_i]
+     MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
+     MLTILATplot = SCATTERPLOT(MLTs, $
+                               ABS(andre.ilat[final_i]), $
+                               XTITLE='mlt', $
+                               YTITLE='ilat', $
+                               TRANSP=50)
+
+     scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                    + "-kappaStats-MLT_ILAT_coverage.png"
+
+     MLTILATplot.Save,outPlotDir+scatPlotName
+     MLTILATplot.Close
+
+  ENDIF  
 
 END

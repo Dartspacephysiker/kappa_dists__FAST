@@ -85,7 +85,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
 
   ;;get orbTimes here
   orbPref                 = 'Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
-  bonusPref               = orbPref + '-apres_Elph98-' + (KEYWORD_SET(in_bonusPref) ? in_bonusPref : '')
+  bonusPref               = orbPref + '-' + (KEYWORD_SET(in_bonusPref) ? in_bonusPref : '')
 
   orbTimes                = plot_times
   orbBurstTimes           = plot_times
@@ -170,9 +170,9 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   ;; units                = 'dfStd'
 
   outDir                  = '/home/spencerh/software/sdt/batch_jobs/saves_output_etc/cur_and_pot_analysis/'
-  masterFile              = bonusPref + 'blkBox-Fig2_ingredients.sav'
+  masterFile              = bonusPref + '-ingredients.sav'
 
-  saveCurPotFile          = bonusPref + 'blkBox-Fig2__meal.sav'
+  saveCurPotFile          = bonusPref + '-meal.sav'
   ;; save_diff_eFlux_file    = save_diff_eFlux_to_file
   ;; load_diff_eFlux_file    = 1
   ;; restore_fitFile         = 0
@@ -193,8 +193,8 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
   CASE 1 OF
      KEYWORD_SET(all_pitchAngles): BEGIN
 
-        masterFile          = masterFile.Replace('blkBox-','blkBox-allPitch-')
-        saveCurPotFile      = saveCurPotFile.Replace('blkBox-','blkBox-allPitch-')
+        masterFile          = masterFile.Replace(bonusPref,bonusPref+'allPitch-')
+        saveCurPotFile      = saveCurPotFile.Replace(bonusPref,bonusPref+'allPitch-')
 
         aRange__moments_e_down  = [0.,360.]
         aRange__moments_i_up = [0.,360.]
@@ -210,8 +210,8 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      END
      KEYWORD_SET(allPitch_except_atm_lc): BEGIN
 
-        masterFile          = masterFile.Replace('blkBox-','blkBox-allP_excl_atmLC-')
-        saveCurPotFile      = saveCurPotFile.Replace('blkBox-','blkBox-allP_excl_atmLC-')
+        masterFile          = masterFile.Replace(bonusPref,bonusPref+'allP_excl_atmLC-')
+        saveCurPotFile      = saveCurPotFile.Replace(bonusPref,bonusPref+'allP_excl_atmLC-')
 
         aRange__dens_e_down  = 'lc__excl_atm'
         aRange__moments_e_down  = 'lc__excl_atm'
