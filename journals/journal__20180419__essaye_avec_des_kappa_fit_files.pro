@@ -179,7 +179,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  restoreFile = 1
+  restoreFile = 0
   requireIons = 1
 
   makeMLTILATplot = 1
@@ -629,6 +629,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
      final_i        = CGSETINTERSECTION(final_i,ion_i,COUNT=count)
   ENDIF
+
+  PRINT,FORMAT='("Working with ",I0, " inds")',count
   STOP
 
   ;; Unique low kappa-ers
@@ -644,15 +646,15 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   pctNorth          = nNorth/count
   pctSouth          = nSouth/count
 
-  !P.multi = [0,1,1,0,0]
-  WINDOW,1,XSIZE=600,YSIZE=600
-  CGHISTOPLOT,KF2DParms.kappa[plot_i],BINSIZE=0.15,MININPUT=1.5,MAXINPUT=10
+  ;; !P.multi = [0,1,1,0,0]
+  ;; WINDOW,1,XSIZE=600,YSIZE=600
+  ;; CGHISTOPLOT,KF2DParms.kappa[plot_i],BINSIZE=0.15,MININPUT=1.5,MAXINPUT=10
 
-  !P.multi = [0,2,2,0,0]
-  WINDOW,0,XSIZE=600,YSIZE=600
-  CGHISTOPLOT,ALOG10(GF2DParms.chi2red[plot_i]),TITLE="Maxwellian"
-  CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
-  CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
+  ;; !P.multi = [0,2,2,0,0]
+  ;; WINDOW,0,XSIZE=600,YSIZE=600
+  ;; CGHISTOPLOT,ALOG10(GF2DParms.chi2red[plot_i]),TITLE="Maxwellian"
+  ;; CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
+  ;; CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
 
   binSize = 0.5
   histMin = 1.45
@@ -697,7 +699,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                          (minM LT 0 ? minM + 24 : minM),maxM)
   PRINT,"Saving to " + outPlotName
   winder.Save,outPlotDir+outPlotName
-  winder.Close
 
   IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
      MLTs = andre.mlt[final_i]
@@ -715,5 +716,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      MLTILATplot.Close
 
   ENDIF  
+
+  STOP
+
+  winder.Close
+  IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
+     MLTILATplot.Close
+  ENDIF
 
 END
