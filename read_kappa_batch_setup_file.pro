@@ -58,24 +58,35 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
      min_T_streakLen = 60       ;in seconds
   ENDIF
 
+  mltType = SIZE(mltR[0],/TYPE)
+  IF mltType EQ 2 OR mltType EQ 3 THEN BEGIN
+     mltFmtStr = 'I0'
+  ENDIF ELSE IF mltType EQ 4 OR mltType EQ 5 THEN BEGIN
+     mltFmtStr = 'F0.2'
+  ENDIF
   CASE (N_ELEMENTS(SIZE(mltR,/DIM))) OF
      1: BEGIN
         minM     = mltR[0]
         maxM     = mltR[1]
-        mltStr   = STRING(FORMAT='("__",I0,"-",I0,"MLT")',mltR[0],mltR[1])
+        mltStr   = STRING(FORMAT='("__",' + mltFmtStr + ',"-",' $
+                          + mltFmtStr + ',"MLT")',mltR[0],mltR[1])
      END
      2: BEGIN
         minM     = mltR[0,*]
         maxM     = mltR[1,*]
 
         nRange   = N_ELEMENTS(mltR[0,*])
-        mltStr   = STRING(FORMAT='("__",I0,"-",I0)',mltR[0,0],mltR[1,0])
+        mltStr   = STRING(FORMAT='("__",' + mltFmtStr + ',"-",' $
+                          + mltFmtStr + ')',mltR[0,0],mltR[1,0])
         FOR k=1,nRange-1 DO BEGIN
-           mltStr += STRING(FORMAT='("n",I0,"-",I0)',mltR[0,k],mltR[1,k])
+           mltStr += STRING(FORMAT='("n",' + mltFmtStr + ',"-",' $
+                            + mltFmtStr + ')',mltR[0,k],mltR[1,k])
         ENDFOR
         mltStr += 'MLT'
      END
   ENDCASE
+  mltStr = mltStr.Replace('.','_')
+
   ;; orbStr   = STRING(FORMAT='("__",I0,"-",I0,"ORB")',orbR[0],orbR[1])
   altStr   = STRING(FORMAT='("__",I0,"-",I0,"ALT")',altR[0],altR[1])
   min_TStr = STRING(FORMAT='("__minTStreak_sec_",I0)',min_T_streakLen)

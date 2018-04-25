@@ -226,6 +226,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
   ENDIF
 
   GET_CURRENT_AND_POTENTIAL_FILENAMES, $
+     ORBTIMES=orbTimes, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_list[0], $
      ARANGE__MOMENTS_I_UP=aRange__moments_list[2], $
      USE_SC_POT_FOR_LOWERBOUND=use_sc_pot_for_lowerbound, $
