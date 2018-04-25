@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    133626,       2689]
-NotebookOptionsPosition[    129963,       2613]
-NotebookOutlinePosition[    130301,       2628]
-CellTagsIndexPosition[    130258,       2625]
+NotebookDataLength[    135240,       2742]
+NotebookOptionsPosition[    131211,       2659]
+NotebookOutlinePosition[    131553,       2674]
+CellTagsIndexPosition[    131510,       2671]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -2609,10 +2609,56 @@ fpF355Dqbo/nnxhbMX0o2/p36Rzi2cm5S9ttw/8DwekdPA==
 04321ed4b936"]
 }, Open  ]]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Derivative of 1-D kappa dist, growth/damping rate", "Subchapter",
+ CellChangeTimes->{{3.733587467707793*^9, 
+  3.7335874794435587`*^9}},ExpressionUUID->"87fb157c-0ae7-4fb3-9615-\
+1436c5b8ae6f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"kappaDist", ",", "v"}], "]"}], "/", "kappaDist"}]], "Input",
+ CellChangeTimes->{{3.733587486823518*^9, 
+  3.733587504613698*^9}},ExpressionUUID->"7fa1b6e0-ce10-4b4d-b6a2-\
+a8ed553dbccf"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{"2", " ", "v", " ", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", "1"}], "-", "\[Kappa]"}], ")"}]}], 
+  RowBox[{
+   SuperscriptBox["vth", "2"], " ", 
+   RowBox[{"(", 
+    RowBox[{"1", "+", 
+     FractionBox[
+      SuperscriptBox["v", "2"], 
+      RowBox[{
+       SuperscriptBox["vth", "2"], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          FractionBox["1", "2"]}], "+", "\[Kappa]"}], ")"}]}]]}], ")"}], " ", 
+   
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", 
+      FractionBox["1", "2"]}], "+", "\[Kappa]"}], ")"}]}]]], "Output",
+ CellChangeTimes->{{3.7335874918436127`*^9, 
+  3.733587505972542*^9}},ExpressionUUID->"d9ab2400-2f63-4bae-be65-\
+5d887a0bf0f2"]
+}, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1280, 848},
-WindowMargins->{{0, Automatic}, {0, Automatic}},
+WindowSize->{1280, 997},
+WindowMargins->{{-1280, Automatic}, {Automatic, 3}},
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
 StyleDefinitions->"Default.nb"
 ]
@@ -2689,6 +2735,13 @@ Cell[CellGroupData[{
 Cell[85643, 1749, 1860, 47, 139, "Input",ExpressionUUID->"2258f1bf-efcb-4d9b-84b5-9bf3523baede"],
 Cell[87506, 1798, 42417, 810, 377, "Output",ExpressionUUID->"b2645220-4434-46a6-bf5b-04321ed4b936"]
 }, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[129984, 2615, 199, 3, 65, "Subchapter",ExpressionUUID->"87fb157c-0ae7-4fb3-9615-1436c5b8ae6f"],
+Cell[CellGroupData[{
+Cell[130208, 2622, 243, 6, 31, "Input",ExpressionUUID->"7fa1b6e0-ce10-4b4d-b6a2-a8ed553dbccf"],
+Cell[130454, 2630, 729, 25, 112, "Output",ExpressionUUID->"d9ab2400-2f63-4bae-be65-5d887a0bf0f2"]
 }, Open  ]]
 }, Open  ]]
 }
