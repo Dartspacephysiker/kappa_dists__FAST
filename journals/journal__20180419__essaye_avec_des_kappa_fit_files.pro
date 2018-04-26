@@ -179,19 +179,25 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  restoreFile = 0
-  requireIons = 1
+  restoreFile = 1
+  requireIons = 0
+  excludeIons = 1
 
   makeMLTILATplot = 1
+  bufferPlots = 1
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ;; restoreD = '20180420' ;2018/04/23 Making a new one, calling it 20180424 for kicks
-  restoreD = '20180425'
+  ;; restoreD = '20180426'
+  restoreD = '20180426TRY2' ;Later, with orbs reaching into 7000+
+  bonusPlotSuff = '-WITH 7000NUP'
   outFName = restoreD+'-parsedKappa.sav'
 
-  newellDate    = restoreD
-  KandGFitDate  = restoreD
+  ;; newellDates   = restoreD
+  ;; KandGFitDates = restoreD
+  newellDates   = ['20180425','20180426']
+  KandGFitDates = newellDates
   CAPtimeagoStr = '-mtime -2'
 
   IF KEYWORD_SET(restoreFile) THEN BEGIN
@@ -214,21 +220,32 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      CAPmidI = '--GETKLOWBOUND-ingredients'
      CAPsuff = '-sc_pot-sRate1_25.sav'
 
-     Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/' + newellDate + '/'
-     Newellpref = 'NewellData-'
-     Newellsuff = '-GETKLOWBOUND-'
+     nNewellDates = N_ELEMENTS(newellDates)
+     newellListe  = !NULL
+     FOR k=0,nNewellDates-1 DO BEGIN
+        Newelldir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/kappa_Newell_data/' $
+                    + newellDates[k] + '/'
+        Newellpref = 'NewellData-'
+        Newellsuff = '-GETKLOWBOUND-'
 
-     newellListe = FILE_SEARCH(Newelldir+Newellpref+'*'+Newellsuff+'*'+'.sav')
-
+        tempNewellListe = FILE_SEARCH(Newelldir+Newellpref+'*'+Newellsuff+'*'+'.sav')
+        newellListe = [newellListe,tempNewellListe]
+     ENDFOR
+     
 ;; Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2__meal-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 ;;   Orbit_1450-apres_Elph98--GETKLOWBOUNDblkBox-Fig2_ingredients-aR_mom_eD_-32-32-sc_pot-sRate1_25.sav
 
      ;; KandGFitDate  = '20180419'
-     KandGPref  = KandGFitDate + '-orb_'
-     KandGMid   = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25'
-     KandGSuff  = '.sav'
-     SPAWN,'cd ' + inDir + '; ls ' + KandGPref + '*' + KandGMid + '*' + KandGSuff,KandGliste
-
+     nKAndGFitDates = N_ELEMENTS(KandGFitDates)
+     KandGliste = !NULL
+     FOR k=0,nKAndGFitDates-1 DO BEGIN
+        KandGPref  = KandGFitDates[k] + '-orb_'
+        KandGMid   = '-KandGfits-ees-GETKLOWBOUND-only_fit_peak_eRange-sRate1_25'
+        KandGSuff  = '.sav'
+        SPAWN,'cd ' + inDir + '; ls ' + KandGPref + '*' + KandGMid + '*' + KandGSuff,tempKandGliste
+        KandGliste = [KandGliste,tempKandGliste]
+     ENDFOR
+     
      findIString = "find . " + CAPtimeagoStr + " -iname '*" $
                    + CAPpref + "*" + CAPmidI + "*" + CAPsuff $
                    + "' -print0 | xargs -0 ls -1"
@@ -241,18 +258,90 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      SPAWN,'cd ' + CAPDir + '; ' + findIString,CAPIliste
      SPAWN,'cd ' + CAPDir + '; ' + findMString,CAPMliste
 
-     nFil  = N_ELEMENTS(KandGliste)
-     nCAPI = N_ELEMENTS(CAPIliste)
-     nCAPM = N_ELEMENTS(CAPMliste)
+     nKandGFil = N_ELEMENTS(KandGliste)
+     nCAPI     = N_ELEMENTS(CAPIliste)
+     nCAPM     = N_ELEMENTS(CAPMliste)
+     nNewell   = N_ELEMENTS(newellListe)
 
-     ;; IF nFil NE nCAPI OR nFil NE nCAPM OR nCAPI NE nCAPM THEN BEGIN
+     ;; Check for duplicates?
+
+     toOrbLen  = STRLEN(NewellDir+Newellpref)
+     toTidLen  = STRLEN(NewellDir+Newellpref+Newellsuff)+4
+     toDateLen = STRLEN(NewellDir)-9
+     rmIndArr  = !NULL
+     FOR k=0,nNewell-1 DO BEGIN
+        orbStr = STRMID(newellListe[k],toOrbLen,4)        
+        tidStr = STRMID(newellListe[k],toTidLen,27)
+
+        match  = WHERE(STRMATCH(newellListe,'*'+NewellPref+orbStr+'*'+tidStr+'*'),nMatch)
+
+        ;; Now pick newest
+        CASE nMatch OF
+           0: BEGIN
+              PRINT,"Huh??? Should at least match self ..."
+              STOP
+           END
+           1:                   ;Just keep moving
+           ELSE: BEGIN
+              tmpDates = !NULL
+              FOR kk=0,nMatch-1 DO tmpDates = [tmpDates,LONG(STRMID(newellListe[match[kk]],toDateLen,8))]
+              winna = MAX(tmpDates,winInd)
+              REMOVE,winInd,match ;Keep the latest file (by removing it from the list of files to be removed)
+              rmIndArr = [rmIndArr,match]
+           END
+        ENDCASE
+
+     ENDFOR
+
+     rmIndArr = rmIndArr[UNIQ(rmIndArr,SORT(rmIndArr))]
+     REMOVE,rmIndArr,newellListe
+
+     ;; Now remove from KandG
+     toOrbLen  = 13
+     toTidLen  = STRLEN(KandGPref+KandGMid)+5
+     toDateLen = 0
+     rmIndArr  = !NULL
+     FOR k=0,nKandGFil-1 DO BEGIN
+        orbStr = STRMID(KandGliste[k],toOrbLen,4)        
+        tidStr = STRMID(KandGliste[k],toTidLen,27)
+
+        match  = WHERE(STRMATCH(KandGliste,'*'+orbStr+KandGMid+'*'+tidStr+'*'),nMatch)
+
+        ;; Now pick newest
+        CASE nMatch OF
+           0: BEGIN
+              PRINT,"Huh??? Should at least match self ..."
+              STOP
+           END
+           1:                   ;Just keep moving
+           ELSE: BEGIN
+              tmpDates = !NULL
+              FOR kk=0,nMatch-1 DO tmpDates = [tmpDates,LONG(STRMID(KandGliste[match[kk]],toDateLen,8))]
+              winna = MAX(tmpDates,winInd)
+              REMOVE,winInd,match ;Keep the latest file (by removing it from the list of files to be removed)
+              rmIndArr = [rmIndArr,match]
+           END
+        ENDCASE
+
+     ENDFOR
+
+     rmIndArr = rmIndArr[UNIQ(rmIndArr,SORT(rmIndArr))]
+     REMOVE,rmIndArr,KandGliste
+
+     ;; Recalc
+     nKandGFil = N_ELEMENTS(KandGliste)
+     nCAPI     = N_ELEMENTS(CAPIliste)
+     nCAPM     = N_ELEMENTS(CAPMliste)
+     nNewell   = N_ELEMENTS(newellListe)
+
+     ;; IF nKandGFil NE nCAPI OR nKandGFil NE nCAPM OR nCAPI NE nCAPM THEN BEGIN
 
      ;;    STOP
      ;; ENDIF
 
      use_mpFit1D = 1
 
-     maks      = 30000
+     maks      = 80000
      bArr      = MAKE_ARRAY(maks,/FLOAT,VALUE=0.)
      KF2DParms = {time              : DOUBLE(bArr), $
                   bulk_energy       : bArr, $
@@ -280,7 +369,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
      nIkkeHa   = 0
      totT      = 0.D
      orbArr    = !NULL
-     FOR k=0,nFil-1 DO BEGIN
+     FOR k=0,nKandGFil-1 DO BEGIN
 
         kappaFit1Ds         = !NULL
         gaussFit1Ds         = !NULL
@@ -625,9 +714,21 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   final_i           = CGSETINTERSECTION(final_i,chi2_i,COUNT=count)
   IF count EQ 0 THEN STOP
 
+  ionSuff           = '-noIons'
+
+  IF KEYWORD_SET(requireIons) AND KEYWORD_SET(excludeIons) THEN BEGIN
+     PRINT,"Now you're on my turf."
+     STOP
+  ENDIF
+
   IF KEYWORD_SET(requireIons) THEN BEGIN
      ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
      final_i        = CGSETINTERSECTION(final_i,ion_i,COUNT=count)
+     ionSuff        = ''
+  ENDIF ELSE IF KEYWORD_SET(excludeIons) THEN BEGIN
+     ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
+     final_i        = CGSETDIFFERENCE(final_i,ion_i,COUNT=count)
+     ionSuff        = '-excludeIons'
   ENDIF
 
   PRINT,FORMAT='("Working with ",I0, " inds")',count
@@ -677,7 +778,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                     minI,maxI, $
                     MIN(orbArr),MAX(orbArr), $
                     N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
-  winder   = WINDOW(DIMENSIONS=[800,800])
+  winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
   xRange   = [1.5,15]
   histPlot = PLOT(kBins,kHist,/HISTOGRAM, $
@@ -695,33 +796,36 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   outPlotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
   outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT.png")', $
-                         (minM LT 0 ? minM + 24 : minM),maxM)
+                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT",A0,A0,".png")', $
+                         (minM LT 0 ? minM + 24 : minM),maxM,ionSuff,bonusPlotSuff)
   PRINT,"Saving to " + outPlotName
   winder.Save,outPlotDir+outPlotName
 
   IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
      MLTs = andre.mlt[final_i]
      MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
+
+     winder2 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
      MLTILATplot = SCATTERPLOT(MLTs, $
                                ABS(andre.ilat[final_i]), $
                                XTITLE='mlt', $
                                YTITLE='ilat', $
-                               TRANSP=50)
+                               TRANSP=50, $
+                               CURRENT=winder2)
 
      scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + "-kappaStats-MLT_ILAT_coverage.png"
+                    + "-kappaStats-MLT_ILAT_coverage" + ionSuff + bonusPlotSuff + ".png"
 
-     MLTILATplot.Save,outPlotDir+scatPlotName
-     MLTILATplot.Close
+     winder2.Save,outPlotDir+scatPlotName
 
   ENDIF  
 
-  STOP
+  IF ~KEYWORD_SET(bufferPlots) THEN STOP
 
   winder.Close
   IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
-     MLTILATplot.Close
+     winder2.Close
   ENDIF
 
 END
