@@ -175,28 +175,53 @@ PRO KAPPA_RAWSAVE_PARSER, $
 
 
 END
-PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
+PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
+   EXCLUDE_IONS=exclude_ions, $
+   REQUIRE_IONS=require_ions, $
+   KHIST_BINSIZE=kHist_binSize, $
+   KHIST_MIN=kHist_min, $
+   MHIST_BINSIZE=mHist_binSize, $
+   MHIST_MIN=mHist_min
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   restoreFile = 1
-  requireIons = 0
-  excludeIons = 1
+  requireIons = N_ELEMENTS(require_ions) GT 0 ? require_ions : 0
+  excludeIons = N_ELEMENTS(exclude_ions) GT 0 ? exclude_ions : 0
 
-  makeMLTILATplot = 1
+  makeMetaStabPlot = 1
+  makeMLTILATplot = 0
+  makeILATKappaplot = 0
   bufferPlots = 1
+
+  GoverKReq = 1.
+  KChi2Max  = 5.0
+
+  minM  = -3
+  maxM  = 1
+  minI  = 60
+  maxI  = 89
+  hemi  = 'BOTH'
+
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
+  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
+
+  mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
+  mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   ;; restoreD = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ;; restoreD = '20180420' ;2018/04/23 Making a new one, calling it 20180424 for kicks
   ;; restoreD = '20180426'
-  restoreD = '20180426TRY2' ;Later, with orbs reaching into 7000+
-  bonusPlotSuff = '-WITH 7000NUP'
+  ;; restoreD = '20180427TRY3' ;Later, with orbs reaching into 7000+
+  restoreD = '20180427TRY4' 
+  restoreD = '20180427TRY5' 
+  bonusPlotSuff = '-WITH7000NUP'
   outFName = restoreD+'-parsedKappa.sav'
 
   ;; newellDates   = restoreD
   ;; KandGFitDates = restoreD
-  newellDates   = ['20180425','20180426']
+  newellDates   = ['20180425','20180426','20180427']
   KandGFitDates = newellDates
   CAPtimeagoStr = '-mtime -2'
 
@@ -341,7 +366,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
      use_mpFit1D = 1
 
-     maks      = 80000
+     maks      = 90000
      bArr      = MAKE_ARRAY(maks,/FLOAT,VALUE=0.)
      KF2DParms = {time              : DOUBLE(bArr), $
                   bulk_energy       : bArr, $
@@ -636,12 +661,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
 
   ENDELSE
 
-  minM  = -5
-  maxM  = 5
-  minI  = 60
-  maxI  = 89
-  hemi  = 'BOTH'
-
   SET_DEFAULT_MLT_ILAT_AND_MAGC,MINMLT=minM, $
                                 MAXMLT=maxM, $
                                 BINMLT=binM, $
@@ -704,17 +723,30 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                                     LUN=lun)
   region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
 
-  mono_i            = WHERE(andre.mono  EQ 1 OR andre.mono  EQ 2,nMono,NCOMPLEMENT=nNotMono)
-  broad_i           = WHERE(andre.broad EQ 1 OR andre.broad EQ 2,nBroad,NCOMPLEMENT=nNotBroad)
+  mono_i            = WHERE(andre.mono  EQ 1 OR andre.mono  EQ 2, $
+                            nMono, $
+                            NCOMPLEMENT=nNotMono)
+  broad_i           = WHERE(andre.broad EQ 1 OR andre.broad EQ 2, $
+                            nBroad, $
+                            NCOMPLEMENT=nNotBroad)
 
-  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE 2.0) AND $
-                            (KF2DParms.chi2red LT 5),nChi2,NCOMPLEMENT=nNotChi2)
-  final_i           = CGSETINTERSECTION(region_i,mono_i,COUNT=count)
+  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE GoverKReq) AND $
+                            (KF2DParms.chi2red LE KChi2Max), $
+                            nChi2, $
+                            NCOMPLEMENT=nNotChi2)
+  final_i           = CGSETINTERSECTION(region_i,mono_i, $
+                                        COUNT=count)
   IF count EQ 0 THEN STOP
-  final_i           = CGSETINTERSECTION(final_i,chi2_i,COUNT=count)
+  final_i           = CGSETINTERSECTION(final_i,chi2_i, $
+                                        COUNT=count)
   IF count EQ 0 THEN STOP
 
-  ionSuff           = '-noIons'
+  GoverKStr         = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
+  KChi2MaxStr       = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
+  kHBinSizeStr        = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
+  mHBinSizeStr        = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
+
+  ionSuff           = '-allObs'
 
   IF KEYWORD_SET(requireIons) AND KEYWORD_SET(excludeIons) THEN BEGIN
      PRINT,"Now you're on my turf."
@@ -724,15 +756,16 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   IF KEYWORD_SET(requireIons) THEN BEGIN
      ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
      final_i        = CGSETINTERSECTION(final_i,ion_i,COUNT=count)
-     ionSuff        = ''
+     ionSuff        = '-onlyIonBeams'
   ENDIF ELSE IF KEYWORD_SET(excludeIons) THEN BEGIN
      ion_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam,NCOMPLEMENT=nNotIonBeam)
      final_i        = CGSETDIFFERENCE(final_i,ion_i,COUNT=count)
      ionSuff        = '-excludeIons'
   ENDIF
 
+  parmStr           = GoverKStr + KChi2MaxStr + ionSuff
+
   PRINT,FORMAT='("Working with ",I0, " inds")',count
-  STOP
 
   ;; Unique low kappa-ers
 
@@ -757,22 +790,35 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   ;; CGHISTOPLOT,ALOG10(KF2DParms.chi2red[plot_i]),TITLE='Kappa'
   ;; CGHISTOPLOT,GF2DParms.chi2red[plot_i]/KF2DParms.chi2red[plot_i],TITLE='Ratio G/K',MAXINPUT=10,binsize=0.1
 
-  binSize = 0.5
-  histMin = 1.45
+  ;; What about a metastability measure?
+  qVals = 1.+1./KF2DParms.kappa
+  MVals = 4.*(qVals-1.)/(qVals+1.)
+
   kHist = HISTOGRAM(KF2DParms.kappa[plot_i], $
-                    BINSIZE=binSize, $
-                    MIN=histMin, $
+                    BINSIZE=kHBinSize, $
+                    MIN=kHistMin, $
                     LOCATIONS=kBins, $
-                    REVERSE_INDICES=rInds)
+                    REVERSE_INDICES=rKInds)
+
+  magicQVal = 1.+1./2.45
+  magicMVal = 4.*(magicQVal-1.)/(magicQVal+1.)
+  checkM = magicMVal-(mHBinSize)*(DOUBLE(ROUND(magicMVal/mHBinSize)))
+
+  mHist = HISTOGRAM(MVals[plot_i], $
+                    BINSIZE=mHBinSize, $
+                    MIN=MIN([mHistMin,checkM]), $
+                    LOCATIONS=mBins, $
+                    REVERSE_INDICES=rMInds)
 
   ;; Where are they less than .245?
   lt245inds = !NULL
   bin245 = VALUE_CLOSEST2(kBins,2.45,/CONSTRAINED)
   FOR k=0,bin245-1 DO BEGIN
-     IF rInds[k] NE rInds[k+1] THEN $
-        lt245inds = [lt245inds,rInds[rInds[k] : rInds[k+1]-1]]
+     IF rKInds[k] NE rKInds[k+1] THEN $
+        lt245inds = [lt245inds,rKInds[rKInds[k] : rKInds[k+1]-1]]
   ENDFOR
 
+  ;; Kappa plot
   titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                     minM+24,maxM, $
                     minI,maxI, $
@@ -781,25 +827,74 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
   winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
   xRange   = [1.5,15]
-  histPlot = PLOT(kBins,kHist,/HISTOGRAM, $
-                  XRANGE=xRange,YRANGE=[0,MAX(kHist)*1.2], $
+  yRange   = [0,MAX(kHist)*1.1]
+  kHistPlot = PLOT(kBins,kHist,/HISTOGRAM, $
+                  XRANGE=xRange, $
+                  YRANGE=yRange, $
                   XTITLE='$\kappa$',YTITLE='Count',TITLE=titleStr, $
                   FONT_SIZE=16,THICK=2.5, $
                  CURRENT=winder)
-  linePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2, $
-                  YRANGE=[0,MAX(kHist)*1.2], $
+
+  kLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2, $
+                  YRANGE=yRange, $
                   THICK=2.,COLOR='GREEN',/OVERPLOT, $
                   CURRENT=winder)
-  text     = TEXT(0.25,0.8,"$\kappa_t$ = 2.45",/NORMAL, $
+
+  kText     = TEXT(0.25,0.8,"$\kappa_t$ = 2.45",/NORMAL, $
                   FONT_SIZE=16,FONT_COLOR='GREEN', $
                   TARGET=winder)
 
-  outPlotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
+  plotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
   outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT",A0,A0,".png")', $
-                         (minM LT 0 ? minM + 24 : minM),maxM,ionSuff,bonusPlotSuff)
+                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT",A0,A0,A0,".png")', $
+                         (minM LT 0 ? minM + 24 : minM),maxM,parmStr,kHBinSizeStr,bonusPlotSuff)
   PRINT,"Saving to " + outPlotName
-  winder.Save,outPlotDir+outPlotName
+  winder.Save,plotDir+outPlotName
+
+  IF KEYWORD_SET(makeMetaStabPlot) THEN BEGIN
+
+     ;; Kappa plot
+     titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
+                       minM+24,maxM, $
+                       minI,maxI, $
+                       MIN(orbArr),MAX(orbArr), $
+                       N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
+     winderM  = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+     xRange   = [0.,1.]
+     yRange   = [0,MAX(mHist)*1.1]
+     mPosition = [0.1,0.1,0.9,0.8]
+     mHistPlot = PLOT(mBins,mHist,/HISTOGRAM, $
+                      XRANGE=xRange, $
+                      YRANGE=yRange, $
+                      XTITLE='$M_q$',YTITLE='Count',TITLE=titleStr, $
+                      FONT_SIZE=16,THICK=2.5, $
+                      CURRENT=winderM, $
+                      POSITION=mPosition)
+     mLinePlot = PLOT(REPLICATE(magicMVal,11), $
+                      FINDGEN(11)/10.*MAX(mHist)*2, $
+                     YRANGE=yRange, $
+                      THICK=2., $
+                      COLOR='GREEN', $
+                      /OVERPLOT, $
+                     CURRENT=winderM)
+     mText     = TEXT(0.7,0.8,"$\kappa_t$ = 2.45", $
+                     /NORMAL, $
+                     FONT_SIZE=16, $
+                     FONT_COLOR='GREEN', $
+                     TARGET=winderM)
+
+     MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                   + STRING(FORMAT='("-MetaStab_",I02,"-",I02,"MLT",A0,A0,A0,".png")', $
+                            (minM LT 0 ? minM + 24 : minM),maxM, $
+                            parmStr, $
+                            mHBinSizeStr, $
+                            bonusPlotSuff)
+
+     PRINT,"Saving to " + MPlotName
+     winderM.Save,plotDir+MPlotName
+
+  ENDIF
 
   IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
      MLTs = andre.mlt[final_i]
@@ -815,9 +910,32 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES
                                CURRENT=winder2)
 
      scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + "-kappaStats-MLT_ILAT_coverage" + ionSuff + bonusPlotSuff + ".png"
+                    + "-kS-MLT_ILAT_coverage" + parmStr + bonusPlotSuff + ".png"
 
-     winder2.Save,outPlotDir+scatPlotName
+     PRINT,"Saving to " + scatPlotName
+     winder2.Save,plotDir+scatPlotName
+
+  ENDIF  
+
+  IF KEYWORD_SET(makeILATKappaplot) THEN BEGIN
+     MLTs = andre.mlt[final_i]
+     MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
+
+     winder3 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+     ILATkappaplot = SCATTERPLOT(ABS(andre.ilat[final_i]), $
+                                 KF2DParms.kappa[plot_i], $
+                                 XTITLE='ILAT (deg)', $
+                                 YTITLE='Kappa', $
+                                 YRANGE=[1.5,15], $
+                                 TRANSP=50, $
+                                 CURRENT=winder3)
+
+     ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                    + "-kS-ILATkappa" + parmStr + bonusPlotSuff + ".png"
+
+     PRINT,"Saving to " + ilatPlotName
+     winder3.Save,plotDir+ilatPlotName
 
   ENDIF  
 
