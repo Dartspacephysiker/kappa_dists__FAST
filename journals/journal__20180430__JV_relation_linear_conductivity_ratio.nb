@@ -1,0 +1,277 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      8332,        269]
+NotebookOptionsPosition[      6745,        232]
+NotebookOutlinePosition[      7085,        247]
+CellTagsIndexPosition[      7042,        244]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Load doze packages", "Subchapter",
+ CellChangeTimes->{{3.7340942744904737`*^9, 
+  3.7340942781146107`*^9}},ExpressionUUID->"067d253c-be67-4858-8c1a-\
+e081614009a2"],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<ErrorBarPlots`\>\"", "]"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.7277985681983147`*^9, 
+  3.727798578766698*^9}},ExpressionUUID->"ebbdcd94-5b47-4ff4-b6c8-\
+9996d893ec0b"],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<ComputerArithmetic`\>\"", "]"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.728402480236289*^9, 
+  3.7284024932138042`*^9}},ExpressionUUID->"cf0da75d-180e-4b8d-816b-\
+c88a6b3cb4f7"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+  "dir", "=", 
+   "\"\</SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/\>\""}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", "dir", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"<<", 
+  "Liemohn_and_Khazanov__mapped_Maxwellian_density.wl"}], \
+"\[IndentingNewLine]", 
+ RowBox[{"<<", "jvFuncs.wl"}]}], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.728317943862924*^9, 
+  3.728317961519827*^9}},ExpressionUUID->"4e187fc6-9da7-4677-929a-\
+3d7a7f88d046"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Conductivity Ratio in Linear Regime", "Subchapter",
+ CellChangeTimes->{{3.734094285946286*^9, 
+  3.734094295912508*^9}},ExpressionUUID->"6bef0241-3746-4dd8-986b-\
+4a107ec841e2"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ratio", "=", 
+   FractionBox[
+    RowBox[{"Gamma", "[", "\[Kappa]", "]"}], 
+    RowBox[{
+     SqrtBox[
+      RowBox[{"\[Kappa]", "-", 
+       RowBox[{"3", "/", "2"}]}]], 
+     RowBox[{"Gamma", "[", 
+      RowBox[{"\[Kappa]", "-", 
+       RowBox[{"1", "/", "2"}]}], "]"}]}]]}], ";"}]], "Input",
+ CellChangeTimes->{{3.7340939193511353`*^9, 
+  3.734093969316518*^9}},ExpressionUUID->"4d9c964f-404e-495e-b099-\
+785d3502379e"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ratio", "/.", 
+  RowBox[{"\[Kappa]", "\[Rule]", "2.45"}]}]], "Input",
+ CellChangeTimes->{{3.734093970361917*^9, 
+  3.734093980123835*^9}},ExpressionUUID->"b423e48f-9689-4b99-9b7d-\
+b2b7ce1557f2"],
+
+Cell[BoxData["1.344623585812237`"], "Output",
+ CellChangeTimes->{{3.734093976854195*^9, 
+  3.734093980510482*^9}},ExpressionUUID->"0833be66-7e83-4445-b7ad-\
+2068e65f813c"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Ratio of J-V Relations", "Subchapter",
+ CellChangeTimes->{{3.7340943319701033`*^9, 
+  3.734094341281735*^9}},ExpressionUUID->"6acee3f1-55ea-4929-bbe4-\
+ad62b4276800"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"JVKappa", "[", 
+    RowBox[{"pot", ",", "RB", ",", "Tm", ",", "nm", ",", "kappa"}], "]"}], 
+   "/", 
+   RowBox[{"JVMaxwellian", "[", 
+    RowBox[{"pot", ",", "RB", ",", "Tm", ",", "nm"}], "]"}]}], "]"}]], "Input",\
+
+ CellChangeTimes->{{3.734094352371518*^9, 
+  3.734094412663752*^9}},ExpressionUUID->"3bbf0e0c-5224-446b-88d8-\
+62312e64129c"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{"1.`", " ", 
+   RowBox[{"(", 
+    RowBox[{"1", "-", 
+     FractionBox[
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", "RB"}], ")"}], " ", 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          FractionBox["pot", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"-", 
+               FractionBox["3", "2"]}], "+", "kappa"}], ")"}], " ", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"-", "1"}], "+", "RB"}], ")"}], " ", "Tm"}]]}], ")"}], 
+        RowBox[{"1", "-", "kappa"}]]}], "RB"]}], ")"}], " ", 
+   SqrtBox[
+    RowBox[{"Tm", "-", 
+     FractionBox[
+      RowBox[{"3", " ", "Tm"}], 
+      RowBox[{"2", " ", "kappa"}]]}]], " ", 
+   RowBox[{"Gamma", "[", 
+    RowBox[{"1", "+", "kappa"}], "]"}]}], 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", "1"}], "+", "kappa"}], ")"}], " ", 
+   SqrtBox["kappa"], " ", 
+   RowBox[{"(", 
+    RowBox[{"1", "+", 
+     RowBox[{
+      SuperscriptBox["\[ExponentialE]", 
+       FractionBox["pot", 
+        RowBox[{"Tm", "-", 
+         RowBox[{"RB", " ", "Tm"}]}]]], " ", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"-", "1"}], "+", 
+        FractionBox["1", "RB"]}], ")"}]}]}], ")"}], " ", 
+   SqrtBox["Tm"], " ", 
+   RowBox[{"Gamma", "[", 
+    RowBox[{
+     RowBox[{"-", 
+      FractionBox["1", "2"]}], "+", "kappa"}], "]"}]}]]], "Output",
+ CellChangeTimes->{{3.7340943948853607`*^9, 
+  3.734094414748495*^9}},ExpressionUUID->"e9ab19f5-255c-43ad-a245-\
+302e8af695ec"]
+}, Open  ]],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{"1.`", " ", 
+   RowBox[{"(", 
+    RowBox[{"1", "-", 
+     FractionBox[
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", "RB"}], ")"}], " ", 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          FractionBox["pot", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"-", 
+               FractionBox["3", "2"]}], "+", "kappa"}], ")"}], " ", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"-", "1"}], "+", "RB"}], ")"}], " ", "Tm"}]]}], ")"}], 
+        RowBox[{"1", "-", "kappa"}]]}], "RB"]}], ")"}], " ", 
+   SqrtBox[
+    RowBox[{"1", "-", 
+     FractionBox[
+      RowBox[{"3", " "}], 
+      RowBox[{"2", " ", "kappa"}]]}]], " ", 
+   RowBox[{"Gamma", "[", 
+    RowBox[{"1", "+", "kappa"}], "]"}]}], 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", "1"}], "+", "kappa"}], ")"}], " ", 
+   SqrtBox["kappa"], " ", 
+   RowBox[{"(", 
+    RowBox[{"1", "+", 
+     RowBox[{
+      SuperscriptBox["\[ExponentialE]", 
+       FractionBox["pot", 
+        RowBox[{"Tm", 
+         RowBox[{"(", 
+          RowBox[{"1", "-", "RB"}], ")"}]}]]], " ", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"-", "1"}], "+", 
+        FractionBox["1", "RB"]}], ")"}]}]}], ")"}], " ", 
+   RowBox[{"Gamma", "[", 
+    RowBox[{
+     RowBox[{"-", 
+      FractionBox["1", "2"]}], "+", "kappa"}], "]"}]}]]], "Input",
+ CellChangeTimes->{{3.7340944505526037`*^9, 
+  3.734094468075556*^9}},ExpressionUUID->"2097fcd2-f978-4129-b157-\
+3bf38aada4e0"]
+}, Open  ]]
+},
+WindowSize->{808, 753},
+WindowMargins->{{396, Automatic}, {46, Automatic}},
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 170, 3, 65, "Subchapter",ExpressionUUID->"067d253c-be67-4858-8c1a-e081614009a2"],
+Cell[753, 27, 234, 5, 47, "Input",ExpressionUUID->"ebbdcd94-5b47-4ff4-b6c8-9996d893ec0b",
+ InitializationCell->True],
+Cell[990, 34, 239, 5, 47, "Input",ExpressionUUID->"cf0da75d-180e-4b8d-816b-c88a6b3cb4f7",
+ InitializationCell->True],
+Cell[1232, 41, 540, 15, 117, "Input",ExpressionUUID->"4e187fc6-9da7-4677-929a-3d7a7f88d046",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1809, 61, 183, 3, 65, "Subchapter",ExpressionUUID->"6bef0241-3746-4dd8-986b-4a107ec841e2"],
+Cell[1995, 66, 456, 14, 54, "Input",ExpressionUUID->"4d9c964f-404e-495e-b099-785d3502379e"],
+Cell[CellGroupData[{
+Cell[2476, 84, 219, 5, 31, "Input",ExpressionUUID->"b423e48f-9689-4b99-9b7d-b2b7ce1557f2"],
+Cell[2698, 91, 171, 3, 35, "Output",ExpressionUUID->"0833be66-7e83-4445-b7ad-2068e65f813c"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2918, 100, 172, 3, 65, "Subchapter",ExpressionUUID->"6acee3f1-55ea-4929-bbe4-ad62b4276800"],
+Cell[CellGroupData[{
+Cell[3115, 107, 409, 11, 31, "Input",ExpressionUUID->"3bbf0e0c-5224-446b-88d8-62312e64129c"],
+Cell[3527, 120, 1597, 53, 148, "Output",ExpressionUUID->"e9ab19f5-255c-43ad-a245-302e8af695ec"]
+}, Open  ]],
+Cell[5139, 176, 1590, 53, 146, InheritFromParent,ExpressionUUID->"2097fcd2-f978-4129-b157-3bf38aada4e0"]
+}, Open  ]]
+}
+]
+*)
+
