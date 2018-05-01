@@ -1,3 +1,4 @@
+
 ;2018/04/19
 PRO KAPPA_RAWSAVE_PARSER, $
    KAPPAFIT1DS=kappaFit1Ds, $
@@ -195,12 +196,13 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   bufferPlots = 1
 
   GoverKReq = 1.
-  KChi2Max  = 5.0
+  KChi2Max  = 10
 
   minM  = -3
   maxM  = 1
+  notMLT = 1
   minI  = 60
-  maxI  = 89
+  maxI  = 75
   hemi  = 'BOTH'
 
   kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
@@ -235,7 +237,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   IF KEYWORD_SET(makeNewFile) THEN BEGIN
 
-     badOrbs = [1257,1635,1693,1875,1945,3123,3268,3353]
+     ;; Only longest interval of 4377 is bad, but I don't know how to screen for that
+     badOrbs = [1257,1635,1693,1875,1945,3123,3268,3353,4377,4424,4479,7871]
 
      inDir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
      CAPDir = inDir + 'cur_and_pot_analysis/'
@@ -712,7 +715,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        NOTMLT_I=notMlt_i, $
                        NNOTMLT=nNotMlt)
 
-  ;; mlt_i = notMlt_i
+  mltSuff = 'MLT'
+  IF KEYWORD_SET(notMLT) THEN BEGIN
+     mlt_i = notMlt_i
+     mltSuff = 'notMLT'
+  ENDIF
 
   ilat_i            = GET_ILAT_INDS(andre, $
                                     minI, $
@@ -819,7 +826,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   ENDFOR
 
   ;; Kappa plot
-  titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
+  titleStr = STRING(FORMAT='(I02,"-",I02," ' + mltSuff + ', ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                     minM+24,maxM, $
                     minI,maxI, $
                     MIN(orbArr),MAX(orbArr), $
@@ -846,15 +853,15 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   plotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
   outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"MLT",A0,A0,A0,".png")', $
-                         (minM LT 0 ? minM + 24 : minM),maxM,parmStr,kHBinSizeStr,bonusPlotSuff)
+                + STRING(FORMAT='("-kappaStats_",I02,"-",I02,"' + mltSuff + '","-",A0,A0,A0,A0,".png")', $
+                         (minM LT 0 ? minM + 24 : minM),maxM,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
   PRINT,"Saving to " + outPlotName
   winder.Save,plotDir+outPlotName
 
   IF KEYWORD_SET(makeMetaStabPlot) THEN BEGIN
 
      ;; Kappa plot
-     titleStr = STRING(FORMAT='(I02,"-",I02," MLT, ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
+     titleStr = STRING(FORMAT='(I02,"-",I02," ' + mltSuff + ', ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                        minM+24,maxM, $
                        minI,maxI, $
                        MIN(orbArr),MAX(orbArr), $
@@ -885,8 +892,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                      TARGET=winderM)
 
      MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                   + STRING(FORMAT='("-MetaStab_",I02,"-",I02,"MLT",A0,A0,A0,".png")', $
+                   + STRING(FORMAT='("-MetaStab_",I02,"-",I02,"' + mltSuff + '","-",A0,A0,A0,A0,".png")', $
                             (minM LT 0 ? minM + 24 : minM),maxM, $
+                            hemi, $
                             parmStr, $
                             mHBinSizeStr, $
                             bonusPlotSuff)
@@ -910,7 +918,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                CURRENT=winder2)
 
      scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + "-kS-MLT_ILAT_coverage" + parmStr + bonusPlotSuff + ".png"
+                    + "-kS-" + mltSuff + "_ILAT_coverage" + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
      PRINT,"Saving to " + scatPlotName
      winder2.Save,plotDir+scatPlotName
@@ -918,8 +926,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   ENDIF  
 
   IF KEYWORD_SET(makeILATKappaplot) THEN BEGIN
-     MLTs = andre.mlt[final_i]
-     MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
 
      winder3 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
@@ -932,7 +938,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                  CURRENT=winder3)
 
      ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + "-kS-ILATkappa" + parmStr + bonusPlotSuff + ".png"
+                    + "-kS-ILATkappa" + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
      PRINT,"Saving to " + ilatPlotName
      winder3.Save,plotDir+ilatPlotName
