@@ -104,7 +104,6 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
                           STRMID(fit2DParmErrFile, $
                                  8, $
                                  STRLEN(fit2DParmErrFile)-8)
-
      IF KEYWORD_SET(ParmUncertainty_2D) THEN BEGIN
         fit2DParmErrFileIn = fit2DParmErrFileIn.Replace('-2DPARMERRORS','-2DPARMERRORS_TWOSIDED')
      ENDIF
@@ -113,6 +112,66 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
               1000
      fit2DParmErrFileIn = fit2DParmErrFileIn.Replace('.sav', $
                                                      STRING(FORMAT='("-",I0,"Rolls.sav")',nRolls))
+
+     searchbackward1month = 1
+
+     remaining = KEYWORD_SET(searchbackward1month) ? 30 : 0
+
+     foundParmErrFile = 0
+     tmpParmErrFile   = fit2DParmErrFileIn
+     WHILE ~foundParmErrFile AND remaining GT -1 DO BEGIN
+
+        IF FILE_TEST(fit2DParmErrDir+tmpParmErrFile) THEN BEGIN
+
+           foundParmErrFile = 1
+           fit2DParmErrFileIn      = TEMPORARY(tmpParmErrFile)
+           
+           PRINT,'Restoring ' + fit2DParmErrFileIn + ' ...'
+           RESTORE,fit2DParmErrDir+fit2DParmErrFileIn
+           restored_fit2DParmErrFileIn = 1B
+           ;; just_diff_eFlux  = 1B
+
+           ;;And diff eFlux
+           ;; RESTORE,fit2DParmErrDir+'/diff_eFlux/'+diff_eFlux_file
+
+        ENDIF ELSE BEGIN
+           ;; PRINT,"Couldn't get file!"
+           ;; STOP
+           date = (STRSPLIT(tmpParmErrFile,'-',/EXTRACT))
+           rest = STRJOIN(date[1:-1],'-')
+           date = date[0]
+           dd   = FIX(STRMID(date,STRLEN(date)-2,2))
+           mm   = FIX(STRMID(date,STRLEN(date)-4,2))
+           jahr = FIX(STRMID(date,STRLEN(date)-8,4))
+
+           CASE 1 OF
+              ((dd EQ 1) AND (mm EQ 1)): BEGIN
+                 jahr--
+                 dd = 31
+                 mm = 12
+              END
+              (dd EQ 1): BEGIN
+                 dd = 31
+                 mm--
+              END
+              ELSE: BEGIN
+                 dd--
+              END
+           ENDCASE
+           
+           tmpParmErrFile = STRJOIN([STRING(FORMAT='(I04,I02,I02)',jahr,mm,dd),rest],'-')
+
+           remaining--
+
+        ENDELSE
+        
+     ENDWHILE
+
+     IF ~foundParmErrFile THEN BEGIN
+        PRINT,"Couldn't get file!"
+        IF KEYWORD_SET(batch_mode) THEN RETURN ELSE STOP
+     ENDIF
+
      RESTORE,fit2DParmErrDir+fit2DParmErrFileIn
 
      matchieKinit = VALUE_CLOSEST2(k2DParmErr.time,kappa2DTime,/CONSTRAINED)
