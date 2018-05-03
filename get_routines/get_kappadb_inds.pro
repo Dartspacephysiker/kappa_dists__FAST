@@ -104,8 +104,17 @@ FUNCTION GET_KAPPADB_INDS,andre, $
      mlt_i = notMlt_i
      mltSuff = 'notMLT'
   ENDIF
-  mltStr = STRING(FORMAT='(I02,"-",I02,A0)', $
+
+  checkMin  = ( ABS(ROUND(minM)-minM) GT 0.1 ) 
+  checkMax  = ( ABS(ROUND(maxM)-maxM) GT 0.1 )
+
+  IF checkMin THEN mltMinFmt = 'F0.1' ELSE mltMinFmt = 'I02'
+  IF checkMax THEN mltMaxFmt = 'F0.1' ELSE mltMaxFmt = 'I02'
+
+  mltStr = STRING(FORMAT='(' + mltMinFmt + ',"-",' + mltMaxFmt + ',A0)', $
                   (minM LT 0 ? minM + 24 : minM),maxM,mltSuff)
+
+  IF (checkMin OR checkMax) THEN mltStr = mltStr.Replace('.','_')
 
   ilat_i            = GET_ILAT_INDS(andre, $
                                     minI, $
