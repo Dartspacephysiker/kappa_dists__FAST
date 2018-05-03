@@ -45,7 +45,15 @@ JEVKappa[phiBar_,RB_,Tm_,nm_,kappa_]
 Gives the Dors and Kletzing energy flux as a function of phiBar (pot/temperature), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
+JVRatio::usage="
+JVRatio[pot_,RB_,Tm_,kappa_]
+Gives the ratio of the Dors and Kletzing J-V relation and the Knight J-V relation as a function of pot, RB, Tm (in eV), and kappa
+";
 
+JVRatioPhiBar::usage="
+JVRatioPhiBar[phiBar_,RB_,kappa_]
+Gives the ratio of the Dors and Kletzing J-V relation and the Knight J-V relation as a function of phiBar (pot/temperature), RB, and kappa
+";
 
 
 Begin["`Private`"] (* Begin Private Context *) 
@@ -84,6 +92,15 @@ jeParallel=2.6805946*^-5 nm Tm^(3/2) (1-3 / (2 kappa ) )^(3/2) kappa^2/((kappa-1
 -(1+phiBar/((kappa-3/2)(RB-1)))^(-kappa+1) (1-1/RB)((kappa-2)/(kappa-1)+(kappa-2)/(kappa-3/2) phiBar)(kappa/((kappa-1)(RB-1))+1)
 -(1+phiBar/((kappa-3/2)(RB-1)))^(-kappa+2) (1-1/RB)^2 (1+(1+kappa/(RB-1))/(kappa-1)))
 ];
+
+JVRatio[pot_,RB_,Tm_,kappa_]:=Module[{ratio},
+ratio = Sqrt[1-3 /(2 kappa)] Gamma[kappa+1]/(kappa^(3/2) Gamma[kappa-1/2]) 1/(1-1/kappa) ( 1-(1-1/RB) ((1+pot/((kappa-3/2) (RB-1) Tm))^(1-kappa))  )/(  1-(1-1/RB)(E^(-(pot/(Tm(RB-1))))) )
+];
+
+JVRatioPhiBar[phiBar_,RB_,kappa_]:=Module[{ratio},
+ratio = Sqrt[1-3 /(2 kappa)] Gamma[kappa+1]/(kappa^(3/2) Gamma[kappa-1/2]) 1/(1-1/kappa) ( 1-(1-1/RB) ((1+phiBar/((kappa-3/2) (RB-1)))^(1-kappa))  )/(  1-(1-1/RB)(E^(-(phiBar/(RB-1)))) )
+];
+
 
 End[] (* End Private Context *)
 
