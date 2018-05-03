@@ -30,22 +30,22 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
-  makeMLTILATplot        = 1
-  makeILATKappaplot      = 1
+  makeMLTILATplot        = 0
+  makeILATKappaplot      = 0
   makeMLTKappaplot       = 0
   bufferPlots            = 1
 
-  GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 3
+  GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
   KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5
 
-  minM  = -5
-  maxM  = 5
+  minM  = -3.5
+  maxM  = 1.5
   notMLT = 0
   minI  = 60
   maxI  = 90
   hemi  = 'BOTH'
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 1.0
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.4
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
@@ -391,6 +391,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         parmStr += '-normed'
      ENDIF
+
+     IF kBinsReq[0] LT 1.5 THEN kBinsReq[0] = 1.5
+     IF kBinsExc[0] LT 1.5 THEN kBinsExc[0] = 1.5
+     IF mBinsReq[0] LT 1.5 THEN mBinsReq[0] = 1.5
+     IF mBinsExc[0] LT 1.5 THEN mBinsExc[0] = 1.5
 
      ILATkappaBelTransp = 85
      ILATkappaAARTransp = 65
