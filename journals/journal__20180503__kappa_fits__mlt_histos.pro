@@ -385,12 +385,14 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                       FONT_COLOR=k245LineCol, $
                       TARGET=earlyWinder)
 
-     outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                   + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                            earlyMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
-     PRINT,"Saving to " + outPlotName
-     IF saveEmAll THEN earlyWinder.Save,plotDir+outPlotName
-
+     IF saveEmAll THEN BEGIN
+        outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                      + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
+                               earlyMLTStr,altStr, $
+                               hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+        PRINT,"Saving to " + outPlotName
+        earlyWinder.Save,plotDir+outPlotName
+     ENDIF
 
      ;; NOW LATE
      lateWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
@@ -437,11 +439,14 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                       FONT_COLOR=k245LineCol, $
                       TARGET=lateWinder)
 
-     outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                   + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                            lateMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
-     PRINT,"Saving to " + outPlotName
-     IF saveEmAll THEN lateWinder.Save,plotDir+outPlotName
+     IF saveEmAll THEN BEGIN
+        outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                      + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
+                               lateMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+        PRINT,"Saving to " + outPlotName
+
+        lateWinder.Save,plotDir+outPlotName
+     ENDIF
 
   ENDIF
 

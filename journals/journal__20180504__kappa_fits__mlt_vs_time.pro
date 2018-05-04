@@ -16,9 +16,9 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
 
   minI  = 60
   maxI  = 90
-  hemi  = 'South'
+  hemi  = 'North'
 
-  minA  = 300
+  minA  = 3000
   maxA  = 4300
 
   LOAD_KAPPAFIT_DB,andre, $
@@ -33,21 +33,14 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
   excludeIons = N_ELEMENTS(exclude_ions) GT 0 ? exclude_ions : 0
 
   bufferPlots            = 0
+  savePlots              = 1
+  saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
 
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
   KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
-  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
-
-  mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
-  mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
-
-
   GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
   KChi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
-  kHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
-  mHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
 
   ionSuff       = '-allObs'
 
@@ -103,13 +96,6 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
 
   parmStr           = GoverKStr + KChi2MaxStr + ionSuff
 
-  ;; What about a metastability measure?
-  ;; qVals = 1.+1./KF2DParms.kappa
-  ;; MVals = 4.*(qVals-1.)/(qVals+1.)
-  ;; magicQVal = 1.+1./2.45
-  ;; magicMVal = 4.*(magicQVal-1.)/(magicQVal+1.)
-  ;; checkM = magicMVal-(mHBinSize)*(DOUBLE(ROUND(magicMVal/mHBinSize)))
-
   MLTs = andre.mlt
   MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
 
@@ -156,18 +142,28 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
      AARSym    = '+'
 
   ;; Create format strings for a time axis
-  dummy = LABEL_DATE(DATE_FORMAT=['%M-%Y'])
+  dummy = LABEL_DATE(DATE_FORMAT=['%N-%Z'])
 
   ;; finalTime=UTC2JULDAY(MAX(andre.time))
   julTidReq = UTC_TO_JULDAY(andre.time[req_i])
   julTidExc = UTC_TO_JULDAY(andre.time[exc_i])
 
   ;; Set up time axis
-  finalTime = JULDAY(03,01,1999)
+  finalTime = JULDAY(06,01,1999)
   axisTimes = TIMEGEN(START=JULDAY(9,1,1996), $
                       FINAL=finalTime, $
                       UNITS="Years", $
-                      MONTHS=[6,12])
+                      MONTHS=[3,6,9,12])
+
+  xTickNames = MAKE_ARRAY(N_ELEMENTS(axisTimes),/STRING,VALUE='')
+  CALDAT,axisTimes[1:-1:2],month,day,year
+
+  tmpString = !NULL
+  FOR k=0,N_ELEMENTS(month)-1 DO tmpString=[tmpString, $
+                                            STRING(FORMAT='(I02,"-",I02)', $
+                                                   year[k]-1900, $
+                                                   month[k])]
+  xTickNames[1:-1:2] = tmpString
 
   winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
@@ -191,10 +187,12 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
                            XRANGE=MINMAX(axisTimes), $
                            XTICKFORMAT='LABEL_DATE', $
                            XTICKVALUES=axisTimes, $
+                           XTICKNAME=xTickNames, $
                            CURRENT=winder, $
                            XTICKUNITS='Years', $
                            XTICKINTERVAL=0.5, $
-                           XMINOR=5, $
+                           XTICKFONT_SIZE=14, $
+                           XMINOR=2, $
                            SYM_COLOR=belAARCol, $
                            SYMBOL=belAARSym, $
                            TRANSP=belTransp, $
@@ -209,7 +207,7 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
                            CURRENT=winder, $
                            ;; XTICKUNITS='Years', $
                            ;; XTICKINTERVAL=0.5, $
-                           ;; XMINOR=5, $
+                           ;; XMINOR=2, $
                            SYM_COLOR=AARCol, $
                            SYMBOL=AARSym, $
                            TRANSP=AARTransp, $
@@ -221,7 +219,17 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
                           POSITION=[0.3,0.85])
 
 
-  STOP
+     IF saveEmAll THEN BEGIN
+        outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                      + STRING(FORMAT='("-kS-MLT_v_time-",A0,A0,"-",A0,A0,A0,".png")', $
+                               MLTStr,altStr, $
+                               hemi,parmStr,bonusPlotSuff)
+        PRINT,"Saving to " + outPlotName
+        winder.Save,plotDir+outPlotName
+     ENDIF
 
+     IF ~KEYWORD_SET(bufferPlots) THEN STOP
+
+     winder.Close
 
 END
