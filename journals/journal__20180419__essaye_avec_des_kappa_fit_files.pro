@@ -52,12 +52,14 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
 
 
-  GoverKStr         = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
-  KChi2MaxStr       = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
-  kHBinSizeStr        = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
-  mHBinSizeStr        = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
+  GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
+  KChi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
+  kHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
+  mHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
 
-  ionSuff           = '-allObs'
+  ionSuff       = '-allObs'
+
+  plotDir       = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
 
   final_i = GET_KAPPADB_INDS( $
             andre, $
@@ -231,7 +233,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       FONT_SIZE=16,FONT_COLOR='GREEN', $
                       TARGET=winder)
 
-     plotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
      outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                    + STRING(FORMAT='("-kappaStats_",A0,"-",A0,A0,A0,A0,".png")', $
                             mltStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
@@ -397,8 +398,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      IF mBinsReq[0] LT 1.5 THEN mBinsReq[0] = 1.5
      IF mBinsExc[0] LT 1.5 THEN mBinsExc[0] = 1.5
 
-     ILATkappaBelTransp = 85
-     ILATkappaAARTransp = 65
+     BelTransp = 85
+     AARTransp = 65
      belAARCol = 'BLACK'
      AARCol    = 'RED'
 
@@ -436,7 +437,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN(orbArr),MAX(orbArr), $
                        N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
 
-     plotDir      = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
      IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
@@ -567,7 +567,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                      SYM_COLOR=belAARCol, $
                                      SYMBOL=belAARSym, $
                                      NAME=belAARName, $
-                                  TRANSP=ILATkappaBelTransp, $
+                                  TRANSP=BelTransp, $
                                   CURRENT=winder2)
 
         MLTILATplot2 = SCATTERPLOT(MLTs[req_i], $
@@ -575,7 +575,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                    SYM_COLOR=AARCol, $
                                    SYMBOL=AARSym, $
                                    NAME=AARName, $
-                                  TRANSP=ILATkappaAARTransp, $
+                                  TRANSP=AARTransp, $
                                    CURRENT=winder2, $
                                   /OVERPLOT)
 
@@ -603,7 +603,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                      SYMBOL=belAARSym, $
                                      NAME=belAARName, $
                                      XRANGE=ILATkappaXRange, $
-                                     TRANSP=ILATkappaBelTransp, $
+                                     TRANSP=BelTransp, $
                                      CURRENT=winder3)
 
         ILATkappaplot2 = SCATTERPLOT(KF2DParms.kappa[req_i], $
@@ -613,7 +613,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                      SYMBOL=AARSym, $
                                      NAME=AARName, $
                                      XRANGE=ILATkappaXRange, $
-                                     TRANSP=ILATkappaAARTransp, $
+                                     TRANSP=AARTransp, $
                                      /OVERPLOT, $
                                      CURRENT=winder3)
 
@@ -719,7 +719,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                      SYMBOL=belAARSym, $
                                      NAME=belAARName, $
                                      XRANGE=MLTkappaXRange, $
-                                     TRANSP=ILATkappaBelTransp, $
+                                     TRANSP=BelTransp, $
                                      CURRENT=winder4)
 
         MLTkappaplot2 = SCATTERPLOT(KF2DParms.kappa[req_i], $

@@ -25,7 +25,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   maxI  = 90
   hemi  = 'BOTH'
 
-  minA  = 3000
+  minA  = 300
   maxA  = 4300
 
   LOAD_KAPPAFIT_DB,andre, $
@@ -45,6 +45,8 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   makeILATKappaplot      = 1
   makeMLTKappaplot       = 0
   bufferPlots            = 0
+  savePlots              = 0
+  saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
 
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
   KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
@@ -387,7 +389,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                    + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
                             earlyMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
      PRINT,"Saving to " + outPlotName
-     earlyWinder.Save,plotDir+outPlotName
+     IF saveEmAll THEN earlyWinder.Save,plotDir+outPlotName
 
 
      ;; NOW LATE
@@ -439,7 +441,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                    + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
                             lateMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
      PRINT,"Saving to " + outPlotName
-     lateWinder.Save,plotDir+outPlotName
+     IF saveEmAll THEN lateWinder.Save,plotDir+outPlotName
 
   ENDIF
 
