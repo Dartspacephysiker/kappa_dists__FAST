@@ -16,9 +16,9 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
 
   minI  = 60
   maxI  = 90
-  hemi  = 'North'
+  hemi  = 'Both'
 
-  minA  = 3000
+  minA  = 300
   maxA  = 4300
 
   LOAD_KAPPAFIT_DB,andre, $

@@ -28,6 +28,7 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
    MLTRANGE=mltRange, $
    ALTRANGE=altRange, $
    MIN_T_STREAKLEN=min_T_streakLen, $
+   MAX_T_STREAKLEN=max_T_streakLen, $
    PRINT_SUMMARY=print_summary
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -90,7 +91,10 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
   ;; orbStr   = STRING(FORMAT='("__",I0,"-",I0,"ORB")',orbR[0],orbR[1])
   altStr   = STRING(FORMAT='("__",I0,"-",I0,"ALT")',altR[0],altR[1])
   min_TStr = STRING(FORMAT='("__minTStreak_sec_",I0)',min_T_streakLen)
-
+  max_TStr = ''
+  IF N_ELEMENTS(max_T_streakLen) GT 0 THEN BEGIN
+     max_TStr = STRING(FORMAT='("__maxTStreak_",I0)',max_T_streakLen)
+  ENDIF
 
   filsDate = KEYWORD_SET(date) ? date : '20180302'
 
@@ -107,7 +111,7 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
      endOrb   += 3000
   ENDWHILE
   orbStr       = STRING(FORMAT='("__",I0,"-",I0,"ORB")',startOrb,endOrb)
-  fSuff = altStr + min_TStr + '.txt'
+  fSuff = altStr + min_TStr + max_TStr + '.txt'
 
   file = fPref+orbStr+fSuff
   IF ~FILE_TEST(dir+file) THEN BEGIN

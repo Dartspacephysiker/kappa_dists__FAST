@@ -45,7 +45,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   makeILATKappaplot      = 1
   makeMLTKappaplot       = 0
   bufferPlots            = 0
-  savePlots              = 0
+  savePlots              = 1
   saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
 
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
