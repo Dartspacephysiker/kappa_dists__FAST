@@ -1,0 +1,113 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3208,        103]
+NotebookOptionsPosition[      2555,         83]
+NotebookOutlinePosition[      2898,         98]
+CellTagsIndexPosition[      2855,         95]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Plot Re, Im, Abs, and Arg for incomplete beta function", "Subchapter",
+ CellChangeTimes->{{3.73468294666501*^9, 
+  3.734682966193164*^9}},ExpressionUUID->"d675d003-ecdc-4aab-a221-\
+cb377f27eca2"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"Beta", "[", 
+    RowBox[{"z", ",", "5", ",", "10"}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"-", "10"}], ",", "0"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.734681648855485*^9, 
+  3.734681678506493*^9}},ExpressionUUID->"318005fc-876f-4823-9415-\
+2226262b7365"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Plot","pllim",
+   "\"Range specification \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{RowBox[{\\\"-\\\
+\", \\\"10\\\"}], \\\",\\\", \\\"0\\\"}], \\\"}\\\"}]\\) is not of the form \
+{x, xmin, xmax}.\"",2,1,1,28530189773045069764,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.734681679160294*^9},ExpressionUUID->"382a0b22-9d35-4f0d-896c-\
+718fdf735fc0"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Table", "[", 
+  RowBox[{
+   RowBox[{"DensityPlot", "[", 
+    RowBox[{
+     RowBox[{"f", "[", 
+      RowBox[{"Beta", "[", 
+       RowBox[{
+        RowBox[{"x", "+", 
+         RowBox[{"\[ImaginaryI]", " ", "y"}]}], ",", 
+        RowBox[{"3", "/", "2"}], ",", 
+        RowBox[{"3", "/", "2"}]}], "]"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", 
+       RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"f", ",", 
+     RowBox[{"{", 
+      RowBox[{"Re", ",", "Im", ",", "Abs", ",", "Arg"}], "}"}]}], "}"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.7346816837960453`*^9, 3.734681713314302*^9}, {
+  3.734681814543702*^9, 3.734681870329054*^9}, {3.734681902519286*^9, 
+  3.734681955993806*^9}, {3.734682034857018*^9, 
+  3.734682068434819*^9}},ExpressionUUID->"f1fa66ed-8389-47b9-8a88-\
+6a8a135c3b5e"]
+}, Open  ]]
+},
+WindowSize->{1280, 997},
+WindowMargins->{{-1280, Automatic}, {Automatic, 27}},
+FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 201, 3, 65, "Subchapter",ExpressionUUID->"d675d003-ecdc-4aab-a221-cb377f27eca2"],
+Cell[CellGroupData[{
+Cell[806, 29, 345, 10, 31, "Input",ExpressionUUID->"318005fc-876f-4823-9415-2226262b7365"],
+Cell[1154, 41, 403, 9, 22, "Message",ExpressionUUID->"382a0b22-9d35-4f0d-896c-718fdf735fc0"]
+}, Open  ]],
+Cell[1572, 53, 967, 27, 31, InheritFromParent,ExpressionUUID->"f1fa66ed-8389-47b9-8a88-6a8a135c3b5e"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+

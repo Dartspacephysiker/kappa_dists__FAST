@@ -709,10 +709,27 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2DPARMERRFILE=fit2DParmErrFile, $
         FIT2DPARMERRDIR=outDir
 
+     IF KEYWORD_SET(sway__checkForIonBeams) THEN BEGIN
+        GET_FA_IESA_ION_BEAMS,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
+                              ORBIT=orbit, $
+                              NEWELL_2009_INTERP=Newell_2009_interp, $
+                              ION_ANGLERANGE=curPotList[2].angles.peakEn, $
+                              ION_ENERGYRANGE=curPotList[2].energy, $
+                              SPECTROGRAM_UNITS=spectrogram_units, $
+                              EEB_OR_EES=eeb_or_ees, $
+                              SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                              ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+                              SC_POT=sc_pot, $
+                              OUT_SC_POTAVG=sc_potAvg, $
+                              OUT_IONEVENTS=ionEvents, $
+                              BATCH_MODE=batch_mode
+     ENDIF
+
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
                            TPLT_VARS=tPlt_vars, $
+                           ORBIT=orbit, $
                            EEB_OR_EES=eeb_or_ees, $
                            ENERGY_ELECTRONS=energy_electrons, $
                            ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
@@ -752,9 +769,10 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            OUTPLOT_BONUSPREF=bonusPref, $
                            SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
                            ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
-                           OUT_IONEVENTS=ionEvents, $
+                           IONEVENTS=ionEvents, $
+                           SC_POTAVG=sc_potAvg, $
                            ;; GRL=sway__GRL, $
-                           SC_POT=sc_pot, $
+                           ;; SC_POT=sc_pot, $
                            CHECKFORIONBEAMS=sway__checkForIonBeams, $
                            BATCH_MODE=batch_mode, $
                            PLOTDIR=plotDir
@@ -767,6 +785,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
         SINGLE_KAPPA_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
                              TPLT_VARS=tPlt_vars, $
+                             ORBIT=orbit, $
                              EEB_OR_EES=eeb_or_ees, $
                              ENERGY_ELECTRONS=energy_electrons, $
                              ENERGY_ELECTRON_TBOUNDS=energy_electron_tBounds, $
