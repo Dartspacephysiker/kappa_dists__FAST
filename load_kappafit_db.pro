@@ -15,7 +15,7 @@ PRO LOAD_KAPPAFIT_DB,andre, $
   ;; restoreD = '20180427TRY3' ;Later, with orbs reaching into 7000+
   ;; restoreD = '20180427TRY4' 
   ;; restoreD = '20180427TRY5' 
-  restoreD = '20180501' 
+  restoreD = '20180508' 
 
   fName = restoreD+'-parsedKappa.sav'
 

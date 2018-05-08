@@ -41,9 +41,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
 
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
-  makeMLTILATplot        = 1
-  makeILATKappaplot      = 1
-  makeMLTKappaplot       = 0
+  ;; makeMLTILATplot        = 1
   bufferPlots            = 0
   savePlots              = 1
   saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
@@ -51,7 +49,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
   KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 1.0
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
@@ -176,10 +174,10 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   magicMVal = 4.*(magicQVal-1.)/(magicQVal+1.)
   checkM = magicMVal-(mHBinSize)*(DOUBLE(ROUND(magicMVal/mHBinSize)))
 
-  IF KEYWORD_SET(makeMLTILATplot) OR KEYWORD_SET(makeMLTKappaplot) THEN BEGIN
-     MLTs = andre.mlt
-     MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
-  ENDIF
+  ;; IF KEYWORD_SET(makeMLTILATplot) THEN BEGIN
+  ;;    MLTs = andre.mlt
+  ;;    MLTs[WHERE(MLTs GT 18)] = MLTs[WHERE(MLTs GT 18)] - 24.
+  ;; ENDIF
 
   k245LineCol = 'GREEN'
   yHistoTitle = KEYWORD_SET(normed) ? 'Percent' : 'Count'

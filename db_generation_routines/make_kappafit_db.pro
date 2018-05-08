@@ -11,12 +11,15 @@ PRO MAKE_KAPPAFIT_DB
   ;; restoreD = '20180427TRY3' ;Later, with orbs reaching into 7000+
   ;; restoreD = '20180427TRY4' 
   ;; restoreD = '20180427TRY5' 
-  restoreD = '20180501' 
+  ;; restoreD = '20180501' 
+
+  restoreD = '20180508' 
   outFName = restoreD+'-parsedKappa.sav'
 
   ;; newellDates   = restoreD
   ;; KandGFitDates = restoreD
-  newellDates   = ['20180425','20180426','20180427','20180430','20180501']
+  newellDates   = ['20180425','20180426','20180427','20180430', $
+                   '20180501','20180507','20180508']
   KandGFitDates = newellDates
   CAPtimeagoStr = '-mtime -6'
 
@@ -162,7 +165,7 @@ PRO MAKE_KAPPAFIT_DB
 
      use_mpFit1D = 1
 
-     maks      = 90000
+     maks      = 100000
      bArr      = MAKE_ARRAY(maks,/FLOAT,VALUE=0.)
      KF2DParms = {time              : DOUBLE(bArr), $
                   bulk_energy       : bArr, $

@@ -13,7 +13,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    MINALT=minA, $
    MAXALT=maxA, $
    MAKEKAPPAHISTOPLOT=makeKappaHistoPlot, $
-   MAKEMETASTABPLOT=makeMetaStabPlot
+   MAKEMETASTABPLOT=makeMetaStabPlot, $
+   MLTILATSTATS__GIVE_DECILE=MLTILATstats__give_decile, $
+   MLTILATSTATS__GIVE_VENTILE=MLTILATstats__give_ventile
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -30,9 +32,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
-  makeMLTILATplot        = 0
-  makeILATKappaplot      = 0
-  makeMLTKappaplot       = 0
+  makeMLTILATplot        = 1
+  makeILATKappaplot      = 1
+  makeMLTKappaplot       = 1
   bufferPlots            = 1
 
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
@@ -46,7 +48,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   hemi  = 'BOTH'
 
   kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 1.0
-  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.4
+  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
@@ -123,6 +125,18 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   parmStr           = GoverKStr + KChi2MaxStr + ionSuff
 
+  decileStr         = ''
+
+  statName          = "Median"
+  IF KEYWORD_SET(MLTILATstats__give_decile) THEN BEGIN
+     decileStr      = '-3decile'
+     statName       = '2!Und!N decile'
+  ENDIF
+  IF KEYWORD_SET(MLTILATstats__give_ventile) THEN BEGIN
+     decileStr      = '-5ventile'
+     statName       = '3!Urd!N ventile'
+  ENDIF
+    
   ;; What about a metastability measure?
   qVals = 1.+1./KF2DParms.kappa
   MVals = 4.*(qVals-1.)/(qVals+1.)
@@ -152,7 +166,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   ;; pctNorth          = nNorth/count
   ;; pctSouth          = nSouth/count
 
+  BelTransp = 85
+  AARTransp = 65
+  belAARCol = 'BLUE'
+  AARCol    = 'ORANGE'
   k245LineCol = 'GREEN'
+
+  medianTransp = 0
+  
+  belAARSym = 'x'
+  AARSym    = '+'
+
   yHistoTitle = KEYWORD_SET(normed) ? 'Percent' : 'Count'
 
   IF ~KEYWORD_SET(combined_histos) THEN BEGIN
@@ -338,10 +362,14 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      PRINT,FORMAT='("Working with ",I0, " RequInds")',nReq
      PRINT,FORMAT='("Working with ",I0, " ExclInds")',nExc
 
-     AARName    = 'AAR' + STRING(9B) + STRING(9B) + STRING(9B) + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',nReq)
-     belAARName = 'Below AAR'                                  + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',nExc)
-     AARMedName = 'AAR' + STRING(9B) + STRING(9B) + STRING(9B) + STRING(9B) + "(Median)"
-     belAARMedName = 'Below AAR'                               + STRING(9B) + "(Median)"
+     AARName       = 'AAR' + STRING(9B) + STRING(9B) + STRING(9B) $
+                     + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',nReq)
+     belAARName    = 'Below AAR'                                  $
+                     + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',nExc)
+     AARMedName    = 'AAR' + STRING(9B) + STRING(9B) + STRING(9B) $
+                     + STRING(9B) + "(" + statName + ")"
+     belAARMedName = 'Below AAR'                               $
+                     + STRING(9B) + "(" + statName + ")"
 
      ;; req_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nReq)
      ;; exc_i          = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nExc)
@@ -398,14 +426,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      IF mBinsReq[0] LT 1.5 THEN mBinsReq[0] = 1.5
      IF mBinsExc[0] LT 1.5 THEN mBinsExc[0] = 1.5
 
-     BelTransp = 85
-     AARTransp = 65
-     belAARCol = 'BLACK'
-     AARCol    = 'RED'
-
-     belAARSym = 'x'
-     AARSym    = '+'
-
      ;; Where are they less than .245?
      ;; lt245inds = !NULL
      ;; bin245 = VALUE_CLOSEST2(kBins,2.45,/CONSTRAINED)
@@ -416,20 +436,26 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      binI              = 4
      binMinforInclusion = 10
-     ILATReqHS = HISTOGRAM_BINSTATS(ABS(andre.ilat[req_i]), $
-                                    KF2DParms.kappa[req_i], $
-                                    BINSIZE=binI, $
-                                    MIN=minI, $
-                                    MAX=maxI, $
-                                    /NAN, $
-                                    BINMINFORINCLUSION=binMinforInclusion)
-     ILATExcHS = HISTOGRAM_BINSTATS(ABS(andre.ilat[exc_i]), $
-                                    KF2DParms.kappa[exc_i], $
-                                    BINSIZE=binI, $
-                                    MIN=minI, $
-                                    MAX=maxI, $
-                                    /NAN, $
-                                    BINMINFORINCLUSION=binMinforInclusion)
+     ILATReqHS = HISTOGRAM_BINSTATS( $
+                 ABS(andre.ilat[req_i]), $
+                 KF2DParms.kappa[req_i], $
+                 BINSIZE=binI, $
+                 MIN=minI, $
+                 MAX=maxI, $
+                 /NAN, $
+                 BINMINFORINCLUSION=binMinforInclusion, $
+                 GIVE_DECILES=MLTILATstats__give_decile, $
+                 GIVE_VENTILES=MLTILATstats__give_ventile)
+     ILATExcHS = HISTOGRAM_BINSTATS( $
+                 ABS(andre.ilat[exc_i]), $
+                 KF2DParms.kappa[exc_i], $
+                 BINSIZE=binI, $
+                 MIN=minI, $
+                 MAX=maxI, $
+                 /NAN, $
+                 BINMINFORINCLUSION=binMinforInclusion, $
+                 GIVE_DECILES=MLTILATstats__give_decile, $
+                 GIVE_VENTILES=MLTILATstats__give_ventile)
      ;; Kappa plot
      titleStr = STRING(FORMAT='(A0,", ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                        mltStr, $
@@ -650,7 +676,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                          ILATEYerr, $
                                          NAME=belAARMedName, $
                                          COLOR=belAARCol, $
-                                         TRANSP=30, $
+                                         TRANSP=medianTransp, $
                                          THICK=2., $
                                          ERRORBAR_THICK=2., $
                                          SYMBOL=belAARSym, $
@@ -665,7 +691,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                          ILATRYerr, $
                                          NAME=AARMedName, $
                                          COLOR=AARCol, $
-                                         TRANSP=30, $
+                                         TRANSP=medianTransp, $
                                          THICK=2., $
                                          ERRORBAR_THICK=2., $
                                          SYMBOL=AARSym, $
@@ -708,35 +734,179 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      IF KEYWORD_SET(makeMLTKappaplot) THEN BEGIN
 
+        medianstyle = 1
+
         winder4 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
-        MLTkappaXRange = [1.5,20]
+
+        MLTkappaXRange = [1.5,15]
+        MLTRange      = [minM-0.1,maxM+0.1]
         MLTkappaplot1 = SCATTERPLOT(KF2DParms.kappa[exc_i], $
-                                     MLTs[exc_i], $
-                                     XTITLE='Kappa', $
-                                     YTITLE='MLT', $
-                                     SYM_COLOR=belAARCol, $
-                                     SYMBOL=belAARSym, $
-                                     NAME=belAARName, $
-                                     XRANGE=MLTkappaXRange, $
-                                     TRANSP=BelTransp, $
-                                     CURRENT=winder4)
+                                    MLTs[exc_i], $
+                                    XTITLE='Kappa', $
+                                    YTITLE='MLT', $
+                                    SYM_COLOR=belAARCol, $
+                                    SYMBOL=belAARSym, $
+                                    NAME=belAARName, $
+                                    XRANGE=MLTkappaXRange, $
+                                    YRANGE=MLTRange, $
+                                    XMINOR=1, $
+                                    YMINOR=3, $
+                                    TRANSP=BelTransp, $
+                                    CURRENT=winder4)
 
         MLTkappaplot2 = SCATTERPLOT(KF2DParms.kappa[req_i], $
-                                     MLTs[req_i], $
-                                     SYM_COLOR=AARCol, $
-                                     SYMBOL=AARSym, $
-                                     NAME=AARName, $
-                                     XRANGE=MLTkappaXRange, $
-                                     TRANSP=60, $
-                                     /OVERPLOT, $
-                                     CURRENT=winder4)
+                                    MLTs[req_i], $
+                                    SYM_COLOR=AARCol, $
+                                    SYMBOL=AARSym, $
+                                    NAME=AARName, $
+                                    TRANSP=60, $
+                                    /OVERPLOT, $
+                                    CURRENT=winder4)
+
+        IF KEYWORD_SET(medianstyle) THEN BEGIN
+
+           binM              = 1.25
+           binMinforInclusion = 10
+           MLTReqHS = HISTOGRAM_BINSTATS( $
+                      MLTs[req_i], $
+                      KF2DParms.kappa[req_i], $
+                      BINSIZE=binM, $
+                      MIN=minM, $
+                      MAX=maxM, $
+                      /NAN, $
+                      BINMINFORINCLUSION=binMinforInclusion, $
+                      GIVE_DECILES=MLTILATstats__give_decile, $
+                      GIVE_VENTILES=MLTILATstats__give_ventile)
+           MLTExcHS = HISTOGRAM_BINSTATS( $
+                      MLTs[exc_i], $
+                      KF2DParms.kappa[exc_i], $
+                      BINSIZE=binM, $
+                      MIN=minM, $
+                      MAX=maxM, $
+                      /NAN, $
+                      BINMINFORINCLUSION=binMinforInclusion, $
+                      GIVE_DECILES=MLTILATstats__give_decile, $
+                      GIVE_VENTILES=MLTILATstats__give_ventile)
+
+           bpdStuff = 1
+           IF KEYWORD_SET(bpdStuff) THEN BEGIN
+              ;; MLTEy = MLTExcHS.lEdge+binM/2.+binM/10.
+              MLTEy = MLTExcHS.lEdge+binM/2.-0.05
+              MLTEYerr = MAKE_ARRAY(N_ELEMENTS(MLTExcHS.stdDev),VALUE=0)
+
+              CASE 1 OF
+                 KEYWORD_SET(MLTILATstats__give_decile): BEGIN
+                    MLTEx = MLTExcHS[*].decile.val[1]
+                    MLTEXerr = ABS(TRANSPOSE( $
+                               [[MLTExcHS[*].decile.val[0]-MLTEx], $
+                                [MLTExcHS[*].decile.val[2]-MLTEx]]))
+
+                    MLTRx = MLTReqHS[*].decile.val[1]
+                    MLTRXerr = ABS(TRANSPOSE( $
+                               [[MLTReqHS[*].decile.val[0]-MLTRx], $
+                                [MLTReqHS[*].decile.val[2]-MLTRx]]))
+
+                 END
+                 KEYWORD_SET(MLTILATstats__give_ventile): BEGIN
+                    MLTEx = MLTExcHS[*].ventile.val[2]
+                    MLTEXerr = ABS(TRANSPOSE( $
+                               [[MLTExcHS[*].ventile.val[0]-MLTEx], $
+                                [MLTExcHS[*].ventile.val[4]-MLTEx]]))
+
+                    MLTRx = MLTReqHS[*].ventile.val[2]
+                    MLTRXerr = ABS(TRANSPOSE( $
+                               [[MLTReqHS[*].ventile.val[0]-MLTRx], $
+                                [MLTReqHS[*].ventile.val[4]-MLTRx]]))
+
+                 END
+                 ELSE: BEGIN
+                    MLTEx = MLTExcHS[*].bpd[2]
+                    MLTEXerr = ABS(TRANSPOSE([[MLTExcHS[*].bpd[1]-MLTEx], $
+                                              [MLTExcHS[*].bpd[3]-MLTEx]]))
+
+                    MLTRx = MLTReqHS[*].bpd[2]
+                    MLTRXerr = ABS(TRANSPOSE([[MLTReqHS[*].bpd[1]-MLTRx], $
+                                              [MLTReqHS[*].bpd[3]-MLTRx]]))
+                 END
+              ENDCASE
+
+              ;; MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
+              MLTRy = MLTReqHS.lEdge+binM/2.+0.05
+              MLTRYerr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
+           ENDIF ELSE BEGIN
+              MLTEx = MLTExcHS.mean
+              MLTEy = MLTExcHS.lEdge+binM/2.+binM/20.
+              MLTEXerr = MLTExcHS.stdDev
+              MLTEYerr = MAKE_ARRAY(N_ELEMENTS(MLTExcHS.stdDev),VALUE=0)
+
+              MLTRx = MLTReqHS.mean
+              MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
+              MLTRXerr = MLTReqHS.stdDev
+              MLTRYerr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
+           ENDELSE
+
+           MLTkappaEMedianPlot = ERRORPLOT(MLTEx, $
+                                            MLTEy, $
+                                            MLTEXerr, $
+                                            MLTEYerr, $
+                                            NAME=belAARMedName, $
+                                            COLOR=belAARCol, $
+                                            TRANSP=medianTransp, $
+                                            THICK=2., $
+                                            ERRORBAR_THICK=2., $
+                                            SYMBOL=belAARSym, $
+                                            SYM_THICK=2.0, $
+                                            SYM_SIZE=1.5, $
+                                            /OVERPLOT, $
+                                            CURRENT=winder4)
+
+           MLTkappaRMedianPlot = ERRORPLOT(MLTRx, $
+                                            MLTRy, $
+                                            MLTRXerr, $
+                                            MLTRYerr, $
+                                            NAME=AARMedName, $
+                                            COLOR=AARCol, $
+                                            TRANSP=medianTransp, $
+                                            THICK=2., $
+                                            ERRORBAR_THICK=2., $
+                                            SYMBOL=AARSym, $
+                                            SYM_THICK=2.0, $
+                                            SYM_SIZE=1.5, $
+                                            /OVERPLOT, $
+                                            CURRENT=winder4)
+
+           MLTKappaLegend  = LEGEND(TARGET=[MLTkappaplot1, $
+                                             MLTkappaEMedianPlot, $
+                                             MLTkappaplot2, $
+                                             MLTkappaRMedianPlot], $
+                                     /NORMAL, $
+                                     POSITION=[0.85,0.8])
+
+           MLTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxM-minM)+minM, $
+                                YRANGE=MLTRange, $
+                                THICK=2., $
+                                COLOR=k245LineCol, $
+                                TRANSP=35, $
+                                LINESTYLE='--', $
+                                /OVERPLOT, $
+                                CURRENT=winder4)
+
+           kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
+                            /NORMAL, $
+                            FONT_SIZE=16, $
+                            FONT_COLOR=k245LineCol, $
+                            TARGET=winder4)
+
+        ENDIF
 
         mltPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                       + "-kS-MLTkappa" + altStr + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                      + "-kS-MLTkappa" + altStr + "-" + $
+                      hemi + parmStr + decileStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + mltPlotName
         winder4.Save,plotDir+mltPlotName
+
 
      ENDIF  
 
