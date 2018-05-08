@@ -32,9 +32,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
-  makeMLTILATplot        = 1
-  makeILATKappaplot      = 1
-  makeMLTKappaplot       = 1
+  makeMLTILATplot        = 0
+  makeILATKappaplot      = 0
+  makeMLTKappaplot       = 0
   bufferPlots            = 1
 
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
@@ -42,12 +42,14 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   minM  = -3.5
   maxM  = 1.5
+  ;; minM  = 20.5
+  ;; maxM  = 23.5
   notMLT = 0
   minI  = 60
   maxI  = 90
   hemi  = 'BOTH'
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 1.0
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
@@ -645,19 +647,64 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         bpdStuff = 1
         IF KEYWORD_SET(bpdStuff) THEN BEGIN
-           ILATEx = ILATExcHS[*].bpd[2]
+
            ;; ILATEy = ILATExcHS.lEdge+binI/2.+binI/10.
            ILATEy = ILATExcHS.lEdge+binI/2.-0.25
-           ILATEXerr = ABS(TRANSPOSE([[ILATExcHS[*].bpd[1]-ILATEx], $
-                                  [ILATExcHS[*].bpd[3]-ILATEx]]))
            ILATEYerr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
-
-           ILATRx = ILATReqHS[*].bpd[2]
            ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
            ILATRy = ILATReqHS.lEdge+binI/2.+0.25
-           ILATRXerr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
-                                      [ILATReqHS[*].bpd[3]-ILATRx]]))
            ILATRYerr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
+
+              CASE 1 OF
+                 KEYWORD_SET(MLTILATstats__give_decile): BEGIN
+                    ILATEx = ILATExcHS[*].decile.val[1]
+                    ILATEXerr = ABS(TRANSPOSE( $
+                               [[ILATExcHS[*].decile.val[0]-ILATEx], $
+                                [ILATExcHS[*].decile.val[2]-ILATEx]]))
+
+                    ILATRx = ILATReqHS[*].decile.val[1]
+                    ILATRXerr = ABS(TRANSPOSE( $
+                               [[ILATReqHS[*].decile.val[0]-ILATRx], $
+                                [ILATReqHS[*].decile.val[2]-ILATRx]]))
+
+                 END
+                 KEYWORD_SET(MLTILATstats__give_ventile): BEGIN
+                    ILATEx = ILATExcHS[*].ventile.val[2]
+                    ILATEXerr = ABS(TRANSPOSE( $
+                               [[ILATExcHS[*].ventile.val[0]-ILATEx], $
+                                [ILATExcHS[*].ventile.val[4]-ILATEx]]))
+
+                    ILATRx = ILATReqHS[*].ventile.val[2]
+                    ILATRXerr = ABS(TRANSPOSE( $
+                               [[ILATReqHS[*].ventile.val[0]-ILATRx], $
+                                [ILATReqHS[*].ventile.val[4]-ILATRx]]))
+
+                 END
+                 ELSE: BEGIN
+                    ILATEx = ILATExcHS[*].bpd[2]
+                    ILATEXerr = ABS(TRANSPOSE([[ILATExcHS[*].bpd[1]-ILATEx], $
+                                              [ILATExcHS[*].bpd[3]-ILATEx]]))
+
+                    ILATRx = ILATReqHS[*].bpd[2]
+                    ILATRXerr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
+                                              [ILATReqHS[*].bpd[3]-ILATRx]]))
+                 END
+              ENDCASE
+
+           ;; ILATEx = ILATExcHS[*].bpd[2]
+           ;; ;; ILATEy = ILATExcHS.lEdge+binI/2.+binI/10.
+           ;; ILATEy = ILATExcHS.lEdge+binI/2.-0.25
+           ;; ILATEXerr = ABS(TRANSPOSE([[ILATExcHS[*].bpd[1]-ILATEx], $
+           ;;                        [ILATExcHS[*].bpd[3]-ILATEx]]))
+           ;; ILATEYerr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
+
+           ;; ILATRx = ILATReqHS[*].bpd[2]
+           ;; ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
+           ;; ILATRy = ILATReqHS.lEdge+binI/2.+0.25
+           ;; ILATRXerr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
+           ;;                            [ILATReqHS[*].bpd[3]-ILATRx]]))
+           ;; ILATRYerr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
+
         ENDIF ELSE BEGIN
            ILATEx = ILATExcHS.mean
            ILATEy = ILATExcHS.lEdge+binI/2.+binI/20.
@@ -794,6 +841,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
               ;; MLTEy = MLTExcHS.lEdge+binM/2.+binM/10.
               MLTEy = MLTExcHS.lEdge+binM/2.-0.05
               MLTEYerr = MAKE_ARRAY(N_ELEMENTS(MLTExcHS.stdDev),VALUE=0)
+              ;; MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
+              MLTRy = MLTReqHS.lEdge+binM/2.+0.05
+              MLTRYerr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
 
               CASE 1 OF
                  KEYWORD_SET(MLTILATstats__give_decile): BEGIN
@@ -831,9 +881,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                  END
               ENDCASE
 
-              ;; MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
-              MLTRy = MLTReqHS.lEdge+binM/2.+0.05
-              MLTRYerr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
            ENDIF ELSE BEGIN
               MLTEx = MLTExcHS.mean
               MLTEy = MLTExcHS.lEdge+binM/2.+binM/20.

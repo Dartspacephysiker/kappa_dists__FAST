@@ -49,7 +49,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
   KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 1.0
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
@@ -98,7 +98,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
             MAXILAT=maxI, $
             MINALT=minA, $
             MAXALT=maxA, $
-            MLTSTR=earlyMltStr, $
+            MLTSTR=earlyMLTStr, $
             ALTSTR=altStr, $
             HEMI=hemi, $
             NORTH=north, $
@@ -161,7 +161,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   lateExc_i   = CGSETDIFFERENCE(late_i,ion_i, $
                                 COUNT=nLateExc)
 
-  ionSuff     = '-onlyAndExcl'
+  ionSuff     = '-combo'
   ;; ENDIF
 
   parmStr           = GoverKStr + KChi2MaxStr + ionSuff
@@ -296,7 +296,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   earlyTitle = 'Early'
   lateTitle = 'Late'
 
-  combine_like = 1
+  combine_like = 0
   IF KEYWORD_SET(combine_like) THEN BEGIN
 
      kBinsTmp = kBinsEarlyExc
@@ -333,7 +333,12 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      earlyAARName    = earlyAARName.Replace('_','.')
      earlyBelAARName = earlyBelAARName.Replace('_','.')
 
-  ENDIF
+  ENDIF ELSE BEGIN
+
+     earlyTitle = earlyMLTStr
+     lateTitle = lateMLTStr
+
+  ENDELSE
 
   IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
      earlyWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
