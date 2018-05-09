@@ -1,4 +1,32 @@
 ;2018/05/03
+PRO J20180503__PRINT_FOR_MATHEMATICA, $
+   kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc, $
+   kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc, $
+   BINSIZE=kHBinSize
+  
+
+  names = ['kHistEarlyReq','kHistEarlyExc','kHistLateReq','kHistLateExc']
+  hists = LIST(kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc)
+  bins  = LIST(kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc)
+  FOR jj=0,N_ELEMENTS(hists)-1 DO BEGIN
+
+     name = names[jj]
+     hist = hists[jj]
+     bin = bins[jj]+kHBinSize/2.
+     PRINT,FORMAT='(A0," = {")',name
+
+     FOR k=0,N_ELEMENTS(hist)-1 DO BEGIN
+        PRINT,FORMAT='("{",F0.2,",",F0.2,"}",A0)', $
+              bin[k], $
+              hist[k], $
+              (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
+     ENDFOR
+
+     PRINT,'}'
+
+  ENDFOR
+
+END
 PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
    EXCLUDE_IONS=exclude_ions, $
    REQUIRE_IONS=require_ions, $
@@ -42,12 +70,12 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
   ;; makeMLTILATplot        = 1
-  bufferPlots            = 0
+  bufferPlots            = 1
   savePlots              = 1
   saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
 
-  GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
-  KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
+  GoverKReq = N_ELEMENTS(GoverK  ) GT 0 ? GoverK   : 'decile=1'
+  KChi2Max  = N_ELEMENTS(maxKChi2) GT 0 ? maxKChi2 : 4
 
   kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
@@ -55,9 +83,22 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
 
-
-  GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
-  KChi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
+  CASE 1 OF
+     SIZE(GoverK,/TYPE) EQ 7: BEGIN
+        GoverKStr     = STRING(FORMAT='("-GKDec",I1)',LONG(STRMID(GoverKReq,7,1)))
+     END
+     ELSE: BEGIN
+        GoverKStr     = (STRING(FORMAT='("-GK",F0.1)',GoverKReq)).Replace('.','_')
+     END
+  ENDCASE
+  CASE 1 OF
+     SIZE(Kchi2Max,/TYPE) EQ 7: BEGIN
+        Kchi2MaxStr   = STRING(FORMAT='("-Kc2Dec",I1)',LONG(STRMID(Kchi2Max,7,1)))
+     END
+     ELSE: BEGIN
+        Kchi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',Kchi2Max)).Replace('.','_')
+     END
+  ENDCASE
   kHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
   mHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
 
@@ -248,6 +289,12 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                            LOCATIONS=mBinsLateExc, $
                            REVERSE_INDICES=rMIndsLateExc)
 
+  ;; Print for mathematica???
+  J20180503__PRINT_FOR_MATHEMATICA, $
+     kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc, $
+     kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc, $
+     BINSIZE=kHBinSize
+
   IF kBinsLateExc[0] LT 1.5 THEN kBinsLateExc[0] = 1.5
   IF kBinsLateReq[0] LT 1.5 THEN kBinsLateReq[0] = 1.5
   IF kBinsEarlyExc[0] LT 1.5 THEN kBinsEarlyExc[0] = 1.5
@@ -296,7 +343,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   earlyTitle = 'Early'
   lateTitle = 'Late'
 
-  combine_like = 0
+  combine_like = 1
   IF KEYWORD_SET(combine_like) THEN BEGIN
 
      kBinsTmp = kBinsEarlyExc
@@ -332,6 +379,9 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      earlyBelAARName = earlyBelAARName.Replace(STRING(9B)+STRING(9B)+STRING(9B),'')
      earlyAARName    = earlyAARName.Replace('_','.')
      earlyBelAARName = earlyBelAARName.Replace('_','.')
+
+     earlyMLTStr     = 'AAR'
+     lateMLTStr      = 'belAAR'
 
   ENDIF ELSE BEGIN
 

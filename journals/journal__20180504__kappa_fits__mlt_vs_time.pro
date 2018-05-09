@@ -36,12 +36,25 @@ PRO JOURNAL__20180504__KAPPA_FITS__MLT_VS_TIME, $
   savePlots              = 1
   saveEmAll              = KEYWORD_SET(bufferPlots) OR KEYWORD_SET(savePlots)
 
-  GoverKReq = KEYWORD_SET(GoverK)   ? GoverK   : 1.5
-  KChi2Max  = KEYWORD_SET(maxKChi2) ? maxKChi2 : 5.
+  GoverKReq = N_ELEMENTS(GoverK  ) GT 0 ? GoverK   : 'decile=1'
+  KChi2Max  = N_ELEMENTS(maxKChi2) GT 0 ? maxKChi2 : 4
 
-  GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
-  KChi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',KChi2Max)).Replace('.','_')
-
+  CASE 1 OF
+     SIZE(GoverK,/TYPE) EQ 7: BEGIN
+        GoverKStr     = STRING(FORMAT='("-GKDec",I1)',LONG(STRMID(GoverKReq,7,1)))
+     END
+     ELSE: BEGIN
+        GoverKStr     = (STRING(FORMAT='("-GK",F0.1)',GoverKReq)).Replace('.','_')
+     END
+  ENDCASE
+  CASE 1 OF
+     SIZE(Kchi2Max,/TYPE) EQ 7: BEGIN
+        Kchi2MaxStr   = STRING(FORMAT='("-Kc2Dec",I1)',LONG(STRMID(Kchi2Max,7,1)))
+     END
+     ELSE: BEGIN
+        Kchi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',Kchi2Max)).Replace('.','_')
+     END
+  ENDCASE
   ionSuff       = '-allObs'
 
   plotDir       = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'

@@ -1,4 +1,64 @@
 ;2018/05/02
+FUNCTION GOVERK_CHI2FUNC,kappa, $
+                         DECILE=GoverKReq
+
+  decile = N_ELEMENTS(GoverKReq) GT 0 ? LONG(STRMID(GoverKReq,7,1)) : 1
+  CASE decile OF
+     1: BEGIN
+        ;; first decile
+        a = 0.071777
+        b = 0.979759
+        c = -5
+     END
+     2: BEGIN
+        ;; second decile
+        a = 0.0595617
+        b = 0.894554
+        c = -5
+     END
+     3: BEGIN
+        ;; third decile
+        a = 0.0550905
+        b = 0.83265
+        c = -5
+     END
+  ENDCASE
+
+
+  RETURN,1.+(a * kappa + b)^c
+END
+FUNCTION KCHI2MAX_CHI2FUNC,kappa, $
+                         DECILE=KChi2Max
+
+  decile = N_ELEMENTS(KChi2Max) GT 0 ? LONG(STRMID(KChi2Max,7,1)) : 1
+  CASE decile OF
+     7: BEGIN
+        ;; seventh decile
+        PRINT,"Needs to be done"
+        STOP
+        a = 0.071777
+        b = 0.979759
+        c = -5
+     END
+     8: BEGIN
+        ;; eigth decile
+        a = 0.174054
+        b = 0.384697
+        c = -7.61408
+        d = 3.65279
+     END
+     9: BEGIN
+        ;; ninth decile
+        a = 0.200464
+        b = -0.0548358
+        c = -2.70258
+        d = 6.17905
+     END
+  ENDCASE
+
+
+  RETURN,d+(a * kappa + b)^c
+END
 FUNCTION GET_KAPPADB_INDS,andre, $
                           KF2DParms, $
                           GF2DParms, $
@@ -146,16 +206,73 @@ FUNCTION GET_KAPPADB_INDS,andre, $
                             nBroad, $
                             NCOMPLEMENT=nNotBroad)
 
-  chi2_i            = WHERE((GF2DParms.chi2red/KF2DParms.chi2red GE GoverKReq) AND $
-                            (KF2DParms.chi2red LE KChi2Max), $
-                            nChi2, $
-                            NCOMPLEMENT=nNotChi2)
   final_i           = CGSETINTERSECTION(region_i,mono_i, $
                                         COUNT=count)
   IF count EQ 0 THEN STOP
-  final_i           = CGSETINTERSECTION(final_i,chi2_i, $
+
+  IF N_ELEMENTS(GoverKReq) GT 0 THEN BEGIN
+
+     ratio = GF2DParms.chi2red/KF2DParms.chi2red
+     CASE 1 OF
+        SIZE(GoverKReq,/TYPE) EQ 7: BEGIN
+           chi2_i = WHERE(ratio GE GOVERK_CHI2FUNC(KF2DParms.kappa, $
+                                                  DECILE=GoverKReq), $
+                          nChi2, $
+                          NCOMPLEMENT=nNotChi2)
+        END
+        ELSE: BEGIN
+           IF GoverKReq NE 0 THEN BEGIN
+              chi2_i         = WHERE(ratio GE GoverKReq, $
+                                     nChi2, $
+                                     NCOMPLEMENT=nNotChi2)
+           ENDIF ELSE BEGIN
+              chi2_i = LINDGEN(N_ELEMENTS(ratio))
+           ENDELSE
+        END
+     ENDCASE
+
+     final_i        = CGSETINTERSECTION(final_i,chi2_i, $
                                         COUNT=count)
-  IF count EQ 0 THEN STOP
+     IF count EQ 0 THEN STOP
+
+  ENDIF
+
+  IF N_ELEMENTS(KChi2Max) GT 0 THEN BEGIN
+
+     CASE 1 OF
+        SIZE(KChi2Max,/TYPE) EQ 7: BEGIN
+           chi2_i = WHERE(KF2DParms.chi2red LE KCHI2MAX_CHI2FUNC(KF2DParms.kappa, $
+                                                  DECILE=KChi2Max), $
+                          nChi2, $
+                          NCOMPLEMENT=nNotChi2)
+        END
+        ELSE: BEGIN
+           IF KChi2Max NE 0 THEN BEGIN
+              chi2_i         = WHERE(KF2DParms.chi2red LE KChi2Max, $
+                                     nChi2, $
+                                     NCOMPLEMENT=nNotChi2)
+           ENDIF ELSE BEGIN
+              chi2_i = LINDGEN(N_ELEMENTS(KF2DParms.chi2red))
+           ENDELSE
+        END
+     ENDCASE
+
+     final_i        = CGSETINTERSECTION(final_i,chi2_i, $
+                                        COUNT=count)
+     IF count EQ 0 THEN STOP
+
+  ENDIF
+
+  ;; IF N_ELEMENTS(KChi2Max) GT 0 THEN IF KChi2Max NE 0 THEN BEGIN
+  ;;    chi2_i         = WHERE(KF2DParms.chi2red LE KChi2Max, $
+  ;;                           nChi2, $
+  ;;                           NCOMPLEMENT=nNotChi2)
+
+  ;;    final_i        = CGSETINTERSECTION(final_i,chi2_i, $
+  ;;                                       COUNT=count)
+  ;;    IF count EQ 0 THEN STOP
+
+  ;; ENDIF
 
   RETURN,final_i
 
