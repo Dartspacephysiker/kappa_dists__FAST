@@ -22,7 +22,7 @@ PRO J20180503__PRINT_FOR_MATHEMATICA, $
               (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
      ENDFOR
 
-     PRINT,'}'
+     PRINT,'};'
 
   ENDFOR
 
@@ -30,7 +30,6 @@ END
 PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
    EXCLUDE_IONS=exclude_ions, $
    REQUIRE_IONS=require_ions, $
-   COMBINED_HISTOS=combined_histos, $
    KHIST_BINSIZE=kHist_binSize, $
    KHIST_MIN=kHist_min, $
    MHIST_BINSIZE=mHist_binSize, $
@@ -40,14 +39,18 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
    MAXKCHI2=maxKChi2, $
    MINALT=minA, $
    MAXALT=maxA, $
+   DSTCUTOFF=dstCutoff, $
    MAKEKAPPAHISTOPLOT=makeKappaHistoPlot, $
-   MAKEMETASTABPLOT=makeMetaStabPlot
+   MAKEMETASTABPLOT=makeMetaStabPlot, $
+   SHOW_EARLYLATE_BEAMS_TOGETHER=show_earlyLate_beams_together, $
+   HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string
+
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   minM = -3.5
   maxM = 1.5
-  divM = -1.5
+  divM = -1.75
 
   minI  = 60
   maxI  = 90
@@ -77,8 +80,8 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   GoverKReq = N_ELEMENTS(GoverK  ) GT 0 ? GoverK   : 'decile=1'
   KChi2Max  = N_ELEMENTS(maxKChi2) GT 0 ? maxKChi2 : 4
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
-  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.75
+  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.5
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
@@ -104,7 +107,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
 
   ionSuff       = '-allObs'
 
-  plotDir       = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
+  SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
 
   IF maxM GT 18 THEN BEGIN
      minM = 24 + minM
@@ -147,7 +150,8 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
             BOTH_HEMIS=both_hemis, $
             GLOBE=globe, $
             DAYSIDE=dayside, $
-            NIGHTSIDE=nightside)
+            NIGHTSIDE=nightside, $
+            DSTCUTOFF=dstCutoff)
 
   late_i = GET_KAPPADB_INDS( $
            andre, $
@@ -170,26 +174,9 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
            BOTH_HEMIS=both_hemis, $
            GLOBE=globe, $
            DAYSIDE=dayside, $
-           NIGHTSIDE=nightside)
+           NIGHTSIDE=nightside, $
+           DSTCUTOFF=dstCutoff)
 
-
-  ;; IF KEYWORD_SET(requireIons) THEN BEGIN
-  ;;    ion_i       = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam, $
-  ;;                        NCOMPLEMENT=nNotIonBeam)
-  ;;    early_i     = CGSETINTERSECTION(early_i,ion_i, $
-  ;;                                    COUNT=count)
-  ;;    late_i      = CGSETINTERSECTION(late_i,ion_i, $
-  ;;                                    COUNT=count)
-  ;;    ionSuff     = '-onlyIonBeams'
-  ;; ENDIF ELSE IF KEYWORD_SET(excludeIons) THEN BEGIN
-  ;;    ion_i       = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nIonBeam, $
-  ;;                        NCOMPLEMENT=nNotIonBeam)
-  ;;    early_i     = CGSETDIFFERENCE(early_i,ion_i, $
-  ;;                                  COUNT=count)
-  ;;    late_i      = CGSETDIFFERENCE(late_i,ion_i, $
-  ;;                                  COUNT=count)
-  ;;    ionSuff     = '-excludeIons'
-  ;; ENDIF ELSE IF KEYWORD_SET(combined_histos) THEN BEGIN
   ion_i       = WHERE(andre.ionBeam EQ 1 OR andre.ionBeam EQ 2,nReq)
 
   earlyReq_i  = CGSETINTERSECTION(early_i,ion_i, $
@@ -343,8 +330,11 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   earlyTitle = 'Early'
   lateTitle = 'Late'
 
-  combine_like = 1
-  IF KEYWORD_SET(combine_like) THEN BEGIN
+  legFontSize = 14
+  fontSize = 20
+
+  AAR_with_AAR = N_ELEMENTS(show_earlyLate_beams_together) GT 0 ? show_earlyLate_beams_together : 1
+  IF KEYWORD_SET(AAR_with_AAR) THEN BEGIN
 
      kBinsTmp = kBinsEarlyExc
      kHistTmp = kHistEarlyExc
@@ -390,11 +380,16 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
 
   ENDELSE
 
+  IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
+     titleSuff  = '!C' $
+                  + CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) $
+                  + ' Decile'
+     earlyTitle += titleSuff
+     lateTitle  += titleSuff
+  ENDIF
+
   IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
      earlyWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
-
-     legFontSize = 14
-     fontSize = 20
 
      xRange   = [1.5,15]
      yRange   = [0,(MAX(kHistEarlyExc)>MAX(kHistEarlyReq))*1.1]

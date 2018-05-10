@@ -3,24 +3,77 @@ FUNCTION GOVERK_CHI2FUNC,kappa, $
                          DECILE=GoverKReq
 
   decile = N_ELEMENTS(GoverKReq) GT 0 ? LONG(STRMID(GoverKReq,7,1)) : 1
+
+  ;; haveDeciles = [1,2,3]
+  haveDeciles = [1,2,3,4,5,6,7,8,9]
+  IF (WHERE(decile EQ haveDeciles))[0] EQ -1 THEN BEGIN
+     PRINT,"Don't have decile " + STRING(FORMAT='(I0)',decile) + "!"
+     STOP
+  ENDIF
+  
   CASE decile OF
+     ;; 1: BEGIN
+     ;;    ;; first decile
+     ;;    a = 0.071777
+     ;;    b = 0.979759
+     ;;    c = -5
+     ;; END
+     ;; 2: BEGIN
+     ;;    ;; second decile
+     ;;    a = 0.0595617
+     ;;    b = 0.894554
+     ;;    c = -5
+     ;; END
+     ;; 3: BEGIN
+     ;;    ;; third decile
+     ;;    a = 0.0550905
+     ;;    b = 0.83265
+     ;;    c = -5
+     ;; END
      1: BEGIN
-        ;; first decile
-        a = 0.071777
-        b = 0.979759
-        c = -5
+        a = 0.0298931
+        b = 1.00168
+        c = -9.99969
      END
      2: BEGIN
-        ;; second decile
-        a = 0.0595617
-        b = 0.894554
-        c = -5
+        a = 0.0263136
+        b = 0.955473
+        c = -9.99969
      END
      3: BEGIN
-        ;; third decile
-        a = 0.0550905
-        b = 0.83265
-        c = -5
+        a = 0.0284356
+        b = 0.911727
+        c = -8.97227
+     END
+     4: BEGIN
+        a = 0.0362803
+        b = 0.850323
+        c = -6.87573
+     END
+     5: BEGIN
+        a = 0.0462379
+        b = 0.769292
+        c = -5.29457
+     END
+     6: BEGIN
+        a = 0.0481355
+        b = 0.721586
+        c = -4.85215
+     END
+     7: BEGIN
+        a = 0.0454183
+        b = 0.697242
+        c = -4.92433
+     END
+     8: BEGIN
+        a = 0.0473201
+        b = 0.635967
+        c = -4.43713
+     END
+     9: BEGIN
+        a = 0.0399212
+        b = 0.631185
+        c = -4.88113
      END
   ENDCASE
 
@@ -81,7 +134,8 @@ FUNCTION GET_KAPPADB_INDS,andre, $
                           BOTH_HEMIS=both_hemis, $
                           GLOBE=globe, $
                           DAYSIDE=dayside, $
-                          NIGHTSIDE=nightside
+                          NIGHTSIDE=nightside, $
+                          DSTCUTOFF=dstCutoff
                           ;; USE_LNG=use_lng, $
                           ;; MINLNG=minLng, $
                           ;; MAXLNG=maxLng, $
@@ -168,8 +222,8 @@ FUNCTION GET_KAPPADB_INDS,andre, $
   checkMin  = ( ABS(ROUND(minM)-minM) GT 0.1 ) 
   checkMax  = ( ABS(ROUND(maxM)-maxM) GT 0.1 )
 
-  IF checkMin THEN mltMinFmt = 'F0.1' ELSE mltMinFmt = 'I02'
-  IF checkMax THEN mltMaxFmt = 'F0.1' ELSE mltMaxFmt = 'I02'
+  IF checkMin THEN mltMinFmt = 'F0.2' ELSE mltMinFmt = 'I02'
+  IF checkMax THEN mltMaxFmt = 'F0.2' ELSE mltMaxFmt = 'I02'
 
   mltStr = STRING(FORMAT='(' + mltMinFmt + ',"-",' + mltMaxFmt + ',A0)', $
                   (minM LT 0 ? minM + 24 : minM),maxM,mltSuff)
@@ -273,6 +327,41 @@ FUNCTION GET_KAPPADB_INDS,andre, $
   ;;    IF count EQ 0 THEN STOP
 
   ;; ENDIF
+
+  IF KEYWORD_SET(dstCutoff) THEN BEGIN
+     SET_ALFVENDB_PLOT_DEFAULTS, $
+        DSTCUTOFF=dstCutoff, $
+        /USE_STORM_STUFF, $
+        ALFDB_PLOT_STRUCT=alfDB_plot_struct
+
+     SET_IMF_PARAMS_AND_IND_DEFAULTS, $
+        CLOCKSTR=clockStr, $
+        EARLIEST_JULDAY=earliest_julDay, $
+        LATEST_JULDAY=latest_julDay, $
+        IMF_STRUCT=IMF_struct, $
+        ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+        LUN=lun
+
+     GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_FASTDB_INDICES, $
+        ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+        IMF_STRUCT=IMF_struct, $
+        /GET_CUSTOM_I_NOT_ALFDB_I, $
+        CUSTOMDB=andre, $
+        CUSTOMTIMES=andre.time, $
+        CUSTOMGOOD_I=final_i, $
+        NONSTORM_I=ns_i, $
+        MAINPHASE_I=mp_i, $
+        RECOVERYPHASE_I=rp_i, $
+        N_NONSTORM=n_ns, $
+        N_STORM=n_s, $
+        N_MAINPHASE=n_mp, $
+        N_RECOVERYPHASE=n_rp
+
+     final_i = CGSETINTERSECTION(final_i,ns_i)
+
+     mltStr += '-ns'
+     
+  ENDIF
 
   RETURN,final_i
 

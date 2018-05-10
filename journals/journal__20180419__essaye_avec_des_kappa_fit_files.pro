@@ -1,4 +1,56 @@
 ;2018/04/19
+PRO J20180419__PRINT_DECILES, $
+   histoStats,decileInd, $
+   DATANAME=dataName, $
+   BINSIZE=binSize
+
+  dName = KEYWORD_SET(dataName) ? dataName   : "kchi2reddat"
+
+  bHalf = KEYWORD_SET(binSize ) ? binSize/2. : (histoStats[1].ledge-histoStats[0].ledge)/2.
+
+  PRINT,FORMAT='(A0,I1," = {")', $
+        dataName, $
+        decileInd+1
+
+  FOR k=0,N_ELEMENTS(histoStats)-1 DO BEGIN
+     IF FINITE(histoStats[k].decile.val[decileInd]) THEN BEGIN
+        PRINT,FORMAT='("{",F0.3,",",G0.5,"}",A0)', $
+              histoStats[k].ledge+bHalf, $
+              histoStats[k].decile.val[decileInd], $
+              (k EQ (N_ELEMENTS(histoStats)-1) ? '' : ',')
+     ENDIF
+  ENDFOR
+
+  PRINT,'};'
+
+END
+PRO J20180419__PRINT_FOR_MATHEMATICA, $
+   kHistReq,kHistExc, $
+   kBinsReq,kBinsExc, $
+   BINSIZE=kHBinSize
+
+  names = ['kHistReq','kHistExc']
+  hists = LIST(kHistReq,kHistExc)
+  bins  = LIST(kBinsReq,kBinsExc)
+  FOR jj=0,N_ELEMENTS(hists)-1 DO BEGIN
+
+     name = names[jj]
+     hist = hists[jj]
+     bin = bins[jj]+kHBinSize/2.
+     PRINT,FORMAT='(A0," = {")',name
+
+     FOR k=0,N_ELEMENTS(hist)-1 DO BEGIN
+        PRINT,FORMAT='("{",F0.2,",",F0.2,"}",A0)', $
+              bin[k], $
+              hist[k], $
+              (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
+     ENDFOR
+
+     PRINT,'};'
+
+  ENDFOR
+
+END
 PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    EXCLUDE_IONS=exclude_ions, $
    REQUIRE_IONS=require_ions, $
@@ -12,7 +64,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    MAXKCHI2=maxKChi2, $
    MINALT=minA, $
    MAXALT=maxA, $
+   DSTCUTOFF=dstCutoff, $
    MAKEKAPPAHISTOPLOT=makeKappaHistoPlot, $
+   HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string, $
    MAKEMETASTABPLOT=makeMetaStabPlot, $
    MAKEMLTILATPLOT=makeMLTILATplot, $
    MAKEILATKAPPAPLOT=makeILATKappaplot, $
@@ -37,6 +91,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   requireIons = N_ELEMENTS(require_ions) GT 0 ? require_ions : 0
   excludeIons = N_ELEMENTS(exclude_ions) GT 0 ? exclude_ions : 0
 
+  legFontSize = 14
+  fontSize = 20
+
   ;; makeKappaHistoPlot    = 1
   ;; makeMetaStabPlot      = 1
   ;; makeMLTILATplot        = 1
@@ -54,10 +111,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   notMLT = 0
   minI  = 60
   maxI  = 90
-  hemi  = 'BOTH'
+  hemi  = 'NORTH'
 
-  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.5
-  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.45
+  kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.75
+  kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.5
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
@@ -84,7 +141,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   ionSuff       = '-allObs'
 
-  plotDir       = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/plots/'
+  SET_PLOT_DIR,plotDir,/FOR_KAPPA_DB,/ADD_TODAY
 
   final_i = GET_KAPPADB_INDS( $
             andre, $
@@ -109,7 +166,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
             BOTH_HEMIS=both_hemis, $
             GLOBE=globe, $
             DAYSIDE=dayside, $
-            NIGHTSIDE=nightside)
+            NIGHTSIDE=nightside, $
+            DSTCUTOFF=dstCutoff)
 
   ;; Disqualified
   ;; disqual_i         = WHERE((KF2DParms.kappa LE 2.0) $
@@ -196,7 +254,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   BelTransp = 85
   AARTransp = 65
   belAARCol = 'BLUE'
-  AARCol    = 'ORANGE'
+  AARCol    = 'DARK ORANGE'
   k245LineCol = 'GREEN'
 
   medianstyle = 1
@@ -275,6 +333,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           mltStr, $
                           minI,maxI, $
                           MIN(orbArr),MAX(orbArr))
+        IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
+           
+           titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
+                      ' Decile'
+        ENDIF
+
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         yRange   = [0,MAX(kHist)*1.1]
@@ -284,19 +348,20 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          XTITLE='$\kappa$', $
                          YTITLE=yHistoTitle, $
                          TITLE=titleStr, $
-                         FONT_SIZE=16,THICK=2.5, $
+                         FONT_SIZE=fontSize,THICK=2.5, $
                          CURRENT=winder)
 
         kLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHist)*2, $
                          YRANGE=yRange, $
                          THICK=2., $
                          COLOR=k245LineCol, $
+                         LINESTYLE=':', $
                          /OVERPLOT, $
                          CURRENT=winder)
 
-        kText     = TEXT(0.25,0.85,"$\kappa_t$ = 2.45", $
+        kText     = TEXT(0.24,0.22,"$\kappa_t$ = 2.45", $
                          /NORMAL, $
-                         FONT_SIZE=16, $
+                         FONT_SIZE=fontSize, $
                          FONT_COLOR=k245LineCol, $
                          TARGET=winder)
 
@@ -319,6 +384,13 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           mltStr, $
                           minI,maxI, $
                           MIN(orbArr),MAX(orbArr))
+
+        IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
+           
+           titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
+                      ' Decile'
+        ENDIF
+
         winderM  = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         yRange   = [0,MAX(mHist)*1.1]
@@ -329,7 +401,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          XTITLE='$M_q$', $
                          YTITLE=yHistoTitle, $
                          TITLE=titleStr, $
-                         FONT_SIZE=16,THICK=2.5, $
+                         FONT_SIZE=fontSize,THICK=2.5, $
                          CURRENT=winderM, $
                          POSITION=mPosition)
         mLinePlot = PLOT(REPLICATE(magicMVal,11), $
@@ -341,7 +413,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          CURRENT=winderM)
         mText     = TEXT(0.7,0.8,"$\kappa_t$ = 2.45", $
                          /NORMAL, $
-                         FONT_SIZE=16, $
+                         FONT_SIZE=fontSize, $
                          FONT_COLOR='GREEN', $
                          TARGET=winderM)
 
@@ -395,7 +467,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binI              = 4
-           binMinforInclusion = 10
+           NMinBinForInclusion = 10
            ILATHS = HISTOGRAM_BINSTATS( $
                     ABS(andre.ilat[plot_i]), $
                     KF2DParms.kappa[plot_i], $
@@ -403,12 +475,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                     MIN=minI, $
                     MAX=maxI, $
                     /NAN, $
-                    BINMINFORINCLUSION=binMinforInclusion, $
+                    NMINBINFORINCLUSION=NMinBinForInclusion, $
                     GIVE_DECILES=stats__give_decile, $
                     GIVE_VENTILES=stats__give_ventile)
 
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
-              ILATEy = ILATHS.lEdge+binM/2.-0.05
+              ILATEy = ILATHS.lEdge+binI/2.-0.05
               ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATHS.stdDev),VALUE=0)
 
               CASE 1 OF
@@ -433,7 +505,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ENDIF ELSE BEGIN
               ILATEx = ILATHS.mean
-              ILATEy = ILATHS.lEdge+binM/2.+binM/20.
+              ILATEy = ILATHS.lEdge+binI/2.+binI/20.
               ILATExErr = ILATHS.stdDev
               ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATHS.stdDev),VALUE=0)
            ENDELSE
@@ -469,7 +541,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
                             /NORMAL, $
-                            FONT_SIZE=16, $
+                            FONT_SIZE=fontSize, $
                             FONT_COLOR=k245LineCol, $
                             TARGET=winder4)
 
@@ -506,35 +578,39 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           binM              = 1.25
-           binMinforInclusion = 10
+           histBinM           = 0.5
+           NMinBinForInclusion = 10
            MLTHS = HISTOGRAM_BINSTATS( $
                       MLTs[plot_i], $
                       KF2DParms.kappa[plot_i], $
-                      BINSIZE=binM, $
+                      BINSIZE=histBinM, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      BINMINFORINCLUSION=binMinforInclusion, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
-              MLTEy = MLTHS.lEdge+binM/2.-0.05
+              MLTEy = MLTHS.lEdge+histBinM/2.-0.05
               MLTEyErr = MAKE_ARRAY(N_ELEMENTS(MLTHS.stdDev),VALUE=0)
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    MLTEx = MLTHS[*].decile.val[1]
+                    deciles = [0,1,2]
+
+                    MLTEx = MLTHS[*].decile.val[deciles[1]]
                     MLTExErr = ABS(TRANSPOSE( $
-                               [[MLTHS[*].decile.val[0]-MLTEx], $
-                                [MLTHS[*].decile.val[2]-MLTEx]]))
+                               [[MLTHS[*].decile.val[deciles[0]]-MLTEx], $
+                                [MLTHS[*].decile.val[deciles[2]]-MLTEx]]))
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
-                    MLTEx = MLTHS[*].ventile.val[2]
+                    ventiles = [0,2,4]
+
+                    MLTEx = MLTHS[*].ventile.val[deciles[1]]
                     MLTExErr = ABS(TRANSPOSE( $
-                               [[MLTHS[*].ventile.val[0]-MLTEx], $
-                                [MLTHS[*].ventile.val[4]-MLTEx]]))
+                               [[MLTHS[*].ventile.val[deciles[0]]-MLTEx], $
+                                [MLTHS[*].ventile.val[deciles[2]]-MLTEx]]))
                  END
                  ELSE: BEGIN
                     MLTEx = MLTHS[*].bpd[2]
@@ -545,7 +621,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ENDIF ELSE BEGIN
               MLTEx = MLTHS.mean
-              MLTEy = MLTHS.lEdge+binM/2.+binM/20.
+              MLTEy = MLTHS.lEdge+histBinM/2.+histBinM/20.
               MLTExErr = MLTHS.stdDev
               MLTEyErr = MAKE_ARRAY(N_ELEMENTS(MLTHS.stdDev),VALUE=0)
            ENDELSE
@@ -581,7 +657,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
                             /NORMAL, $
-                            FONT_SIZE=16, $
+                            FONT_SIZE=fontSize, $
                             FONT_COLOR=k245LineCol, $
                             TARGET=winder4)
 
@@ -602,12 +678,19 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         winder5 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         GoverKchi2Range       = KEYWORD_SET(GoverKLog) ? [0.9,MAX(ratio)] : [0.5,7]
+
+        medianStyle = 1
+        addDecileLine = 0
+
+        ;; tmpColor = KEYWORD_SET(addDecileLine) ? 'Orange' : belAARCol
+        tmpColor = 'Orange' 
+
         GoverKchi2Kappaplot   = SCATTERPLOT(KF2DParms.kappa[plot_i], $
                                             ratio[plot_i], $
                                             XTITLE='Kappa', $
                                             YTITLE='G over K', $
                                             YLOG=GoverKLog, $
-                                            SYM_COLOR=belAARCol, $
+                                            SYM_COLOR=tmpColor, $
                                             SYMBOL=belAARSym, $
                                             NAME=allName, $
                                             XRANGE=kappaPlotRange, $
@@ -615,11 +698,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                             TRANSP=90, $
                                             CURRENT=winder5)
 
-        medianStyle = 1
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           binK              = 0.2
-           binMinforInclusion = 10
+           binK               = 0.2
+           NMinBinForInclusion = 10
 
            GoverKHS = HISTOGRAM_BINSTATS( $
                       KF2DParms.kappa[plot_i], $
@@ -628,20 +710,35 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minK, $
                       MAX=maxK, $
                       /NAN, $
-                      BINMINFORINCLUSION=binMinforInclusion, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
+           IF KEYWORD_SET(GoverK__print_deciles) THEN BEGIN
+              ;; decileInds = [0,1,2]
+              ;; decileInds = [3,4,5]
+              ;; decileInds = [6,7,8]
+              decileInds = [0,1,2,3,4,5,6,7,8]
+              FOR jjj=0,N_ELEMENTS(decileInds)-1 DO BEGIN
+                 J20180419__PRINT_DECILES,GoverKHS,decileInds[jjj], $
+                                          DATANAME="goverkdat", $
+                                          BINSIZE=binK
+              ENDFOR
+           ENDIF
+           
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
               GoverKx = GoverKHS.lEdge+binK/2.-0.05
               GoverKxErr = MAKE_ARRAY(N_ELEMENTS(GoverKHS.stdDev),VALUE=0)
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    GoverKy = GoverKHS[*].decile.val[1]
+                    deciles = [0,1,2]
+                    deciles = [3,4,5]
+
+                    GoverKy = GoverKHS[*].decile.val[deciles[1]]
                     GoverKyErr = ABS(TRANSPOSE( $
-                                  [[GoverKHS[*].decile.val[0]-GoverKy], $
-                                   [GoverKHS[*].decile.val[2]-GoverKy]]))
+                                 [[GoverKHS[*].decile.val[deciles[0]]-GoverKy], $
+                                  [GoverKHS[*].decile.val[deciles[2]]-GoverKy]]))
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
                     GoverKy = GoverKHS[*].ventile.val[2]
@@ -669,7 +766,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                                GoverKxErr, $
                                                GoverKyErr, $
                                                NAME=allMedName, $
-                                               COLOR='Black', $
+                                               COLOR='Dark Slate Gray', $
+                                               ;; COLOR='Black', $
                                                TRANSP=medianTransp, $
                                                THICK=2., $
                                                ERRORBAR_THICK=2., $
@@ -695,44 +793,105 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ;; kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
            ;;                  /NORMAL, $
-           ;;                  FONT_SIZE=16, $
+           ;;                  FONT_SIZE=fontSize, $
            ;;                  FONT_COLOR=k245LineCol, $
            ;;                  TARGET=winder5)
 
         ENDIF
 
-        addDecileLine = 0
         IF KEYWORD_SET(addDecileLine) THEN BEGIN
-           kVals = FINDGEN(20)+1.5
-           decilePlot1 = PLOT(kVals, $
+           kVals = FINDGEN(160)/8.+1.5
+
+           ;; decilePlot1 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=1'), $
+           ;;                    NAME='1!Ust!N Decile', $
+           ;;                    LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Black', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+           ;; decilePlot2 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=2'), $
+           ;;                    NAME='2!Und!N Decile', $
+           ;;                    ;; LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Black', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
+           ;; decilePlot3 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=3'), $
+           ;;                    NAME='3!Urd!N Decile', $
+           ;;                    LINESTYLE=':', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Black', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
+           decilePlot4 = PLOT(kVals, $
                               GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=1'), $
-                              NAME='1!Ust!N Decile', $
+                                              DECILE='decile=4'), $
+                              NAME='4!Uth!N Decile', $
                               LINESTYLE='--', $
                               THICK=2., $
-                              COLOR='Black', $
+                              COLOR='Dark Slate Gray', $
                               /OVERPLOT, $
                               CURRENT=winder5)
-           decilePlot2 = PLOT(kVals, $
+           decilePlot5 = PLOT(kVals, $
                               GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=2'), $
-                              NAME='2!Und!N Decile', $
+                                              DECILE='decile=5'), $
+                              NAME='5!Uth!N Decile', $
                               ;; LINESTYLE='--', $
                               THICK=2., $
-                              COLOR='Black', $
-                              /OVERPLOT, $
-                              CURRENT=winder5)
-           decilePlot3 = PLOT(kVals, $
-                              GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=3'), $
-                              NAME='3!Urd!N Decile', $
-                              LINESTYLE=':', $
-                              THICK=2., $
-                              COLOR='Black', $
+                              COLOR='Dark Slate Gray', $
                               /OVERPLOT, $
                               CURRENT=winder5)
 
-           legend = LEGEND(TARGET=[decilePlot3,decilePlot2,decilePlot1], $
+           decilePlot6 = PLOT(kVals, $
+                              GOVERK_CHI2FUNC(kVals, $
+                                              DECILE='decile=6'), $
+                              NAME='6!Uth!N Decile', $
+                              LINESTYLE=':', $
+                              THICK=2., $
+                              COLOR='Dark Slate Gray', $
+                              /OVERPLOT, $
+                              CURRENT=winder5)
+
+           ;; decilePlot7 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=7'), $
+           ;;                    NAME='7!Uth!N Decile', $
+           ;;                    LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Dark Slate Blue', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+           ;; decilePlot8 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=8'), $
+           ;;                    NAME='8!Uth!N Decile', $
+           ;;                    ;; LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Dark Slate Blue', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
+           ;; decilePlot9 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=9'), $
+           ;;                    NAME='9!Uth!N Decile', $
+           ;;                    LINESTYLE=':', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Dark Slate Blue', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
+           legend = LEGEND(TARGET=[ $;; decilePlot9,decilePlot8,decilePlot7, $
+                                   decilePlot6,decilePlot5,decilePlot4], $ ;, $
+                                   ;; decilePlot3,decilePlot2,decilePlot1], $
                            /NORMAL, $
                            POSITION=[0.85,0.8])
 
@@ -778,7 +937,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.25
-           binMinforInclusion = 10
+           NMinBinForInclusion = 10
            chi2RedHS = HISTOGRAM_BINSTATS( $
                        KF2DParms.kappa[plot_i], $
                        KF2DParms.chi2Red[plot_i], $
@@ -786,9 +945,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN=minK, $
                        MAX=maxK, $
                        /NAN, $
-                       BINMINFORINCLUSION=binMinforInclusion, $
+                       NMINBINFORINCLUSION=NMinBinForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
+
+           ;; Print stats?
+           ;; decileInds = [3,4,5]
+           ;; FOR jjj=0,N_ELEMENTS(decileInds)-1 DO BEGIN
+           ;;    J20180419__PRINT_DECILES,chi2RedHS,decileInds[jjj], $
+           ;;                             DATANAME="kchi2reddat", $
+           ;;                             BINSIZE=binK
+           ;; ENDFOR
 
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
               chi2Redx = chi2RedHS.lEdge+binK/2.-0.05
@@ -893,6 +1060,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        LOCATIONS=mBinsExc, $
                        REVERSE_INDICES=rMIndsExc)
 
+  ;; Print for mathematica???
+     J20180419__PRINT_FOR_MATHEMATICA, $
+        kHistReq,kHistExc, $
+        kBinsReq,kBinsExc, $
+        BINSIZE=kHBinSize
+
      IF KEYWORD_SET(normed) THEN BEGIN
         kTotReq = TOTAL(kHistReq)
         mTotReq = TOTAL(mHistReq)
@@ -914,20 +1087,18 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      IF mBinsReq[0] LT 1.5 THEN mBinsReq[0] = 1.5
      IF mBinsExc[0] LT 1.5 THEN mBinsExc[0] = 1.5
 
-     ;; Where are they less than .245?
-     ;; lt245inds = !NULL
-     ;; bin245 = VALUE_CLOSEST2(kBins,2.45,/CONSTRAINED)
-     ;; FOR k=0,bin245-1 DO BEGIN
-     ;;    IF rKInds[k] NE rKInds[k+1] THEN $
-     ;;       lt245inds = [lt245inds,rKInds[rKInds[k] : rKInds[k+1]-1]]
-     ;; ENDFOR
-
      ;; Kappa plot
      titleStr = STRING(FORMAT='(A0,", ",I0,"$^\circ$ < |ILAT| < ",I0,"$^\circ$!C!COrbits ",I0,"-",I0," (",I0,"/",I0," considered)")', $
                        mltStr, $
                        minI,maxI, $
                        MIN(orbArr),MAX(orbArr), $
                        N_ELEMENTS(orbArr),MAX(orbArr)-MIN(orbArr))
+
+     IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
+        
+        titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
+                   ' Decile'
+     ENDIF
 
      IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
@@ -941,7 +1112,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                             XTITLE='$\kappa$', $
                             YTITLE=yHistoTitle, $
                             TITLE=titleStr, $
-                            FONT_SIZE=16,THICK=2.5, $
+                            FONT_SIZE=fontSize,THICK=2.5, $
                             CURRENT=winder)
 
         kHistPlotExc = PLOT(kBinsExc,kHistExc,/HISTOGRAM, $
@@ -956,18 +1127,20 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         histLegend  = LEGEND(TARGET=[kHistPlotReq,kHistPlotExc], $
                              /NORMAL, $
+                             FONT_SIZE=legFontSize, $
                              POSITION=[0.85,0.7])
 
         kLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHistReq)*2, $
                          YRANGE=yRange, $
                          THICK=2., $
+                         LINESTYLE=':', $
                          COLOR=k245LineCol, $
                          /OVERPLOT, $
                          CURRENT=winder)
 
-        kText     = TEXT(0.25,0.85,"$\kappa_t$ = 2.45", $
+        kText     = TEXT(0.24,0.22,"$\kappa_t$ = 2.45", $
                          /NORMAL, $
-                         FONT_SIZE=16, $
+                         FONT_SIZE=fontSize, $
                          FONT_COLOR=k245LineCol, $
                          TARGET=winder)
 
@@ -1000,7 +1173,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                             XTITLE='$M_q$', $
                             YTITLE=yHistoTitle, $
                             TITLE=titleStr, $
-                            FONT_SIZE=16,THICK=2.5, $
+                            FONT_SIZE=fontSize,THICK=2.5, $
                             CURRENT=winderM, $
                             POSITION=mPosition)
 
@@ -1018,6 +1191,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         metaHistLegend  = LEGEND(TARGET=[mHistPlotReq,mHistPlotExc], $
                                  /NORMAL, $
+                                 FONT_SIZE=legFontSize, $
                                  POSITION=[0.85,0.7])
 
         mLinePlot = PLOT(REPLICATE(magicMVal,11), $
@@ -1029,7 +1203,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          CURRENT=winderM)
         mText     = TEXT(0.7,0.72,"$\kappa_t$ = 2.45", $
                          /NORMAL, $
-                         FONT_SIZE=16, $
+                         FONT_SIZE=fontSize, $
                          FONT_COLOR=k245LineCol, $
                          TARGET=winderM)
 
@@ -1110,7 +1284,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(bpdStuff) THEN BEGIN
 
            binI               = 5
-           binMinforInclusion = 20
+           NMinBinForInclusion = 20
            ILATReqHS = HISTOGRAM_BINSTATS( $
                        ABS(andre.ilat[req_i]), $
                        KF2DParms.kappa[req_i], $
@@ -1118,7 +1292,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN=minI, $
                        MAX=maxI, $
                        /NAN, $
-                       BINMINFORINCLUSION=binMinforInclusion, $
+                       NMINBINFORINCLUSION=NMinBinForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
            ILATExcHS = HISTOGRAM_BINSTATS( $
@@ -1128,7 +1302,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN=minI, $
                        MAX=maxI, $
                        /NAN, $
-                       BINMINFORINCLUSION=binMinforInclusion, $
+                       NMINBINFORINCLUSION=NMinBinForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
 
@@ -1141,15 +1315,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    ILATEx = ILATExcHS[*].decile.val[1]
-                    ILATExErr = ABS(TRANSPOSE( $
-                               [[ILATExcHS[*].decile.val[0]-ILATEx], $
-                                [ILATExcHS[*].decile.val[2]-ILATEx]]))
+                    deciles = [0,1,2]
 
-                    ILATRx = ILATReqHS[*].decile.val[1]
+                    ILATEx = ILATExcHS[*].decile.val[deciles[1]]
+                    ILATExErr = ABS(TRANSPOSE( $
+                               [[ILATExcHS[*].decile.val[deciles[0]]-ILATEx], $
+                                [ILATExcHS[*].decile.val[deciles[2]]-ILATEx]]))
+
+                    ILATRx = ILATReqHS[*].decile.val[deciles[1]]
                     ILATRxErr = ABS(TRANSPOSE( $
-                               [[ILATReqHS[*].decile.val[0]-ILATRx], $
-                                [ILATReqHS[*].decile.val[2]-ILATRx]]))
+                               [[ILATReqHS[*].decile.val[deciles[0]]-ILATRx], $
+                                [ILATReqHS[*].decile.val[deciles[2]]-ILATRx]]))
 
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
@@ -1182,61 +1358,62 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                        [ILATExcHS[*].bpd[3]-ILATEx]]))
            ;; ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
 
-           ;; ILATRx = ILATReqHS[*].bpd[2]
-           ;; ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
-           ;; ILATRy = ILATReqHS.lEdge+binI/2.+0.25
-           ;; ILATRxErr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
-           ;;                            [ILATReqHS[*].bpd[3]-ILATRx]]))
-           ;; ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
+              ;; ILATRx = ILATReqHS[*].bpd[2]
+              ;; ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
+              ;; ILATRy = ILATReqHS.lEdge+binI/2.+0.25
+              ;; ILATRxErr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
+              ;;                            [ILATReqHS[*].bpd[3]-ILATRx]]))
+              ;; ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
 
-        ENDIF ELSE BEGIN
-           ILATEx = ILATExcHS.mean
-           ILATEy = ILATExcHS.lEdge+binI/2.+binI/20.
-           ILATExErr = ILATExcHS.stdDev
-           ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
+           ENDIF ELSE BEGIN
+              ILATEx = ILATExcHS.mean
+              ILATEy = ILATExcHS.lEdge+binI/2.+binI/20.
+              ILATExErr = ILATExcHS.stdDev
+              ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
 
-           ILATRx = ILATReqHS.mean
-           ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
-           ILATRxErr = ILATReqHS.stdDev
-           ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
-        ENDELSE
+              ILATRx = ILATReqHS.mean
+              ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
+              ILATRxErr = ILATReqHS.stdDev
+              ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
+           ENDELSE
 
-        ILATkappaEStatPlot = ERRORPLOT(ILATEx, $
-                                         ILATEy, $
-                                         ILATExErr, $
-                                         ILATEyErr, $
-                                         NAME=belAARMedName, $
-                                         COLOR=belAARCol, $
-                                         TRANSP=medianTransp, $
-                                         THICK=2., $
-                                         ERRORBAR_THICK=2., $
-                                         SYMBOL=belAARSym, $
-                                         SYM_THICK=2.0, $
-                                         SYM_SIZE=1.5, $
-                                         /OVERPLOT, $
-                                         CURRENT=winder3)
+           ILATkappaEStatPlot = ERRORPLOT(ILATEx, $
+                                          ILATEy, $
+                                          ILATExErr, $
+                                          ILATEyErr, $
+                                          NAME=belAARMedName, $
+                                          COLOR=belAARCol, $
+                                          TRANSP=medianTransp, $
+                                          THICK=2., $
+                                          ERRORBAR_THICK=2., $
+                                          SYMBOL=belAARSym, $
+                                          SYM_THICK=2.0, $
+                                          SYM_SIZE=1.5, $
+                                          /OVERPLOT, $
+                                          CURRENT=winder3)
 
-        ILATkappaRStatPlot = ERRORPLOT(ILATRx, $
-                                         ILATRy, $
-                                         ILATRxErr, $
-                                         ILATRyErr, $
-                                         NAME=AARMedName, $
-                                         COLOR=AARCol, $
-                                         TRANSP=medianTransp, $
-                                         THICK=2., $
-                                         ERRORBAR_THICK=2., $
-                                         SYMBOL=AARSym, $
-                                         SYM_THICK=2.0, $
-                                         SYM_SIZE=1.5, $
-                                         /OVERPLOT, $
-                                         CURRENT=winder3)
+           ILATkappaRStatPlot = ERRORPLOT(ILATRx, $
+                                          ILATRy, $
+                                          ILATRxErr, $
+                                          ILATRyErr, $
+                                          NAME=AARMedName, $
+                                          COLOR=AARCol, $
+                                          TRANSP=medianTransp, $
+                                          THICK=2., $
+                                          ERRORBAR_THICK=2., $
+                                          SYMBOL=AARSym, $
+                                          SYM_THICK=2.0, $
+                                          SYM_SIZE=1.5, $
+                                          /OVERPLOT, $
+                                          CURRENT=winder3)
 
-        ILATKappaLegend  = LEGEND(TARGET=[ILATkappaplot1, $
-                                          ILATkappaEStatPlot, $
-                                          ILATkappaplot2, $
-                                          ILATkappaRStatPlot], $
-                                 /NORMAL, $
-                                 POSITION=[0.85,0.8])
+           ILATKappaLegend  = LEGEND(TARGET=[ILATkappaplot1, $
+                                             ILATkappaEStatPlot, $
+                                             ILATkappaplot2, $
+                                             ILATkappaRStatPlot], $
+                                     FONT_SIZE=legFontSize, $
+                                     /NORMAL, $
+                                     POSITION=[0.85,0.8])
 
         ILATkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxI-minI)+minI, $
                              YRANGE=ILATRange, $
@@ -1249,7 +1426,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
                          /NORMAL, $
-                         FONT_SIZE=16, $
+                         FONT_SIZE=fontSize, $
                          FONT_COLOR=k245LineCol, $
                          TARGET=winder3)
 
@@ -1293,48 +1470,50 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           binM              = 1.25
-           binMinforInclusion = 10
+           histBinM            = 0.5
+           NMinBinForInclusion = 10
            MLTReqHS = HISTOGRAM_BINSTATS( $
                       MLTs[req_i], $
                       KF2DParms.kappa[req_i], $
-                      BINSIZE=binM, $
+                      BINSIZE=histBinM, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      BINMINFORINCLUSION=binMinforInclusion, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
            MLTExcHS = HISTOGRAM_BINSTATS( $
                       MLTs[exc_i], $
                       KF2DParms.kappa[exc_i], $
-                      BINSIZE=binM, $
+                      BINSIZE=histBinM, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      BINMINFORINCLUSION=binMinforInclusion, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
-              ;; MLTEy = MLTExcHS.lEdge+binM/2.+binM/10.
-              MLTEy = MLTExcHS.lEdge+binM/2.-0.05
+              ;; MLTEy = MLTExcHS.lEdge+histBinM/2.+histBinM/10.
+              MLTEy = MLTExcHS.lEdge+histBinM/2.-0.05
               MLTEyErr = MAKE_ARRAY(N_ELEMENTS(MLTExcHS.stdDev),VALUE=0)
-              ;; MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
-              MLTRy = MLTReqHS.lEdge+binM/2.+0.05
+              ;; MLTRy = MLTReqHS.lEdge+histBinM/2.+histBinM/20.
+              MLTRy = MLTReqHS.lEdge+histBinM/2.+0.05
               MLTRyErr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    MLTEx = MLTExcHS[*].decile.val[1]
-                    MLTExErr = ABS(TRANSPOSE( $
-                               [[MLTExcHS[*].decile.val[0]-MLTEx], $
-                                [MLTExcHS[*].decile.val[2]-MLTEx]]))
+                    deciles = [0,1,2]
 
-                    MLTRx = MLTReqHS[*].decile.val[1]
+                    MLTEx = MLTExcHS[*].decile.val[deciles[1]]
+                    MLTExErr = ABS(TRANSPOSE( $
+                               [[MLTExcHS[*].decile.val[deciles[0]]-MLTEx], $
+                                [MLTExcHS[*].decile.val[deciles[2]]-MLTEx]]))
+
+                    MLTRx = MLTReqHS[*].decile.val[deciles[1]]
                     MLTRxErr = ABS(TRANSPOSE( $
-                               [[MLTReqHS[*].decile.val[0]-MLTRx], $
-                                [MLTReqHS[*].decile.val[2]-MLTRx]]))
+                               [[MLTReqHS[*].decile.val[deciles[0]]-MLTRx], $
+                                [MLTReqHS[*].decile.val[deciles[2]]-MLTRx]]))
 
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
@@ -1362,52 +1541,53 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ENDIF ELSE BEGIN
               MLTEx = MLTExcHS.mean
-              MLTEy = MLTExcHS.lEdge+binM/2.+binM/20.
+              MLTEy = MLTExcHS.lEdge+histBinM/2.+histBinM/20.
               MLTExErr = MLTExcHS.stdDev
               MLTEyErr = MAKE_ARRAY(N_ELEMENTS(MLTExcHS.stdDev),VALUE=0)
 
               MLTRx = MLTReqHS.mean
-              MLTRy = MLTReqHS.lEdge+binM/2.+binM/20.
+              MLTRy = MLTReqHS.lEdge+histBinM/2.+histBinM/20.
               MLTRxErr = MLTReqHS.stdDev
               MLTRyErr = MAKE_ARRAY(N_ELEMENTS(MLTReqHS.stdDev),VALUE=0)
            ENDELSE
 
            MLTkappaEStatPlot = ERRORPLOT(MLTEx, $
-                                            MLTEy, $
-                                            MLTExErr, $
-                                            MLTEyErr, $
-                                            NAME=belAARMedName, $
-                                            COLOR=belAARCol, $
-                                            TRANSP=medianTransp, $
-                                            THICK=2., $
-                                            ERRORBAR_THICK=2., $
-                                            SYMBOL=belAARSym, $
-                                            SYM_THICK=2.0, $
-                                            SYM_SIZE=1.5, $
-                                            /OVERPLOT, $
-                                            CURRENT=winder4)
+                                         MLTEy, $
+                                         MLTExErr, $
+                                         MLTEyErr, $
+                                         NAME=belAARMedName, $
+                                         COLOR=belAARCol, $
+                                         TRANSP=medianTransp, $
+                                         THICK=2., $
+                                         ERRORBAR_THICK=2., $
+                                         SYMBOL=belAARSym, $
+                                         SYM_THICK=2.0, $
+                                         SYM_SIZE=1.5, $
+                                         /OVERPLOT, $
+                                         CURRENT=winder4)
 
            MLTkappaRStatPlot = ERRORPLOT(MLTRx, $
-                                            MLTRy, $
-                                            MLTRxErr, $
-                                            MLTRyErr, $
-                                            NAME=AARMedName, $
-                                            COLOR=AARCol, $
-                                            TRANSP=medianTransp, $
-                                            THICK=2., $
-                                            ERRORBAR_THICK=2., $
-                                            SYMBOL=AARSym, $
-                                            SYM_THICK=2.0, $
-                                            SYM_SIZE=1.5, $
-                                            /OVERPLOT, $
-                                            CURRENT=winder4)
+                                         MLTRy, $
+                                         MLTRxErr, $
+                                         MLTRyErr, $
+                                         NAME=AARMedName, $
+                                         COLOR=AARCol, $
+                                         TRANSP=medianTransp, $
+                                         THICK=2., $
+                                         ERRORBAR_THICK=2., $
+                                         SYMBOL=AARSym, $
+                                         SYM_THICK=2.0, $
+                                         SYM_SIZE=1.5, $
+                                         /OVERPLOT, $
+                                         CURRENT=winder4)
 
            MLTKappaLegend  = LEGEND(TARGET=[MLTkappaplot1, $
-                                             MLTkappaEStatPlot, $
-                                             MLTkappaplot2, $
-                                             MLTkappaRStatPlot], $
-                                     /NORMAL, $
-                                     POSITION=[0.85,0.8])
+                                            MLTkappaEStatPlot, $
+                                            MLTkappaplot2, $
+                                            MLTkappaRStatPlot], $
+                                    FONT_SIZE=legFontSize, $
+                                    /NORMAL, $
+                                    POSITION=[0.92,0.9])
 
            MLTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxM-minM)+minM, $
                                 YRANGE=MLTRange, $
@@ -1420,7 +1600,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
                             /NORMAL, $
-                            FONT_SIZE=16, $
+                            FONT_SIZE=fontSize, $
                             FONT_COLOR=k245LineCol, $
                             TARGET=winder4)
 
@@ -1467,7 +1647,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.2
-           binMinforInclusion = 10
+           NMinBinForInclusion = 10
            GoverKReqHS = HISTOGRAM_BINSTATS( $
                          KF2DParms.kappa[req_i], $
                          ratio[req_i], $
@@ -1475,7 +1655,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          MIN=minK, $
                          MAX=maxK, $
                          /NAN, $
-                         BINMINFORINCLUSION=binMinforInclusion, $
+                         NMINBINFORINCLUSION=NMinBinForInclusion, $
                          GIVE_DECILES=stats__give_decile, $
                          GIVE_VENTILES=stats__give_ventile)
            GoverKExcHS = HISTOGRAM_BINSTATS( $
@@ -1485,7 +1665,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          MIN=minK, $
                          MAX=maxK, $
                          /NAN, $
-                         BINMINFORINCLUSION=binMinforInclusion, $
+                         NMINBINFORINCLUSION=NMinBinForInclusion, $
                          GIVE_DECILES=stats__give_decile, $
                          GIVE_VENTILES=stats__give_ventile)
 
@@ -1499,15 +1679,18 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    GoverKEy = GoverKExcHS[*].decile.val[1]
-                    GoverKEyErr = ABS(TRANSPOSE( $
-                               [[GoverKExcHS[*].decile.val[0]-GoverKEy], $
-                                [GoverKExcHS[*].decile.val[2]-GoverKEy]]))
+                    deciles = [0,1,2]
+                    ;; deciles = [3,4,5]
 
-                    GoverKRy = GoverKReqHS[*].decile.val[1]
+                    GoverKEy = GoverKExcHS[*].decile.val[deciles[1]]
+                    GoverKEyErr = ABS(TRANSPOSE( $
+                               [[GoverKExcHS[*].decile.val[deciles[0]]-GoverKEy], $
+                                [GoverKExcHS[*].decile.val[deciles[2]]-GoverKEy]]))
+
+                    GoverKRy = GoverKReqHS[*].decile.val[deciles[1]]
                     GoverKRyErr = ABS(TRANSPOSE( $
-                               [[GoverKReqHS[*].decile.val[0]-GoverKRy], $
-                                [GoverKReqHS[*].decile.val[2]-GoverKRy]]))
+                               [[GoverKReqHS[*].decile.val[deciles[0]]-GoverKRy], $
+                                [GoverKReqHS[*].decile.val[deciles[2]]-GoverKRy]]))
 
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
@@ -1546,41 +1729,42 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ENDELSE
 
            GoverKchi2KappaEStatPlot = ERRORPLOT(GoverKEx, $
-                                            GoverKEy, $
-                                            GoverKExErr, $
-                                            GoverKEyErr, $
-                                            NAME=belAARMedName, $
-                                            COLOR=belAARCol, $
-                                            TRANSP=medianTransp, $
-                                            THICK=2., $
-                                            ERRORBAR_THICK=2., $
-                                            SYMBOL=belAARSym, $
-                                            SYM_THICK=2.0, $
-                                            SYM_SIZE=1.5, $
-                                            /OVERPLOT, $
-                                            CURRENT=winder5)
+                                                GoverKEy, $
+                                                GoverKExErr, $
+                                                GoverKEyErr, $
+                                                NAME=belAARMedName, $
+                                                COLOR=belAARCol, $
+                                                TRANSP=medianTransp, $
+                                                THICK=2., $
+                                                ERRORBAR_THICK=2., $
+                                                SYMBOL=belAARSym, $
+                                                SYM_THICK=2.0, $
+                                                SYM_SIZE=1.5, $
+                                                /OVERPLOT, $
+                                                CURRENT=winder5)
 
            GoverKchi2KappaRStatPlot = ERRORPLOT(GoverKRx, $
-                                            GoverKRy, $
-                                            GoverKRxErr, $
-                                            GoverKRyErr, $
-                                            NAME=AARMedName, $
-                                            COLOR=AARCol, $
-                                            TRANSP=medianTransp, $
-                                            THICK=2., $
-                                            ERRORBAR_THICK=2., $
-                                            SYMBOL=AARSym, $
-                                            SYM_THICK=2.0, $
-                                            SYM_SIZE=1.5, $
-                                            /OVERPLOT, $
-                                            CURRENT=winder5)
+                                                GoverKRy, $
+                                                GoverKRxErr, $
+                                                GoverKRyErr, $
+                                                NAME=AARMedName, $
+                                                COLOR=AARCol, $
+                                                TRANSP=medianTransp, $
+                                                THICK=2., $
+                                                ERRORBAR_THICK=2., $
+                                                SYMBOL=AARSym, $
+                                                SYM_THICK=2.0, $
+                                                SYM_SIZE=1.5, $
+                                                /OVERPLOT, $
+                                                CURRENT=winder5)
 
            GoverKKappaLegend  = LEGEND(TARGET=[GoverKchi2Kappaplot1, $
-                                             GoverKchi2KappaEStatPlot, $
-                                             GoverKchi2Kappaplot2, $
-                                             GoverKchi2KappaRStatPlot], $
-                                     /NORMAL, $
-                                     POSITION=[0.85,0.8])
+                                               GoverKchi2KappaEStatPlot, $
+                                               GoverKchi2Kappaplot2, $
+                                               GoverKchi2KappaRStatPlot], $
+                                       FONT_SIZE=legFontSize, $
+                                       /NORMAL, $
+                                       POSITION=[0.85,0.8])
 
            ;; GoverKkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxK-minK)+minK, $
            ;;                      YRANGE=GoverKchi2Range, $
@@ -1593,7 +1777,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ;; kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
            ;;                  /NORMAL, $
-           ;;                  FONT_SIZE=16, $
+           ;;                  FONT_SIZE=fontSize, $
            ;;                  FONT_COLOR=k245LineCol, $
            ;;                  TARGET=winder5)
 
@@ -1645,7 +1829,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.2
-           binMinforInclusion = 10
+           NMinBinForInclusion = 10
            chi2RedReqHS = HISTOGRAM_BINSTATS( $
                           KF2DParms.kappa[req_i], $
                           KF2DParms.chi2Red[req_i], $
@@ -1653,7 +1837,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           MIN=minK, $
                           MAX=maxK, $
                           /NAN, $
-                          BINMINFORINCLUSION=binMinforInclusion, $
+                          NMINBINFORINCLUSION=NMinBinForInclusion, $
                           GIVE_DECILES=stats__give_decile, $
                           GIVE_VENTILES=stats__give_ventile)
            chi2RedExcHS = HISTOGRAM_BINSTATS( $
@@ -1663,7 +1847,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           MIN=minK, $
                           MAX=maxK, $
                           /NAN, $
-                          BINMINFORINCLUSION=binMinforInclusion, $
+                          NMINBINFORINCLUSION=NMinBinForInclusion, $
                           GIVE_DECILES=stats__give_decile, $
                           GIVE_VENTILES=stats__give_ventile)
 
@@ -1677,15 +1861,17 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
               CASE 1 OF
                  KEYWORD_SET(stats__give_decile): BEGIN
-                    chi2RedEy = chi2RedExcHS[*].decile.val[1]
-                    chi2RedEyErr = ABS(TRANSPOSE( $
-                               [[chi2RedExcHS[*].decile.val[0]-chi2RedEy], $
-                                [chi2RedExcHS[*].decile.val[2]-chi2RedEy]]))
+                    deciles = [0,1,2]
 
-                    chi2RedRy = chi2RedReqHS[*].decile.val[1]
+                    chi2RedEy = chi2RedExcHS[*].decile.val[deciles[1]]
+                    chi2RedEyErr = ABS(TRANSPOSE( $
+                               [[chi2RedExcHS[*].decile.val[deciles[0]]-chi2RedEy], $
+                                [chi2RedExcHS[*].decile.val[deciles[2]]-chi2RedEy]]))
+
+                    chi2RedRy = chi2RedReqHS[*].decile.val[deciles[1]]
                     chi2RedRyErr = ABS(TRANSPOSE( $
-                               [[chi2RedReqHS[*].decile.val[0]-chi2RedRy], $
-                                [chi2RedReqHS[*].decile.val[2]-chi2RedRy]]))
+                               [[chi2RedReqHS[*].decile.val[deciles[0]]-chi2RedRy], $
+                                [chi2RedReqHS[*].decile.val[deciles[2]]-chi2RedRy]]))
 
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
@@ -1739,26 +1925,27 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                             CURRENT=winder6)
 
            chi2RedKappaRStatPlot = ERRORPLOT(chi2RedRx, $
-                                            chi2RedRy, $
-                                            chi2RedRxErr, $
-                                            chi2RedRyErr, $
-                                            NAME=AARMedName, $
-                                            COLOR=AARCol, $
-                                            TRANSP=medianTransp, $
-                                            THICK=2., $
-                                            ERRORBAR_THICK=2., $
-                                            SYMBOL=AARSym, $
-                                            SYM_THICK=2.0, $
-                                            SYM_SIZE=1.5, $
-                                            /OVERPLOT, $
-                                            CURRENT=winder6)
+                                             chi2RedRy, $
+                                             chi2RedRxErr, $
+                                             chi2RedRyErr, $
+                                             NAME=AARMedName, $
+                                             COLOR=AARCol, $
+                                             TRANSP=medianTransp, $
+                                             THICK=2., $
+                                             ERRORBAR_THICK=2., $
+                                             SYMBOL=AARSym, $
+                                             SYM_THICK=2.0, $
+                                             SYM_SIZE=1.5, $
+                                             /OVERPLOT, $
+                                             CURRENT=winder6)
 
            chi2RedKappaLegend  = LEGEND(TARGET=[chi2RedKappaplot1, $
-                                             chi2RedKappaEStatPlot, $
-                                             chi2RedKappaplot2, $
-                                             chi2RedKappaRStatPlot], $
-                                     /NORMAL, $
-                                     POSITION=[0.85,0.8])
+                                                chi2RedKappaEStatPlot, $
+                                                chi2RedKappaplot2, $
+                                                chi2RedKappaRStatPlot], $
+                                        /NORMAL, $
+                                        FONT_SIZE=legFontSize, $
+                                        POSITION=[0.85,0.8])
 
            ;; chi2RedkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxK-minK)+minK, $
            ;;                      YRANGE=chi2RedRange, $
@@ -1771,7 +1958,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ;; kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
            ;;                  /NORMAL, $
-           ;;                  FONT_SIZE=16, $
+           ;;                  FONT_SIZE=fontSize, $
            ;;                  FONT_COLOR=k245LineCol, $
            ;;                  TARGET=winder6)
 
