@@ -75,6 +75,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    MAKEGOVERK__LOG=GoverKLog, $
    MAKECHI2REDVSKAPPAPLOT=makeChi2RedvsKappaPlot, $
    MAKECHI2RED__LOG=chi2RedLog, $
+   MAKEDSTKAPPAPLOT=makeDSTKappaplot, $
+   MAKEAEKAPPAPLOT=makeAEKappaplot, $
    STATS__GIVE_DECILE=stats__give_decile, $
    STATS__GIVE_VENTILE=stats__give_ventile
 
@@ -260,7 +262,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   medianstyle = 1
   medianTransp = 0
   bpdStuff = 1
-
 
   belAARSym = 'x'
   AARSym    = '+'
@@ -1021,6 +1022,228 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         winder6.Save,plotDir+chi2RedPlotName
 
      ENDIF
+
+     IF KEYWORD_SET(makeDSTKappaplot) THEN BEGIN
+
+        minDST = MIN(andre.dst[plot_i])
+        maxDST = MAX(andre.dst[plot_i])
+
+        winder7 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+        DSTkappaplot = SCATTERPLOT(KF2DParms.kappa[plot_i], $
+                                    andre.dst[plot_i], $
+                                    NAME=allName, $
+                                    XTITLE='Kappa', $
+                                    YTITLE='Dst (nT)', $
+                                    SYM_COLOR=belAARCol, $
+                                    SYMBOL=belAARSym, $                                    
+                                    XRANGE=kappaPlotRange, $
+                                    TRANSP=BelTransp, $
+                                    CURRENT=winder7)
+
+        IF KEYWORD_SET(medianstyle) THEN BEGIN
+
+           histBinD            = 10
+           NMinBinForInclusion = 20
+           DSTHS = HISTOGRAM_BINSTATS( $
+                    andre.dst[plot_i], $
+                    KF2DParms.kappa[plot_i], $
+                    BINSIZE=histBinD, $
+                    MIN=minDST, $
+                    MAX=maxDST, $
+                    /NAN, $
+                    NMINBINFORINCLUSION=NMinBinForInclusion, $
+                    GIVE_DECILES=stats__give_decile, $
+                    GIVE_VENTILES=stats__give_ventile)
+
+           IF KEYWORD_SET(bpdStuff) THEN BEGIN
+              Ey = DSTHS.lEdge+histBinD/2.-2
+              EyErr = MAKE_ARRAY(N_ELEMENTS(DSTHS.stdDev),VALUE=0)
+
+              CASE 1 OF
+                 KEYWORD_SET(stats__give_decile): BEGIN
+                    Ex = DSTHS[*].decile.val[1]
+                    ExErr = ABS(TRANSPOSE( $
+                               [[DSTHS[*].decile.val[0]-Ex], $
+                                [DSTHS[*].decile.val[2]-Ex]]))
+                 END
+                 KEYWORD_SET(stats__give_ventile): BEGIN
+                    Ex = DSTHS[*].ventile.val[2]
+                    ExErr = ABS(TRANSPOSE( $
+                               [[DSTHS[*].ventile.val[0]-Ex], $
+                                [DSTHS[*].ventile.val[4]-Ex]]))
+                 END
+                 ELSE: BEGIN
+                    Ex = DSTHS[*].bpd[2]
+                    ExErr = ABS(TRANSPOSE([[DSTHS[*].bpd[1]-Ex], $
+                                              [DSTHS[*].bpd[3]-Ex]]))
+                 END
+              ENDCASE
+
+           ENDIF ELSE BEGIN
+              Ex = DSTHS.mean
+              Ey = DSTHS.lEdge+histBinD/2.+2
+              ExErr = DSTHS.stdDev
+              EyErr = MAKE_ARRAY(N_ELEMENTS(DSTHS.stdDev),VALUE=0)
+           ENDELSE
+
+           DSTkappaStatPlot = ERRORPLOT(Ex, $
+                                         Ey, $
+                                         ExErr, $
+                                         EyErr, $
+                                         NAME=allMedName, $
+                                         COLOR=belAARCol, $
+                                         TRANSP=medianTransp, $
+                                         THICK=2., $
+                                         ERRORBAR_THICK=2., $
+                                         SYMBOL=belAARSym, $
+                                         SYM_THICK=2.0, $
+                                         SYM_SIZE=1.5, $
+                                         /OVERPLOT, $
+                                         CURRENT=winder7)
+
+           DSTKappaLegend  = LEGEND(TARGET=[DSTkappaplot, $
+                                            DSTkappaStatPlot], $
+                                    /NORMAL, $
+                                    POSITION=[0.85,0.8])
+
+           DSTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxDST-minDST)+minDST, $
+                               YRANGE=DSTRange, $
+                               THICK=2., $
+                               COLOR=k245LineCol, $
+                               TRANSP=35, $
+                               LINESTYLE='--', $
+                               /OVERPLOT, $
+                               CURRENT=winder7)
+
+           kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
+                            /NORMAL, $
+                            FONT_SIZE=fontSize, $
+                            FONT_COLOR=k245LineCol, $
+                            TARGET=winder7)
+
+        ENDIF
+
+        ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                       + "-kS-DSTkappa" $
+                       + "-" + mltStr +altStr $
+                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+
+        PRINT,"Saving to " + ilatPlotName
+        winder7.Save,plotDir+ilatPlotName
+
+     ENDIF  
+
+     IF KEYWORD_SET(makeAEKappaplot) THEN BEGIN
+
+        winder8 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+        minAE = MIN(andre.ae[plot_i])
+        maxAE = MAX(andre.ae[plot_i])
+
+        AEkappaplot = SCATTERPLOT(KF2DParms.kappa[plot_i], $
+                                    andre.ae[plot_i], $
+                                    NAME=allName, $
+                                    XTITLE='Kappa', $
+                                    YTITLE='Ae (nT)', $
+                                    SYM_COLOR=belAARCol, $
+                                    SYMBOL=belAARSym, $                                    
+                                    XRANGE=kappaPlotRange, $
+                                    TRANSP=BelTransp, $
+                                    CURRENT=winder8)
+
+        IF KEYWORD_SET(medianstyle) THEN BEGIN
+
+           histBinAE           = 100
+           NMinBinForInclusion = 20
+           AEHS = HISTOGRAM_BINSTATS( $
+                  andre.ae[plot_i], $
+                  KF2DParms.kappa[plot_i], $
+                  BINSIZE=histBinAE, $
+                  MIN=minAE, $
+                  MAX=maxAE, $
+                  /NAN, $
+                  NMINBINFORINCLUSION=NMinBinForInclusion, $
+                  GIVE_DECILES=stats__give_decile, $
+                  GIVE_VENTILES=stats__give_ventile)
+
+           IF KEYWORD_SET(bpdstuff) THEN BEGIN
+              Ey = AEHS.lEdge+histBinAE/2.-0.05
+              EyErr = MAKE_ARRAY(N_ELEMENTS(AEHS.stdDev),VALUE=0)
+
+              CASE 1 OF
+                 KEYWORD_SET(stats__give_decile): BEGIN
+                    Ex = AEHS[*].decile.val[1]
+                    ExErr = ABS(TRANSPOSE( $
+                               [[AEHS[*].decile.val[0]-Ex], $
+                                [AEHS[*].decile.val[2]-Ex]]))
+                 END
+                 KEYWORD_SET(stats__give_ventile): BEGIN
+                    Ex = AEHS[*].ventile.val[2]
+                    ExErr = ABS(TRANSPOSE( $
+                               [[AEHS[*].ventile.val[0]-Ex], $
+                                [AEHS[*].ventile.val[4]-Ex]]))
+                 END
+                 ELSE: BEGIN
+                    Ex = AEHS[*].bpd[2]
+                    ExErr = ABS(TRANSPOSE([[AEHS[*].bpd[1]-Ex], $
+                                              [AEHS[*].bpd[3]-Ex]]))
+                 END
+              ENDCASE
+
+           ENDIF ELSE BEGIN
+              Ex = AEHS.mean
+              Ey = AEHS.lEdge+histBinAE/2.+histBinAE/20.
+              ExErr = AEHS.stdDev
+              EyErr = MAKE_ARRAY(N_ELEMENTS(AEHS.stdDev),VALUE=0)
+           ENDELSE
+
+           AEkappaStatPlot = ERRORPLOT(Ex, $
+                                         Ey, $
+                                         ExErr, $
+                                         EyErr, $
+                                         NAME=allMedName, $
+                                         COLOR=belAARCol, $
+                                         TRANSP=medianTransp, $
+                                         THICK=2., $
+                                         ERRORBAR_THICK=2., $
+                                         SYMBOL=belAARSym, $
+                                         SYM_THICK=2.0, $
+                                         SYM_SIZE=1.5, $
+                                         /OVERPLOT, $
+                                         CURRENT=winder8)
+
+           AEKappaLegend  = LEGEND(TARGET=[AEkappaplot, $
+                                            AEkappaStatPlot], $
+                                    /NORMAL, $
+                                    POSITION=[0.85,0.8])
+
+           AEkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxAE-minAE)+minAE, $
+                               YRANGE=AERange, $
+                               THICK=2., $
+                               COLOR=k245LineCol, $
+                               TRANSP=35, $
+                               LINESTYLE='--', $
+                               /OVERPLOT, $
+                               CURRENT=winder8)
+
+           kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
+                            /NORMAL, $
+                            FONT_SIZE=fontSize, $
+                            FONT_COLOR=k245LineCol, $
+                            TARGET=winder8)
+
+        ENDIF
+
+        ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                       + "-kS-AEkappa" $
+                       + "-" + mltStr +altStr $
+                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+
+        PRINT,"Saving to " + ilatPlotName
+        winder8.Save,plotDir+ilatPlotName
+
+     ENDIF  
 
   ENDIF ELSE BEGIN
 
@@ -1976,6 +2199,389 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      ENDIF  
 
+     IF KEYWORD_SET(makeDSTKappaplot) THEN BEGIN
+
+        winder7 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+        minDST = MIN(andre.dst[req_i,exc_i])
+        maxDST = MAX(andre.dst[req_i,exc_i])
+
+        ;; DSTRange = MINMAX(ABS(andre.dst[exc_i]))
+        DSTRange = [minDST,maxDST]
+        DSTkappaplot1 = SCATTERPLOT(KF2DParms.kappa[exc_i], $
+                                    andre.dst[exc_i], $
+                                    XTITLE='Kappa', $
+                                    YTITLE='Dst (nT)', $
+                                    XRANGE=kappaPlotRange, $
+                                    YRANGE=DSTRange, $
+                                    SYM_COLOR=belAARCol, $
+                                    SYMBOL=belAARSym, $
+                                    NAME=belAARName, $
+                                    TRANSP=BelTransp, $
+                                    CURRENT=winder7)
+
+        DSTkappaplot2 = SCATTERPLOT(KF2DParms.kappa[req_i], $
+                                    andre.dst[req_i], $
+                                    XRANGE=kappaPlotRange, $
+                                    YRANGE=DSTRange, $
+                                    SYM_COLOR=AARCol, $
+                                    SYMBOL=AARSym, $
+                                    NAME=AARName, $
+                                    TRANSP=AARTransp, $
+                                    /OVERPLOT, $
+                                    CURRENT=winder7)
+
+        IF KEYWORD_SET(bpdStuff) THEN BEGIN
+
+           histBinD            = 5
+           NMinBinForInclusion = 20
+           DSTReqHS = HISTOGRAM_BINSTATS( $
+                      andre.dst[req_i], $
+                      KF2DParms.kappa[req_i], $
+                      BINSIZE=histBinD, $
+                      MIN=minDST, $
+                      MAX=maxDST, $
+                      /NAN, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      GIVE_DECILES=stats__give_decile, $
+                      GIVE_VENTILES=stats__give_ventile)
+           DSTExcHS = HISTOGRAM_BINSTATS( $
+                      andre.dst[exc_i], $
+                      KF2DParms.kappa[exc_i], $
+                      BINSIZE=histBinD, $
+                      MIN=minDST, $
+                      MAX=maxDST, $
+                      /NAN, $
+                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      GIVE_DECILES=stats__give_decile, $
+                      GIVE_VENTILES=stats__give_ventile)
+
+           ;; Ey = ExcHS.lEdge+histBinD/2.+histBinD/10.
+           Ey = ExcHS.lEdge+histBinD/2.-0.25
+           EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+           ;; Ry = ReqHS.lEdge+histBinD/2.+histBinD/20.
+           Ry = ReqHS.lEdge+histBinD/2.+0.25
+           RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+
+           CASE 1 OF
+              KEYWORD_SET(stats__give_decile): BEGIN
+                 deciles = [0,1,2]
+
+                 Ex = ExcHS[*].decile.val[deciles[1]]
+                 ExErr = ABS(TRANSPOSE( $
+                         [[ExcHS[*].decile.val[deciles[0]]-Ex], $
+                          [ExcHS[*].decile.val[deciles[2]]-Ex]]))
+
+                 Rx = ReqHS[*].decile.val[deciles[1]]
+                 RxErr = ABS(TRANSPOSE( $
+                         [[ReqHS[*].decile.val[deciles[0]]-Rx], $
+                          [ReqHS[*].decile.val[deciles[2]]-Rx]]))
+
+              END
+              KEYWORD_SET(stats__give_ventile): BEGIN
+                 Ex = ExcHS[*].ventile.val[2]
+                 ExErr = ABS(TRANSPOSE( $
+                         [[ExcHS[*].ventile.val[0]-Ex], $
+                          [ExcHS[*].ventile.val[4]-Ex]]))
+
+                 Rx = ReqHS[*].ventile.val[2]
+                 RxErr = ABS(TRANSPOSE( $
+                         [[ReqHS[*].ventile.val[0]-Rx], $
+                          [ReqHS[*].ventile.val[4]-Rx]]))
+
+              END
+              ELSE: BEGIN
+                 Ex = ExcHS[*].bpd[2]
+                 ExErr = ABS(TRANSPOSE([[ExcHS[*].bpd[1]-Ex], $
+                                        [ExcHS[*].bpd[3]-Ex]]))
+
+                 Rx = ReqHS[*].bpd[2]
+                 RxErr = ABS(TRANSPOSE([[ReqHS[*].bpd[1]-Rx], $
+                                        [ReqHS[*].bpd[3]-Rx]]))
+              END
+           ENDCASE
+
+           ;; Ex = ExcHS[*].bpd[2]
+           ;; ;; Ey = ExcHS.lEdge+histBinD/2.+histBinD/10.
+           ;; Ey = ExcHS.lEdge+histBinD/2.-0.25
+           ;; ExErr = ABS(TRANSPOSE([[ExcHS[*].bpd[1]-Ex], $
+           ;;                        [ExcHS[*].bpd[3]-Ex]]))
+           ;; EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+
+           ;; Rx = ReqHS[*].bpd[2]
+           ;; ;; Ry = ReqHS.lEdge+histBinD/2.+histBinD/20.
+           ;; Ry = ReqHS.lEdge+histBinD/2.+0.25
+           ;; RxErr = ABS(TRANSPOSE([[ReqHS[*].bpd[1]-Rx], $
+           ;;                            [ReqHS[*].bpd[3]-Rx]]))
+           ;; RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+
+        ENDIF ELSE BEGIN
+           Ex = ExcHS.mean
+           Ey = ExcHS.lEdge+histBinD/2.+histBinD/20.
+           ExErr = ExcHS.stdDev
+           EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+
+           Rx = ReqHS.mean
+           Ry = ReqHS.lEdge+histBinD/2.+histBinD/20.
+           RxErr = ReqHS.stdDev
+           RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+        ENDELSE
+
+        DSTkappaEStatPlot = ERRORPLOT(Ex, $
+                                      Ey, $
+                                      ExErr, $
+                                      EyErr, $
+                                      NAME=belAARMedName, $
+                                      COLOR=belAARCol, $
+                                      TRANSP=medianTransp, $
+                                      THICK=2., $
+                                      ERRORBAR_THICK=2., $
+                                      SYMBOL=belAARSym, $
+                                      SYM_THICK=2.0, $
+                                      SYM_SIZE=1.5, $
+                                      /OVERPLOT, $
+                                      CURRENT=winder7)
+
+        DSTkappaRStatPlot = ERRORPLOT(Rx, $
+                                      Ry, $
+                                      RxErr, $
+                                      RyErr, $
+                                      NAME=AARMedName, $
+                                      COLOR=AARCol, $
+                                      TRANSP=medianTransp, $
+                                      THICK=2., $
+                                      ERRORBAR_THICK=2., $
+                                      SYMBOL=AARSym, $
+                                      SYM_THICK=2.0, $
+                                      SYM_SIZE=1.5, $
+                                      /OVERPLOT, $
+                                      CURRENT=winder7)
+
+        DSTKappaLegend  = LEGEND(TARGET=[DSTkappaplot1, $
+                                         DSTkappaEStatPlot, $
+                                         DSTkappaplot2, $
+                                         DSTkappaRStatPlot], $
+                                 FONT_SIZE=legFontSize, $
+                                 /NORMAL, $
+                                 POSITION=[0.85,0.8])
+
+        DSTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxDST-minDST)+minDST, $
+                            YRANGE=DSTRange, $
+                            THICK=2., $
+                            COLOR=k245LineCol, $
+                            TRANSP=60, $
+                            LINESTYLE='--', $
+                            /OVERPLOT, $
+                            CURRENT=winder7)
+
+        kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
+                         /NORMAL, $
+                         FONT_SIZE=fontSize, $
+                         FONT_COLOR=k245LineCol, $
+                         TARGET=winder7)
+
+        dstPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                      + "-kS-DSTkappa" $
+                      + "-" + mltStr + altStr $
+                      + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+
+        PRINT,"Saving to " + dstPlotName
+        winder7.Save,plotDir+dstPlotName
+
+     ENDIF  
+
+     IF KEYWORD_SET(makeAEKappaplot) THEN BEGIN
+
+        winder8 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
+
+        minAE = MIN(andre.ae[req_i,exc_i])
+        maxAE = MAX(andre.ae[req_i,exc_i])
+
+        ;; AERange = MINMAX(ABS(andre.ae[exc_i]))
+        ;; AERange = [minAE,maxAE]
+        AEkappaplot1 = SCATTERPLOT(KF2DParms.kappa[exc_i], $
+                                   andre.ae[exc_i], $
+                                   XTITLE='Kappa', $
+                                   YTITLE='Ae (nT)', $
+                                   XRANGE=kappaPlotRange, $
+                                   YRANGE=AERange, $
+                                   SYM_COLOR=belAARCol, $
+                                   SYMBOL=belAARSym, $
+                                   NAME=belAARName, $
+                                   TRANSP=BelTransp, $
+                                   CURRENT=winder8)
+
+        AEkappaplot2 = SCATTERPLOT(KF2DParms.kappa[req_i], $
+                                   andre.ae[req_i], $
+                                   XRANGE=kappaPlotRange, $
+                                   YRANGE=AERange, $
+                                   SYM_COLOR=AARCol, $
+                                   SYMBOL=AARSym, $
+                                   NAME=AARName, $
+                                   TRANSP=AARTransp, $
+                                   /OVERPLOT, $
+                                   CURRENT=winder8)
+
+        IF KEYWORD_SET(bpdStuff) THEN BEGIN
+
+           histBinAE           = 100
+           NMinBinForInclusion = 20
+
+           AEReqHS = HISTOGRAM_BINSTATS( $
+                     andre.ae[req_i], $
+                     KF2DParms.kappa[req_i], $
+                     BINSIZE=histBinAE, $
+                     MIN=minAE, $
+                     MAX=maxAE, $
+                     /NAN, $
+                     NMINBINFORINCLUSION=NMinBinForInclusion, $
+                     GIVE_DECILES=stats__give_decile, $
+                     GIVE_VENTILES=stats__give_ventile)
+           AEExcHS = HISTOGRAM_BINSTATS( $
+                     andre.ae[exc_i], $
+                     KF2DParms.kappa[exc_i], $
+                     BINSIZE=histBinAE, $
+                     MIN=minAE, $
+                     MAX=maxAE, $
+                     /NAN, $
+                     NMINBINFORINCLUSION=NMinBinForInclusion, $
+                     GIVE_DECILES=stats__give_decile, $
+                     GIVE_VENTILES=stats__give_ventile)
+
+           ;; Ey = ExcHS.lEdge+histBinAE/2.+histBinAE/10.
+           Ey = ExcHS.lEdge+histBinAE/2.-0.25
+           EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+           ;; Ry = ReqHS.lEdge+histBinAE/2.+histBinAE/20.
+           Ry = ReqHS.lEdge+histBinAE/2.+0.25
+           RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+
+           CASE 1 OF
+              KEYWORD_SET(stats__give_decile): BEGIN
+                 deciles = [0,1,2]
+
+                 Ex = ExcHS[*].decile.val[deciles[1]]
+                 ExErr = ABS(TRANSPOSE( $
+                         [[ExcHS[*].decile.val[deciles[0]]-Ex], $
+                          [ExcHS[*].decile.val[deciles[2]]-Ex]]))
+
+                 Rx = ReqHS[*].decile.val[deciles[1]]
+                 RxErr = ABS(TRANSPOSE( $
+                         [[ReqHS[*].decile.val[deciles[0]]-Rx], $
+                          [ReqHS[*].decile.val[deciles[2]]-Rx]]))
+
+              END
+              KEYWORD_SET(stats__give_ventile): BEGIN
+                 Ex = ExcHS[*].ventile.val[2]
+                 ExErr = ABS(TRANSPOSE( $
+                         [[ExcHS[*].ventile.val[0]-Ex], $
+                          [ExcHS[*].ventile.val[4]-Ex]]))
+
+                 Rx = ReqHS[*].ventile.val[2]
+                 RxErr = ABS(TRANSPOSE( $
+                         [[ReqHS[*].ventile.val[0]-Rx], $
+                          [ReqHS[*].ventile.val[4]-Rx]]))
+
+              END
+              ELSE: BEGIN
+                 Ex = ExcHS[*].bpd[2]
+                 ExErr = ABS(TRANSPOSE([[ExcHS[*].bpd[1]-Ex], $
+                                        [ExcHS[*].bpd[3]-Ex]]))
+
+                 Rx = ReqHS[*].bpd[2]
+                 RxErr = ABS(TRANSPOSE([[ReqHS[*].bpd[1]-Rx], $
+                                        [ReqHS[*].bpd[3]-Rx]]))
+              END
+           ENDCASE
+
+           ;; Ex = ExcHS[*].bpd[2]
+           ;; ;; Ey = ExcHS.lEdge+histBinAE/2.+histBinAE/10.
+           ;; Ey = ExcHS.lEdge+histBinAE/2.-0.25
+           ;; ExErr = ABS(TRANSPOSE([[ExcHS[*].bpd[1]-Ex], $
+           ;;                        [ExcHS[*].bpd[3]-Ex]]))
+           ;; EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+
+           ;; Rx = ReqHS[*].bpd[2]
+           ;; ;; Ry = ReqHS.lEdge+histBinAE/2.+histBinAE/20.
+           ;; Ry = ReqHS.lEdge+histBinAE/2.+0.25
+           ;; RxErr = ABS(TRANSPOSE([[ReqHS[*].bpd[1]-Rx], $
+           ;;                            [ReqHS[*].bpd[3]-Rx]]))
+           ;; RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+
+        ENDIF ELSE BEGIN
+           Ex = ExcHS.mean
+           Ey = ExcHS.lEdge+histBinAE/2.+histBinAE/20.
+           ExErr = ExcHS.stdDev
+           EyErr = MAKE_ARRAY(N_ELEMENTS(ExcHS.stdDev),VALUE=0)
+
+           Rx = ReqHS.mean
+           Ry = ReqHS.lEdge+histBinAE/2.+histBinAE/20.
+           RxErr = ReqHS.stdDev
+           RyErr = MAKE_ARRAY(N_ELEMENTS(ReqHS.stdDev),VALUE=0)
+        ENDELSE
+
+        AEkappaEStatPlot = ERRORPLOT(Ex, $
+                                      Ey, $
+                                      ExErr, $
+                                      EyErr, $
+                                      NAME=belAARMedName, $
+                                      COLOR=belAARCol, $
+                                      TRANSP=medianTransp, $
+                                      THICK=2., $
+                                      ERRORBAR_THICK=2., $
+                                      SYMBOL=belAARSym, $
+                                      SYM_THICK=2.0, $
+                                      SYM_SIZE=1.5, $
+                                      /OVERPLOT, $
+                                      CURRENT=winder8)
+
+        AEkappaRStatPlot = ERRORPLOT(Rx, $
+                                      Ry, $
+                                      RxErr, $
+                                      RyErr, $
+                                      NAME=AARMedName, $
+                                      COLOR=AARCol, $
+                                      TRANSP=medianTransp, $
+                                      THICK=2., $
+                                      ERRORBAR_THICK=2., $
+                                      SYMBOL=AARSym, $
+                                      SYM_THICK=2.0, $
+                                      SYM_SIZE=1.5, $
+                                      /OVERPLOT, $
+                                      CURRENT=winder8)
+
+        AEKappaLegend  = LEGEND(TARGET=[AEkappaplot1, $
+                                         AEkappaEStatPlot, $
+                                         AEkappaplot2, $
+                                         AEkappaRStatPlot], $
+                                 FONT_SIZE=legFontSize, $
+                                 /NORMAL, $
+                                 POSITION=[0.85,0.8])
+
+        AEkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxAE-minAE)+minAE, $
+                            YRANGE=AERange, $
+                            THICK=2., $
+                            COLOR=k245LineCol, $
+                            TRANSP=60, $
+                            LINESTYLE='--', $
+                            /OVERPLOT, $
+                            CURRENT=winder8)
+
+        kText     = TEXT(0.15,0.1,"$\kappa_t$ = 2.45", $
+                         /NORMAL, $
+                         FONT_SIZE=fontSize, $
+                         FONT_COLOR=k245LineCol, $
+                         TARGET=winder8)
+
+        aePlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
+                      + "-kS-AEkappa" $
+                      + "-" + mltStr + altStr $
+                      + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+
+        PRINT,"Saving to " + aePlotName
+        winder8.Save,plotDir+aePlotName
+
+     ENDIF
+
   ENDELSE
 
   IF ~KEYWORD_SET(bufferPlots) THEN STOP
@@ -2005,5 +2611,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      winder6.Close
   ENDIF
 
+  IF KEYWORD_SET(makeDSTKappaplot) THEN BEGIN
+     winder7.Close
+  ENDIF
+
+  IF KEYWORD_SET(makeAEKappaplot) THEN BEGIN
+     winder8.Close
+  ENDIF
 
 END

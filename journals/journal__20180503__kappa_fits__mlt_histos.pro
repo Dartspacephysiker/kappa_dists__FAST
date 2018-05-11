@@ -1,28 +1,82 @@
 ;2018/05/03
 PRO J20180503__PRINT_FOR_MATHEMATICA, $
-   kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc, $
-   kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc, $
+   names,histList,binList,dataList, $
+   NORMALIZE_HIST=normalize_hist, $
+   ALSO_PRINT_DATA=also_print_data, $
    BINSIZE=kHBinSize
   
 
-  names = ['kHistEarlyReq','kHistEarlyExc','kHistLateReq','kHistLateExc']
-  hists = LIST(kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc)
-  bins  = LIST(kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc)
-  FOR jj=0,N_ELEMENTS(hists)-1 DO BEGIN
+  FOR jj=0,N_ELEMENTS(histList)-1 DO BEGIN
 
      name = names[jj]
-     hist = hists[jj]
-     bin = bins[jj]+kHBinSize/2.
+     hist = histList[jj]
+     bins = binList[jj]+kHBinSize/2.
+
      PRINT,FORMAT='(A0," = {")',name
 
+     IF KEYWORD_SET(normalize_hist) THEN BEGIN
+
+        normFac = INT_TABULATED(bins,FLOAT(hist))
+
+        hist    = FLOAT(hist)/normFac
+
+     ENDIF
+
      FOR k=0,N_ELEMENTS(hist)-1 DO BEGIN
-        PRINT,FORMAT='("{",F0.2,",",F0.2,"}",A0)', $
-              bin[k], $
+        PRINT,FORMAT='("{",F0.4,",",F0.5,"}",A0)', $
+              bins[k], $
               hist[k], $
               (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
      ENDFOR
 
      PRINT,'};'
+
+  ENDFOR
+
+  IF KEYWORD_SET(also_print_data) THEN BEGIN
+     FOR jj=0,N_ELEMENTS(dataList)-1 DO BEGIN
+        name = names[jj]
+        data = dataList[jj]
+
+        PRINT,FORMAT='(A0," = {")',name
+        PRINT,FORMAT='(100000(F0.5,:,","))',data
+        PRINT,'};'
+
+     ENDFOR
+  ENDIF
+
+END
+PRO J20180503__ESTIMATE_MU_AND_SIGMA, $
+   names,histList,binList,dataList, $
+   NORMALIZE_HIST=normalize_hist, $
+   BINSIZE=kHBinSize
+  
+  PRINT,FORMAT='(A15,TR5,A6,TR5,A6,TR5,A6)', $
+        'Name','Mu','Sigma','Mode'
+
+  FOR jj=0,N_ELEMENTS(histList)-1 DO BEGIN
+
+     name = names[jj]
+     hist = histList[jj]
+     bins = binList[jj]+kHBinSize/2.
+     data = dataList[jj]
+
+     IF KEYWORD_SET(normalize_hist) THEN BEGIN
+
+        normFac = INT_TABULATED(bins,FLOAT(hist))
+
+        hist    = FLOAT(hist)/normFac
+
+     ENDIF
+
+     mu   = MEAN(ALOG10(data-1.5))
+     junk = MAX(hist,modeInd)
+     mode = bins[modeInd]-1.5
+
+     sigma = SQRT(mu-ALOG10(mode))
+
+     PRINT,FORMAT='(A15,TR5,F6.3,TR5,F6.3,TR5,F6.3)', $
+           name,mu,sigma,mode
 
   ENDFOR
 
@@ -43,7 +97,9 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
    MAKEKAPPAHISTOPLOT=makeKappaHistoPlot, $
    MAKEMETASTABPLOT=makeMetaStabPlot, $
    SHOW_EARLYLATE_BEAMS_TOGETHER=show_earlyLate_beams_together, $
-   HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string
+   HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string, $
+   PRINT_HISTOS=print_histos, $
+   ESTIMATE_MU_AND_SIGMA=estimate_mu_and_sigma
 
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -102,7 +158,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
         Kchi2MaxStr   = (STRING(FORMAT='("-Kchi2Max",F0.1)',Kchi2Max)).Replace('.','_')
      END
   ENDCASE
-  kHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.1)',kHBinSize)).Replace('.','_')
+  kHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.2)',kHBinSize)).Replace('.','_')
   mHBinSizeStr  = (STRING(FORMAT='("-binSz",F0.3)',mHBinSize)).Replace('.','_')
 
   ionSuff       = '-allObs'
@@ -277,11 +333,35 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                            REVERSE_INDICES=rMIndsLateExc)
 
   ;; Print for mathematica???
-  J20180503__PRINT_FOR_MATHEMATICA, $
-     kHistEarlyReq,kHistEarlyExc,kHistLateReq,kHistLateExc, $
-     kBinsEarlyReq,kBinsEarlyExc,kBinsLateReq,kBinsLateExc, $
-     BINSIZE=kHBinSize
+  IF KEYWORD_SET(estimate_mu_and_sigma) $
+     OR KEYWORD_SET(print_histos         ) $
+  THEN BEGIN
+     names    = ['kHistEarlyReq','kHistEarlyExc', $
+                 'kHistLateReq','kHistLateExc']
+     histList = LIST(kHistEarlyReq,kHistEarlyExc, $
+                     kHistLateReq,kHistLateExc)
+     binList  = LIST(kBinsEarlyReq,kBinsEarlyExc, $
+                     kBinsLateReq,kBinsLateExc)
+     dataList = LIST(KF2DParms.kappa[earlyReq_i], $
+                     KF2DParms.kappa[earlyExc_i], $
+                     KF2DParms.kappa[lateReq_i], $
+                     KF2DParms.kappa[lateExc_i])
+  ENDIF
 
+  IF KEYWORD_SET(print_histos) THEN BEGIN
+     J20180503__PRINT_FOR_MATHEMATICA, $
+        names,histList,binList,dataList, $
+        /NORMALIZE_HIST, $
+        /ALSO_PRINT_DATA, $
+        BINSIZE=kHBinSize
+  ENDIF
+  IF KEYWORD_SET(estimate_mu_and_sigma) THEN BEGIN
+     J20180503__ESTIMATE_MU_AND_SIGMA, $
+        names,histList,binList,dataList, $
+        NORMALIZE_HIST=normalize_hist, $
+        BINSIZE=kHBinSize
+  ENDIF
+  
   IF kBinsLateExc[0] LT 1.5 THEN kBinsLateExc[0] = 1.5
   IF kBinsLateReq[0] LT 1.5 THEN kBinsLateReq[0] = 1.5
   IF kBinsEarlyExc[0] LT 1.5 THEN kBinsEarlyExc[0] = 1.5
@@ -388,10 +468,11 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      lateTitle  += titleSuff
   ENDIF
 
+  xRange   = [1.5,20]
+
   IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
      earlyWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
-     xRange   = [1.5,15]
      yRange   = [0,(MAX(kHistEarlyExc)>MAX(kHistEarlyReq))*1.1]
      kHistPlotEarlyReq = PLOT(kBinsEarlyReq,kHistEarlyReq,/HISTOGRAM, $
                               XRANGE=xRange, $
@@ -445,7 +526,6 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      ;; NOW LATE
      lateWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
-     xRange   = [1.5,15]
      yRange   = [0,(MAX(kHistLateExc)>MAX(kHistLateReq))*1.1]
      kHistPlotLateReq = PLOT(kBinsLateReq,kHistLateReq,/HISTOGRAM, $
                              XRANGE=xRange, $

@@ -249,8 +249,13 @@ FUNCTION GET_KAPPADB_INDS,andre, $
 
      region_i = CGSETINTERSECTION(region_i,alt_i)
      
-     altStr = STRING(FORMAT='("-",I0,"-",I0,"ALT")', $
-                              minA,maxA)
+     IF minA EQ 300 AND maxA EQ 4300 THEN BEGIN
+        altStr = '-allALT'
+     ENDIF ELSE BEGIN
+        altStr = STRING(FORMAT='("-",I0,"-",I0,"ALT")', $
+                        minA,maxA)
+     ENDELSE
+
   ENDIF
 
   mono_i            = WHERE(andre.mono  EQ 1 OR andre.mono  EQ 2, $
@@ -359,7 +364,7 @@ FUNCTION GET_KAPPADB_INDS,andre, $
 
      final_i = CGSETINTERSECTION(final_i,ns_i)
 
-     mltStr += '-ns'
+     mltStr += STRING(FORMAT='(A0,I0)','-Dst',Dstcutoff)
      
   ENDIF
 
