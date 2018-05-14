@@ -2,55 +2,76 @@
 PRO J20180419__PRINT_DECILES, $
    histoStats,decileInd, $
    DATANAME=dataName, $
-   BINSIZE=binSize
+   BINSIZE=binSize, $
+   VENTILES=stats__give_ventile, $
+   WRITE_TO_FILE=write_to_file, $
+   FILEPREF=filePref, $
+   FILESUFF=fileSuff, $
+   WRITEDIR=writeDir
 
-  dName = KEYWORD_SET(dataName) ? dataName   : "kchi2reddat"
+  dName = (KEYWORD_SET(dataName) ? dataName   : "kchi2reddat") + STRING(FORMAT='(I0)',decileInd)
 
   bHalf = KEYWORD_SET(binSize ) ? binSize/2. : (histoStats[1].ledge-histoStats[0].ledge)/2.
 
-  PRINT,FORMAT='(A0,I1," = {")', $
-        dataName, $
-        decileInd+1
+  IF KEYWORD_SET(write_to_file) THEN BEGIN
+
+     wDir   = N_ELEMENTS(writeDir) GT 0 ? writeDir : './'
+     fPref  = N_ELEMENTS(filePref) GT 0 ? filePref : names
+     fSuff  = N_ELEMENTS(fileSuff) GT 0 ? fileSuff : ''
+
+     todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+
+     fName = todayStr + '-' + fPref+'-'+dName+fSuff+'.csv'
+     PRINT,"Writing to " + fName + ' ...'
+
+     OPENW,lun,wDir+fName,/GET_LUN
+
+  ENDIF ELSE BEGIN
+
+     lun = -1
+
+     PRINTF,lun,FORMAT='(A0," = {")', $
+            dName
+
+  ENDELSE
 
   FOR k=0,N_ELEMENTS(histoStats)-1 DO BEGIN
-     IF FINITE(histoStats[k].decile.val[decileInd]) THEN BEGIN
-        PRINT,FORMAT='("{",F0.3,",",G0.5,"}",A0)', $
-              histoStats[k].ledge+bHalf, $
-              histoStats[k].decile.val[decileInd], $
-              (k EQ (N_ELEMENTS(histoStats)-1) ? '' : ',')
+
+     IF KEYWORD_SET(stats__give_ventile) THEN BEGIN
+        vals = histoStats[k].ventile.val
+     ENDIF ELSE BEGIN
+        vals = histoStats[k].decile.val
+     ENDELSE
+
+     IF FINITE(vals[decileInd]) THEN BEGIN
+
+        IF KEYWORD_SET(write_to_file) THEN BEGIN
+           PRINTF,lun,FORMAT='(F0.3,",",F0.5)', $
+                  histoStats[k].ledge+bHalf, $
+                  vals[decileInd]
+
+        ENDIF ELSE BEGIN
+           PRINT,FORMAT='("{",F0.3,",",G0.5,"}",A0)', $
+                 histoStats[k].ledge+bHalf, $
+                 vals[decileInd], $
+                 (k EQ (N_ELEMENTS(histoStats)-1) ? '' : ',')
+        ENDELSE
+
      ENDIF
+
   ENDFOR
 
-  PRINT,'};'
+  IF KEYWORD_SET(write_to_file) THEN BEGIN
 
-END
-PRO J20180419__PRINT_FOR_MATHEMATICA, $
-   kHistReq,kHistExc, $
-   kBinsReq,kBinsExc, $
-   BINSIZE=kHBinSize
+     CLOSE,lun
+     FREE_LUN,lun
 
-  names = ['kHistReq','kHistExc']
-  hists = LIST(kHistReq,kHistExc)
-  bins  = LIST(kBinsReq,kBinsExc)
-  FOR jj=0,N_ELEMENTS(hists)-1 DO BEGIN
-
-     name = names[jj]
-     hist = hists[jj]
-     bin = bins[jj]+kHBinSize/2.
-     PRINT,FORMAT='(A0," = {")',name
-
-     FOR k=0,N_ELEMENTS(hist)-1 DO BEGIN
-        PRINT,FORMAT='("{",F0.2,",",F0.2,"}",A0)', $
-              bin[k], $
-              hist[k], $
-              (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
-     ENDFOR
-
+  ENDIF ELSE BEGIN
      PRINT,'};'
-
-  ENDFOR
+  ENDELSE
 
 END
+
 PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    EXCLUDE_IONS=exclude_ions, $
    REQUIRE_IONS=require_ions, $
@@ -73,12 +94,16 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    MAKEMLTKAPPAPLOT=makeMLTKappaplot, $
    MAKEGOVERKVSKAPPAPLOT=makeGoverKvsKappaPlot, $
    MAKEGOVERK__LOG=GoverKLog, $
+   PRINT_DECILES__GOVERK=GoverK__print_deciles, $
    MAKECHI2REDVSKAPPAPLOT=makeChi2RedvsKappaPlot, $
    MAKECHI2RED__LOG=chi2RedLog, $
    MAKEDSTKAPPAPLOT=makeDSTKappaplot, $
    MAKEAEKAPPAPLOT=makeAEKappaplot, $
    STATS__GIVE_DECILE=stats__give_decile, $
-   STATS__GIVE_VENTILE=stats__give_ventile
+   STATS__GIVE_VENTILE=stats__give_ventile, $
+   PRINT_HISTOS=print_histos, $
+   WRITE_DATA_TO_FILES=write_data_to_files, $
+   ESTIMATE_MU_AND_SIGMA=estimate_mu_and_sigma
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -113,7 +138,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   notMLT = 0
   minI  = 60
   maxI  = 90
-  hemi  = 'NORTH'
+  hemi  = 'BOTH'
 
   kHBinSize = N_ELEMENTS(kHist_binSize) GT 0 ? kHist_binSize : 0.75
   kHistMin  = N_ELEMENTS(kHist_min    ) GT 0 ? kHist_min     : 1.5
@@ -124,7 +149,19 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   CASE 1 OF
      SIZE(GoverK,/TYPE) EQ 7: BEGIN
-        GoverKStr     = STRING(FORMAT='("-GKDec",I1)',LONG(STRMID(GoverKReq,7,1)))
+        CASE 1 OF 
+           STRMATCH(GoverKReq,'ventile*'): BEGIN
+              space = 8
+              len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+              str   = 'Ven'
+           END
+           ELSE: BEGIN
+              space = 7
+              len   = 1
+              str   = 'Dec'
+           END
+        ENDCASE
+        GoverKStr     = STRING(FORMAT='("-GK",A0,I2)',str,LONG(STRMID(GoverKReq,space,len)))
      END
      ELSE: BEGIN
         GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
@@ -162,6 +199,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
             MAXALT=maxA, $
             MLTSTR=mltStr, $
             ALTSTR=altStr, $
+            DSTSTR=dstStr, $
             HEMI=hemi, $
             NORTH=north, $
             SOUTH=south, $
@@ -217,7 +255,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   ENDIF
   IF KEYWORD_SET(stats__give_ventile) THEN BEGIN
      decileStr      = '-ventiles'
-     statName       = 'Ventiles 1, 3, 5'
+     statName       = 'Ventiles 1, 4, 7'
   ENDIF
     
   ;; What about a metastability measure?
@@ -255,7 +293,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   BelTransp = 85
   AARTransp = 65
-  belAARCol = 'BLUE'
+  belAARCol = 'DARK BLUE'
   AARCol    = 'DARK ORANGE'
   k245LineCol = 'GREEN'
 
@@ -268,11 +306,25 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   yHistoTitle = KEYWORD_SET(normed) ? 'Percent' : 'Count'
 
-  kappaPlotRange = [1.5,15]
+  kappaPlotRange = [1.5,20]
   metaPlotRange  = [0.,1.]
         
 
   IF ~KEYWORD_SET(combined_histos) THEN BEGIN
+
+     IF KEYWORD_SET(medianStyle) THEN BEGIN
+        histBinI               = 2.5
+        NMinBinIForInclusion   = 20
+
+        histBinM               = 0.5
+        NMinBinMForInclusion   = 20
+
+        histBinD               = 10
+        NMinBinDForInclusion   = 20
+
+        histBinAE              = 100
+        NMinBinAEForInclusion  = 20
+     ENDIF
 
      PRINT,FORMAT='("Working with ",I0, " inds")',count
 
@@ -336,8 +388,22 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           MIN(orbArr),MAX(orbArr))
         IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
            
-           titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
-                      ' Decile'
+           CASE 1 OF 
+              STRMATCH(GoverKReq,'ventile*'): BEGIN
+                 space = 8
+                 len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+                 str   = ' Ventile'
+              END
+              ELSE: BEGIN
+                 space = 7
+                 len   = 1
+                 str   = ' Decile'
+              END
+           ENDCASE
+
+           titleStr = CARDINAL_TO_ORDINAL_STRING( $
+                      LONG(STRMID(GoverKReq,space,len)), $
+                      /TOUPCASE) + str
         ENDIF
 
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
@@ -368,7 +434,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + STRING(FORMAT='("-kappaStats_",A0,"-",A0,A0,A0,A0,".png")', $
-                               mltStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+                               mltStr+altStr+dstStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
         PRINT,"Saving to " + outPlotName
         winder.Save,plotDir+outPlotName
 
@@ -388,8 +454,21 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
            
-           titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
-                      ' Decile'
+           CASE 1 OF 
+              STRMATCH(GoverKReq,'ventile*'): BEGIN
+                 space = 8
+                 len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+                 str   = ' Ventile'
+              END
+              ELSE: BEGIN
+                 space = 7
+                 len   = 1
+                 str   = ' Decile'
+              END
+           ENDCASE
+
+           titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,space,len)),/TOUPCASE) + $
+                      str
         ENDIF
 
         winderM  = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
@@ -420,7 +499,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                     + STRING(FORMAT='("-MetaStab_",A0,"-",A0,A0,A0,A0,".png")', $
-                             mltStr, $
+                             mltStr+altStr+dstStr, $
                              hemi, $
                              parmStr, $
                              mHBinSizeStr, $
@@ -443,7 +522,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                   CURRENT=winder2)
 
         scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                       + "-kS-" + mltStr + "_ILAT" + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-kS-" + mltStr + "_ILAT" + altStr + dstStr + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + scatPlotName
         winder2.Save,plotDir+scatPlotName
@@ -467,21 +546,19 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           binI              = 4
-           NMinBinForInclusion = 10
            ILATHS = HISTOGRAM_BINSTATS( $
                     ABS(andre.ilat[plot_i]), $
                     KF2DParms.kappa[plot_i], $
-                    BINSIZE=binI, $
+                    BINSIZE=histBinI, $
                     MIN=minI, $
                     MAX=maxI, $
                     /NAN, $
-                    NMINBINFORINCLUSION=NMinBinForInclusion, $
+                    NMINBINFORINCLUSION=NMinBinIForInclusion, $
                     GIVE_DECILES=stats__give_decile, $
                     GIVE_VENTILES=stats__give_ventile)
 
            IF KEYWORD_SET(bpdStuff) THEN BEGIN
-              ILATEy = ILATHS.lEdge+binI/2.-0.05
+              ILATEy = ILATHS.lEdge+histBinI/2.-0.05
               ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATHS.stdDev),VALUE=0)
 
               CASE 1 OF
@@ -506,7 +583,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            ENDIF ELSE BEGIN
               ILATEx = ILATHS.mean
-              ILATEy = ILATHS.lEdge+binI/2.+binI/20.
+              ILATEy = ILATHS.lEdge+histBinI/2.+histBinI/20.
               ILATExErr = ILATHS.stdDev
               ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATHS.stdDev),VALUE=0)
            ENDELSE
@@ -550,7 +627,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-ILATkappa" $
-                       + "-" + mltStr +altStr $
+                       + "-" + mltStr +altStr + dstStr $
                        + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + ilatPlotName
@@ -579,8 +656,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           histBinM           = 0.5
-           NMinBinForInclusion = 10
            MLTHS = HISTOGRAM_BINSTATS( $
                       MLTs[plot_i], $
                       KF2DParms.kappa[plot_i], $
@@ -588,7 +663,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinMForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
@@ -606,12 +681,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                 [MLTHS[*].decile.val[deciles[2]]-MLTEx]]))
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
-                    ventiles = [0,2,4]
+                    ventiles = [1,4,7]
 
-                    MLTEx = MLTHS[*].ventile.val[deciles[1]]
+                    MLTEx = MLTHS[*].ventile.val[ventiles[1]]
                     MLTExErr = ABS(TRANSPOSE( $
-                               [[MLTHS[*].ventile.val[deciles[0]]-MLTEx], $
-                                [MLTHS[*].ventile.val[deciles[2]]-MLTEx]]))
+                               [[MLTHS[*].ventile.val[ventiles[0]]-MLTEx], $
+                                [MLTHS[*].ventile.val[ventiles[2]]-MLTEx]]))
                  END
                  ELSE: BEGIN
                     MLTEx = MLTHS[*].bpd[2]
@@ -665,7 +740,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         mltPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                      + "-kS-MLTkappa" + altStr + "-" + $
+                      + "-kS-MLTkappa" + altStr + dstStr + "-" + $
                       hemi + parmStr + decileStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + mltPlotName
@@ -684,7 +759,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         addDecileLine = 0
 
         ;; tmpColor = KEYWORD_SET(addDecileLine) ? 'Orange' : belAARCol
-        tmpColor = 'Orange' 
+        tmpColor = 'Dark Orange' 
 
         GoverKchi2Kappaplot   = SCATTERPLOT(KF2DParms.kappa[plot_i], $
                                             ratio[plot_i], $
@@ -701,8 +776,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           binK               = 0.2
-           NMinBinForInclusion = 10
+           binK               = 0.25
+           NMinBinKGoverKForInclusion = 10
 
            GoverKHS = HISTOGRAM_BINSTATS( $
                       KF2DParms.kappa[plot_i], $
@@ -711,7 +786,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minK, $
                       MAX=maxK, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinKGoverKForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
@@ -719,11 +794,28 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
               ;; decileInds = [0,1,2]
               ;; decileInds = [3,4,5]
               ;; decileInds = [6,7,8]
-              decileInds = [0,1,2,3,4,5,6,7,8]
+              ;; decileInds = [0,1,2,3,4,5,6,7,8]
+
+              IF KEYWORD_SET(stats__give_ventile) THEN BEGIN
+                 dNameSuff = 'Ventiles'
+                 decileInds = INDGEN(19)
+              ENDIF ELSE BEGIN
+                 dNameSuff = 'Deciles'
+                 decileInds = INDGEN(9)
+              ENDELSE
+
               FOR jjj=0,N_ELEMENTS(decileInds)-1 DO BEGIN
                  J20180419__PRINT_DECILES,GoverKHS,decileInds[jjj], $
-                                          DATANAME="goverkdat", $
-                                          BINSIZE=binK
+                                          DATANAME="goverk"+dNameSuff, $
+                                          BINSIZE=binK, $
+                                          VENTILES=stats__give_ventile, $
+                                          WRITE_TO_FILE=write_data_to_files, $
+                                          FILEPREF=mltStr, $
+                                          FILESUFF=STRING(FORMAT='(A0,"-",A0,A0,A0)', $
+                                                          altStr+dstStr, $
+                                                          hemi,parmStr,bonusPlotSuff), $
+                                          WRITEDIR='/SPENCEdata/Research/Satellites/FAST/kappa_dists/txtOutput/'
+
               ENDFOR
            ENDIF
            
@@ -742,10 +834,12 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                   [GoverKHS[*].decile.val[deciles[2]]-GoverKy]]))
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
-                    GoverKy = GoverKHS[*].ventile.val[2]
+                    ventiles = [1,4,7]
+
+                    GoverKy = GoverKHS[*].ventile.val[ventiles[1]]
                     GoverKyErr = ABS(TRANSPOSE( $
-                                  [[GoverKHS[*].ventile.val[0]-GoverKy], $
-                                   [GoverKHS[*].ventile.val[4]-GoverKy]]))
+                                  [[GoverKHS[*].ventile.val[ventiles[0]]-GoverKy], $
+                                   [GoverKHS[*].ventile.val[ventiles[2]]-GoverKy]]))
                  END
                  ELSE: BEGIN
                     GoverKy = GoverKHS[*].bpd[2]
@@ -899,7 +993,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         GoverKPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                         + "-kS-GoverKchi2vsKappa" + altStr + "-" + $
+                         + "-kS-GoverKchi2vsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(GoverKLog) ? 'log-' : '') + $
                           ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
                           hemi + parmStr + bonusPlotSuff + ".png"
@@ -938,7 +1032,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.25
-           NMinBinForInclusion = 10
+           NMinBinKChiForInclusion = 10
            chi2RedHS = HISTOGRAM_BINSTATS( $
                        KF2DParms.kappa[plot_i], $
                        KF2DParms.chi2Red[plot_i], $
@@ -946,7 +1040,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN=minK, $
                        MAX=maxK, $
                        /NAN, $
-                       NMINBINFORINCLUSION=NMinBinForInclusion, $
+                       NMINBINFORINCLUSION=NMinBinKChiForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
 
@@ -1013,7 +1107,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         chi2RedPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                         + "-kS-chi2RedvsKappa" + altStr + "-" + $
+                         + "-kS-chi2RedvsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(chi2RedLog) ? 'log-' : '') + $
                           ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
                           hemi + parmStr + bonusPlotSuff + ".png"
@@ -1043,8 +1137,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           histBinD            = 10
-           NMinBinForInclusion = 20
            DSTHS = HISTOGRAM_BINSTATS( $
                     andre.dst[plot_i], $
                     KF2DParms.kappa[plot_i], $
@@ -1052,7 +1144,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                     MIN=minDST, $
                     MAX=maxDST, $
                     /NAN, $
-                    NMINBINFORINCLUSION=NMinBinForInclusion, $
+                    NMINBINFORINCLUSION=NMinBinDForInclusion, $
                     GIVE_DECILES=stats__give_decile, $
                     GIVE_VENTILES=stats__give_ventile)
 
@@ -1126,7 +1218,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-DSTkappa" $
-                       + "-" + mltStr +altStr $
+                       + "-" + mltStr +altStr + dstStr $
                        + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + ilatPlotName
@@ -1154,8 +1246,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           histBinAE           = 100
-           NMinBinForInclusion = 20
            AEHS = HISTOGRAM_BINSTATS( $
                   andre.ae[plot_i], $
                   KF2DParms.kappa[plot_i], $
@@ -1163,7 +1253,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                   MIN=minAE, $
                   MAX=maxAE, $
                   /NAN, $
-                  NMINBINFORINCLUSION=NMinBinForInclusion, $
+                  NMINBINFORINCLUSION=NMinBinAEForInclusion, $
                   GIVE_DECILES=stats__give_decile, $
                   GIVE_VENTILES=stats__give_ventile)
 
@@ -1237,7 +1327,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-AEkappa" $
-                       + "-" + mltStr +altStr $
+                       + "-" + mltStr +altStr + dstStr $
                        + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + ilatPlotName
@@ -1246,6 +1336,20 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
      ENDIF  
 
   ENDIF ELSE BEGIN
+
+     IF KEYWORD_SET(medianStyle) THEN BEGIN
+        histBinI               = 5
+        NMinBinIForInclusion   = 20
+
+        histBinM               = 1.25
+        NMinBinMForInclusion   = 20
+
+        histBinD               = 5
+        NMinBinDForInclusion   = 20
+
+        histBinAE              = 100
+        NMinBinAEForInclusion  = 20
+     ENDIF
 
      PRINT,FORMAT='("Working with ",I0, " RequInds")',nReq
      PRINT,FORMAT='("Working with ",I0, " ExclInds")',nExc
@@ -1284,10 +1388,36 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        REVERSE_INDICES=rMIndsExc)
 
   ;; Print for mathematica???
-     J20180419__PRINT_FOR_MATHEMATICA, $
-        kHistReq,kHistExc, $
-        kBinsReq,kBinsExc, $
-        BINSIZE=kHBinSize
+     IF KEYWORD_SET(estimate_mu_and_sigma) $
+        OR KEYWORD_SET(print_histos         ) $
+     THEN BEGIN
+        names = ['kHistReq','kHistExc']
+        hists = LIST(kHistReq,kHistExc)
+        bins  = LIST(kBinsReq,kBinsExc)
+        dataList = LIST(KF2DParms.kappa[req_i], $
+                        KF2DParms.kappa[exc_i])
+     ENDIF
+
+     IF KEYWORD_SET(print_histos) THEN BEGIN
+        HISTO_PRINT_FOR_MATHEMATICA, $
+           names,histList,binList,dataList, $
+           /NORMALIZE_HIST, $
+           /ALSO_PRINT_DATA, $
+           WRITE_TO_FILE=write_data_to_files, $
+           FILEPREFS=[mltStr+'-ionBeam-',mltStr+'-noBeam-'], $
+           FILESUFF=STRING(FORMAT='(A0,"-",A0,A0,A0)', $
+                           altStr+dstStr, $
+                           hemi,parmStr,bonusPlotSuff), $
+           WRITEDIR='/SPENCEdata/Research/Satellites/FAST/kappa_dists/txtOutput/', $
+           BINSIZE=kHBinSize
+     ENDIF
+
+     IF KEYWORD_SET(estimate_mu_and_sigma) THEN BEGIN
+        J20180503__ESTIMATE_MU_AND_SIGMA, $
+           names,histList,binList,dataList, $
+           NORMALIZE_HIST=normalize_hist, $
+           BINSIZE=kHBinSize
+     ENDIF
 
      IF KEYWORD_SET(normed) THEN BEGIN
         kTotReq = TOTAL(kHistReq)
@@ -1319,8 +1449,21 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
         
-        titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) + $
-                   ' Decile'
+           CASE 1 OF 
+              STRMATCH(GoverKReq,'ventile*'): BEGIN
+                 space = 8
+                 len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+                 str   = ' Ventile'
+              END
+              ELSE: BEGIN
+                 space = 7
+                 len   = 1
+                 str   = ' Decile'
+              END
+           ENDCASE
+
+        titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,space,len)),/TOUPCASE) + $
+                   str
      ENDIF
 
      IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
@@ -1369,7 +1512,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                               mltStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+                               mltStr,altStr+dstStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
         PRINT,"Saving to " + outPlotName
         winder.Save,plotDir+outPlotName
 
@@ -1433,7 +1576,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                     + STRING(FORMAT='("-MetaStab_",A0,A0,"-",A0,A0,A0,A0,".png")', $
                              mltStr, $
-                             altStr, $
+                             altStr+dstStr, $
                              hemi, $
                              parmStr, $
                              mHBinSizeStr, $
@@ -1449,23 +1592,23 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         winder2 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         MLTILATplot1 = SCATTERPLOT(MLTs[exc_i], $
-                                  ABS(andre.ilat[exc_i]), $
-                                  XTITLE='mlt', $
-                                  YTITLE='ilat', $
-                                     SYM_COLOR=belAARCol, $
-                                     SYMBOL=belAARSym, $
-                                     NAME=belAARName, $
-                                  TRANSP=BelTransp, $
-                                  CURRENT=winder2)
+                                   ABS(andre.ilat[exc_i]), $
+                                   XTITLE='mlt', $
+                                   YTITLE='ilat', $
+                                   SYM_COLOR=belAARCol, $
+                                   SYMBOL=belAARSym, $
+                                   NAME=belAARName, $
+                                   TRANSP=BelTransp, $
+                                   CURRENT=winder2)
 
         MLTILATplot2 = SCATTERPLOT(MLTs[req_i], $
-                                  ABS(andre.ilat[req_i]), $
+                                   ABS(andre.ilat[req_i]), $
                                    SYM_COLOR=AARCol, $
                                    SYMBOL=AARSym, $
                                    NAME=AARName, $
-                                  TRANSP=AARTransp, $
+                                   TRANSP=AARTransp, $
                                    CURRENT=winder2, $
-                                  /OVERPLOT)
+                                   /OVERPLOT)
 
         scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-MLT_ILAT_coverage" + "-" + hemi + parmStr + bonusPlotSuff + ".png"
@@ -1506,34 +1649,32 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(bpdStuff) THEN BEGIN
 
-           binI               = 5
-           NMinBinForInclusion = 20
            ILATReqHS = HISTOGRAM_BINSTATS( $
                        ABS(andre.ilat[req_i]), $
                        KF2DParms.kappa[req_i], $
-                       BINSIZE=binI, $
+                       BINSIZE=histBinI, $
                        MIN=minI, $
                        MAX=maxI, $
                        /NAN, $
-                       NMINBINFORINCLUSION=NMinBinForInclusion, $
+                       NMINBINFORINCLUSION=NMinBinIForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
            ILATExcHS = HISTOGRAM_BINSTATS( $
                        ABS(andre.ilat[exc_i]), $
                        KF2DParms.kappa[exc_i], $
-                       BINSIZE=binI, $
+                       BINSIZE=histBinI, $
                        MIN=minI, $
                        MAX=maxI, $
                        /NAN, $
-                       NMINBINFORINCLUSION=NMinBinForInclusion, $
+                       NMINBINFORINCLUSION=NMinBinIForInclusion, $
                        GIVE_DECILES=stats__give_decile, $
                        GIVE_VENTILES=stats__give_ventile)
 
-           ;; ILATEy = ILATExcHS.lEdge+binI/2.+binI/10.
-           ILATEy = ILATExcHS.lEdge+binI/2.-0.25
+           ;; ILATEy = ILATExcHS.lEdge+histBinI/2.+histBinI/10.
+           ILATEy = ILATExcHS.lEdge+histBinI/2.-0.25
            ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
-           ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
-           ILATRy = ILATReqHS.lEdge+binI/2.+0.25
+           ;; ILATRy = ILATReqHS.lEdge+histBinI/2.+histBinI/20.
+           ILATRy = ILATReqHS.lEdge+histBinI/2.+0.25
            ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
 
               CASE 1 OF
@@ -1575,27 +1716,27 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
               ENDCASE
 
            ;; ILATEx = ILATExcHS[*].bpd[2]
-           ;; ;; ILATEy = ILATExcHS.lEdge+binI/2.+binI/10.
-           ;; ILATEy = ILATExcHS.lEdge+binI/2.-0.25
+           ;; ;; ILATEy = ILATExcHS.lEdge+histBinI/2.+histBinI/10.
+           ;; ILATEy = ILATExcHS.lEdge+histBinI/2.-0.25
            ;; ILATExErr = ABS(TRANSPOSE([[ILATExcHS[*].bpd[1]-ILATEx], $
            ;;                        [ILATExcHS[*].bpd[3]-ILATEx]]))
            ;; ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
 
               ;; ILATRx = ILATReqHS[*].bpd[2]
-              ;; ;; ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
-              ;; ILATRy = ILATReqHS.lEdge+binI/2.+0.25
+              ;; ;; ILATRy = ILATReqHS.lEdge+histBinI/2.+histBinI/20.
+              ;; ILATRy = ILATReqHS.lEdge+histBinI/2.+0.25
               ;; ILATRxErr = ABS(TRANSPOSE([[ILATReqHS[*].bpd[1]-ILATRx], $
               ;;                            [ILATReqHS[*].bpd[3]-ILATRx]]))
               ;; ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
 
            ENDIF ELSE BEGIN
               ILATEx = ILATExcHS.mean
-              ILATEy = ILATExcHS.lEdge+binI/2.+binI/20.
+              ILATEy = ILATExcHS.lEdge+histBinI/2.+histBinI/20.
               ILATExErr = ILATExcHS.stdDev
               ILATEyErr = MAKE_ARRAY(N_ELEMENTS(ILATExcHS.stdDev),VALUE=0)
 
               ILATRx = ILATReqHS.mean
-              ILATRy = ILATReqHS.lEdge+binI/2.+binI/20.
+              ILATRy = ILATReqHS.lEdge+histBinI/2.+histBinI/20.
               ILATRxErr = ILATReqHS.stdDev
               ILATRyErr = MAKE_ARRAY(N_ELEMENTS(ILATReqHS.stdDev),VALUE=0)
            ENDELSE
@@ -1655,7 +1796,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-ILATkappa" $
-                       + "-" + mltStr + altStr $
+                       + "-" + mltStr + altStr + dstStr $
                        + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + ilatPlotName
@@ -1677,7 +1818,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                     NAME=belAARName, $
                                     XRANGE=kappaPlotRange, $
                                     YRANGE=MLTRange, $
-                                    XMINOR=1, $
+                                    XMINOR=4, $
                                     YMINOR=3, $
                                     TRANSP=BelTransp, $
                                     CURRENT=winder4)
@@ -1693,8 +1834,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
-           histBinM            = 0.5
-           NMinBinForInclusion = 10
            MLTReqHS = HISTOGRAM_BINSTATS( $
                       MLTs[req_i], $
                       KF2DParms.kappa[req_i], $
@@ -1702,7 +1841,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinMForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
            MLTExcHS = HISTOGRAM_BINSTATS( $
@@ -1712,7 +1851,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minM, $
                       MAX=maxM, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinMForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
@@ -1830,7 +1969,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         mltPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                      + "-kS-MLTkappa" + altStr + "-" + $
+                      + "-kS-MLTkappa" + altStr + dstStr + "-" + $
                       hemi + parmStr + decileStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + mltPlotName
@@ -1870,7 +2009,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.2
-           NMinBinForInclusion = 10
+           NMinBinKGoverKForInclusion = 10
            GoverKReqHS = HISTOGRAM_BINSTATS( $
                          KF2DParms.kappa[req_i], $
                          ratio[req_i], $
@@ -1878,7 +2017,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          MIN=minK, $
                          MAX=maxK, $
                          /NAN, $
-                         NMINBINFORINCLUSION=NMinBinForInclusion, $
+                         NMINBINFORINCLUSION=NMinBinKGoverKForInclusion, $
                          GIVE_DECILES=stats__give_decile, $
                          GIVE_VENTILES=stats__give_ventile)
            GoverKExcHS = HISTOGRAM_BINSTATS( $
@@ -1888,7 +2027,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          MIN=minK, $
                          MAX=maxK, $
                          /NAN, $
-                         NMINBINFORINCLUSION=NMinBinForInclusion, $
+                         NMINBINFORINCLUSION=NMinBinKGoverKForInclusion, $
                          GIVE_DECILES=stats__give_decile, $
                          GIVE_VENTILES=stats__give_ventile)
 
@@ -2007,7 +2146,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         GoverKPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                         + "-kS-GoverKchi2vsKappa" + altStr + "-" + $
+                         + "-kS-GoverKchi2vsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(GoverKLog) ? 'log-' : '') + $
                           ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
                           hemi + parmStr + bonusPlotSuff + ".png"
@@ -2052,7 +2191,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         IF KEYWORD_SET(medianstyle) THEN BEGIN
 
            binK              = 0.2
-           NMinBinForInclusion = 10
+           NMinBinKChiForInclusion = 10
            chi2RedReqHS = HISTOGRAM_BINSTATS( $
                           KF2DParms.kappa[req_i], $
                           KF2DParms.chi2Red[req_i], $
@@ -2060,7 +2199,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           MIN=minK, $
                           MAX=maxK, $
                           /NAN, $
-                          NMINBINFORINCLUSION=NMinBinForInclusion, $
+                          NMINBINFORINCLUSION=NMinBinKChiForInclusion, $
                           GIVE_DECILES=stats__give_decile, $
                           GIVE_VENTILES=stats__give_ventile)
            chi2RedExcHS = HISTOGRAM_BINSTATS( $
@@ -2070,7 +2209,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                           MIN=minK, $
                           MAX=maxK, $
                           /NAN, $
-                          NMINBINFORINCLUSION=NMinBinForInclusion, $
+                          NMINBINFORINCLUSION=NMinBinKChiForInclusion, $
                           GIVE_DECILES=stats__give_decile, $
                           GIVE_VENTILES=stats__give_ventile)
 
@@ -2188,7 +2327,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ENDIF
 
         chi2RedPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                         + "-kS-chi2RedvsKappa" + altStr + "-" + $
+                         + "-kS-chi2RedvsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(chi2RedLog) ? 'log-' : '') + $
                           ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
                           hemi + parmStr + bonusPlotSuff + ".png"
@@ -2233,8 +2372,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(bpdStuff) THEN BEGIN
 
-           histBinD            = 5
-           NMinBinForInclusion = 20
            DSTReqHS = HISTOGRAM_BINSTATS( $
                       andre.dst[req_i], $
                       KF2DParms.kappa[req_i], $
@@ -2242,7 +2379,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minDST, $
                       MAX=maxDST, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinDForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
            DSTExcHS = HISTOGRAM_BINSTATS( $
@@ -2252,7 +2389,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                       MIN=minDST, $
                       MAX=maxDST, $
                       /NAN, $
-                      NMINBINFORINCLUSION=NMinBinForInclusion, $
+                      NMINBINFORINCLUSION=NMinBinDForInclusion, $
                       GIVE_DECILES=stats__give_decile, $
                       GIVE_VENTILES=stats__give_ventile)
 
@@ -2382,7 +2519,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         dstPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-DSTkappa" $
-                      + "-" + mltStr + altStr $
+                      + "-" + mltStr + altStr + dstStr $
                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + dstPlotName
@@ -2424,9 +2561,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         IF KEYWORD_SET(bpdStuff) THEN BEGIN
 
-           histBinAE           = 100
-           NMinBinForInclusion = 20
-
            AEReqHS = HISTOGRAM_BINSTATS( $
                      andre.ae[req_i], $
                      KF2DParms.kappa[req_i], $
@@ -2434,7 +2568,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                      MIN=minAE, $
                      MAX=maxAE, $
                      /NAN, $
-                     NMINBINFORINCLUSION=NMinBinForInclusion, $
+                     NMINBINFORINCLUSION=NMinBinAEForInclusion, $
                      GIVE_DECILES=stats__give_decile, $
                      GIVE_VENTILES=stats__give_ventile)
            AEExcHS = HISTOGRAM_BINSTATS( $
@@ -2444,7 +2578,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                      MIN=minAE, $
                      MAX=maxAE, $
                      /NAN, $
-                     NMINBINFORINCLUSION=NMinBinForInclusion, $
+                     NMINBINFORINCLUSION=NMinBinAEForInclusion, $
                      GIVE_DECILES=stats__give_decile, $
                      GIVE_VENTILES=stats__give_ventile)
 
@@ -2574,7 +2708,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         aePlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-AEkappa" $
-                      + "-" + mltStr + altStr $
+                      + "-" + mltStr + altStr + dstStr $
                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
 
         PRINT,"Saving to " + aePlotName

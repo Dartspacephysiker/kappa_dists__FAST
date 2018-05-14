@@ -1,49 +1,55 @@
 ;2018/05/03
-PRO J20180503__PRINT_FOR_MATHEMATICA, $
-   names,histList,binList,dataList, $
-   NORMALIZE_HIST=normalize_hist, $
-   ALSO_PRINT_DATA=also_print_data, $
-   BINSIZE=kHBinSize
-  
+;; 2018/05/14 COMMAND FOR DIST OVERPLOT
+;; FOR k=5,5 DO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS,MINALT=300,MAXALT=4300,/NORMED,GOVERK='decile='+STRING(FORMAT='(I1)',k),MAXKCHI2=5,DSTCUTOFF=-25,/HISTOTITLE__USE_GOVERK_DECILE_STRING,SHOW_EARLYLATE_BEAMS_TOGETHER=0,/MAKEKAPPAHISTOPLOT,EARLYBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=[5.36033,4.27511],LATEBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=[7.49282,6.86371],EARLYNOBEAM__OVERPLOT_FRECHET_PARMS=[1.87611,4.41171,-1.54853],LATENOBEAM__OVERPLOT_FRECHET_PARMS=[2.12565,6.04772,-2.37716]
+FUNCTION J20180503__SETUP_OVERPLOT, $
+   op_ig_parms, $
+   op_frech_parms, $
+   STATS=stats
 
-  FOR jj=0,N_ELEMENTS(histList)-1 DO BEGIN
+     CASE 1 OF
+        KEYWORD_SET(op_ig_parms) AND KEYWORD_SET(op_frech_parms): BEGIN
+           PRINT,"Can't do both!"
+           STOP
+        END
+        KEYWORD_SET(op_ig_parms): BEGIN
+           kappasM1p5 = FINDGEN(1001)/1000. * 20. ;"kappas minus 1.5"
 
-     name = names[jj]
-     hist = histList[jj]
-     bins = binList[jj]+kHBinSize/2.
+           ;;mu     = op_ig_parms[0]
+           ;;lambda = op_ig_parms[1]
+           dato = INVERSEGAUSSIANDIST(kappasM1p5, $
+                                      op_ig_parms[0], $
+                                      op_ig_parms[1], $
+                                      STATS=stats)
+           name = STRING(FORMAT='(A0,F0.3,"; ",F0.3,")")', $
+                         'f!DIG!N($\kappa$-1.5; ', $
+                         op_ig_parms[0], $
+                         op_ig_parms[1])
 
-     PRINT,FORMAT='(A0," = {")',name
+        END
+        KEYWORD_SET(op_frech_parms): BEGIN
 
-     IF KEYWORD_SET(normalize_hist) THEN BEGIN
+           kappasM1p5 = FINDGEN(1001)/1000. * 20. ;"kappas minus 1.5"
 
-        normFac = INT_TABULATED(bins,FLOAT(hist))
+           dato = FRECHETDIST(kappasM1p5, $
+                              op_frech_parms[0], $
+                              op_frech_parms[1], $
+                              op_frech_parms[2], $
+                              STATS=stats)
 
-        hist    = FLOAT(hist)/normFac
+           name = STRING(FORMAT='(A0,F0.3,"; ",F0.3,"; ",F0.3,")")', $
+                         'f!DFr!N($\kappa$-1.5; ', $
+                         op_frech_parms[0], $
+                         op_frech_parms[1], $
+                         op_frech_parms[2])
 
-     ENDIF
+        END
+        ELSE:
+     ENDCASE
 
-     FOR k=0,N_ELEMENTS(hist)-1 DO BEGIN
-        PRINT,FORMAT='("{",F0.4,",",F0.5,"}",A0)', $
-              bins[k], $
-              hist[k], $
-              (k EQ (N_ELEMENTS(hist)-1) ? '' : ',')
-     ENDFOR
-
-     PRINT,'};'
-
-  ENDFOR
-
-  IF KEYWORD_SET(also_print_data) THEN BEGIN
-     FOR jj=0,N_ELEMENTS(dataList)-1 DO BEGIN
-        name = names[jj]
-        data = dataList[jj]
-
-        PRINT,FORMAT='(A0," = {")',name
-        PRINT,FORMAT='(100000(F0.5,:,","))',data
-        PRINT,'};'
-
-     ENDFOR
-  ENDIF
+     RETURN,{name:name, $
+             x: kappasM1p5+1.5, $
+             y: dato, $
+             stats: stats}
 
 END
 PRO J20180503__ESTIMATE_MU_AND_SIGMA, $
@@ -99,14 +105,22 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
    SHOW_EARLYLATE_BEAMS_TOGETHER=show_earlyLate_beams_together, $
    HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string, $
    PRINT_HISTOS=print_histos, $
-   ESTIMATE_MU_AND_SIGMA=estimate_mu_and_sigma
-
+   WRITE_DATA_TO_FILES=write_data_to_files, $
+   ESTIMATE_MU_AND_SIGMA=estimate_mu_and_sigma, $
+   EARLYBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=eb__op_ig_parms, $
+   EARLYBEAM__OVERPLOT_FRECHET_PARMS=eb__op_frech_parms, $
+   EARLYNOBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=en__op_ig_parms, $
+   EARLYNOBEAM__OVERPLOT_FRECHET_PARMS=en__op_frech_parms, $
+   LATEBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=lb__op_ig_parms, $
+   LATEBEAM__OVERPLOT_FRECHET_PARMS=lb__op_frech_parms, $
+   LATENOBEAM__OVERPLOT_INVERSEGAUSSIAN_PARMS=ln__op_ig_parms, $
+   LATENOBEAM__OVERPLOT_FRECHET_PARMS=ln__op_frech_parms
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   minM = -3.5
   maxM = 1.5
-  divM = -1.75
+  divM = -1.
 
   minI  = 60
   maxI  = 90
@@ -144,7 +158,19 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
 
   CASE 1 OF
      SIZE(GoverK,/TYPE) EQ 7: BEGIN
-        GoverKStr     = STRING(FORMAT='("-GKDec",I1)',LONG(STRMID(GoverKReq,7,1)))
+        CASE 1 OF 
+           STRMATCH(GoverKReq,'ventile*'): BEGIN
+              space = 8
+              len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+              str   = 'Ven'
+           END
+           ELSE: BEGIN
+              space = 7
+              len   = 1
+              str   = 'Dec'
+           END
+        ENDCASE
+        GoverKStr     = STRING(FORMAT='("-GK",A0,I0)',str,LONG(STRMID(GoverKReq,space,len)))
      END
      ELSE: BEGIN
         GoverKStr     = (STRING(FORMAT='("-GK",F0.1)',GoverKReq)).Replace('.','_')
@@ -200,6 +226,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
             MAXALT=maxA, $
             MLTSTR=earlyMLTStr, $
             ALTSTR=altStr, $
+            DSTSTR=dstStr, $
             HEMI=hemi, $
             NORTH=north, $
             SOUTH=south, $
@@ -224,6 +251,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
            MAXALT=maxA, $
            MLTSTR=lateMLTStr, $
            ALTSTR=altStr, $
+           DSTSTR=dstStr, $
            HEMI=hemi, $
            NORTH=north, $
            SOUTH=south, $
@@ -332,6 +360,31 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                            LOCATIONS=mBinsLateExc, $
                            REVERSE_INDICES=rMIndsLateExc)
 
+     IF KEYWORD_SET(eb__op_ig_parms) $
+        OR KEYWORD_SET(eb__op_frech_parms) $
+     THEN BEGIN
+        ebStat = J20180503__SETUP_OVERPLOT(eb__op_ig_parms,eb__op_frech_parms, $
+                                           STATS=stats)
+     ENDIF
+     IF KEYWORD_SET(en__op_ig_parms) $
+        OR KEYWORD_SET(en__op_frech_parms) $
+     THEN BEGIN
+        enStat = J20180503__SETUP_OVERPLOT(en__op_ig_parms,en__op_frech_parms, $
+                                           STATS=stats)
+     ENDIF
+     IF KEYWORD_SET(lb__op_ig_parms) $
+        OR KEYWORD_SET(lb__op_frech_parms) $
+     THEN BEGIN
+        lbStat = J20180503__SETUP_OVERPLOT(lb__op_ig_parms,lb__op_frech_parms, $
+                                           STATS=stats)
+     ENDIF
+     IF KEYWORD_SET(ln__op_ig_parms) $
+        OR KEYWORD_SET(ln__op_frech_parms) $
+     THEN BEGIN
+        lnStat = J20180503__SETUP_OVERPLOT(ln__op_ig_parms,ln__op_frech_parms, $
+                                           STATS=stats)
+     ENDIF
+
   ;; Print for mathematica???
   IF KEYWORD_SET(estimate_mu_and_sigma) $
      OR KEYWORD_SET(print_histos         ) $
@@ -349,10 +402,17 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   ENDIF
 
   IF KEYWORD_SET(print_histos) THEN BEGIN
-     J20180503__PRINT_FOR_MATHEMATICA, $
+     HISTO_PRINT_FOR_MATHEMATICA, $
         names,histList,binList,dataList, $
         /NORMALIZE_HIST, $
         /ALSO_PRINT_DATA, $
+        WRITE_TO_FILE=write_data_to_files, $
+        FILEPREFS=[earlyMLTStr+'-ionBeam-',earlyMLTStr+'-noBeam-', $
+                   lateMLTStr+'-ionBeam-',lateMLTStr+'-noBeam-'], $
+        FILESUFF=STRING(FORMAT='(A0,"-",A0,A0,A0)', $
+                 altStr+dstStr, $
+                 hemi,parmStr,bonusPlotSuff), $
+        WRITEDIR='/SPENCEdata/Research/Satellites/FAST/kappa_dists/txtOutput/', $
         BINSIZE=kHBinSize
   ENDIF
   IF KEYWORD_SET(estimate_mu_and_sigma) THEN BEGIN
@@ -372,29 +432,53 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   IF mBinsLateExc[0] LT 1.5 THEN mBinsLateExc[0] = 1.5
 
   IF KEYWORD_SET(normed) THEN BEGIN
-     kTotEarlyReq = TOTAL(kHistEarlyReq)
-     mTotEarlyReq = TOTAL(mHistEarlyReq)
+     kTotEarlyReq  = INT_TABULATED(kBinsEarlyReq,FLOAT(kHistEarlyReq))
+     mTotEarlyReq  = INT_TABULATED(mBinsEarlyReq,FLOAT(mHistEarlyReq))
 
-     kHistEarlyReq = FLOAT(kHistEarlyReq)/FLOAT(kTotEarlyReq)*100.
-     mHistEarlyReq = FLOAT(mHistEarlyReq)/FLOAT(mTotEarlyReq)*100.
+     kHistEarlyReq = FLOAT(kHistEarlyReq)/kTotEarlyReq
+     mHistEarlyReq = FLOAT(mHistEarlyReq)/mTotEarlyReq
 
-     kTotEarlyExc = TOTAL(kHistEarlyExc)
-     mTotEarlyExc = TOTAL(mHistEarlyExc)
+     kTotEarlyExc  = INT_TABULATED(kBinsEarlyExc,FLOAT(kHistEarlyExc))
+     mTotEarlyExc  = INT_TABULATED(mBinsEarlyExc,FLOAT(mHistEarlyExc))
 
-     kHistEarlyExc = FLOAT(kHistEarlyExc)/FLOAT(kTotEarlyExc)*100.
-     mHistEarlyExc = FLOAT(mHistEarlyExc)/FLOAT(mTotEarlyExc)*100.
+     kHistEarlyExc = FLOAT(kHistEarlyExc)/kTotEarlyExc
+     mHistEarlyExc = FLOAT(mHistEarlyExc)/mTotEarlyExc
 
-     kTotLateReq = TOTAL(kHistLateReq)
-     mTotLateReq = TOTAL(mHistLateReq)
+     kTotLateReq  = INT_TABULATED(kBinsLateReq,FLOAT(kHistLateReq))
+     mTotLateReq  = INT_TABULATED(mBinsLateReq,FLOAT(mHistLateReq))
 
-     kHistLateReq = FLOAT(kHistLateReq)/FLOAT(kTotLateReq)*100.
-     mHistLateReq = FLOAT(mHistLateReq)/FLOAT(mTotLateReq)*100.
+     kHistLateReq = FLOAT(kHistLateReq)/kTotLateReq
+     mHistLateReq = FLOAT(mHistLateReq)/mTotLateReq
 
-     kTotLateExc = TOTAL(kHistLateExc)
-     mTotLateExc = TOTAL(mHistLateExc)
+     kTotLateExc  = INT_TABULATED(kBinsLateExc,FLOAT(kHistLateExc))
+     mTotLateExc  = INT_TABULATED(mBinsLateExc,FLOAT(mHistLateExc))
 
-     kHistLateExc = FLOAT(kHistLateExc)/FLOAT(kTotLateExc)*100.
-     mHistLateExc = FLOAT(mHistLateExc)/FLOAT(mTotLateExc)*100.
+     kHistLateExc = FLOAT(kHistLateExc)/kTotLateExc
+     mHistLateExc = FLOAT(mHistLateExc)/mTotLateExc
+
+     ;; kTotEarlyReq = TOTAL(kHistEarlyReq)
+     ;; mTotEarlyReq = TOTAL(mHistEarlyReq)
+
+     ;; kHistEarlyReq = FLOAT(kHistEarlyReq)/FLOAT(kTotEarlyReq)*100.
+     ;; mHistEarlyReq = FLOAT(mHistEarlyReq)/FLOAT(mTotEarlyReq)*100.
+
+     ;; kTotEarlyExc = TOTAL(kHistEarlyExc)
+     ;; mTotEarlyExc = TOTAL(mHistEarlyExc)
+
+     ;; kHistEarlyExc = FLOAT(kHistEarlyExc)/FLOAT(kTotEarlyExc)*100.
+     ;; mHistEarlyExc = FLOAT(mHistEarlyExc)/FLOAT(mTotEarlyExc)*100.
+
+     ;; kTotLateReq = TOTAL(kHistLateReq)
+     ;; mTotLateReq = TOTAL(mHistLateReq)
+
+     ;; kHistLateReq = FLOAT(kHistLateReq)/FLOAT(kTotLateReq)*100.
+     ;; mHistLateReq = FLOAT(mHistLateReq)/FLOAT(mTotLateReq)*100.
+
+     ;; kTotLateExc = TOTAL(kHistLateExc)
+     ;; mTotLateExc = TOTAL(mHistLateExc)
+
+     ;; kHistLateExc = FLOAT(kHistLateExc)/FLOAT(kTotLateExc)*100.
+     ;; mHistLateExc = FLOAT(mHistLateExc)/FLOAT(mTotLateExc)*100.
 
      parmStr += '-normed'
   ENDIF
@@ -461,9 +545,21 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   ENDELSE
 
   IF KEYWORD_SET(histoTitle__use_GoverK_decile_string) THEN BEGIN
+           CASE 1 OF 
+              STRMATCH(GoverKReq,'ventile*'): BEGIN
+                 space = 8
+                 len   = STRLEN(GoverKReq) EQ 10 ? 2 : 1
+                 str   = ' Ventile'
+              END
+              ELSE: BEGIN
+                 space = 7
+                 len   = 1
+                 str   = ' Decile'
+              END
+           ENDCASE
      titleSuff  = '!C' $
-                  + CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,7,1)),/TOUPCASE) $
-                  + ' Decile'
+                  + CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,space,len)),/TOUPCASE) $
+                  + str
      earlyTitle += titleSuff
      lateTitle  += titleSuff
   ENDIF
@@ -473,6 +569,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
   IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
      earlyWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
+     legTargets = !NULL
      yRange   = [0,(MAX(kHistEarlyExc)>MAX(kHistEarlyReq))*1.1]
      kHistPlotEarlyReq = PLOT(kBinsEarlyReq,kHistEarlyReq,/HISTOGRAM, $
                               XRANGE=xRange, $
@@ -485,6 +582,24 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                               FONT_SIZE=fontSize,THICK=2.5, $
                               CURRENT=earlyWinder)
 
+     legTargets = [legTargets,kHistPlotEarlyReq]
+
+     IF KEYWORD_SET(eb__op_ig_parms) $
+        OR KEYWORD_SET(eb__op_frech_parms) $
+     THEN BEGIN
+        ebStatPlot = PLOT(ebStat.x,ebStat.y, $
+                                 XRANGE=xRange, $
+                                 YRANGE=yRange, $
+                                 LINESTYLE='__', $
+                                 NAME=ebStat.name, $
+                                 ;; COLOR='GRAY', $
+                                 THICK=3.0, $
+                                 /OVERPLOT, $
+                                 CURRENT=earlyWinder)
+
+        legTargets = [legTargets,ebStatPlot]
+     ENDIF
+
      kHistPlotEarlyExc = PLOT(kBinsEarlyExc,kHistEarlyExc,/HISTOGRAM, $
                               XRANGE=xRange, $
                               YRANGE=yRange, $
@@ -495,7 +610,27 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                               /OVERPLOT, $
                               CURRENT=earlyWinder)
 
-     histLegend  = LEGEND(TARGET=[kHistPlotEarlyReq,kHistPlotEarlyExc], $
+     legTargets = [legTargets,kHistPlotEarlyExc]
+
+     IF KEYWORD_SET(en__op_ig_parms) $
+        OR KEYWORD_SET(en__op_frech_parms) $
+     THEN BEGIN
+
+        enStatPlot = PLOT(enStat.x,enStat.y, $
+                                 XRANGE=xRange, $
+                                 YRANGE=yRange, $
+                                 LINESTYLE='-.', $
+                                 NAME=enStat.name, $
+                                 COLOR='GRAY', $
+                                 THICK=3.0, $
+                                 /OVERPLOT, $
+                                 CURRENT=earlyWinder)
+
+
+        legTargets = [legTargets,enStatPlot]
+     ENDIF
+
+     histLegend  = LEGEND(TARGET=legTargets, $
                           /NORMAL, $
                           FONT_SIZE=legFontSize, $
                           POSITION=[0.85,0.7])
@@ -517,7 +652,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      IF saveEmAll THEN BEGIN
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                               earlyMLTStr,altStr, $
+                               earlyMLTStr,altStr+dstStr, $
                                hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
         PRINT,"Saving to " + outPlotName
         earlyWinder.Save,plotDir+outPlotName
@@ -526,7 +661,9 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      ;; NOW LATE
      lateWinder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
+     legTargets = !NULL
      yRange   = [0,(MAX(kHistLateExc)>MAX(kHistLateReq))*1.1]
+
      kHistPlotLateReq = PLOT(kBinsLateReq,kHistLateReq,/HISTOGRAM, $
                              XRANGE=xRange, $
                              YRANGE=yRange, $
@@ -538,6 +675,27 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                              FONT_SIZE=fontSize,THICK=2.5, $
                              CURRENT=lateWinder)
 
+     legTargets = [legTargets,kHistPlotLateReq]
+
+     IF KEYWORD_SET(lb__op_ig_parms) $
+        OR KEYWORD_SET(lb__op_frech_parms) $
+     THEN BEGIN
+
+        lbStatPlot = PLOT(lbStat.x,lbStat.y, $
+                                 XRANGE=xRange, $
+                                 YRANGE=yRange, $
+                                 LINESTYLE='__', $
+                                 NAME=lbStat.name, $
+                                 ;; COLOR='GRAY', $
+                                 THICK=3.0, $
+                                 /OVERPLOT, $
+                                 CURRENT=lateWinder)
+
+
+        legTargets = [legTargets,lbStatPlot]
+
+     ENDIF
+
      kHistPlotLateExc = PLOT(kBinsLateExc,kHistLateExc,/HISTOGRAM, $
                              XRANGE=xRange, $
                              YRANGE=yRange, $
@@ -548,7 +706,27 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
                              /OVERPLOT, $
                              CURRENT=lateWinder)
 
-     histLegend  = LEGEND(TARGET=[kHistPlotLateReq,kHistPlotLateExc], $
+     legTargets = [legTargets,kHistPlotLateExc]
+
+     IF KEYWORD_SET(ln__op_ig_parms) $
+        OR KEYWORD_SET(ln__op_frech_parms) $
+     THEN BEGIN
+
+        lnStatPlot = PLOT(lnStat.x,lnStat.y, $
+                                 XRANGE=xRange, $
+                                 YRANGE=yRange, $
+                                 LINESTYLE='-.', $
+                                 NAME=lnStat.name, $
+                                 COLOR='GRAY', $
+                                 THICK=3.0, $
+                                 /OVERPLOT, $
+                                 CURRENT=lateWinder)
+
+
+        legTargets = [legTargets,lnStatPlot]
+     ENDIF
+
+     histLegend  = LEGEND(TARGET=legTargets, $
                           /NORMAL, $
                           FONT_SIZE=legFontSize, $
                           POSITION=[0.85,0.7])
@@ -570,7 +748,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
      IF saveEmAll THEN BEGIN
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                               lateMLTStr,altStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+                               lateMLTStr,altStr+dstStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
         PRINT,"Saving to " + outPlotName
 
         lateWinder.Save,plotDir+outPlotName
