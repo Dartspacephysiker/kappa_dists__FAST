@@ -120,7 +120,7 @@ PRO JOURNAL__20180503__KAPPA_FITS__MLT_HISTOS, $
 
   minM = -3.5
   maxM = 1.5
-  divM = -1.
+  divM = -1.75
 
   minI  = 60
   maxI  = 90

@@ -88,6 +88,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
    DSTCUTOFF=dstCutoff, $
    MAKEKAPPAHISTOPLOT=makeKappaHistoPlot, $
    HISTOTITLE__USE_GOVERK_DECILE_STRING=histoTitle__use_GoverK_decile_string, $
+   HISTOTITLE__NONE=histoTitle__none, $
    MAKEMETASTABPLOT=makeMetaStabPlot, $
    MAKEMLTILATPLOT=makeMLTILATplot, $
    MAKEILATKAPPAPLOT=makeILATKappaplot, $
@@ -115,10 +116,13 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   bonusPlotSuff = ''
 
+  outPlotType   = '.png'
+  ;; outPlotType   = '.pdf'
+
   requireIons = N_ELEMENTS(require_ions) GT 0 ? require_ions : 0
   excludeIons = N_ELEMENTS(exclude_ions) GT 0 ? exclude_ions : 0
 
-  legFontSize = 14
+  legFontSize = 18
   fontSize = 20
 
   ;; makeKappaHistoPlot    = 1
@@ -161,7 +165,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
               str   = 'Dec'
            END
         ENDCASE
-        GoverKStr     = STRING(FORMAT='("-GK",A0,I2)',str,LONG(STRMID(GoverKReq,space,len)))
+        GoverKStr     = STRING(FORMAT='("-GK",A0,I0)',str,LONG(STRMID(GoverKReq,space,len)))
      END
      ELSE: BEGIN
         GoverKStr     = (STRING(FORMAT='("-GoverK",F0.1)',GoverKReq)).Replace('.','_')
@@ -255,7 +259,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   ENDIF
   IF KEYWORD_SET(stats__give_ventile) THEN BEGIN
      decileStr      = '-ventiles'
-     statName       = 'Ventiles 1, 4, 7'
+     statName       = 'Q1, Median, Q3'
   ENDIF
     
   ;; What about a metastability measure?
@@ -304,9 +308,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   belAARSym = 'x'
   AARSym    = '+'
 
-  yHistoTitle = KEYWORD_SET(normed) ? 'Percent' : 'Count'
+  yHistoTitle = KEYWORD_SET(normed) ? '% Obs' : 'Count'
 
-  kappaPlotRange = [1.5,20]
+  kappaPlotRange = [1.4,20]
   metaPlotRange  = [0.,1.]
         
 
@@ -328,8 +332,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      PRINT,FORMAT='("Working with ",I0, " inds")',count
 
-     allName       = 'All' + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',count)
-     allMedName    = 'All' + STRING(9B) + "(" + statName + ")"
+     ;; allName       = 'All' + STRING(9B) + STRING(FORMAT='("(N = ",I5,")")',count)
+     ;; allMedName    = 'All' + STRING(9B) + "(" + statName + ")"
+     allName       = STRING(FORMAT='("N = ",I5)',count)
+     allMedName    = statName
 
      plot_i            = final_i
 
@@ -404,7 +410,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            titleStr = CARDINAL_TO_ORDINAL_STRING( $
                       LONG(STRMID(GoverKReq,space,len)), $
                       /TOUPCASE) + str
-        ENDIF
+        ENDIF ELSE IF KEYWORD_SET(histoTitle__none) THEN titleStr = ''
 
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
@@ -433,8 +439,9 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          TARGET=winder)
 
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                      + STRING(FORMAT='("-kappaStats_",A0,"-",A0,A0,A0,A0,".png")', $
-                               mltStr+altStr+dstStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+                      + STRING(FORMAT='("-kappaStats_",A0,"-",A0,A0,A0,A0,A0)', $
+                               mltStr+altStr+dstStr,hemi,parmStr,kHBinSizeStr, $
+                               bonusPlotSuff,outPlotType)
         PRINT,"Saving to " + outPlotName
         winder.Save,plotDir+outPlotName
 
@@ -469,7 +476,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
            titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,space,len)),/TOUPCASE) + $
                       str
-        ENDIF
+        ENDIF ELSE IF KEYWORD_SET(histoTitle__none) THEN titleStr = ''
 
         winderM  = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
@@ -498,12 +505,13 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          TARGET=winderM)
 
         MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + STRING(FORMAT='("-MetaStab_",A0,"-",A0,A0,A0,A0,".png")', $
+                    + STRING(FORMAT='("-MetaStab_",A0,"-",A0,A0,A0,A0,A0)', $
                              mltStr+altStr+dstStr, $
                              hemi, $
                              parmStr, $
                              mHBinSizeStr, $
-                             bonusPlotSuff)
+                             bonusPlotSuff, $
+                             outPlotType)
 
         PRINT,"Saving to " + MPlotName
         winderM.Save,plotDir+MPlotName
@@ -522,7 +530,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                   CURRENT=winder2)
 
         scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                       + "-kS-" + mltStr + "_ILAT" + altStr + dstStr + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-kS-" + mltStr + "_ILAT" + altStr + dstStr + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + scatPlotName
         winder2.Save,plotDir+scatPlotName
@@ -628,7 +636,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-ILATkappa" $
                        + "-" + mltStr +altStr + dstStr $
-                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + ilatPlotName
         winder3.Save,plotDir+ilatPlotName
@@ -741,7 +749,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         mltPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-MLTkappa" + altStr + dstStr + "-" + $
-                      hemi + parmStr + decileStr + bonusPlotSuff + ".png"
+                      hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + mltPlotName
         winder4.Save,plotDir+mltPlotName
@@ -751,20 +759,21 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
      IF KEYWORD_SET(makeGoverKvsKappaPlot) THEN BEGIN
 
+        ;; winder5 = WINDOW(DIMENSIONS=[ROUND(800*1.61803),800],BUFFER=bufferPlots)
         winder5 = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         GoverKchi2Range       = KEYWORD_SET(GoverKLog) ? [0.9,MAX(ratio)] : [0.5,7]
 
         medianStyle = 1
-        addDecileLine = 0
+        addDecileLine = 1
 
         ;; tmpColor = KEYWORD_SET(addDecileLine) ? 'Orange' : belAARCol
         tmpColor = 'Dark Orange' 
 
         GoverKchi2Kappaplot   = SCATTERPLOT(KF2DParms.kappa[plot_i], $
                                             ratio[plot_i], $
-                                            XTITLE='Kappa', $
-                                            YTITLE='G over K', $
+                                            ;; XTITLE='$\kappa$', $
+                                            ;; YTITLE='$\chi$!U2!Dred,M!N / $\chi$!U2!Dred,$\kappa$!N', $
                                             YLOG=GoverKLog, $
                                             SYM_COLOR=tmpColor, $
                                             SYMBOL=belAARSym, $
@@ -772,6 +781,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                             XRANGE=kappaPlotRange, $
                                             YRANGE=GoverKchi2Range, $
                                             TRANSP=90, $
+                                            YMINOR=3, $
+                                            XSHOWTEXT=0, $
+                                            YSHOWTEXT=0, $
+                                            ;; YTICKFONT_SIZE=16, $
+                                            ;; XTICKFONT_SIZE=16, $
                                             CURRENT=winder5)
 
         IF KEYWORD_SET(medianstyle) THEN BEGIN
@@ -834,7 +848,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                   [GoverKHS[*].decile.val[deciles[2]]-GoverKy]]))
                  END
                  KEYWORD_SET(stats__give_ventile): BEGIN
-                    ventiles = [1,4,7]
+                    ;; ventiles = [1,4,7]
+                    ventiles = [5,10,15]
 
                     GoverKy = GoverKHS[*].ventile.val[ventiles[1]]
                     GoverKyErr = ABS(TRANSPOSE( $
@@ -861,21 +876,19 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                                GoverKxErr, $
                                                GoverKyErr, $
                                                NAME=allMedName, $
-                                               COLOR='Dark Slate Gray', $
-                                               ;; COLOR='Black', $
-                                               TRANSP=medianTransp, $
-                                               THICK=2., $
-                                               ERRORBAR_THICK=2., $
+                                               ;; COLOR='Dark Slate Gray', $
+                                               COLOR='Black', $
+                                               TRANSP=40, $
+                                               THICK=1., $
+                                               ERRORBAR_THICK=0.8, $
                                                SYMBOL=belAARSym, $
-                                               SYM_THICK=2.0, $
+                                               SYM_THICK=1.5, $
                                                SYM_SIZE=1.5, $
                                                /OVERPLOT, $
                                                CURRENT=winder5)
 
-           GoverKKappaLegend  = LEGEND(TARGET=[GoverKchi2Kappaplot, $
-                                               GoverKchi2KappaStatPlot], $
-                                       /NORMAL, $
-                                       POSITION=[0.85,0.8])
+           legTargets = [GoverKchi2Kappaplot, $
+                         GoverKchi2KappaStatPlot]
 
            ;; GoverKkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxK-minK)+minK, $
            ;;                      YRANGE=GoverKchi2Range, $
@@ -926,34 +939,37 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                    /OVERPLOT, $
            ;;                    CURRENT=winder5)
 
-           decilePlot4 = PLOT(kVals, $
-                              GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=4'), $
-                              NAME='4!Uth!N Decile', $
-                              LINESTYLE='--', $
-                              THICK=2., $
-                              COLOR='Dark Slate Gray', $
-                              /OVERPLOT, $
-                              CURRENT=winder5)
+           ;; decilePlot4 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=4'), $
+           ;;                    NAME='4!Uth!N Decile', $
+           ;;                    LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Dark Slate Gray', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
            decilePlot5 = PLOT(kVals, $
                               GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=5'), $
-                              NAME='5!Uth!N Decile', $
-                              ;; LINESTYLE='--', $
-                              THICK=2., $
-                              COLOR='Dark Slate Gray', $
+                                              DECILE='ventile=10'), $
+                              NAME='Median Fit', $
+                              ;; LINESTYLE='__', $
+                              THICK=2.5, $
+                              ;; COLOR='Dark Slate Gray', $
+                              COLOR='Black', $
+                              ;; COLOR='Dark Gray', $
+                              TRANSP=30, $
                               /OVERPLOT, $
                               CURRENT=winder5)
 
-           decilePlot6 = PLOT(kVals, $
-                              GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='decile=6'), $
-                              NAME='6!Uth!N Decile', $
-                              LINESTYLE=':', $
-                              THICK=2., $
-                              COLOR='Dark Slate Gray', $
-                              /OVERPLOT, $
-                              CURRENT=winder5)
+           ;; decilePlot6 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=6'), $
+           ;;                    NAME='6!Uth!N Decile', $
+           ;;                    LINESTYLE=':', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Dark Slate Gray', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
 
            ;; decilePlot7 = PLOT(kVals, $
            ;;                    GOVERK_CHI2FUNC(kVals, $
@@ -984,19 +1000,28 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                    /OVERPLOT, $
            ;;                    CURRENT=winder5)
 
-           legend = LEGEND(TARGET=[ $;; decilePlot9,decilePlot8,decilePlot7, $
-                                   decilePlot6,decilePlot5,decilePlot4], $ ;, $
-                                   ;; decilePlot3,decilePlot2,decilePlot1], $
-                           /NORMAL, $
-                           POSITION=[0.85,0.8])
+           ;; legend = LEGEND(TARGET=[ $;; decilePlot9,decilePlot8,decilePlot7, $
+           ;;                         ;; decilePlot6,decilePlot5,decilePlot4], $ ;, $
+           ;;                         decilePlot5], $ ;, $
+           ;;                         ;; decilePlot3,decilePlot2,decilePlot1], $
+           ;;                 /NORMAL, $
+           ;;                 POSITION=[0.85,0.8])
+
+           legTargets = [legTargets,decilePlot5]
 
         ENDIF
+
+        GoverKKappaLegend  = LEGEND(TARGET=legTargets, $
+                                    /NORMAL, $
+                                    POSITION=[0.8,0.8], $
+                                    FONT_SIZE=legFontSize)
+
 
         GoverKPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                          + "-kS-GoverKchi2vsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(GoverKLog) ? 'log-' : '') + $
-                          ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
-                          hemi + parmStr + bonusPlotSuff + ".png"
+                          ;; hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
+                          hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + GoverKPlotName
         winder5.Save,plotDir+GoverKPlotName
@@ -1109,8 +1134,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         chi2RedPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                          + "-kS-chi2RedvsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(chi2RedLog) ? 'log-' : '') + $
-                          ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
-                          hemi + parmStr + bonusPlotSuff + ".png"
+                          ;; hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
+                          hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + chi2RedPlotName
         winder6.Save,plotDir+chi2RedPlotName
@@ -1219,7 +1244,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-DSTkappa" $
                        + "-" + mltStr +altStr + dstStr $
-                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + ilatPlotName
         winder7.Save,plotDir+ilatPlotName
@@ -1328,7 +1353,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-AEkappa" $
                        + "-" + mltStr +altStr + dstStr $
-                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + ilatPlotName
         winder8.Save,plotDir+ilatPlotName
@@ -1464,9 +1489,11 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         titleStr = CARDINAL_TO_ORDINAL_STRING(LONG(STRMID(GoverKReq,space,len)),/TOUPCASE) + $
                    str
-     ENDIF
+
+     ENDIF ELSE IF KEYWORD_SET(histoTitle__none) THEN titleStr = ''
 
      IF KEYWORD_SET(makeKappaHistoPlot) THEN BEGIN
+
         winder   = WINDOW(DIMENSIONS=[800,800],BUFFER=bufferPlots)
 
         yRange   = [0,(MAX(kHistExc)>MAX(kHistReq))*1.1]
@@ -1491,28 +1518,32 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                             /OVERPLOT, $
                             CURRENT=winder)
 
-        histLegend  = LEGEND(TARGET=[kHistPlotReq,kHistPlotExc], $
-                             /NORMAL, $
-                             FONT_SIZE=legFontSize, $
-                             POSITION=[0.85,0.7])
-
         kLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*MAX(kHistReq)*2, $
                          YRANGE=yRange, $
+                         NAME='$\kappa_t$ = 2.45', $
                          THICK=2., $
                          LINESTYLE=':', $
                          COLOR=k245LineCol, $
                          /OVERPLOT, $
                          CURRENT=winder)
 
-        kText     = TEXT(0.24,0.22,"$\kappa_t$ = 2.45", $
-                         /NORMAL, $
-                         FONT_SIZE=fontSize, $
-                         FONT_COLOR=k245LineCol, $
-                         TARGET=winder)
+        histLegend  = LEGEND(TARGET=[kHistPlotReq,kHistPlotExc,kLinePlot], $
+                             /NORMAL, $
+                             FONT_SIZE=legFontSize, $
+                             POSITION=[0.75,0.8])
+
+        ;; kText     = TEXT(0.24,0.22,"$\kappa_t$ = 2.45", $
+        ;;                  /NORMAL, $
+        ;;                  FONT_SIZE=fontSize, $
+        ;;                  FONT_COLOR=k245LineCol, $
+        ;;                  TARGET=winder)
 
         outPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                      + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,".png")', $
-                               mltStr,altStr+dstStr,hemi,parmStr,kHBinSizeStr,bonusPlotSuff)
+                      + STRING(FORMAT='("-kappaStats_",A0,A0,"-",A0,A0,A0,A0,A0)', $
+                               mltStr,altStr+dstStr,hemi,parmStr, $
+                               kHBinSizeStr, $
+                               bonusPlotSuff, $
+                               outPlotType)
         PRINT,"Saving to " + outPlotName
         winder.Save,plotDir+outPlotName
 
@@ -1574,13 +1605,14 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                          TARGET=winderM)
 
         MPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                    + STRING(FORMAT='("-MetaStab_",A0,A0,"-",A0,A0,A0,A0,".png")', $
+                    + STRING(FORMAT='("-MetaStab_",A0,A0,"-",A0,A0,A0,A0,A0)', $
                              mltStr, $
                              altStr+dstStr, $
                              hemi, $
                              parmStr, $
                              mHBinSizeStr, $
-                             bonusPlotSuff)
+                             bonusPlotSuff, $
+                             outPlotType)
 
         PRINT,"Saving to " + MPlotName
         winderM.Save,plotDir+MPlotName
@@ -1611,7 +1643,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                    /OVERPLOT)
 
         scatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
-                       + "-kS-MLT_ILAT_coverage" + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-kS-MLT_ILAT_coverage" + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + scatPlotName
         winder2.Save,plotDir+scatPlotName
@@ -1797,7 +1829,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         ilatPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                        + "-kS-ILATkappa" $
                        + "-" + mltStr + altStr + dstStr $
-                       + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                       + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + ilatPlotName
         winder3.Save,plotDir+ilatPlotName
@@ -1970,7 +2002,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
         mltPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-MLTkappa" + altStr + dstStr + "-" + $
-                      hemi + parmStr + decileStr + bonusPlotSuff + ".png"
+                      hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + mltPlotName
         winder4.Save,plotDir+mltPlotName
@@ -2148,8 +2180,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         GoverKPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                          + "-kS-GoverKchi2vsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(GoverKLog) ? 'log-' : '') + $
-                          ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
-                          hemi + parmStr + bonusPlotSuff + ".png"
+                          ;; hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
+                          hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + GoverKPlotName
         winder5.Save,plotDir+GoverKPlotName
@@ -2329,8 +2361,8 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         chi2RedPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                          + "-kS-chi2RedvsKappa" + altStr + dstStr + "-" + $
                          (KEYWORD_SET(chi2RedLog) ? 'log-' : '') + $
-                          ;; hemi + parmStr + decileStr + bonusPlotSuff + ".png"
-                          hemi + parmStr + bonusPlotSuff + ".png"
+                          ;; hemi + parmStr + decileStr + bonusPlotSuff + outPlotType
+                          hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + chi2RedPlotName
         winder6.Save,plotDir+chi2RedPlotName
@@ -2520,7 +2552,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         dstPlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-DSTkappa" $
                       + "-" + mltStr + altStr + dstStr $
-                      + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                      + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + dstPlotName
         winder7.Save,plotDir+dstPlotName
@@ -2709,7 +2741,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
         aePlotName = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) $
                       + "-kS-AEkappa" $
                       + "-" + mltStr + altStr + dstStr $
-                      + "-" + hemi + parmStr + bonusPlotSuff + ".png"
+                      + "-" + hemi + parmStr + bonusPlotSuff + outPlotType
 
         PRINT,"Saving to " + aePlotName
         winder8.Save,plotDir+aePlotName
