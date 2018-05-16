@@ -135,10 +135,15 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   GoverKReq = N_ELEMENTS(GoverK  ) GT 0 ? GoverK   : 'decile=1'
   KChi2Max  = N_ELEMENTS(maxKChi2) GT 0 ? maxKChi2 : 4
 
-  minM  = -3.5
-  maxM  = 1.5
   ;; minM  = 20.5
   ;; maxM  = 23.5
+
+  ;; minM  = -3.5
+  ;; maxM  = 1.5
+
+  minM  = 21
+  maxM  = 24
+
   notMLT = 0
   minI  = 60
   maxI  = 90
@@ -149,7 +154,6 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
 
   mHBinSize = N_ELEMENTS(mHist_binSize) GT 0 ? mHist_binSize : 0.05
   mHistMin  = N_ELEMENTS(mHist_min    ) GT 0 ? mHist_min     : 0.
-
 
   CASE 1 OF
      SIZE(GoverK,/TYPE) EQ 7: BEGIN
@@ -360,6 +364,29 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                        MIN=MIN([mHistMin,checkM]), $
                        LOCATIONS=mBins, $
                        REVERSE_INDICES=rMInds)
+
+     IF KEYWORD_SET(estimate_mu_and_sigma) $
+        OR KEYWORD_SET(print_histos         ) $
+     THEN BEGIN
+        names = 'kHist'
+        hists = LIST(kHist,kHist)
+        bins  = LIST(kBins)
+        dataList = LIST(KF2DParms.kappa[plot_i])
+     ENDIF
+
+     IF KEYWORD_SET(print_histos) THEN BEGIN
+        HISTO_PRINT_FOR_MATHEMATICA, $
+           names,histList,binList,dataList, $
+           /NORMALIZE_HIST, $
+           /ALSO_PRINT_DATA, $
+           WRITE_TO_FILE=write_data_to_files, $
+           FILEPREFS=[mltStr+'-all-'], $
+           FILESUFF=STRING(FORMAT='(A0,"-",A0,A0,A0)', $
+                           altStr+dstStr, $
+                           hemi,parmStr,bonusPlotSuff), $
+           WRITEDIR='/SPENCEdata/Research/Satellites/FAST/kappa_dists/txtOutput/', $
+           BINSIZE=kHBinSize
+     ENDIF
 
      IF KEYWORD_SET(normed) THEN BEGIN
         kTot = TOTAL(kHist)
@@ -929,6 +956,16 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                    /OVERPLOT, $
            ;;                    CURRENT=winder5)
 
+           ;; decilePlot2 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='decile=2'), $
+           ;;                    NAME='2!Und!N Decile', $
+           ;;                    ;; LINESTYLE='--', $
+           ;;                    THICK=2., $
+           ;;                    COLOR='Black', $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
            ;; decilePlot3 = PLOT(kVals, $
            ;;                    GOVERK_CHI2FUNC(kVals, $
            ;;                                    DECILE='decile=3'), $
@@ -948,18 +985,19 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                    COLOR='Dark Slate Gray', $
            ;;                    /OVERPLOT, $
            ;;                    CURRENT=winder5)
-           decilePlot5 = PLOT(kVals, $
-                              GOVERK_CHI2FUNC(kVals, $
-                                              DECILE='ventile=10'), $
-                              NAME='Median Fit', $
-                              ;; LINESTYLE='__', $
-                              THICK=2.5, $
-                              ;; COLOR='Dark Slate Gray', $
-                              COLOR='Black', $
-                              ;; COLOR='Dark Gray', $
-                              TRANSP=30, $
-                              /OVERPLOT, $
-                              CURRENT=winder5)
+
+           ;; decilePlot5 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='ventile=10'), $
+           ;;                    NAME='Median Fit', $
+           ;;                    ;; LINESTYLE='__', $
+           ;;                    THICK=2.5, $
+           ;;                    ;; COLOR='Dark Slate Gray', $
+           ;;                    COLOR='Black', $
+           ;;                    ;; COLOR='Dark Gray', $
+           ;;                    TRANSP=30, $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
 
            ;; decilePlot6 = PLOT(kVals, $
            ;;                    GOVERK_CHI2FUNC(kVals, $
@@ -1007,7 +1045,37 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                 /NORMAL, $
            ;;                 POSITION=[0.85,0.8])
 
-           legTargets = [legTargets,decilePlot5]
+           ;; legTargets = [legTargets,decilePlot5]
+
+           ;; ventilePlot5 = PLOT(kVals, $
+           ;;                    GOVERK_CHI2FUNC(kVals, $
+           ;;                                    DECILE='ventile=5'), $
+           ;;                    NAME='Q1 Fit', $
+           ;;                    ;; LINESTYLE='__', $
+           ;;                    THICK=2.5, $
+           ;;                    ;; COLOR='Dark Slate Gray', $
+           ;;                    COLOR='Black', $
+           ;;                    ;; COLOR='Dark Gray', $
+           ;;                    TRANSP=30, $
+           ;;                    /OVERPLOT, $
+           ;;                    CURRENT=winder5)
+
+           ;; legTargets = [legTargets,ventilePlot5]
+
+           ventilePlot10 = PLOT(kVals, $
+                              GOVERK_CHI2FUNC(kVals, $
+                                              DECILE='ventile=10'), $
+                              NAME='Median Fit', $
+                              ;; LINESTYLE='__', $
+                              THICK=2.5, $
+                              ;; COLOR='Dark Slate Gray', $
+                              COLOR='Black', $
+                              ;; COLOR='Dark Gray', $
+                              TRANSP=30, $
+                              /OVERPLOT, $
+                              CURRENT=winder5)
+
+           legTargets = [legTargets,ventilePlot10]
 
         ENDIF
 

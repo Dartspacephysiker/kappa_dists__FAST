@@ -23,12 +23,17 @@ PRO RKAPPA__PRINTSUMMARY,dir,file,orbit,count,tmpOrb,MLT,ILAT,ALT,t1Str,t2Str,t_
 END
 PRO READ_KAPPA_BATCH_SETUP_FILE, $
    orbit,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current, $
-   NTOSKIP=nToSkip, $
    DATE_OF_GENERATION=date, $
    MLTRANGE=mltRange, $
    ALTRANGE=altRange, $
    MIN_T_STREAKLEN=min_T_streakLen, $
    MAX_T_STREAKLEN=max_T_streakLen, $
+   SKIPIFEXISTS=skipIfExists, $
+   ALL_ALREADY_EXIST=all_already_exist, $
+   SKIPROOTDIR=skipRootDir, $
+   SPECAVGSUFF=specAvgSuff, $
+   BONUSPREF=bonusPref, $
+   NTOSKIP=nToSkip, $
    PRINT_SUMMARY=print_summary
 
   COMPILE_OPT IDL2,STRICTARRSUBS
@@ -127,6 +132,7 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
   READF,lun,junkLine
   tmpOrb = 0L
   count  = 0
+  all_already_exist = 0
   WHILE ~cont AND ~EOF(lun) DO BEGIN
      READF,lun,FORMAT='(I05,T7,F04.1,T12,F05.1,T19,I4,T25,A19,T46,A8,T56,G-8.5,T66,I-5,T73,G-6.3,T81,G-0.5)', $
            tmpOrb,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current
@@ -151,6 +157,33 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
         IF KEYWORD_SET(print_summary) THEN BEGIN
            RKAPPA__PRINTSUMMARY, $
               dir,file,orbit,count,tmpOrb,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current
+        ENDIF
+
+        IF KEYWORD_SET(skipIfExists) THEN BEGIN
+
+           ;; NY VEI
+           t1S = STRMID(t1Str,11,11)
+           t2S = t2Str
+
+           t1S = t1S.REPLACE(':', '_')
+           t1S += "__00"
+           
+           t2S = t2S.REPLACE(':', '_')
+           t2S += "__00"
+
+           chkFile = STRING(FORMAT='("NewellData-",I0,A0,A0,A0,A0)', $
+                            orbit, $
+                            bonusPref, $
+                            '-' + t1S + '_-_' + t2S, $
+                            specAvgSuff, $
+                            ".sav")
+
+           this = FILE_SEARCH(skipRootDir,'*'+chkFile)
+
+           all_already_exist = this[0] NE ''
+
+           cont = this[0] EQ ''
+
         ENDIF
 
      ENDIF
