@@ -5,6 +5,11 @@
 BeginPackage["jvFuncs`"]
 (* Exported symbols added here with SymbolName::usage *)  
 
+nVMaxwellian::usage="
+nVMaxwellian[pot_,RB_,Tm_,nm_]
+Gives the 'Spence relation' density as a function of pot (in V), RB, Tm (in eV), and nm (in cm^-3).
+";
+
 JVMaxwellian::usage="
 JVMaxwellian[pot_,RB_,Tm_,nm_]
 Gives the Knight relation current densty as a function of pot (in V), RB, Tm (in eV), and nm (in cm^-3).
@@ -15,9 +20,14 @@ JVMaxwellianPhiBar[phiBar_,RB_,Tm_,nm_]
 Gives the Knight relation current densty as a function of phiBar (pot/temperature), RB, Tm (in eV), and nm (in cm^-3).
 ";
 
+nVKappa::usage="
+nVKappa[pot_,RB_,Tm_,nm_,kappa_]
+Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
+";
+
 JVKappa::usage="
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]
-Gives the Dors and Kletzing current densty as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
+Gives the Dors and Kletzing current density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
 JVKappaPhiBar::usage="
@@ -57,12 +67,20 @@ Gives the ratio of the Dors and Kletzing J-V relation and the Knight J-V relatio
 
 
 Begin["`Private`"] (* Begin Private Context *) 
+nVMaxwellian[pot_,RB_,Tm_,nm_]:=Module[{factor},
+factor=nm*(1/2 (Exp[pot/Tm] Erfc[Sqrt[pot/Tm]]+2Sqrt[(RB-1)/\[Pi]]DawsonF[Sqrt[(pot/Tm)/(RB-1)]]))
+];
+
 JVMaxwellian[pot_,RB_,Tm_,nm_]:=Module[{jParallel},
 jParallel=0.0266987 nm Tm^(1/2) RB (1-(1-1/RB)Exp[-(pot/Tm)/(RB-1)])
 ];
 
 JVMaxwellianPhiBar[phiBar_,RB_,Tm_,nm_]:=Module[{jParallel},
 jParallel=0.0266987 nm Tm^(1/2) RB (1-(1-1/RB)Exp[-(phiBar)/(RB-1)])
+];
+
+nVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{factor},
+factor=1/(2 Sqrt[pot/Tm] (-3+2 kappa)^(5/2)) (pot/Tm (3+2 pot/Tm-2 kappa)^-kappa Sqrt[(3+2 pot/Tm-2 kappa)/pot/Tm] (-3+2 kappa)^(2+kappa) Csc[\[Pi] kappa]+1/(pot/Tm Gamma[-(3/2)+kappa]) 2 Sqrt[2/\[Pi]] (1/((-1+RB) (3+2 kappa) (-1+4 kappa^2)) Gamma[1+kappa] ((-1+RB) (-3+2 kappa) ((-1+RB)^2 (3-2 kappa)^2+2 pot/Tm (-1+RB) (-3+2 kappa) (5+2 kappa)-4 pot/Tm^2 (-1+6 kappa+4 kappa^2))-(2 pot/Tm+(-1+RB) (-3+2 kappa))^3 Hypergeometric2F1[1,1+kappa,-(1/2),(2 pot/Tm)/((-1+RB) (3-2 kappa))])+2 pot/Tm^2 \[Pi] (-3+2 kappa) Csc[\[Pi] kappa] Hypergeometric2F1Regularized[-(1/2),1,1-kappa,(-3+2 kappa)/(2 pot/Tm)]))
 ];
 
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{jParallel},
