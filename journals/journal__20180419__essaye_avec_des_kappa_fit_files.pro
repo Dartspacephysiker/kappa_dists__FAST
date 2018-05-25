@@ -123,6 +123,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   excludeIons = N_ELEMENTS(exclude_ions) GT 0 ? exclude_ions : 0
 
   legFontSize = 18
+  legPos      = [0.85,0.6]
   fontSize = 20
 
   ;; makeKappaHistoPlot    = 1
@@ -312,7 +313,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
   belAARSym = 'x'
   AARSym    = '+'
 
-  yHistoTitle = KEYWORD_SET(normed) ? '% Obs' : 'Count'
+  yHistoTitle = KEYWORD_SET(normed) ? '% Observations' : 'Count'
 
   kappaPlotRange = [1.4,20]
   metaPlotRange  = [0.,1.]
@@ -641,7 +642,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ILATKappaLegend  = LEGEND(TARGET=[ILATkappaplot, $
                                             ILATkappaStatPlot], $
                                     /NORMAL, $
-                                    POSITION=[0.85,0.8])
+                                    POSITION=legPos)
 
            ILATkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxI-minI)+minI, $
                                YRANGE=ILATRange, $
@@ -755,7 +756,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            MLTKappaLegend  = LEGEND(TARGET=[MLTkappaplot, $
                                             MLTkappaStatPlot], $
                                     /NORMAL, $
-                                    POSITION=[0.85,0.8])
+                                    POSITION=legPos)
 
            MLTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxM-minM)+minM, $
                                 YRANGE=MLTRange, $
@@ -1043,7 +1044,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            ;;                         decilePlot5], $ ;, $
            ;;                         ;; decilePlot3,decilePlot2,decilePlot1], $
            ;;                 /NORMAL, $
-           ;;                 POSITION=[0.85,0.8])
+           ;;                 POSITION=legPos)
 
            ;; legTargets = [legTargets,decilePlot5]
 
@@ -1195,7 +1196,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            chi2RedKappaLegend  = LEGEND(TARGET=[chi2RedKappaplot, $
                                                 chi2RedKappaStatPlot], $
                                         /NORMAL, $
-                                        POSITION=[0.85,0.8])
+                                        POSITION=legPos)
 
         ENDIF
 
@@ -1290,7 +1291,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            DSTKappaLegend  = LEGEND(TARGET=[DSTkappaplot, $
                                             DSTkappaStatPlot], $
                                     /NORMAL, $
-                                    POSITION=[0.85,0.8])
+                                    POSITION=legPos)
 
            DSTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxDST-minDST)+minDST, $
                                YRANGE=DSTRange, $
@@ -1399,7 +1400,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
            AEKappaLegend  = LEGEND(TARGET=[AEkappaplot, $
                                             AEkappaStatPlot], $
                                     /NORMAL, $
-                                    POSITION=[0.85,0.8])
+                                    POSITION=legPos)
 
            AEkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxAE-minAE)+minAE, $
                                YRANGE=AERange, $
@@ -1877,7 +1878,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                              ILATkappaRStatPlot], $
                                      FONT_SIZE=legFontSize, $
                                      /NORMAL, $
-                                     POSITION=[0.85,0.8])
+                                     POSITION=legPos)
 
         ILATkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxI-minI)+minI, $
                              YRANGE=ILATRange, $
@@ -2226,7 +2227,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                                GoverKchi2KappaRStatPlot], $
                                        FONT_SIZE=legFontSize, $
                                        /NORMAL, $
-                                       POSITION=[0.85,0.8])
+                                       POSITION=legPos)
 
            ;; GoverKkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxK-minK)+minK, $
            ;;                      YRANGE=GoverKchi2Range, $
@@ -2407,7 +2408,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                                 chi2RedKappaRStatPlot], $
                                         /NORMAL, $
                                         FONT_SIZE=legFontSize, $
-                                        POSITION=[0.85,0.8])
+                                        POSITION=legPos)
 
            ;; chi2RedkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxK-minK)+minK, $
            ;;                      YRANGE=chi2RedRange, $
@@ -2600,9 +2601,10 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                          DSTkappaRStatPlot], $
                                  FONT_SIZE=legFontSize, $
                                  /NORMAL, $
-                                 POSITION=[0.85,0.8])
+                                 POSITION=legPos)
 
-        DSTkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxDST-minDST)+minDST, $
+        DSTkLinePlot = PLOT(REPLICATE(2.45,11), $
+                            FINDGEN(11)/10.*(maxDST-minDST)+minDST, $
                             YRANGE=DSTRange, $
                             THICK=2., $
                             COLOR=k245LineCol, $
@@ -2789,7 +2791,7 @@ PRO JOURNAL__20180419__ESSAYE_AVEC_DES_KAPPA_FIT_FILES, $
                                          AEkappaRStatPlot], $
                                  FONT_SIZE=legFontSize, $
                                  /NORMAL, $
-                                 POSITION=[0.85,0.8])
+                                 POSITION=legPos)
 
         AEkLinePlot = PLOT(REPLICATE(2.45,11),FINDGEN(11)/10.*(maxAE-minAE)+minAE, $
                             YRANGE=AERange, $

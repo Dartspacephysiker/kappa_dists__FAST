@@ -207,21 +207,47 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
 
   ENDIF
 
-  ;; PRINT,FORMAT='("time={",' + nHerStr + '(A25,:,", "),"}")','"'+T2S(jvPlotData.time[inds],/MS)+'"'
-  PRINT,STRING(FORMAT='("time={",' + nHerStr + '(A0,:,", "),"}")','"'+STRMID(T2S(jvPlotData.time[inds],/MS),11,23)+'"')+'};'
-  PRINT,STRING(FORMAT='("pots={",' + nHerStr + '(F-0.2,:,", "),"}")',jvPlotData.pot[inds])+'};'
-  PRINT,STRING(FORMAT='("potErrs={",' + nHerStr + '(F-0.2,:,", "),"}")',jvPlotData.potErr[inds])+'};'
-  PRINT,STRING(FORMAT='("curs={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.cur[inds]*(-1.D))+'};'
-  PRINT,STRING(FORMAT='("curErrs={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.curErr[inds])+'};'
-  PRINT,STRING(FORMAT='("jes={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.je[inds])+'};'
-  PRINT,STRING(FORMAT='("jeErrs={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.jeerr[inds])+'};'
-  PRINT,STRING(FORMAT='("dens={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.source.nDown[inds])+'};'
-  PRINT,STRING(FORMAT='("densErr={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.source.nDownErr[inds])+'};'
-  PRINT,STRING(FORMAT='("downepots={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.only_downe_pot[inds])+'};'
-  IF N_ELEMENTS(k2DParms.bulk_energy) EQ nHer THEN BEGIN
-     PRINT,STRING(FORMAT='("gaussbulkEs={",' + nHerStr + '(F-0.2,:,", "),"}")',g2DParms.bulk_energy[inds])+'};'
-     PRINT,STRING(FORMAT='("kappabulkEs={",' + nHerStr + '(F-0.2,:,", "),"}")',k2DParms.bulk_energy[inds])+'};'
-  ENDIF
+  CSVstyle = 1
+  IF KEYWORD_SET(CSVstyle) THEN BEGIN
+
+     PRINT,"Tid,pot,potErr,cur,curErr,je,jeerr,nDown,nDownErr,downEpot,downEpotErr"
+     FOR k=0,N_ELEMENTS(inds)-1 DO BEGIN
+        i=inds[k]
+        PRINT,FORMAT='(A0,",",F0.2,",",F0.2,","' $
+              + ',F0.3,",",F0.3,",",F0.3,",",F0.3,","' $
+              + ',F0.3,",",F0.3,",",F0.3,",",F0.3)', $
+              '"'+STRMID(T2S(jvPlotData.time[i],/MS),11,23)+'"', $
+              jvPlotData.pot[i], $
+              jvPlotData.potErr[i], $
+              jvPlotData.cur[i], $
+              jvPlotData.curErr[i], $
+              jvPlotData.je[i], $
+              jvPlotData.jeerr[i], $
+              jvPlotData.source.nDown[i], $
+              jvPlotData.source.nDownErr[i], $
+              jvPlotData.only_downe_pot[i], $
+              jvPlotData.only_downe_poterr[i]
+     ENDFOR
+
+  ENDIF ELSE BEGIN
+
+     ;; PRINT,FORMAT='("time={",' + nHerStr + '(A25,:,", "),"}")','"'+T2S(jvPlotData.time[inds],/MS)+'"'
+     PRINT,STRING(FORMAT='("time={",' + nHerStr + '(A0,:,", "),"}")','"'+STRMID(T2S(jvPlotData.time[inds],/MS),11,23)+'"')+'};'
+     PRINT,STRING(FORMAT='("pots={",' + nHerStr + '(F-0.2,:,", "),"}")',    jvPlotData.pot[inds])+'};'
+     PRINT,STRING(FORMAT='("potErrs={",' + nHerStr + '(F-0.2,:,", "),"}")', jvPlotData.potErr[inds])+'};'
+     PRINT,STRING(FORMAT='("curs={",' + nHerStr + '(F-0.3,:,", "),"}")',    jvPlotData.cur[inds]*(-1.D))+'};'
+     PRINT,STRING(FORMAT='("curErrs={",' + nHerStr + '(F-0.3,:,", "),"}")', jvPlotData.curErr[inds])+'};'
+     PRINT,STRING(FORMAT='("jes={",' + nHerStr + '(F-0.3,:,", "),"}")',     jvPlotData.je[inds])+'};'
+     PRINT,STRING(FORMAT='("jeErrs={",' + nHerStr + '(F-0.3,:,", "),"}")',  jvPlotData.jeerr[inds])+'};'
+     PRINT,STRING(FORMAT='("dens={",' + nHerStr + '(F-0.3,:,", "),"}")',    jvPlotData.source.nDown[inds])+'};'
+     PRINT,STRING(FORMAT='("densErr={",' + nHerStr + '(F-0.3,:,", "),"}")', jvPlotData.source.nDownErr[inds])+'};'
+     PRINT,STRING(FORMAT='("downepots={",' + nHerStr + '(F-0.3,:,", "),"}")',jvPlotData.only_downe_pot[inds])+'};'
+     IF N_ELEMENTS(k2DParms.bulk_energy) EQ nHer THEN BEGIN
+        PRINT,STRING(FORMAT='("gaussbulkEs={",' + nHerStr + '(F-0.2,:,", "),"}")',g2DParms.bulk_energy[inds])+'};'
+        PRINT,STRING(FORMAT='("kappabulkEs={",' + nHerStr + '(F-0.2,:,", "),"}")',k2DParms.bulk_energy[inds])+'};'
+     ENDIF
+
+  ENDELSE
 
   IF N_ELEMENTS(fit2DKappa_inf_list) GT 0 AND N_ELEMENTS(fit2DGauss_inf_list) GT 0 THEN BEGIN
 

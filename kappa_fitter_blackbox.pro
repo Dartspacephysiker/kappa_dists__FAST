@@ -76,6 +76,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           SWAY__ADD_IU_POT=sway__add_iu_pot, $
                           SWAY__SPECTROGRAM_UNITS=sway__spectrogram_units, $
                           SWAY__CHECKFORIONBEAMS=sway__checkForIonBeams, $
+                          SWAY__TIMEBAR_FROM_ION_BEAMS=sway__timeBar_from_ion_beams, $
                           SHOW_KAPPA_SUMMARY=show_kappa_summary, $
                           KSUM__EANGLE=kSum__eAngle, $
                           KSUM__SAVE_PS=kSum__save_ps, $
@@ -86,6 +87,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__ADD_MEASURED_T_AND_N=kSum__add_meas_T_and_N, $
                           KSUM__ADD_ONLY_MEAS_N=kSum__add_only_meas_N, $
                           KSUM__INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
+                          KSUM__INCLUDE_ION_PA_SPEC=kSum__include_ion_pa_spec, $
+                          KSUM__INCLUDE_ION_ENERGY_SPEC=kSum__include_ion_energy_spec, $
                           KSUM__GRL=kSum__GRL, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           KSUM__SPECTROGRAM_UNITS=kSum__spectrogram_units, $
@@ -774,6 +777,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                            ;; GRL=sway__GRL, $
                            ;; SC_POT=sc_pot, $
                            CHECKFORIONBEAMS=sway__checkForIonBeams, $
+                           TIMEBAR_FROM_ION_BEAMS=sway__timeBar_from_ion_beams, $
                            BATCH_MODE=batch_mode, $
                            PLOTDIR=plotDir
 
@@ -825,6 +829,9 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              KAPPA_STATS__SAVE_STUFF=kStats__save_stuff, $
                              KAPPA_STATS__INCLUDE_THESE_STARTSTOPS=kStats__include_these_startstops, $
                              INCLUDE_ELECTRON_PA_SPEC=kSum__include_electron_pa_spec, $
+                             INCLUDE_ION_PA_SPEC=kSum__include_ion_pa_spec, $
+                             INCLUDE_ION_ENERGY_SPEC=kSum__include_ion_energy_spec, $
+                             ION_ANGLERANGE=curPotList[2].angles.peakEn, $
                              GRL=kSum__GRL, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              SPECTROGRAM_UNITS=kSum__spectrogram_units, $

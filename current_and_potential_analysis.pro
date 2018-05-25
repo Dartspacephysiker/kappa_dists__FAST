@@ -383,7 +383,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         IF KEYWORD_SET(use_sc_pot_for_lowerbound) THEN BEGIN
 
            tmpscinds = WHERE((sc_pot.x GE t1) AND (sc_pot.x LE t2))
-           IF tmpscinds[0] EQ -1 THEN STOP
+           IF tmpscinds[0] EQ -1 THEN IF ~KEYWORD_SET(batch_mode) THEN STOP
            tmpSc_pot = sc_pot
            STR_ELEMENT,tmpSc_pot,'x',sc_pot.x[tmpscinds],/ADD_REPLACE
            STR_ELEMENT,tmpSc_pot,'y',sc_pot.y[tmpscinds],/ADD_REPLACE

@@ -544,6 +544,17 @@ FUNCTION GET_KAPPADB_INDS,andre, $
   dstStr = ''
   IF KEYWORD_SET(dstCutoff) THEN BEGIN
      SET_ALFVENDB_PLOT_DEFAULTS, $
+        HEMI=hemi, $
+        NORTH=north, $
+        SOUTH=south, $
+        BOTH_HEMIS=both_hemis, $
+        MINMLT=minM, $
+        MAXMLT=maxM, $
+        BINMLT=binM, $
+        SHIFTMLT=shiftM, $
+        MINILAT=minI, $
+        MAXILAT=maxI, $
+        BINILAT=binI, $
         DSTCUTOFF=dstCutoff, $
         /USE_STORM_STUFF, $
         ALFDB_PLOT_STRUCT=alfDB_plot_struct
