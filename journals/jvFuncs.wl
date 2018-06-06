@@ -25,6 +25,11 @@ nVKappa[pot_,RB_,Tm_,nm_,kappa_]
 Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
+nVKappa2p5::usage="
+nVKappa2p5[pot_,RB_,Tm_,nm_]
+Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa=2.5.
+";
+
 JVKappa::usage="
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]
 Gives the Dors and Kletzing current density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
@@ -80,7 +85,11 @@ jParallel=0.0266987 nm Tm^(1/2) RB (1-(1-1/RB)Exp[-(phiBar)/(RB-1)])
 ];
 
 nVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{factor},
-factor=1/(2 Sqrt[pot/Tm] (-3+2 kappa)^(5/2)) (pot/Tm (3+2 pot/Tm-2 kappa)^-kappa Sqrt[(3+2 pot/Tm-2 kappa)/pot/Tm] (-3+2 kappa)^(2+kappa) Csc[\[Pi] kappa]+1/(pot/Tm Gamma[-(3/2)+kappa]) 2 Sqrt[2/\[Pi]] (1/((-1+RB) (3+2 kappa) (-1+4 kappa^2)) Gamma[1+kappa] ((-1+RB) (-3+2 kappa) ((-1+RB)^2 (3-2 kappa)^2+2 pot/Tm (-1+RB) (-3+2 kappa) (5+2 kappa)-4 pot/Tm^2 (-1+6 kappa+4 kappa^2))-(2 pot/Tm+(-1+RB) (-3+2 kappa))^3 Hypergeometric2F1[1,1+kappa,-(1/2),(2 pot/Tm)/((-1+RB) (3-2 kappa))])+2 pot/Tm^2 \[Pi] (-3+2 kappa) Csc[\[Pi] kappa] Hypergeometric2F1Regularized[-(1/2),1,1-kappa,(-3+2 kappa)/(2 pot/Tm)]))
+factor=nm/(2 Sqrt[pot/Tm] (-3+2 kappa)^(5/2)) (pot/Tm (3+2 pot/Tm-2 kappa)^-kappa Sqrt[(3+2 pot/Tm-2 kappa)/pot/Tm] (-3+2 kappa)^(2+kappa) Csc[\[Pi] kappa]+1/(pot/Tm Gamma[-(3/2)+kappa]) 2 Sqrt[2/\[Pi]] (1/((-1+RB) (3+2 kappa) (-1+4 kappa^2)) Gamma[1+kappa] ((-1+RB) (-3+2 kappa) ((-1+RB)^2 (3-2 kappa)^2+2 pot/Tm (-1+RB) (-3+2 kappa) (5+2 kappa)-4 pot/Tm^2 (-1+6 kappa+4 kappa^2))-(2 pot/Tm+(-1+RB) (-3+2 kappa))^3 Hypergeometric2F1[1,1+kappa,-(1/2),(2 pot/Tm)/((-1+RB) (3-2 kappa))])+2 pot/Tm^2 \[Pi] (-3+2 kappa) Csc[\[Pi] kappa] Hypergeometric2F1Regularized[-(1/2),1,1-kappa,(-3+2 kappa)/(2 pot/Tm)]))
+];
+
+nVKappa2p5[pot_,RB_,Tm_,nm_]:=Module[{factor},
+factor=nm/4 (pot/Tm)^(3/2) ((-5+2/(pot/Tm)^(3/2)+3 (pot/Tm))/(-1+(pot/Tm))^2+(5-3 (pot/Tm)-5 RB)/(-1+(pot/Tm)+RB)^2)
 ];
 
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{jParallel},
