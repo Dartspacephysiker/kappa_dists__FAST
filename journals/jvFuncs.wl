@@ -25,9 +25,19 @@ nVKappa[pot_,RB_,Tm_,nm_,kappa_]
 Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
+nVKappa2::usage="
+nVKappa2[pot_,RB_,Tm_,nm_]
+Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa=2.
+";
+
 nVKappa2p5::usage="
 nVKappa2p5[pot_,RB_,Tm_,nm_]
 Gives the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa=2.5.
+";
+
+nVKappaIntegrate::usage="
+nVKappaIntegrate[pot_,RB_,Tm_,nm_,kappa_]
+Perform integral to get the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
 JVKappa::usage="
@@ -84,12 +94,25 @@ JVMaxwellianPhiBar[phiBar_,RB_,Tm_,nm_]:=Module[{jParallel},
 jParallel=0.0266987 nm Tm^(1/2) RB (1-(1-1/RB)Exp[-(phiBar)/(RB-1)])
 ];
 
-nVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{factor},
-factor=nm/(2 Sqrt[pot/Tm] (-3+2 kappa)^(5/2)) (pot/Tm (3+2 pot/Tm-2 kappa)^-kappa Sqrt[(3+2 pot/Tm-2 kappa)/pot/Tm] (-3+2 kappa)^(2+kappa) Csc[\[Pi] kappa]+1/(pot/Tm Gamma[-(3/2)+kappa]) 2 Sqrt[2/\[Pi]] (1/((-1+RB) (3+2 kappa) (-1+4 kappa^2)) Gamma[1+kappa] ((-1+RB) (-3+2 kappa) ((-1+RB)^2 (3-2 kappa)^2+2 pot/Tm (-1+RB) (-3+2 kappa) (5+2 kappa)-4 pot/Tm^2 (-1+6 kappa+4 kappa^2))-(2 pot/Tm+(-1+RB) (-3+2 kappa))^3 Hypergeometric2F1[1,1+kappa,-(1/2),(2 pot/Tm)/((-1+RB) (3-2 kappa))])+2 pot/Tm^2 \[Pi] (-3+2 kappa) Csc[\[Pi] kappa] Hypergeometric2F1Regularized[-(1/2),1,1-kappa,(-3+2 kappa)/(2 pot/Tm)]))
+nVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{factor,kappr},
+kappr=kappa;
+If[Abs[kappr-Round[kappr]]<= 0.01,kappr=Round[kappr]+0.01*RandomChoice[{1,-1}]];
+factor=nm*1/(2 Sqrt[pot/Tm] (-3+2 kappr)^(5/2)) (pot/Tm (3+2 pot/Tm-2 kappr)^-kappr Sqrt[(3+2 pot/Tm-2 kappr)/pot/Tm] (-3+2 kappr)^(2+kappr) Csc[\[Pi] kappr]+1/(pot/Tm Gamma[-(3/2)+kappr]) 2 Sqrt[2/\[Pi]] (1/((-1+RB) (3+2 kappr) (-1+4 kappr^2)) Gamma[1+kappr] ((-1+RB) (-3+2 kappr) ((-1+RB)^2 (3-2 kappr)^2+2 pot/Tm (-1+RB) (-3+2 kappr) (5+2 kappr)-4 pot/Tm^2 (-1+6 kappr+4 kappr^2))-(2 pot/Tm+(-1+RB) (-3+2 kappr))^3 Hypergeometric2F1[1,1+kappr,-(1/2),(2 pot/Tm)/((-1+RB) (3-2 kappr))])+2 pot/Tm^2 \[Pi] (-3+2 kappr) Csc[\[Pi] kappr] Hypergeometric2F1Regularized[-(1/2),1,1-kappr,(-3+2 kappr)/(2 pot/Tm)]))
+];
+
+nVKappa2p5[pot_,RB_,Tm_,nm_]:=Module[{factor},
+factor=nm ((4 (pot/Tm)^2 RB)/((-1+2 (pot/Tm)) (-1+2 (pot/Tm)+RB))+(Sqrt[2] Sqrt[(pot/Tm)] ArcCos[Sqrt[2] Sqrt[(pot/Tm)]])/(1-2 (pot/Tm))^(3/2)+(Sqrt[2] Sqrt[(pot/Tm)] Sqrt[1+(2 (pot/Tm))/(-1+RB)] (-1+RB)^(5/2) ArcSinh[(Sqrt[2] Sqrt[(pot/Tm)])/Sqrt[-1+RB]])/(-1+2 (pot/Tm)+RB)^2)/(Sqrt[2] Sqrt[(pot/Tm)] \[Pi])
 ];
 
 nVKappa2p5[pot_,RB_,Tm_,nm_]:=Module[{factor},
 factor=nm/4 (pot/Tm)^(3/2) ((-5+2/(pot/Tm)^(3/2)+3 (pot/Tm))/(-1+(pot/Tm))^2+(5-3 (pot/Tm)-5 RB)/(-1+(pot/Tm)+RB)^2)
+];
+
+nVKappaIntegrate[pot_,RB_,Tm_,nm_,kappa_]:=Module[{factor},
+factor=nm 2/Sqrt[\[Pi]] 1/(1-3/(2 kappa))^(3/2) Gamma[kappa+1]/(kappa^(3/2) Gamma[kappa-1/2]) *
+NIntegrate[
+rho^2 Sin[theta] (1+(rho^2-(pot/Tm))/(kappa-3/2))^-(kappa+1) 
+* Piecewise[{{1,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)>0&&rho>= 0},{0,rho<= 0},{0,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)< 0}}],{theta,0,\[Pi]/2},{rho,0,30}]
 ];
 
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{jParallel},

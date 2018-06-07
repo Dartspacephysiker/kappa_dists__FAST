@@ -4,7 +4,7 @@
 
 
 (* ::Subsubsection::Initialization:: *)
-(*(*(*(*(*(*(*Helper func*)*)*)*)*)*)*)
+(*(*(*(*(*(*(*(*Helper func*)*)*)*)*)*)*)*)
 
 
 (* ::Input::Initialization:: *)
@@ -16,7 +16,7 @@ zeList=Partition[Riffle[xy,errorB],2]
 
 
 (* ::Subsubsection::Initialization:: *)
-(*(*(*(*(*(*(*Funcs for plotting stepMonitor output*)*)*)*)*)*)*)
+(*(*(*(*(*(*(*(*Funcs for plotting stepMonitor output*)*)*)*)*)*)*)*)
 
 
 (* ::Input::Initialization:: *)
@@ -44,7 +44,7 @@ Column[{NandKap,TandRB}]
 
 
 (* ::Subsubsection::Initialization:: *)
-(*(*(*(*(*(*(*Funcs for string conv*)*)*)*)*)*)*)
+(*(*(*(*(*(*(*(*Funcs for string conv*)*)*)*)*)*)*)*)
 
 
 (* ::Input::Initialization:: *)
@@ -72,7 +72,7 @@ inds=Position[tConv,Min[tConv],1,1]
 
 
 (* ::Subsubsection::Initialization:: *)
-(*(*(*(*(*(*(*Func for plotting a set of inds or a range of inds*)*)*)*)*)*)*)
+(*(*(*(*(*(*(*(*Func for plotting a set of inds or a range of inds*)*)*)*)*)*)*)*)
 
 
 (*Use pots by default*)
@@ -86,19 +86,24 @@ tPlotInds[inds_,mom_,momErr_,pRange_,xTitle_,yTitle_,OptionsPattern[]]:=ErrorLis
 
 
 (* ::Input::Initialization:: *)
-tPlotInds2[inds_,mom_,momErr_,pRange_,time_,xTitle_,yTitle_,OptionsPattern[]]:=ErrorListPlot[(makeErrorData[(OptionValue[usePot])[[#]],mom[[#]],momErr[[#]]])&[inds],AxesStyle->(FontSize->24),PlotRange->pRange,Epilog->Style[Text[StringJoin@Riffle[time[[{inds[[1]],inds[[-1]]}]],"\[Dash]"],Scaled[{0.05,0.95}],{-1,1}],24],ImageSize->500,Frame->True,FrameLabel->{xTitle,yTitle},FrameStyle->Directive[Black,15]]
+tPlotInds2[inds_,mom_,momErr_,pRange_,time_,xTitle_,yTitle_,OptionsPattern[]]:=Module[{ts},
+ts=If[ValueQ[time],time,If[ValueQ[tids],tids,tid]];
+tPlot=ErrorListPlot[(makeErrorData[(OptionValue[usePot])[[#]],mom[[#]],momErr[[#]]])&[inds],AxesStyle->(FontSize->24),PlotRange->pRange,Epilog->Style[Text[StringJoin@Riffle[time[[{inds[[1]],inds[[-1]]}]],"\[Dash]"],Scaled[{0.05,0.95}],{-1,1}],24],ImageSize->500,Frame->True,FrameLabel->{xTitle,yTitle},FrameStyle->Directive[Black,15]]]
 
 
 (* ::Input::Initialization:: *)
-tPlotRange[ind1_,ind2_,mom_,momErr_,pRange_,xTitle_,yTitle_,OptionsPattern[]]:=ErrorListPlot[
+tPlotRange[ind1_,ind2_,mom_,momErr_,pRange_,xTitle_,yTitle_,OptionsPattern[]]:=Module[{ts},
+ts=If[ValueQ[time],time,If[ValueQ[tids],tids,tid]];
+tPlot=ErrorListPlot[
 (makeErrorData[(OptionValue[usePot])[[#1;;#2]],
 mom[[#1;;#2]],
 momErr[[#1;;#2]]])&[ind1,ind2],
 AxesStyle->(FontSize->24),
 PlotRange->pRange,
-Epilog->Style[Text[StringJoin@Riffle[time[[{ind1,ind2}]],"\[Dash]"],Scaled[{0.05,0.95}],{-1,1}],24],
+Epilog->Style[Text[StringJoin@Riffle[ts[[{ind1,ind2}]],"\[Dash]"],Scaled[{0.05,0.95}],{-1,1}],24],
 ImageSize->500,
 Frame->True,FrameLabel->{xTitle,yTitle},FrameStyle->Directive[Black,15]]
+]
 
 
 (* ::Input::Initialization:: *)
