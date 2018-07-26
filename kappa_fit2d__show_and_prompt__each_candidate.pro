@@ -128,29 +128,31 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
            ENCAPSULATED=eps, $
            OPTIONS={charsize:1.5}
      
-     tmp2DStruct = fit2DStruct
-     ;; these = WHERE((tmp2DStruct.SDT.energy LT KF2D__SDTData_opt.energy_electrons[0]) OR $
-     ;;               (tmp2DStruct.SDT.energy GT KF2D__SDTData_opt.energy_electrons[1]),nThese)
-     ;; these = WHERE((tmp2DStruct.SDT.energy LT tmp2DStruct.extra_info.eRange_fit[0]) OR $
-     ;;               (tmp2DStruct.SDT.energy GT tmp2DStruct.extra_info.eRange_fit[1]),nThese)
+     IF ~KEYWORD_SET(only_data) THEN BEGIN
+        tmp2DStruct = fit2DStruct
+        ;; these = WHERE((tmp2DStruct.SDT.energy LT KF2D__SDTData_opt.energy_electrons[0]) OR $
+        ;;               (tmp2DStruct.SDT.energy GT KF2D__SDTData_opt.energy_electrons[1]),nThese)
+        ;; these = WHERE((tmp2DStruct.SDT.energy LT tmp2DStruct.extra_info.eRange_fit[0]) OR $
+        ;;               (tmp2DStruct.SDT.energy GT tmp2DStruct.extra_info.eRange_fit[1]),nThese)
 
-     ;; The reason it looks like you're getting points that you're not supposed
-     ;; to (I suppose), is that diff energy flux emphasizes higher energies over
-     ;; lower ones.
-     ;; zeroVal = 700087.25
-     zeroVal = 1.0E3
-     tmpEBounds = KEYWORD_SET(is_Maxwellian_fit) ? tmp2dstruct.extra_info.erange_fit : REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
-     ;; tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[(tmp2DStruct.fit1d.orig.energy_inds-1) > 0,0])
-     these = WHERE((tmp2DStruct.SDT.energy LT tmpEBounds[0]) OR $
-                   (tmp2DStruct.SDT.energy GT tmpEBounds[1]),nThese)
+        ;; The reason it looks like you're getting points that you're not supposed
+        ;; to (I suppose), is that diff energy flux emphasizes higher energies over
+        ;; lower ones.
+        ;; zeroVal = 700087.25
+        zeroVal = 1.0E3
+        tmpEBounds = KEYWORD_SET(is_Maxwellian_fit) ? tmp2dstruct.extra_info.erange_fit : REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
+        ;; tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[(tmp2DStruct.fit1d.orig.energy_inds-1) > 0,0])
+        these = WHERE((tmp2DStruct.SDT.energy LT tmpEBounds[0]) OR $
+                      (tmp2DStruct.SDT.energy GT tmpEBounds[1]),nThese)
 
-     IF nThese GT 0 THEN tmp2DStruct.SDT.data[these] = zeroVal
-     PRINT,FORMAT='("nEnergy: ",I0)',nThese
-     these = WHERE((tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] LT $
-                    KF2D__SDTData_opt.electron_angleRange[0]) OR $
-                   (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
-                    KF2D__SDTData_opt.electron_angleRange[1]),nThese)
-     IF nThese GT 0 THEN tmp2DStruct.SDT.data[*,these] = zeroVal
+        IF nThese GT 0 THEN tmp2DStruct.SDT.data[these] = zeroVal
+        PRINT,FORMAT='("nEnergy: ",I0)',nThese
+        these = WHERE((tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] LT $
+                       KF2D__SDTData_opt.electron_angleRange[0]) OR $
+                      (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
+                       KF2D__SDTData_opt.electron_angleRange[1]),nThese)
+        IF nThese GT 0 THEN tmp2DStruct.SDT.data[*,these] = zeroVal
+     ENDIF
      ;; PRINT,FORMAT='("nangle: ",I0)',nThese
      nCont = 8
      PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,tmp2DStruct,curDataStr, $
