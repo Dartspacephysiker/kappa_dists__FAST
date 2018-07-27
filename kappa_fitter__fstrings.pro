@@ -30,16 +30,6 @@ PRO KAPPA_FITTER__FSTRINGS, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-;; fit2D__only_fit_peak_eRange
-;; fit2D__only_fit_aboveMin
-;; fit2D__disable_bFunc
-;; fit2D__exclude_lca_from_densCalc
-;; save_diff_eFlux_file
-;; load_diff_eFlux_file
-;; bonusPref
-;; fitFile
-;; electron_angleRange
-
   dEFlux_allAngles = KEYWORD_SET(fit_each_angle) OR (N_ELEMENTS(fit_each_angle) EQ 0)
 
   IF ~KEYWORD_SET(orbit     ) THEN STOP
@@ -57,10 +47,6 @@ PRO KAPPA_FITTER__FSTRINGS, $
      END
   ENDCASE
   
-  ;; IF KEYWORD_SET(add_oneCount_stats) THEN BEGIN
-  ;;    plotNamePref    += '-w_1Count'
-  ;; ENDIF
-
   clampStr  = ''
   isClamped = 0B
   IF KEYWORD_SET(fit1D__clampTemperature) THEN BEGIN
@@ -97,10 +83,6 @@ PRO KAPPA_FITTER__FSTRINGS, $
      plotNamePref    += '-has_bFunc'
   ENDIF
 
-  ;; IF ~KEYWORD_SET(fit2D__exclude_lca_from_densCalc) THEN BEGIN
-  ;;    plotNamePref    += '-dens_w_LCA'
-  ;; ENDIF
-
   avgItvlStr       = ''
   CASE 1 OF
      KEYWORD_SET(enforce_diff_eFlux_sRate): BEGIN
@@ -112,16 +94,9 @@ PRO KAPPA_FITTER__FSTRINGS, $
         plotNamePref += avgItvlStr
      END
   ENDCASE
-  ;; IF KEYWORD_SET(spectra_average_interval) THEN BEGIN
-  ;;    avgItvlStr    = '-avg_itvl' + STRING(FORMAT='(I0)',spectra_average_interval)
-  ;;    plotNamePref += avgItvlStr
-  ;; ENDIF
 
   fitAngleStr      = ''
-  ;; dEFAngleStr         = '-allAngles'
   dEFAngleStr      = ''
-  ;; CASE 1 OF
-  ;; (N_ELEMENTS(electron_angleRange) EQ 2): BEGIN
   CASE SIZE(electron_angleRange,/TYPE) OF
      7: BEGIN
         IF STRMATCH(STRUPCASE(electron_angleRange[0]),'*LC') THEN BEGIN
@@ -187,44 +162,25 @@ PRO KAPPA_FITTER__FSTRINGS, $
 
   ENDIF
   
+  DIFF_EFLUX_FNAME, $
+     T1=t1, $
+     T2=t2, $
+     ORBIT=orbit, $
+     EEB_OR_EES=eeb_or_ees, $
+     BONUSPREF=bonusPref ,$
+     SAVE_DIFF_EFLUX_TO_FILE=save_diff_eFlux_to_file ,$
+     SAVE_DIFF_EFLUX_FILE=save_diff_eFlux_file ,$
+     LOAD_DIFF_EFLUX_FILE=load_diff_eFlux_file ,$
+     MCFADDEN_DIFF_EFLUX=McFadden_diff_eFlux, $
+     OUT_DIFF_EFLUX_FILE=diff_eFlux_file, $
+     ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+     SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+     LOADDIR=loadDir
+
   McFaddenString = KEYWORD_SET(McFadden_diff_eFlux) ? '-McFaddenStyle' : ''
-
-  defEFluxFile = 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + '-diff_eflux' + McFaddenString $
-                 + '-' + eeb_or_ees + avgItvlStr + dEFAngleStr + t1Str + t2Str + '.sav'
-
-  IF KEYWORD_SET(save_diff_eFlux_file) THEN BEGIN
-     CASE SIZE(save_diff_eFlux_file,/TYPE) OF
-        7: BEGIN
-           IF ~(FILE_TEST(save_diff_eFlux_file) OR FILE_TEST(loadDir + save_diff_eFlux_file)) THEN BEGIN
-              PRINT,"Couldn't find " + save_diff_eFlux_file + '!'
-              STOP
-           ENDIF
-        END
-        ELSE: BEGIN
-           save_diff_eFlux_to_file = defEFluxFile
-        END
-     ENDCASE
-  ENDIF
-
-  ;; IF KEYWORD_SET(load_diff_eFlux_file) THEN BEGIN
-     CASE SIZE(load_diff_eFlux_file,/TYPE) OF
-        7: BEGIN
-           IF ~(FILE_TEST(load_diff_eFlux_file) OR FILE_TEST(loadDir+load_diff_eFlux_file)) THEN BEGIN
-              PRINT,"Couldn't find file: " + load_diff_eFlux_file
-              STOP
-           ENDIF ELSE BEGIN
-              diff_eFlux_file = load_diff_eFlux_file
-           ENDELSE
-        END
-        ELSE: BEGIN
-           diff_eFlux_file    = defEFluxFile
-        END
-     ENDCASE
-  ;; ENDIF
 
   defFitFile           = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '-' + 'orb_' + STRCOMPRESS(orbit,/REMOVE_ALL) + $
                         '-KandGfits' + McFaddenString + '-' + eeb_or_ees + plotNamePref + t1Str + t2Str + '.sav'
-  ;; IF KEYWORD_SET(fitFile) THEN BEGIN
      CASE SIZE(fitFile,/TYPE) OF
         7: BEGIN
            IF ~(FILE_TEST(fitFile) OR FILE_TEST(loadDir+fitFile)) THEN BEGIN
@@ -238,7 +194,6 @@ PRO KAPPA_FITTER__FSTRINGS, $
            fitFile    = defFitFile
         END
      ENDCASE
-  ;; ENDIF
 
      fit2DParmErrFile = fitFile.Replace(".sav",'-2DPARMERRORS.sav')
 

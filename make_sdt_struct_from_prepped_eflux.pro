@@ -8,7 +8,7 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX,data3d,ind, $
 
   this = ndimen(data3d.geomfactor)
 
-  IF KEYWORD_SET(is_McFadden_diff_eFlux) THEN BEGIN
+  IF KEYWORD_SET(is_McFadden_diff_eFlux) OR N_ELEMENTS(data3d) GT 1 THEN BEGIN
 
      struct = data3d[ind]
 
