@@ -10,7 +10,7 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX,data3d,ind, $
 
   IF KEYWORD_SET(is_McFadden_diff_eFlux) OR N_ELEMENTS(data3d) GT 1 THEN BEGIN
 
-     struct = data3d[ind]
+    struct = data3d[ind]
 
      IF struct.valid EQ 0 THEN RETURN,struct
 
