@@ -212,8 +212,8 @@ PRO READ_KAPPA_BATCH_SETUP_FILE, $
         dir,file,orbit,count,tmpOrb,MLT,ILAT,ALT,t1Str,t2Str,t_streakLen,nPts,dt_avg,avg_current
   ENDIF
 
-  date = STRMID(t1Str,0,11)
-  t2Str = date + t2Str
+  dateGuy = STRMID(t1Str,0,11)
+  t2Str = dateGuy + t2Str
 
   CLOSE,lun
 

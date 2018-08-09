@@ -16,6 +16,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           EEB_OR_EES=eeb_or_ees, $
                           ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                          DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
                           SOUTH=south, $
                           CHI2_THRESHOLD=chi2_thresh, $
                           CHI2_OVER_DOF_THRESHOLD=chi2_over_dof_thresh, $
@@ -90,6 +91,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__INCLUDE_ION_PA_SPEC=kSum__include_ion_pa_spec, $
                           KSUM__INCLUDE_ION_ENERGY_SPEC=kSum__include_ion_energy_spec, $
                           KSUM__GRL=kSum__GRL, $
+                          KSUM__JGR__KAPPA2=kSum__JGR__kappa2, $
                           KSUM__OPLOT_POT=kSum__oPlot_pot, $
                           KSUM__SPECTROGRAM_UNITS=kSum__spectrogram_units, $
                           KSUM__ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
@@ -246,6 +248,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         EEB_OR_EES=eeb_or_ees, $
         SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
         ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+        DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
         MIN_PEAK_ENERGY=min_peak_energy, $
         MAX_PEAK_ENERGY=max_peak_energy, $
         PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
@@ -833,6 +836,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              INCLUDE_ION_ENERGY_SPEC=kSum__include_ion_energy_spec, $
                              ION_ANGLERANGE=curPotList[2].angles.peakEn, $
                              GRL=kSum__GRL, $
+                             JGR__KAPPA2=kSum__JGR__kappa2, $
                              OPLOT_POT=kSum__oPlot_pot, $
                              SPECTROGRAM_UNITS=kSum__spectrogram_units, $
                              ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $

@@ -18,6 +18,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    EEB_OR_EES=eeb_or_ees, $
    SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
    ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+   DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
    MIN_PEAK_ENERGY=min_peak_energy, $
    MAX_PEAK_ENERGY=max_peak_energy, $
    PEAK_ENERGY__START_AT_HIGHE=peak_energy__start_at_highE, $
@@ -182,6 +183,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      EEB_OR_EES=eeb_or_ees, $
      SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
      ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+     DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
      DO_ALL_TIMES=do_all_times, $
      TIME_ARR=time_arr, $
      ENERGY_ELECTRONS=energy_electrons, $

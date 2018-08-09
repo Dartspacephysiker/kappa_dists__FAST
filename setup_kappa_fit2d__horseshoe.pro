@@ -14,32 +14,32 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
   @common__kappa_fit2d_structs.pro
 
   ;;Uhh, use data for fit weighting. Not fit data.
-  wts                = curDataStr.ddata
+  wts                = curDataStr.ddata[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1]
   wts[*]             = 0.0D
-  nz_i               = WHERE(curDataStr.ddata GT 0,/NULL)
+  nz_i               = WHERE(curDataStr.ddata[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1] GT 0,/NULL)
   CASE KF2D__curveFit_opt.fit2D__weighting OF
      1: BEGIN
-        wts[nz_i]    = 1.D/ABS(curDataStr.ddata[nz_i])
+        wts[nz_i]    = 1.D/ABS((curDataStr.ddata[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1])[nz_i])
      END
      2: BEGIN
-        wts[nz_i]    = 1.D/(curDataStr.ddata[nz_i])^2
+        wts[nz_i]    = 1.D/((curDataStr.ddata[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1])[nz_i])^2
      END
   ENDCASE
   ;; wts[nz_i]          = 1.D/(curDataStr.ddata[nz_i])
 
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2d_just_eRange_fit): BEGIN
-        eRange_i        = WHERE((curDataStr.energy[*,curDataStr.nBins/2] GE FLOOR(eRange_fit[0])) AND $
-                                (curDataStr.energy[*,curDataStr.nBins/2] LE CEIL(eRange_fit[1])),nEnKeep)
+        eRange_i        = WHERE((curDataStr.energy[0:curDataStr.nEnergy-1,curDataStr.nBins/2] GE FLOOR(eRange_fit[0])) AND $
+                                (curDataStr.energy[0:curDataStr.nEnergy-1,curDataStr.nBins/2] LE CEIL(eRange_fit[1])),nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_fit_above_minE): BEGIN
-        eRange_i        = WHERE(curDataStr.energy[*,curDataStr.nBins/2] GE $
+        eRange_i        = WHERE(curDataStr.energy[0:curDataStr.nEnergy-1,curDataStr.nBins/2] GE $
                                 FLOOR(KF2D__curveFit_opt.min_peak_energy),nEnKeep)
         IF nEnKeep EQ 0 THEN STOP
      END
      ELSE: BEGIN
-        nEnKeep         = N_ELEMENTS(curDataStr.energy[*,curDataStr.nBins/2])
+        nEnKeep         = N_ELEMENTS(curDataStr.energy[0:curDataStr.nEnergy-1,curDataStr.nBins/2])
         eRange_i        = INDGEN(nEnKeep)
      END
   ENDCASE
@@ -49,21 +49,26 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
         bro = KF2D__SDTData_opt.electron_angleRange
         CASE KF2D__SDTData_opt.north_south OF
            1: BEGIN
-              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
-                                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
-                                  nAnKeep)
-              aRange      = [MIN(curDataStr.theta[curDataStr.nEnergy/2,aRange_i]), $
-                             MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
+              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] GE FLOOR(bro[0])) AND $
+              ;;                     (curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] LE CEIL(bro[1])), $
+              ;;                     nAnKeep)
+              aRange_i    = WHERE(ANGLE_TO_BINS(curDataStr,bro),nAnKeep)
+              ;; aRange      = [MIN(curDataStr.theta[curDataStr.nEnergy/2,aRange_i]), $
+              ;;                MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
            END
            -1: BEGIN
-              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) OR $
-                                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] GE FLOOR(bro[0])) OR $
+                                  (curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] LE CEIL(bro[1])), $
                                   nAnKeep)
-              tmpAngles   = curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
-              aRange      = [MIN(tmpAngles[WHERE(tmpAngles GT 0)]), $
-                             MAX(tmpAngles[WHERE(tmpAngles LT 0)])]
            END
         ENDCASE
+
+        aRange      = [curDataStr.theta[curDataStr.nEnergy/2,MIN(aRange_i)], $
+                       curDataStr.theta[curDataStr.nEnergy/2,MAX(aRange_i)]]
+        aRange      = (360. + (aRange MOD 360.)) MOD 360.
+        ;; This line tries to get the order right by matching aRange with bro
+        aRange = aRange[VALUE_CLOSEST2(aRange,(360. + (bro MOD 360.)) MOD 360.,/CONSTRAINED)]
+
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN
      ;;    bro         = KF2D__SDTData_opt.electron_lca
@@ -83,7 +88,7 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
      ;;    IF nEnKeep EQ 0 THEN STOP
      ;; END
      ELSE: BEGIN
-        nAnKeep         = N_ELEMENTS(curDataStr.theta[curDataStr.nEnergy/2,*])
+        nAnKeep         = N_ELEMENTS(curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1])
         aRange_i        = INDGEN(nAnKeep)
         aRange          = curDataStr.theta[curDataStr.nEnergy/2,aRange_i]
         ;; PRINT,'Angles for 2D fit: ALL'
@@ -91,10 +96,10 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
   ENDCASE
 
   ;;First drop some energies
-  X2D                = curDataStr.energy[eRange_i,*]
-  Y2D                = curDataStr.theta [eRange_i,*]
-  dataToFit          = curDataStr.data  [eRange_i,*]
-  wtsForFit          = wts              [eRange_i,*]
+  X2D                = curDataStr.energy[eRange_i,0:curDataStr.nBins-1]
+  Y2D                = curDataStr.theta [eRange_i,0:curDataStr.nBins-1]
+  dataToFit          = curDataStr.data  [eRange_i,0:curDataStr.nBins-1]
+  wtsForFit          = wts              [eRange_i,0:curDataStr.nBins-1]
 
   ;;Now drop some angles
   X2D                = X2D      [*,aRange_i]

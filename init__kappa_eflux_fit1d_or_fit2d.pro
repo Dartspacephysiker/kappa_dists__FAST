@@ -204,6 +204,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                  UPGOING=upgoing, $
                                  SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
                                  ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+                                 DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
                                  SC_POT=sc_pot, $
                                  OUT_ORB=orb, $
                                  OUT_ANGLERANGE=e_angle, $
@@ -348,6 +349,7 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                 EEB_OR_EES=KF__SDTData_opt.EEB_or_EES, $
                                 SPECTRA_AVERAGE_INTERVAL=KF__SDTData_opt.spec_avg_intvl, $
                                 ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+                                DIFFEFLUX__ARRAY_OF_STRUCTS=diffEFlux__array_of_structs, $
                                 SC_POT=sc_pot, $
                                 IN_PROTOSTRUCT=diff_eFlux, $
                                 SDT_NAME=dEF_oneCount_name, $
@@ -357,7 +359,8 @@ PRO INIT__KAPPA_EFLUX_FIT1D_OR_FIT2D, $
                                 /FIT_EACH_ANGLE, $ ;Perma-set because we do all angles for 2D fitting
                                 OUT_ONEDAT=out_oneDat, $
                                 DEF_ONECOUNT=dEF_oneCount, $
-                                QUIET=quiet
+                                QUIET=quiet, $
+                                _EXTRA=e
 
         IF KEYWORD_SET(old_mode) THEN BEGIN
            GET_DATA,dEF_oneCount_name,DATA=dEF_oneCount

@@ -161,8 +161,14 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
   ;;Get yourself KF2D__SDTData_opt,KF2D__Curvefit_opt, etc.
   @common__kappa_fit2d_structs.pro
 
-  nEnergies      = N_ELEMENTS(diff_eFlux.energy[*,0,0])
-  nTotAngles     = N_ELEMENTS(diff_eFlux.theta[0,*,0])
+  arrDiffE = N_ELEMENTS(diff_eFlux) GT 1
+  IF arrDiffE THEN BEGIN
+     nEnergies      = diff_eFlux[0].nEnergy
+     nTotAngles     = diff_eFlux[0].nBins
+  ENDIF ELSE BEGIN
+     nEnergies      = N_ELEMENTS(diff_eFlux.energy[*,0,0])
+     nTotAngles     = N_ELEMENTS(diff_eFlux.theta[0,*,0])
+  ENDELSE
 
   nye_plotSuff = '_NYE'
   fitDimStr = '1DFits'
@@ -187,12 +193,33 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
   ;;So the order becomes [angle,energy,time] for each of these arrays
   ;; times                             = (diff_eFlux.time+diff_eFlux.end_time)/2.D
-  times                             = diff_eFlux.time
-  energies                          = TRANSPOSE(diff_eFlux.energy,[1,0,2])
-  data                              = TRANSPOSE(diff_eFlux.data,[1,0,2])
-  ddata                             = TRANSPOSE(diff_eFlux.ddata,[1,0,2])
-  oneCount_data                     = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
-  angles                            = TRANSPOSE(diff_eFlux.theta,[1,0,2])
+  times             = diff_eFlux.time
+  IF arrDiffE THEN BEGIN
+     nEnergiesArr   = diff_eFlux[*].nEnergy
+     nBinsArr       = diff_eFlux[*].nBins
+     ;; energies       = MAKE_ARRAY(N_ELEMENTS(diff_eFlux.data[0,*]), $
+     ;;                             N_ELEMENTS(diff_eFlux.data[*,0]), $
+     ;;                             N_ELEMENTS(diff_eFlux), $
+     ;;                             VALUE=0.)
+     ;; data           = energies
+     ;; ddata          = energies
+     ;; oneCount_data  = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? energies : !NULL
+     ;; angles         = energies
+     ;; FOR k=0,N_ELEMENTS(diff_eFlux)-1 DO BEGIN
+     ;;    energies[*,*,k] = diff_eFlux[k]
+     ;; ENDFOR
+     energies       = TRANSPOSE(diff_eFlux[*].energy,[1,0,2])
+     data           = TRANSPOSE(diff_eFlux[*].data,[1,0,2])
+     ddata          = TRANSPOSE(diff_eFlux[*].ddata,[1,0,2])
+     oneCount_data  = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount[*].data,[1,0,2]) : !NULL
+     angles         = TRANSPOSE(diff_eFlux[*].theta,[1,0,2])
+  ENDIF ELSE BEGIN
+     energies       = TRANSPOSE(diff_eFlux.energy,[1,0,2])
+     data           = TRANSPOSE(diff_eFlux.data,[1,0,2])
+     ddata          = TRANSPOSE(diff_eFlux.ddata,[1,0,2])
+     oneCount_data  = KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) ? TRANSPOSE(dEF_oneCount.data,[1,0,2]) : !NULL
+     angles         = TRANSPOSE(diff_eFlux.theta,[1,0,2])
+  ENDELSE
 
   IF KEYWORD_SET(debug__skip_to_this_time) THEN BEGIN
      CASE SIZE(debug__skip_to_this_time,/TYPE) OF
@@ -237,12 +264,20 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      END
   ENDCASE
 
-  fit1Denergies = diff_eFlux.energy[1:-1,0,0]
+  fit1Denergies = arrDiffE ? diff_eFlux[N_ELEMENTS(bounds)/2].energy[1:-1,0] : diff_eFlux.energy[1:-1,0,0]
 
   synthKappa                     = diff_eFlux
-  synthKappa.data[*]             = 0.0
+  IF arrDiffE THEN BEGIN
+     synthKappa[*].data             = 0.0
+  ENDIF ELSE BEGIN
+     synthKappa.data[*]             = 0.0
+  ENDELSE
   IF KEYWORD_SET(KF2D__Curvefit_opt.fit2D__extend_fitStruct_eRange) THEN BEGIN
      ;; energyStep = synthKappa.energy[0,*,*]/synthKappa.energy[1,*,*]
+     IF arrDiffE THEN BEGIN
+        PRINT,"Not implemented!"
+        STOP
+     ENDIF
      energyStep = diff_eflux.energy[0,0,0]/diff_eflux.energy[1,0,0]
      
      new1Denergies = diff_eFlux.energy[0,0,0]*REVERSE(energyStep^(INDGEN(3)+1))
@@ -306,8 +341,13 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                 /RETRACE, $
                 ANGLE=KF2D__SDTData_opt.electron_angleRange, $
                 UNITS=eSpecUnits, $
+                IS_MCFADDEN_DIFF_EFLUX=arrDiffE, $
                 OUT_AVGFACTORARR=avgFactorArr, $
-                OUT_NORMARR=normArr)
+                OUT_NORMARR=normArr, $
+                OUT_TIME=eSpec_times)
+
+        eSpec_i = VALUE_CLOSEST2(eSpec_times,diff_eFlux.time, $
+                                 /CONSTRAINED)
 
         ;; tmpUseAngles     = [0.]
         ;; tempAngle        = 0.
@@ -322,6 +362,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
                             dEF_oneCount, $
                             /RETRACE, $
                             ANGLE=KF2D__SDTData_opt.electron_angleRange, $
+                            IS_MCFADDEN_DIFF_EFLUX=arrDiffE, $
                             UNITS=eSpecUnits)
         END
 
@@ -390,6 +431,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      successesK       = 0
      successesG       = 0
 
+     IF arrDiffE THEN BEGIN
+        nEnergies      = nEnergiesArr[i]
+        nTotAngles     = nBinsArr[i]
+     ENDIF
+
      iTime            = bounds[i]
      t                = times[iTime]
 
@@ -436,13 +482,20 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ENDIF
 
      ;;And now the order becomes [angle,energy] for each of these arrays
-     XorigArr         = energies[*,*,iTime]
-     YorigArr         = data[*,*,iTime]
-     worigArr         = ddata[*,*,iTime]
+     ;; XorigArr         = energies[*,*,iTime]
+     ;; YorigArr         = data[*,*,iTime]
+     ;; worigArr         = ddata[*,*,iTime]
+     ;; IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
+     ;;    oneCountArr   = oneCount_data[*,*,iTime]
+     ;; END
+     ;; AorigArr         = angles[*,*,iTime]
+     XorigArr         = energies[0:nTotAngles-1,0:nEnergies-1,iTime]
+     YorigArr         = data[0:nTotAngles-1,0:nEnergies-1,iTime]
+     worigArr         = ddata[0:nTotAngles-1,0:nEnergies-1,iTime]
      IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
-        oneCountArr   = oneCount_data[*,*,iTime]
+        oneCountArr   = oneCount_data[0:nTotAngles-1,0:nEnergies-1,iTime]
      END
-     AorigArr         = angles[*,*,iTime]
+     AorigArr         = angles[0:nTotAngles-1,0:nEnergies-1,iTime]
 
      ;; IF KEYWORD_SET(KF2D__SDTData_opt.manual_angle_correction) THEN BEGIN
      ;;    junk          = MIN(ABS(KF2D__SDTData_opt.manual_angle_correction-AorigArr[*,nEnergies/2]),minInd)
@@ -469,8 +522,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      ;; ENDIF
 
      ;;Order of dat.data is [energy,angle] when coming from SDT
-     curDataStr            = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime);; , $
-                                                                ;; UNITS=units2D)
+     curDataStr            = arrDiffE ? diff_eFlux[iTime] : MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
 
      nGoodFits_tempK       = 0
      nGoodFits_tempG       = 0
@@ -491,16 +543,16 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
         CASE 1 OF
            KEYWORD_SET(KF2D__Curvefit_opt.fit1D__sc_eSpec): BEGIN
-              Xorig    = REFORM(eSpec.v[iTime,*])
-              Yorig    = REFORM(eSpec.y[iTime,*])
-              worig    = REFORM(eSpec.yerr[iTime,*])
+              Xorig    = REFORM(eSpec.v[eSpec_i[iTime],*])
+              Yorig    = REFORM(eSpec.y[eSpec_i[iTime],*])
+              worig    = REFORM(eSpec.yerr[eSpec_i[iTime],*])
               Aorig    = REFORM(AorigArr[iAngle,*])
               IF KEYWORD_SET(KF2D__Plot_opt.add_oneCount_curve) THEN BEGIN
                  ;; PRINT,"Umm, how will you handle this??"
                  ;; PRINT,"just make sure below works/is companionable and compatible with sanity"
                  ;; STOP
                  oneCurve           = {x:Xorig, $
-                                       y:REFORM(oneCount_eSpec.y[iTime,*]), $
+                                       y:REFORM(oneCount_eSpec.y[eSpec_i[iTime],*]), $
                                        NAME:"One Count"}
               ENDIF
 
@@ -781,7 +833,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      IF KEYWORD_SET(fit2D__show_only_data) AND KEYWORD_SET(fit2D__save_all_plots) THEN BEGIN
 
         KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE, $
-           MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime), $
+           arrDiffE ? diff_eFlux[iTime] : MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime), $
            tmp2DInfoStruct, $
            TIMEFNSTR=KF2D__strings.timeFNStrs[iTime], $
            /FOR_HORSESHOE_FIT, $
@@ -808,9 +860,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
         hadSuccessG  = KEYWORD_SET(gotGauss)
      ENDIF ELSE BEGIN
         ;;OK, now that we've got all the fits that succeeded, let's see how they do in the mosh pit
-        ;; curDataStr   = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(diff_eFlux,iTime)
-        curKappaStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
-        ;; curGaussStr  = MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthGauss,iTime)
+        curKappaStr  = arrDiffE ? synthKappa[iTime] : MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX(synthKappa,iTime)
         curGaussStr  = curKappaStr
         
         ;; CASE 1 OF

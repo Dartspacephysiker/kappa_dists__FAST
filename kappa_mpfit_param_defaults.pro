@@ -52,7 +52,7 @@ IF ~KEYWORD_SET(kFit__DEFSINITIALIZED) THEN BEGIN
                            ;; [0,0], $
                            [0,0]]
 
-   kFit__limits         = [[100.,3.0D4]    , $ ;E_b
+   kFit__limits         = [[40.,3.0D4]    , $ ;E_b
                            [10,2D4]     , $    ;Temp
                            [1.501D,100]  , $   ;kappa 
                            [1D-4,100]     , $  ;N
