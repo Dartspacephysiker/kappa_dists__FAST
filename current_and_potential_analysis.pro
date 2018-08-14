@@ -1,4 +1,5 @@
 ;;2017/02/22
+;2018/08/13 Set "ARRAY_OF_STRUCTS_INSTEAD" keyword
 PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
    ORBIT=orbit, $
    ORBTIMES=orbTimes, $
@@ -225,6 +226,8 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
   ENDIF
 
+  array_of_structs_instead = 1  ;2018/08/13
+
   GET_CURRENT_AND_POTENTIAL_FILENAMES, $
      ORBTIMES=orbTimes, $
      ARANGE__MOMENTS_E_DOWN=aRange__moments_list[0], $
@@ -419,6 +422,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                           EEB_OR_EES=eeb_or_ees, $
                           NAME__DIFF_EFLUX=name__diff_eFlux, $
                           /CALC_GEOM_FACTORS, $
+                          ARRAY_OF_STRUCTS_INSTEAD=array_of_structs_instead, $
                           ;; UNITS=eSpecUnits, $
                           FIT_EACH_ANGLE=fit_each_angle, $
                           SPECTRA_AVERAGE_INTERVAL=spectra_avg_itvl, $
@@ -445,6 +449,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                                    IN_PROTOSTRUCT=diff_eFlux, $
                                    SDT_NAME=dEF_oneCount_name, $
                                    ANGLE=e_angle, $
+                                   ARRAY_OF_STRUCTS_INSTEAD=array_of_structs_instead, $
                                    ;; ESPECUNITS=units, $
                                    ;; ONLY_FIT_FIELDALIGNED_ANGLE=only_fit_fieldaligned_angle, $
                                    FIT_EACH_ANGLE=fit_each_angle, $ ;Perma-set because we do all angles for 2D fitting
@@ -842,14 +847,17 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         eSpec                 = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 diff_eFlux, $
                                 /RETRACE, $
+                                IS_MCFADDEN_DIFF_EFLUX=array_of_structs_instead, $
                                 ANGLE=aRange__peakEn, $
-                                UNITS=eSpecUnits)
+                                UNITS=eSpecUnits, $
+                                OUT_TIME=out_time)
         eSpec_list.Add,eSpec
 
         IF KEYWORD_SET(also_oneCount) THEN BEGIN
            oneCount_eSpec     = GET_EN_SPEC__FROM_DIFF_EFLUX( $
                                 dEF_oneCount, $
                                 /RETRACE, $
+                                IS_MCFADDEN_DIFF_EFLUX=array_of_structs_instead, $
                                 ANGLE=aRange__peakEn, $
                                 UNITS=eSpecUnits)
         ENDIF
@@ -859,12 +867,14 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
         nEnergies             = N_ELEMENTS(eSpec.v[0,*])
 
         iAngle                = 0
-        nHere                 = N_ELEMENTS(eSpec.x)
+        nHere                 = N_ELEMENTS(diff_eFlux.time)
         peak_indArr           = MAKE_ARRAY(nHere,VALUE=-999,/LONG)
         peak_energyArr        = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
         peak_dEArr            = MAKE_ARRAY(nHere,VALUE=-999,/FLOAT)
         peak_EBoundsArr       = MAKE_ARRAY(2,nHere,VALUE=-999,/FLOAT)
         peakE_indShift        = KEYWORD_SET(peakE_bounds_indShift) ? peakE_bounds_indShift : [0,0]
+
+        IF N_ELEMENTS(eSpec.x) NE nHere THEN STOP
 
         IF has_minpe_struct THEN BEGIN
 
@@ -1009,12 +1019,13 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                         ARANGE__TEMP=aRange__temp, $
                         ERANGE__TEMP=eRange__temp, $
                         SC_POT=tmpSc_pot, $
-                        EEB_OR_EES=eeb_OR_ees, $
+                        EEB_OR_EES=eeb_or_ees, $
                         ERROR_ESTIMATES=error_estimates, $
                         ;; MAP_TO_100KM=map_to_100km, $ 
                         ORBIT=orbit, $
                         /NEW_MOMENT_ROUTINE, $
                         QUIET=quiet, $
+                        MCFADDEN_STYLE_DIFF_EFLUX=array_of_structs_instead, $
                         OUTTIME=time, $
                         OUT_N=n, $
                         OUT_J_=j, $
@@ -1050,6 +1061,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
                            ORBIT=orbit, $
                            /NEW_MOMENT_ROUTINE, $
                            QUIET=quiet, $
+                           MCFADDEN_STYLE_DIFF_EFLUX=array_of_structs_instead, $
                            OUTTIME=time1, $
                            OUT_N=n1, $
                            OUT_J_=j1, $

@@ -35,7 +35,12 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
                  yrange:[-4.6,4.6], $
                  xstyle:1, $
                  ystyle:1}
-  spec2DLims = {yrange:[1e6,1e10]}
+  ;; cont2DLims  = {zrange:[10.^(6.),10.^9], $
+  ;;                xrange:[-4.25,4.25], $
+  ;;                yrange:[-4.25,4.25], $
+  ;;                xstyle:1, $
+  ;;                ystyle:1}
+  spec2DLims = {yrange:[1e5,1e10]}
 
   ;; upLim       = MAX(curDataStr.data) > (KEYWORD_SET(only_data) ? MAX(curDataStr.data) : MAX(fit2DStruct.bestFitStr.data))
   ;; cont2DLims  = {zrange:[10^(6.6),upLim]}
@@ -142,16 +147,31 @@ PRO KAPPA_FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE,curDataStr,fit2DStruct, $
         zeroVal = 1.0E3
         tmpEBounds = KEYWORD_SET(is_Maxwellian_fit) ? tmp2dstruct.extra_info.erange_fit : REVERSE(tmp2DStruct.sdt.energy[tmp2DStruct.fit1d.orig.energy_inds,0])
         ;; tmpEBounds = REVERSE(tmp2DStruct.sdt.energy[(tmp2DStruct.fit1d.orig.energy_inds-1) > 0,0])
-        these = WHERE((tmp2DStruct.SDT.energy LT tmpEBounds[0]) OR $
+
+        minE_i = VALUE_CLOSEST2(ALOG10(tmp2DStruct.SDT.energy[*,0]), $
+                              ALOG10(tmpEBounds[0]), $
+                              /CONSTRAINED)
+        these = WHERE((tmp2DStruct.SDT.energy LT tmp2DStruct.SDT.energy[minE_i+1]) OR $
                       (tmp2DStruct.SDT.energy GT tmpEBounds[1]),nThese)
 
         IF nThese GT 0 THEN tmp2DStruct.SDT.data[these] = zeroVal
-        PRINT,FORMAT='("nEnergy: ",I0)',nThese
-        these = WHERE((tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] LT $
-                       KF2D__SDTData_opt.electron_angleRange[0]) OR $
-                      (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
-                       KF2D__SDTData_opt.electron_angleRange[1]),nThese)
-        IF nThese GT 0 THEN tmp2DStruct.SDT.data[*,these] = zeroVal
+        ;; PRINT,FORMAT='("nEnergy: ",I0)',nThese
+
+        ;; minE_i = VALUE_CLOSEST2(ALOG10(tmp2DStruct.SDT.energy[*,0]), $
+        ;;                       ALOG10(tmpEBounds[0]), $
+        ;;                       /CONSTRAINED)
+        ;; tmp2DStruct.SDT.data[minE_i+1,*] = tmp2DStruct.SDT.data[minE_i,*]
+
+
+        these = WHERE(ANGLE_TO_BINS(curDataStr,KF2D__SDTData_opt.electron_angleRange), $
+                      nAnKeep, $
+                      COMPLEMENT=notThese, $
+                      NCOMPLEMENT=nNotThese)
+        ;; these = WHERE((tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] LT $
+        ;;                KF2D__SDTData_opt.electron_angleRange[0]) OR $
+        ;;               (tmp2DStruct.SDT.theta[tmp2DStruct.SDT.nBins/2,*] GT $
+        ;;                KF2D__SDTData_opt.electron_angleRange[1]),nThese)
+        IF nNotThese GT 0 THEN tmp2DStruct.SDT.data[*,notThese] = zeroVal
      ENDIF
      ;; PRINT,FORMAT='("nangle: ",I0)',nThese
      nCont = 8

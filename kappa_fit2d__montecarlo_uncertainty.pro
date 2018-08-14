@@ -11,6 +11,7 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
                                         CURDATASTR=curDataStr, $
                                         TIDFNSTR=tidFNStr, $
                                         NROLLS=nRolls, $
+                                        HEMI=hemi, $
                                         FACTOR_BY_WHICH_TO_INCREASE_UNCERT_ARRAY=extraFactor, $
                                         NOT_MPFIT1D=not_mpFit1D, $
                                         KCURVEFIT_OPT=kCurvefit_opt, $
@@ -39,8 +40,10 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   ENDIF
 
   nEnergiesK      = kappaDataStr.nEnergy
-  ;; IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
   nEnergiesG      = gaussDataStr.nEnergy
+
+  nA              = curDataStr.nEnergy
+  nB              = curDataStr.nBins
 
   eRange_fit    = fit2DKappa_info.extra_info.eRange_fit
   ;; make_fit2D_info = 1
@@ -173,6 +176,14 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      kappaParamStruct.value = pKappa
      gaussParamStruct.value = pGauss
 
+     tmpMaxEInd = (peak_ind + KF2D__Curvefit_opt.n_below_peak $
+                   - KF2D__Curvefit_opt.peakE_indShift[0]*whichWy) < (nEnergies-1)
+     tmpMinEInd = (peak_ind - 47 - KF2D__Curvefit_opt.peakE_indShift[1]*whichWy) > 0
+     
+     KF2D__Curvefit_opt.tmpEBoundsForMom = [Xorig[tmpMaxEInd], $
+                                            Xorig[tmpMinEInd]]
+
+     STOP 
      ;; Need to reduce these by number of fitAngles---'s'way too high!
      ;; Decided to do this in JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      ;; extraDensDivFac = 5.
@@ -229,14 +240,14 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   ENDIF
   simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,nMaxTry))
 
-  dataK_gaussError = RANDOMN(seed__data_error,kappaDataStr.NEnergy,kappaDataStr.NBins, $
+  dataK_gaussError = RANDOMN(seed__data_error,nA,nB, $
                             nMaxTry)
-  ;; errorK_gaussError = RANDOMN(seed__error_error,kappaDataStr.NEnergy,kappaDataStr.NBins, $
+  ;; errorK_gaussError = RANDOMN(seed__error_error,nA,nB, $
                             ;; nMaxTry)
   ;; IF KEYWORD_SET(add_gaussian_estimate) THEN BEGIN
-  dataG_gaussError = RANDOMN(seed__data_error,kappaDataStr.NEnergy,kappaDataStr.NBins, $
+  dataG_gaussError = RANDOMN(seed__data_error,nA,nB, $
                             nMaxTry)
-  ;; errorG_gaussError = RANDOMN(seed__error_error,kappaDataStr.NEnergy,kappaDataStr.NBins, $
+  ;; errorG_gaussError = RANDOMN(seed__error_error,nA,nB, $
   ;;                           nMaxTry)
 
   ;; If not bootstrapping, set X and Yerror once and for all
@@ -274,18 +285,18 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
   CASE angle OF
      0: BEGIN
 
-        junk = MIN(ABS(kappaDataStr.theta[kappaDataStr.NEnergy/2,*]),angle_i)
+        junk = MIN(ABS(kappaDataStr.theta[nA/2,0:nB-1]),angle_i)
 
      END
      180: BEGIN
 
-        junk = MIN(ABS(kappaDataStr.theta[kappaDataStr.NEnergy/2,*])-180,angle_i)
+        junk = MIN(ABS(kappaDataStr.theta[nA/2,0:nB-1]-180),angle_i)
         
      END
   ENDCASE
 
   PRINT,FORMAT='(A0,F0.2," (",I0,")")',"Min angle (ind): ", $
-        kappaDataStr.theta[kappaDataStr.NEnergy/2,angle_i],angle_i
+        kappaDataStr.theta[nA/2,angle_i],angle_i
 
   shiftTheta     = 0              ;Not clear why shift is necessary, but makes things come out right
   ;;2017/12/27 Not sure why I thought this should be the case
@@ -310,6 +321,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      ;;generate synthetic data
      ;; simulated data set
      IF KEYWORD_SET(bootstrap) THEN BEGIN
+        PRINT,"MÅ OPPDATERES SLIK AT DET BRUKES BARE GYLDIG VERDIMENGDE VINKLER"
+        STOP
         ;; curKDataStr.energy = kappaDataStr.energy[randomInds[*,*,k]]
         curKDataStr.data = kappaDataStr.data[randomInds[*,*,k]] + kappaDataStr.ddata[randomInds[*,*,k]]*dataK_gaussError[*,*,k]
         YorigK_error = Yin_error[randomInds[*,*,k]]*errorK_gaussError[*,*,k]
@@ -317,20 +330,21 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
         curGDataStr.data = gaussDataStr.data[randomInds[*,*,k]] + gaussDataStr.ddata[randomInds[*,*,k]]*dataK_gaussError[*,*,k]
         YorigG_error = Yin_error[randomInds[*,*,k]]*errorG_gaussError[*,*,k]
      ENDIF ELSE BEGIN
-        curKDataStr.data = kappaDataStr.data + kappaDataStr.ddata*dataK_gaussError[*,*,k] > 0.
+        curKDataStr.data[0:nA-1,0:nB-1] = kappaDataStr.data[0:nA-1,0:nB-1] + kappaDataStr.ddata[0:nA-1,0:nB-1]*dataK_gaussError[*,*,k] > 0.
 
-        curGDataStr.data = gaussDataStr.data + gaussDataStr.ddata*dataG_gaussError[*,*,k] > 0.
+        curGDataStr.data[0:nA-1,0:nB-1] = gaussDataStr.data[0:nA-1,0:nB-1] + gaussDataStr.ddata[0:nA-1,0:nB-1]*dataG_gaussError[*,*,k] > 0.
      ENDELSE
 
-     shouldBePos = WHERE(curKDataStr.energy GE eRange_fitK[0],nShouldBePos)
+     shouldBePos = WHERE(curKDataStr.energy[0:nA-1,0:nB-1] GE eRange_fitK[0],nShouldBePos)
      IF nShouldBePos EQ 0 THEN STOP
-     IF (WHERE(~FINITE(curKDataStr.data[shouldBePos]) OR $
-               (curKDataStr.data[shouldBePos] LT 0)))[0] NE -1 $
+     IF (WHERE(~FINITE((curKDataStr.data[0:nA-1,0:nB-1])[shouldBePos]) OR $
+               ((curKDataStr.data[0:nA-1,0:nB-1])[shouldBePos] LT 0)))[0] NE -1 $
      THEN PRINT,"BOGUS"
-     shouldBePos = WHERE(curGDataStr.energy GE eRange_fitK[0],nShouldBePos)
+     shouldBePos = WHERE((curGDataStr.energy[0:nA-1,0:nB-1]) GE eRange_fitK[0], $
+                         nShouldBePos)
      IF nShouldBePos EQ 0 THEN STOP
-     IF (WHERE(~FINITE(curGDataStr.data[shouldBePos]) OR $
-               (curGDataStr.data[shouldBePos] LT 0)))[0] NE -1 $
+     IF (WHERE(~FINITE((curGDataStr.data[0:nA-1,0:nB-1])[shouldBePos]) OR $
+               ((curGDataStr.data[0:nA-1,0:nB-1])[shouldBePos] LT 0)))[0] NE -1 $
      THEN PRINT,"BOGUS"
 
      ;;copy paramStruct
@@ -460,10 +474,10 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      
      IF KEYWORD_SET(make_fit2DParamArrs) THEN BEGIN
 
-        works = N_ELEMENTS(kappaFit2DParamArr) EQ Nsim*5
+        works = N_ELEMENTS(kappaFit2DParamArr[0,*]) EQ Nsim
         
         IF works AND KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
-           works = N_ELEMENTS(gaussFit2DParamArr) EQ Nsim*5
+           works = N_ELEMENTS(gaussFit2DParamArr[0,*]) EQ Nsim
 
            IF ~works THEN STOP  ;Stop us if kappa is OK but Maxwellian isn't---'cause that's garbage
         ENDIF

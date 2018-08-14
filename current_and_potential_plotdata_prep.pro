@@ -29,6 +29,8 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                         USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                         ADD_UPGOING_ION_POT=add_iu_pot, $
                                         IU_POT_TIDS=iu_pot_tids, $
+                                        USE_ION_BEAMS_AS_CAP_TRANGES=use_ion_beams_as_cAP_tRanges, $
+                                        IN_IONBEAMS=ionBeams, $
                                         T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
                                         TEMPERATURE_TYPE_INDEX=TTypeInd, $
                                         ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $
@@ -301,6 +303,39 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
   ;;    WAIT,1
   ;; ENDIF
 
+  IF KEYWORD_SET(add_iu_pot) THEN BEGIN
+     CASE 1 OF
+        KEYWORD_SET(use_ion_beams_as_cAP_tRanges) AND N_ELEMENTS(ionBeams) GT 0: BEGIN
+
+           iu_pot_times = !NULL
+
+           this = WHERE(ionBeams.newell.mono EQ 1 OR ionBeams.newell.mono EQ 2)
+
+           IF this[0] NE -1 THEN BEGIN
+
+              GET_STREAKS,this, $
+                          START_I=start_i, $
+                          STOP_I=stop_i, $
+                          ALLOWABLE_GAP=2, $
+                          MIN_STREAK_TO_KEEP=5, $
+                          OUT_STREAKLENS=streakLens, $
+                          OUT_GAPLENS=gapLens
+
+              iu_pot_times = !NULL
+              FOR k=0,N_ELEMENTS(start_i)-1 DO iu_pot_times = [[iu_pot_times], $
+                                                               [T2S(ionBeams.ji.x[this[start_i[k]]]), $
+                                                                T2S(ionBeams.ji.x[this[stop_i [k]]])]]
+           ENDIF
+
+        END
+        ELSE: BEGIN
+
+           iu_pot_times = iu_pot_tids
+
+        END
+     ENDCASE
+  ENDIF
+
   potErr      = MAKE_ARRAY(nHere,1+KEYWORD_SET(add_iu_pot),/DOUBLE,VALUE=0.D) ;You'll see why
   CASE 1 OF
      KEYWORD_SET(use_charE_for_downPot): BEGIN
@@ -316,24 +351,19 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
 
         IF KEYWORD_SET(add_iu_pot) THEN BEGIN
 
-           ;; pot        += curPotList[iuind].charE
-
-           ;; ;; potErr[*,1] = curPotList[iuind].peakErr
-           ;; potErr[*,1] = curPotList[iuind].charEErr
-
            ;; Neue as of 2018/01/15
            iuPot = blankArr
            iuPotErr = blankArr
            inds  = WHERE(curPotList[iuind].charE GT threshV,nIUPot)
 
-           IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
+           IF KEYWORD_SET(iu_pot_times) AND nIUPot GT 0 THEN BEGIN
 
-              nTRanges = N_ELEMENTS(iu_pot_tids[0,*])
+              nTRanges = N_ELEMENTS(iu_pot_times[0,*])
               useInds  = !NULL
               FOR k=0,nTRanges-1 DO BEGIN
 
-                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_tids[0,k]) AND $
-                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
+                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_times[0,k]) AND $
+                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_times[1,k]),nTmp)
 
                  IF nTmp GT 0 THEN BEGIN
                     
@@ -386,14 +416,14 @@ PRO CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
            iuPotErr = blankArr
            inds  = WHERE(curPotList[iuind].peakE GT threshV,nIUPot)
 
-           IF KEYWORD_SET(iu_pot_tids) AND nIUPot GT 0 THEN BEGIN
+           IF KEYWORD_SET(iu_pot_times) AND nIUPot GT 0 THEN BEGIN
 
-              nTRanges = N_ELEMENTS(iu_pot_tids[0,*])
+              nTRanges = N_ELEMENTS(iu_pot_times[0,*])
               useInds  = !NULL
               FOR k=0,nTRanges-1 DO BEGIN
 
-                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_tids[0,k]) AND $
-                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_tids[1,k]),nTmp)
+                 tmpInds = WHERE(curpotlist[iuind].time GE STR_TO_TIME(iu_pot_times[0,k]) AND $
+                                 curpotlist[iuind].time LE STR_TO_TIME(iu_pot_times[1,k]),nTmp)
 
                  IF nTmp GT 0 THEN BEGIN
 

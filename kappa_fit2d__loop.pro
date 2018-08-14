@@ -603,8 +603,16 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
            PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
            /CONTINUE_IF_NOMATCH, $
            /TEST_NOREV, $
-           ONECOUNT_STR=oneCurve
+           ONECOUNT_STR=oneCurve, $
+           WHICHWY=whichWy
         
+        tmpMaxEInd = (peak_ind + KF2D__Curvefit_opt.n_below_peak $
+                      - KF2D__Curvefit_opt.peakE_indShift[0]*whichWy) < (nEnergies-1)
+        tmpMinEInd = (peak_ind - 47 - KF2D__Curvefit_opt.peakE_indShift[1]*whichWy) > 0
+                     
+        KF2D__Curvefit_opt.tmpEBoundsForMom = [Xorig[tmpMaxEInd], $
+                                               Xorig[tmpMinEInd]]
+
         IF peak_energy EQ -1 THEN CONTINUE
 
         ;;estimate from the data!
@@ -1157,32 +1165,32 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
 
      ENDIF
 
-     IF 0 THEN BEGIN
+     ;; IF 0 THEN BEGIN
 
-        KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DKappa_inf_list[-1], $
-           totSuccessesK, $
-           iTime, $
-           IS_MAXWELLIAN_FIT=0, $
-           PROMPT__CONT_TO_NEXT_FIT=Kprompt__cont_to_next_fit, $
-           PROMPT__CONT_UNTIL_FIT_EQ=Kprompt__cont_until_fit_eq, $
-           FINISH_AND_SAVE_ALL=Kfinish_and_save_all, $
-           KAPPA_FIT__SHOW__QUIT=Kshow__quit, $
-           EPS=eps
+     ;;    KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DKappa_inf_list[-1], $
+     ;;       totSuccessesK, $
+     ;;       iTime, $
+     ;;       IS_MAXWELLIAN_FIT=0, $
+     ;;       PROMPT__CONT_TO_NEXT_FIT=Kprompt__cont_to_next_fit, $
+     ;;       PROMPT__CONT_UNTIL_FIT_EQ=Kprompt__cont_until_fit_eq, $
+     ;;       FINISH_AND_SAVE_ALL=Kfinish_and_save_all, $
+     ;;       KAPPA_FIT__SHOW__QUIT=Kshow__quit, $
+     ;;       EPS=eps
         
-        IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
+     ;;    IF KEYWORD_SET(kCurvefit_opt.add_gaussian_estimate) THEN BEGIN
 
-           KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DGauss_inf_list[-1], $
-              totSuccessesG, $
-              iTime, $
-              IS_MAXWELLIAN_FIT=1, $
-              PROMPT__CONT_TO_NEXT_FIT=Gprompt__cont_to_next_fit, $
-              PROMPT__CONT_UNTIL_FIT_EQ=Gprompt__cont_until_fit_eq, $
-              FINISH_AND_SAVE_ALL=Gfinish_and_save_all, $
-              KAPPA_FIT__SHOW__QUIT=Gshow__quit, $
-              EPS=eps
+     ;;       KAPPA_FIT2D__SHOW_AND_PROMPT__SELECTED2DFIT,curDataStr,fit2DGauss_inf_list[-1], $
+     ;;          totSuccessesG, $
+     ;;          iTime, $
+     ;;          IS_MAXWELLIAN_FIT=1, $
+     ;;          PROMPT__CONT_TO_NEXT_FIT=Gprompt__cont_to_next_fit, $
+     ;;          PROMPT__CONT_UNTIL_FIT_EQ=Gprompt__cont_until_fit_eq, $
+     ;;          FINISH_AND_SAVE_ALL=Gfinish_and_save_all, $
+     ;;          KAPPA_FIT__SHOW__QUIT=Gshow__quit, $
+     ;;          EPS=eps
 
-        ENDIF
-     ENDIF
+     ;;    ENDIF
+     ;; ENDIF
 
   ENDFOR
 

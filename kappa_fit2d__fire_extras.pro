@@ -52,10 +52,12 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
   CASE 1 OF
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
         ;; fit2DParams[2] = 2.08
-        fit2DStr.data = CALL_FUNCTION( $
+        IF shiftTheta NE 0 THEN STOP ;Why shiftTheta in the first place?
+        fit2DStr.data[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1] = CALL_FUNCTION( $
                         fit2D_info.fitFunc, $
-                        fit2DStr.energy, $
-                        SHIFT(fit2DStr.theta,0,shiftTheta), $
+                        fit2DStr.energy[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
+                        ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
+                        fit2DStr.theta[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
                         [fit2DParams[0],fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $
                         UNITS=units, $
                         MASS=curDataStr.mass)
@@ -69,6 +71,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
         ;; fit2DStr.data[WHERE(fit2DStr.energy LT MIN(eRange_fit),/NULL)] = 0.
 
         tmpStr          = CONV_UNITS(fit2DStr,'counts')
+        tmpStr.data     = tmpStr.data > 0
         tmpStr.ddata    = (tmpStr.data)^.5
         fit2DStr        = CONV_UNITS(tmpStr,units)
 
@@ -112,36 +115,44 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
 
   fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                               ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                              ENERGY=eRange_fit, $
+                              ;; ENERGY=eRange_fit, $
+                              ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                               ANGLE=tmpDensSourceConeRange)
+
+  IF fit_scDens LT 0 THEN STOP
 
   fit_scTemp  = (T_2D_FS(fit2DStr, $
                       ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                      ENERGY=eRange_fit, $
+                      ;; ENERGY=eRange_fit, $
+                         ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                       ANGLE=tmpTempSourceConeRange))[KF2D__SDTData_opt.fit2D__temperature_type]
   ;; fit_scTemp  = fit2DParams[1]
 
   obs_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,curDataStr, $
-                              ENERGY=KF2D__SDTData_opt.energy_electrons, $
                               ;; ENERGY=eRange_fit, $
+                              ;; ENERGY=eRange_fit, $
+                              ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                               ANGLE=tmpDensSourceConeRange)
 
   obs_scTemp  = (T_2D_FS(curDataStr, $
-                      ENERGY=KF2D__SDTData_opt.energy_electrons, $
                       ;; ENERGY=eRange_fit, $
+                      ;; ENERGY=eRange_fit, $
+                         ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                       ANGLE=tmpTempSourceConeRange))[KF2D__SDTData_opt.fit2D__temperature_type]
 
   ;;field-aligned conductances
   fFAConduct  = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                 fit2DStr, $
                 ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                ENERGY=eRange_fit, $
+                ;; ENERGY=eRange_fit, $
+                ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                 ANGLE=tmpFaCondSourceConeRange)
 
   oFAConduct  = OLSSON_JANHUNEN_1998_EQ_5__FA_CONDUCTANCE_2D_B( $
                 curDataStr, $
-                ENERGY=KF2D__SDTData_opt.energy_electrons, $
                 ;; ENERGY=eRange_fit, $
+                ;; ENERGY=eRange_fit, $
+                ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                 ANGLE=tmpFaCondSourceConeRange)
 
   NK_EA        = N_ELEMENTS(K_EA__gFunc)

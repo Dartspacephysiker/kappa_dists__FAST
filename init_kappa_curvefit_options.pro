@@ -26,6 +26,7 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
    FIT2D__ONLY_FIT_ELECTRON_ANGLES=fit2D__only_fit_eAngles, $
    FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
    FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+   FIT2D__PEAKE_BOUNDS_INDSHIFT_FOR_MOM=fit2D__peakE_bounds_indShift_for_mom, $
    FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
    FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
    ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $
@@ -112,9 +113,11 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
                                thresh_eFlux                      : 0.0D, $
                                estimate_A_from_data              : 1, $
                                add_gaussian_estimate             : defAdd_gaussian_estimate, $
-                               use_SDT_Gaussian_fit              :  0B, $
-                               use_mpFit1D                       :  0B, $
-                               bulk_offset                       :  0.0} ;; , $
+                               peakE_indShift                    : [0,0], $
+                               tmpEBoundsForMom                  : [0.,0.], $
+                               use_SDT_Gaussian_fit              : 0B, $
+                               use_mpFit1D                       : 0B, $
+                               bulk_offset                       : 0.0} ;; , $
   ;; units                                                       : 'eFlux'}
 
   IF N_ELEMENTS(fit__linear_energy_shift) GT 0 THEN BEGIN
@@ -255,6 +258,13 @@ FUNCTION INIT_KAPPA_CURVEFIT_OPTIONS, $
      PRINT,FORMAT='("kCurvefit_opt.add_gaussian_estimate",T45,":",T48,I0)', $
      kCurvefit_opt.add_gaussian_estimate
   ENDIF
+
+  IF N_ELEMENTS(fit2D__peakE_bounds_indShift_for_mom) GT 0 THEN BEGIN
+     kCurvefit_opt.peakE_indShift     = fit2D__peakE_bounds_indShift_for_mom
+
+     PRINT,FORMAT='("kCurvefit_opt.peakE_indShift",T45,":",T48,"[",I0,",",I0,"]")', $
+     kCurvefit_opt.peakE_indShift
+  ENDIF  
 
   IF N_ELEMENTS(use_SDT_Gaussian_fit) GT 0 THEN BEGIN
      kCurvefit_opt.use_SDT_Gaussian_fit      = use_SDT_Gaussian_fit

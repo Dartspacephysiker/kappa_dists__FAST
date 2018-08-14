@@ -57,9 +57,11 @@ PRO SETUP_KAPPA_FIT2D__HORSESHOE, $
               ;;                MAX(curDataStr.theta[curDataStr.nEnergy/2,aRange_i])]
            END
            -1: BEGIN
-              aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] GE FLOOR(bro[0])) OR $
-                                  (curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] LE CEIL(bro[1])), $
-                                  nAnKeep)
+              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] GE FLOOR(bro[0])) OR $
+              ;;                     (curDataStr.theta[curDataStr.nEnergy/2,0:curDataStr.nBins-1] LE CEIL(bro[1])), $
+              ;;                     nAnKeep)
+              aRange_i    = WHERE(ANGLE_TO_BINS(curDataStr,bro),nAnKeep)
+
            END
         ENDCASE
 

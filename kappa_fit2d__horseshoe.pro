@@ -167,13 +167,14 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
      CASE 1 OF
         KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
 
-           fit2DStr.data = CALL_FUNCTION(func, $
-                                         fit2DStr.energy, $
-                                         ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
-                                         fit2DStr.theta, $ ;Assume shiftTheta isn't necessary
-                                         fit2DParams, $
-                                         UNITS=units, $
-                                         MASS=curDataStr.mass)
+           fit2DStr.data[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1] = CALL_FUNCTION( $
+              func, $
+              fit2DStr.energy[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
+              ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
+              fit2DStr.theta[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $ ;Assume shiftTheta isn't necessary
+              fit2DParams, $
+              UNITS=units, $
+              MASS=curDataStr.mass)
 
            ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
            ;;                 fit2DStr.energy, $
@@ -201,11 +202,12 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
 
      fit_scDens  = CALL_FUNCTION(KF2D__SDTData_opt.densFunc,fit2DStr, $
                                  ;; ENERGY=KF2D__SDTData_opt.energy_electrons, $
-                                 ENERGY=eRange_fit, $
+                                 ;; ENERGY=eRange_fit, $
+                                 ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                                  ANGLE=tmpDensSourceConeRange)
 
      ;; fit2DParams[3] = TEMPORARY(fit_scDens)
-
+     fit2DParams = [fit2DParams,fit_scDens]
   ENDIF
 
 END

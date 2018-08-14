@@ -75,6 +75,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
    SC_POT=sc_pot, $
    EPS=eps, $
    CAP_STRUCT=cAP_struct, $
+   OUT_IONBEAMS=ionBeams, $
    BATCH_MODE=batch_mode, $
    MIN_PEAK_ENERGYARR=min_peak_energyArr, $
    ARANGE__MOMENTS_LIST=aRange__moments_list, $
@@ -430,6 +431,7 @@ PRO CURRENT_AND_POTENTIAL_WRAPPER_FOR_KAPPA_FITTER_BLACKBOX, $
      SC_POT=sc_pot, $
      EPS=eps, $
      CAP_STRUCT=cAP_struct, $
+     OUT_IONBEAMS=ionBeams, $
      BATCH_MODE=batch_mode, $
      _EXTRA=cAP_struct
 

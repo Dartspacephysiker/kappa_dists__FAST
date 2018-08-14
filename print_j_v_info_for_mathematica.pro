@@ -211,6 +211,7 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
   IF KEYWORD_SET(CSVstyle) THEN BEGIN
 
      PRINT,"Tid,pot,potErr,cur,curErr,je,jeerr,nDown,nDownErr,downEpot,downEpotErr"
+     IF TAG_EXIST(jvPlotData,"source") THEN dens = {dens : jvPlotData.source.nDown, err: jvPlotData.source.nDownErr} ELSE dens = {dens : jvPlotData.nDown, err: jvPlotData.nDownErr}
      FOR k=0,N_ELEMENTS(inds)-1 DO BEGIN
         i=inds[k]
         PRINT,FORMAT='(A0,",",F0.2,",",F0.2,","' $
@@ -223,8 +224,8 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
               jvPlotData.curErr[i], $
               jvPlotData.je[i], $
               jvPlotData.jeerr[i], $
-              jvPlotData.source.nDown[i], $
-              jvPlotData.source.nDownErr[i], $
+              dens.dens[i], $
+              dens.err[i], $
               jvPlotData.only_downe_pot[i], $
               jvPlotData.only_downe_poterr[i]
      ENDFOR
@@ -281,6 +282,11 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
                              / MEAN(jvPlotData.time[1:-1]-jvPlotData.time[0:-2])) $
                             LT 0.5,nGKeep)
 
+        kMatchieInd = kMatchieInd[kKeep]
+        gMatchieInd = gMatchieInd[gKeep]
+
+        IF ~ARRAY_EQUAL(kMatchieInd,gMatchieInd) THEN STOP
+
         nTime       = N_ELEMENTS(jvPlotData.time)
         kTemp       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
         gTemp       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
@@ -288,11 +294,17 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
         gDens       = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
         kKappa      = MAKE_ARRAY(nTime,/FLOAT,VALUE=!VALUES.F_NaN)
         
-        kTemp[kMatchieInd[kKeep]] = k2DParms.temperature
-        gTemp[gMatchieInd[gKeep]] = g2DParms.temperature
-        kDens[kMatchieInd[kKeep]] = k2DParms.N
-        gDens[gMatchieInd[gKeep]] = g2DParms.N
-        kKappa[kMatchieInd[kKeep]] = k2DParms.kappa
+        kTemp[kMatchieInd] = k2DParms.temperature[kKeep]
+        gTemp[gMatchieInd] = g2DParms.temperature[kKeep]
+        kDens[kMatchieInd] = k2DParms.N[kKeep]
+        gDens[gMatchieInd] = g2DParms.N[kKeep]
+        kKappa[kMatchieInd] = k2DParms.kappa[kKeep]
+
+        ;; kTemp = k2DParms.temperature[kMatchieInd]
+        ;; gTemp = g2DParms.temperature[kMatchieInd]
+        ;; kDens = k2DParms.N[kMatchieInd]
+        ;; gDens = g2DParms.N[kMatchieInd]
+        ;; kKappa = k2DParms.kappa[kMatchieInd]
 
         ;; Now temperatures
         fmtStrs = ['(A3,TR1,A22,TR5,A6,TR5,A6,TR5,A6)', $
@@ -320,7 +332,7 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
 
         PRINT_MMA_FITSTATS,tRanges, $
                            jvPlotData.time, $
-                           jvPlotData.source.NDown, $
+                           dens.dens, $
                            kDens, $
                            gDens, $
                            avgs_jvFit.useInds, $

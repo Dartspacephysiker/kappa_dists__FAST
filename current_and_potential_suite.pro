@@ -190,6 +190,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
    SC_POT=sc_pot, $
    PLOTDIR=plotDir, $
    CAP_STRUCT=cAP_struct, $
+   USE_ION_BEAMS_AS_CAP_TRANGES=use_ion_beams_as_cAP_tRanges, $
+   OUT_IONBEAMS=ionBeams, $
    BATCH_MODE=batch_mode, $
    _EXTRA=e
 
@@ -325,6 +327,22 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
      BATCH_MODE=batch_mode, $
      _EXTRA=cAP_struct
  
+  IF KEYWORD_SET(use_ion_beams_as_cAP_tRanges) THEN BEGIN
+     GET_FA_IESA_ION_BEAMS,STR_TO_TIME(orbTimes[0]),STR_TO_TIME(orbTimes[1]), $
+                           ORBIT=orbit, $
+                           ;; NEWELL_2009_INTERP=Newell_2009_interp, $
+                           ION_ANGLERANGE=curPotList[2].angles.peakEn, $
+                           ION_ENERGYRANGE=curPotList[2].energy, $
+                           SPECTROGRAM_UNITS=spectrogram_units, $
+                           EEB_OR_EES=eeb_or_eesArr[1], $
+                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                           ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+                           SC_POT=sc_pot, $
+                           OUT_SC_POTAVG=sc_potAvg, $
+                           OUT_IONEVENTS=ionBeams, $
+                           BATCH_MODE=batch_mode
+  ENDIF
+
   CURRENT_AND_POTENTIAL_PLOTDATA_PREP,curPotList,jvPlotData, $
                                       T1=plot_t1, $
                                       T2=plot_t2, $
@@ -337,6 +355,8 @@ PRO CURRENT_AND_POTENTIAL_SUITE, $
                                       USE_PEAK_EN_FOR_DOWNPOT=use_peakE_for_downPot, $
                                       ADD_UPGOING_ION_POT=add_iu_pot, $
                                       IU_POT_TIDS=iu_pot_tids, $
+                                      USE_ION_BEAMS_AS_CAP_TRANGES=use_ion_beams_as_cAP_tRanges, $
+                                      IN_IONBEAMS=ionBeams, $
                                       T_PLUSMINUSFAC_FOR_POT=T_plusMinusFac_for_pot, $
                                       TEMPERATURE_TYPE_INDEX=tTypeInd, $
                                       ;; ALSO_MSPH_SOURCECONE=also_msph_sourcecone, $

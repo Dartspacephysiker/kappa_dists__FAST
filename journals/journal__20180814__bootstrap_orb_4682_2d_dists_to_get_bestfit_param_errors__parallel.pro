@@ -1,31 +1,33 @@
 ;; 2018/08/08
 ;; 'Nother 'nother
 
-PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL
+PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL
 
   mainRoutine = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/journal__20180808__bootstrap_orb_1607_2d_dists_to_get_bestfit_param_errors.pro'
 
-  routineName = 'JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS'
+  routineName = 'JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL'
 
   check_for_and_only_do_baddies = 0
-  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180809/"
+  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180814/"
 
   proDir1     = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/'
   routineArr1 = STRLOWCASE( $
                 ['KAPPA_FIT2D__MONTECARLO_UNCERTAINTY', $
                  'KAPPA_FIT2D__MONTECARLO__1DINIT']) + '.pro'
 
-  sRate = 1.89
+  sRate = 1.25
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180808-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  fil = '20180814-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  diff_eFlux_fil = 'orb_4682-diff_eflux-ees'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
-  orbit = 1607
-  orbString = STRING(FORMAT='(I0)',orbit)
+  ;; orbit = 4682
+  ;; orbString = STRING(FORMAT='(I0)',orbit)
+  ;; south = 1
+  ;; hemi  = "south"
 
   nCPUs    = !CPU.HW_NCPU-1
   
@@ -34,20 +36,16 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   IDLChildDir    = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   IDLChildOutput = IDLChildDir + IDLChildPref + STRCOMPRESS(INDGEN(nCPUs),/REMOVE_ALL) + '.txt'
 
-  ;; 7 processors to work withe
-  ;; an interval of 06m15s-03m50s = 2m25s = 145s
-  ;; 20*2+21*5 = 145s
-  carloTimeArr  = '1997-01-17/' + [['01:03:50','01:04:10'], $
-                                   ['01:04:10','01:04:30'], $
-                                   ['01:04:30','01:04:51'], $
-                                   ['01:04:51','01:05:12'], $
-                                   ['01:05:12','01:05:33'], $
-                                   ['01:05:33','01:05:54'], $
-                                   ['01:05:54','01:06:15']]
-
-  ;; Do some quick catchup
-  carloTimeArr  = '1997-01-17/' + [['01:04:06','01:04:07'], $
-                                   ['01:04:08','01:04:09']]
+  ;; 7 processors to work with
+  ;; an interval of 06m55s-05m40s = 1m15s = 75s
+  ;; 10*2+11*5 = 75
+  carloTimeArr  = '1997-10-28//' + [['09:05:40','09:05:50'], $
+                                    ['09:05:50','09:06:00'], $
+                                    ['09:06:00','09:06:11'], $
+                                    ['09:06:11','09:06:22'], $
+                                    ['09:06:22','09:06:33'], $
+                                    ['09:06:33','09:06:44'], $
+                                    ['09:06:44','09:06:55']]
 
   nCPUsToRun = N_ELEMENTS(carloTimeArr[0,*])
 

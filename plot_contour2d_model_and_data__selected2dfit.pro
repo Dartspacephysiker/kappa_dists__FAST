@@ -136,8 +136,10 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
            ENDCASE
 
            ;; Now do the energies at the boundary
-           minAngle  = MIN(K_EA__fitAngles)
-           maxAngle  = MAX(K_EA__fitAngles)
+           dao = K_EA__fitAngles
+           dao[WHERE(dao GT 180,/NULL)] = dao[WHERE(dao GT 180,/NULL)]-360
+           minAngle  = MIN(dao)
+           maxAngle  = MAX(dao)
            minCosSin = [COS(minAngle*!PI/180.),SIN(minAngle*!PI/180.)]
            maxCosSin = [COS(maxAngle*!PI/180.),SIN(maxAngle*!PI/180.)]
 

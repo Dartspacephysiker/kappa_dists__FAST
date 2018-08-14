@@ -145,7 +145,6 @@ PRO KAPPA_FIT2D__FIREINTHEHOLE,curDataStr, $
                                  TIMEFNSTR=timeFNStr, $
                                  EPS=eps
 
-
      ENDIF
 
   ENDIF ELSE BEGIN

@@ -59,6 +59,7 @@ PRO KAPPA_EFLUX_FIT2D, $
    FIT1D__COMBINE_PLOTSLICES_IN_PDF=fit1D__combine_plotslices_in_PDF, $
    FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
    FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+   FIT2D__PEAKE_BOUNDS_INDSHIFT_FOR_MOM=fit2D__peakE_bounds_indShift_for_mom, $
    FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
    FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
    FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -157,6 +158,7 @@ PRO KAPPA_EFLUX_FIT2D, $
      FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
      FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
      FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+     FIT2D__PEAKE_BOUNDS_INDSHIFT_FOR_MOM=fit2D__peakE_bounds_indShift_for_mom, $
      FIT2D__USE_BULK_E_ANISOTROPY=fit2D__bulk_e_anisotropy, $
      FIT2D__BULK_E_ANISO_FACTOR=fit2D__bulk_e_anis_factor, $
      ;; FIT2D__EXCLUDE_LCA_FROM_DENSCALC=fit2D__exclude_lca_from_densCalc, $

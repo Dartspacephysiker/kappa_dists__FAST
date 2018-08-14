@@ -45,6 +45,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           FIT1D__COMBINE_PLOTSLICES_IN_PDF=fit1D__combine_plotslices_in_PDF, $
                           FIT2D__N_BELOW_PEAK=n_below_peak2D, $
                           FIT2D__N_ABOVE_PEAK=n_above_peak2D, $
+                          FIT2D__PEAKE_BOUNDS_INDSHIFT_FOR_MOM=fit2D__peakE_bounds_indShift_for_mom, $
                           FIT2D__EXTEND_FITSTRUCT_ERANGE=fit2D__extend_fitStruct_eRange, $
                           FIT2D__NFLUX=fit2D__nFlux, $
                           FIT2D__WEIGHTING=fit2D__weighting, $
@@ -98,6 +99,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                           KSUM__ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
                           KSUM__TIMEBAR_FROM_ION_BEAMS=kSum__timeBar_from_ion_beams, $
+                          KSUM__MSPH_SOURCECONE_HALFWIDTH=kSum__msph_sourcecone_halfWidth, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
@@ -122,8 +124,8 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
 
   @common__kappa_fit2d_structs.pro
 
-  t1                            = STR_TO_TIME(t1Str)
-  t2                            = STR_TO_TIME(t2Str)
+  t1      = STR_TO_TIME(t1Str)
+  t2      = STR_TO_TIME(t2Str)
 
   IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
      SET_PLOT_DIR,plotDir, $
@@ -132,7 +134,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                   ADD_SUFF='/kappa_fits/Orbit_' + STRCOMPRESS(orbit,/REMOVE_ALL)
   ENDIF
 
-  outDir                        = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
+  outDir  = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
 
   @kappa_fitter__defaults.pro
   
@@ -295,6 +297,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2D__CLAMPDENSITY=fit2D__clampDensity, $
         FIT2D__ONLY_FIT_ERANGE_AROUND_PEAK=fit2D__only_fit_peak_eRange, $
         FIT2D__ONLY_FIT_ERANGE_ABOVE_MIN=fit2D__only_fit_aboveMin, $
+        FIT2D__PEAKE_BOUNDS_INDSHIFT_FOR_MOM=fit2D__peakE_bounds_indShift_for_mom, $
         FIT2D__SHOW_AND_PROMPT__EACH_CANDIDATE=fit2D__show_each_candidate, $
         FIT2D__SHOW_ONLY_DATA=fit2D__show_only_data, $
         FIT2D__PA_ZRANGE=fit2D__PA_zRange, $
@@ -418,7 +421,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
      electron_angleRange = KF2D__SDTData_opt.electron_angleRange
   ENDIF
 
-  ;;2017/03/21
+ ;;2017/03/21
   ;;LOOK: All you've got to do is figure out a way to consistently get the ion contribution in here, and you're golden. Understand?
   ;;THEN you can see what it's really like
   IF KEYWORD_SET(curAndPot_analysis) THEN BEGIN
@@ -496,10 +499,32 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         SC_POT=sc_pot, $
         EPS=eps, $
         CAP_STRUCT=cAP_struct, $
+        OUT_IONBEAMS=ionEvents, $
         BATCH_MODE=batch_mode
 
   ENDIF
 
+  wantIonBeams = KEYWORD_SET(sway__checkForIonBeams)
+  IF TAG_EXIST(cAP_struct,"use_ion_beams_as_cAP_tRanges") THEN BEGIN
+     wantIonBeams = wantIonBeams OR cAP_struct.use_ion_beams_as_cAP_tRanges
+  ENDIF
+
+  IF wantIonBeams AND N_ELEMENTS(ionEvents) EQ 0 THEN BEGIN
+     GET_FA_IESA_ION_BEAMS,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
+                           ORBIT=orbit, $
+                           ;; NEWELL_2009_INTERP=Newell_2009_interp, $
+                           ION_ANGLERANGE=curPotList[2].angles.peakEn, $
+                           ION_ENERGYRANGE=curPotList[2].energy, $
+                           SPECTROGRAM_UNITS=spectrogram_units, $
+                           EEB_OR_EES=eeb_or_ees, $
+                           SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
+                           ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
+                           SC_POT=sc_pot, $
+                           OUT_SC_POTAVG=sc_potAvg, $
+                           OUT_IONEVENTS=ionEvents, $
+                           BATCH_MODE=batch_mode
+  ENDIF
+ 
 
   lastFile = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/lastFile.sav'
   ;; String of contents updated 2018/04/03
@@ -715,22 +740,6 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         FIT2DPARMERRFILE=fit2DParmErrFile, $
         FIT2DPARMERRDIR=outDir
 
-     IF KEYWORD_SET(sway__checkForIonBeams) THEN BEGIN
-        GET_FA_IESA_ION_BEAMS,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
-                              ORBIT=orbit, $
-                              NEWELL_2009_INTERP=Newell_2009_interp, $
-                              ION_ANGLERANGE=curPotList[2].angles.peakEn, $
-                              ION_ENERGYRANGE=curPotList[2].energy, $
-                              SPECTROGRAM_UNITS=spectrogram_units, $
-                              EEB_OR_EES=eeb_or_ees, $
-                              SPECTRA_AVERAGE_INTERVAL=spectra_average_interval, $
-                              ENFORCE_DIFF_EFLUX_SRATE=enforce_diff_eFlux_sRate, $
-                              SC_POT=sc_pot, $
-                              OUT_SC_POTAVG=sc_potAvg, $
-                              OUT_IONEVENTS=ionEvents, $
-                              BATCH_MODE=batch_mode
-     ENDIF
-
      IF KEYWORD_SET(show_Strangeway_summary) THEN BEGIN
 
         SINGLE_RJS_SUMMARY,STR_TO_TIME(t1Str),STR_TO_TIME(t2Str), $
@@ -843,6 +852,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
                              ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
                              IONEVENTS=ionEvents, $                             
+                             MSPH_SOURCECONE_HALFWIDTH=kSum__msph_sourcecone_halfWidth, $
                              FIT2DPARMERRFILE=fit2DParmErrFile, $
                              FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars, $

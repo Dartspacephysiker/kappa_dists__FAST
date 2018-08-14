@@ -1,6 +1,6 @@
 ;NWO!! Steiner, Hollywood—all of 'em
 
-PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
+PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
    CARLOTIMESTART=carloTimeStart, $
    CARLOTIMESTOP=carloTimeStop, $
    CHECK_FOR_AND_ONLY_DO_BADDIES=check_for_and_only_do_baddies, $
@@ -24,17 +24,21 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      PRINT,FORMAT='("Extra factor          : ",F0.2)',extraFactor
   ENDIF
 
-  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 1.89
+  disable_diffEflux_thresh = 1  ;Seems to be necessary for orb 4682 (2018/08/14)
+
+  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 1.25
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180808-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  fil = '20180814-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  diff_eFlux_fil = 'orb_4682-diff_eflux-ees'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
-  orbit = 1607
+  orbit = 4682
   orbString = STRING(FORMAT='(I0)',orbit)
+  south = 1
+  hemi  = "south"
 
   ;; nRolls         = 1000
   nRolls         = 10000
@@ -53,8 +57,10 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; from JOURNAL__20171222__THE_CLASSICS__RESPOND_TO_REFEREE__NOFIT_BELOW_PEAK_ENERGY
   chi2_over_dof_thresh = 100
   lowDens_threshf       = 0.05
-  diffEflux_thresh     = 3D6
-  nPkAbove_dEF_thresh  = 3
+  IF ~KEYWORD_SET(disable_diffEflux_thresh) THEN BEGIN
+     diffEflux_thresh     = 3D6
+     nPkAbove_dEF_thresh  = 3
+  ENDIF
 
   make_bFunc_gFunc_plots = 0
   save_bFunc_gFunc_plots = 0
@@ -63,14 +69,8 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; print_2DWinInfo = 1
 
   ;; 'chine 1
-  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:00:29.79'
-  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:00:48.7'
-  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:01:12.044'
-  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:01:12.999'
-
-  ;; Testing CHECK_FOR_BADDIES stuff
-  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/01:04:28'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/01:04:42'
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-10-28/09:06:51'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-10-28/09:06:52'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
@@ -335,6 +335,7 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
                                          CURDATASTR=curDataStr, $
                                          TIDFNSTR=tidFNStr, $
                                          NROLLS=nRolls, $
+                                         HEMI=hemi, $
                                          FACTOR_BY_WHICH_TO_INCREASE_UNCERT_ARRAY=extraFactor, $
                                          NOT_MPFIT1D=not_mpFit1D, $
                                          KCURVEFIT_OPT=KF2D__CURVEFIT_OPT, $
@@ -357,3 +358,4 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
 
 
 END
+

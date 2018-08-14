@@ -1,6 +1,6 @@
 ;NWO!! Steiner, Hollywood—all of 'em
 
-PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
+PRO JOURNAL__20180808__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, $
    CARLOTIMESTART=carloTimeStart, $
    CARLOTIMESTOP=carloTimeStop, $
    CHECK_FOR_AND_ONLY_DO_BADDIES=check_for_and_only_do_baddies, $
@@ -24,16 +24,16 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      PRINT,FORMAT='("Extra factor          : ",F0.2)',extraFactor
   ENDIF
 
-  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 1.89
+  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 1.25
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180808-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  fil = '20180809-orb_1612-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-12_00_24__000-12_01_47__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  diff_eFlux_fil = 'orb_1612-diff_eflux-ees'+avgItvlStr+'-12_00_24__000-12_01_47__000.sav'
 
-  orbit = 1607
+  orbit = 1612
   orbString = STRING(FORMAT='(I0)',orbit)
 
   ;; nRolls         = 1000

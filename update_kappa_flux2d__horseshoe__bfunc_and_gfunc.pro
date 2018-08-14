@@ -144,9 +144,9 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
   ENDIF
 
   junk =  KAPPA_EFLUX__ANISOTROPY_DIST( $
-          curDataStr.energy, $
-          curDataStr.theta, $
-          curDataStr.data, $
+          curDataStr.energy[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1], $
+          curDataStr.theta[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1], $
+          curDataStr.data[0:curDataStr.nEnergy-1,0:curDataStr.nBins-1], $
           angleBin_i, $
           fitAngle_i, $
           NORMALIZE_TO_VALS_AT_FITTED_ANGLE=normalize_to_fitAngle_vals, $
@@ -184,27 +184,35 @@ PRO UPDATE_KAPPA_FLUX2D__HORSESHOE__BFUNC_AND_GFUNC,curDataStr, $
      KEYWORD_SET(KF2D__curveFit_opt.fit2D_only_eAngles): BEGIN
         bro              = KF2D__SDTData_opt.electron_angleRange
 
-        CASE KF2D__SDTData_opt.north_south OF
-           1: BEGIN
-              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
-              ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
-              ;;                  nAnKeep)
-              K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) AND $
-                                       (K_EA__angles LE CEIL(bro[1])),nAnKeep)
-           END
-           -1: BEGIN
-              ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) OR $
-              ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
-              ;;                  nAnKeep)
-              K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) OR $
-                                       (K_EA__angles LE CEIL(bro[1])),nAnKeep)
-           END
-        ENDCASE
+        K_EA__fitAngle_i = WHERE(ANGLE_TO_BINS(curDataStr,KF2D__SDTData_opt.electron_angleRange), $
+                                 nAnKeep, $
+                                 COMPLEMENT=notThese, $
+                                 NCOMPLEMENT=nNotThese)
+
+        K_EA__fitAngles  = curDataStr.theta[curDataStr.nEnergy/2,K_EA__fitAngle_i]
+
+        ;; OLD WAY
+        ;; CASE KF2D__SDTData_opt.north_south OF
+        ;;    1: BEGIN
+        ;;       ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) AND $
+        ;;       ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+        ;;       ;;                  nAnKeep)
+        ;;       ;; K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) AND $
+        ;;       ;;                          (K_EA__angles LE CEIL(bro[1])),nAnKeep)
+        ;;    END
+        ;;    -1: BEGIN
+        ;;       ;; aRange_i = WHERE((curDataStr.theta[curDataStr.nEnergy/2,*] GE FLOOR(bro[0])) OR $
+        ;;       ;;                  (curDataStr.theta[curDataStr.nEnergy/2,*] LE CEIL(bro[1])), $
+        ;;       ;;                  nAnKeep)
+        ;;       ;; K_EA__fitAngle_i = WHERE((K_EA__angles GE FLOOR(bro[0])) OR $
+        ;;       ;;                          (K_EA__angles LE CEIL(bro[1])),nAnKeep)
+        ;;    END
+        ;; ENDCASE
 
         ;; K_EA__fitAngles  = [MIN(K_EA__angles[K_EA__fitAngle_i]), $
         ;;                     MAX(K_EA__angles[K_EA__fitAngle_i])]
 
-        K_EA__fitAngles  = K_EA__angles[K_EA__fitAngle_i]
+        ;; K_EA__fitAngles  = K_EA__angles[K_EA__fitAngle_i]
 
      END
      ;; KEYWORD_SET(KF2D__curveFit_opt.fit2d__exclude_lca_from_densCalc): BEGIN

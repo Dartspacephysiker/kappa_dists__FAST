@@ -1,23 +1,22 @@
-;2018/04/13
-;; FRAC         : fraction of values needed  
-PRO JOURNAL__20180413__ORB1612__2D_MONTE_CARLOERS
+;2018/04/14
+;; FRAC         : fraction of values needed
+PRO JOURNAL__20180814__ORB4682__2D_MONTE_CARLOERS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  nRolls  = 10000               ;2018/04/13
+  nRolls  = 10000               ;2018/04/14
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
-  spectra_average_interval = 2
-  avgItvlStr = STRING(FORMAT='("-avg_itvl",I0)',spectra_average_interval)
+  sRate = 1.25
+  avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
-  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180409/'
+  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180809/'
   filPref = 'orb1612_2DMCarlo_ests__'
   filSuff = '_synthetic_wGauss-' + nRollStr + '-fit2DParams' + avgItvlStr + '.sav'
 
   ;; The file that provides the original fit stuff
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180409-orb_1612-Kappa_fits_and_Gauss_fits-ees-horseshoe2d-AUTO-only_fit_peak_eRange' + $
-        avgItvlStr + '.sav'
+  fil = '20180814-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_25-09_05_40__000-09_06_55__000.sav'
 
   calcUncertaintyBars = 1
 
@@ -42,7 +41,6 @@ PRO JOURNAL__20180413__ORB1612__2D_MONTE_CARLOERS
      END
   ENDCASE
   outFil = fil.Replace(".sav",outSuff)
-  ;; outFil = outFil.Replace('20180117',GET_TODAY_STRING(/DO_YYYYMMDD_FMT))
   outFil = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + $
            STRMID(outFil,8,STRLEN(outFil)-8)
   outFil = outFil.Replace('.sav','-'+nRollStr+'.sav')
@@ -302,6 +300,23 @@ PRO JOURNAL__20180413__ORB1612__2D_MONTE_CARLOERS
         END
      ENDCASE
 
+     PRINT,FORMAT='(A5,TR3,A8,TR3,A8,TR3,A8,TR3,A7,TR3,A6,TR5,A8,TR3,A8,TR3,A6)', $
+           "Ind","Time","KBulkE","KTemp","kappa","K N","GBulkE","GTemp","G N"
+     FOR k=0,nHere-1 DO BEGIN
+        PRINT,FORMAT='(I5,TR3,A8,TR3,G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3)', $
+              k, $
+              STRMID(fileList[k],STRLEN(filPref),13), $
+              k2DParmErr.mostProb.(0)[k], $
+              k2DParmErr.mostProb.(1)[k], $
+              k2DParmErr.mostProb.(2)[k], $
+              k2DParmErr.mostProb.(3)[k], $
+              g2DParmErr.mostProb.(0)[k], $
+              g2DParmErr.mostProb.(1)[k], $
+              g2DParmErr.mostProb.(2)[k]
+
+     ENDFOR
+
+
      STOP
      PRINT,"Saving to " + outFil + " ..."
      SAVE,k2DParmErr,g2DParmErr,FILENAME=dir+outFil
@@ -309,4 +324,5 @@ PRO JOURNAL__20180413__ORB1612__2D_MONTE_CARLOERS
   ENDIF
 
 END
+
 
