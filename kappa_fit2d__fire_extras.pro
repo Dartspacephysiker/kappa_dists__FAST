@@ -53,12 +53,24 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
      KEYWORD_SET(KF2D__curveFit_opt.fit2D__keep_wholeFit): BEGIN
         ;; fit2DParams[2] = 2.08
         IF shiftTheta NE 0 THEN STOP ;Why shiftTheta in the first place?
+
+        ;; 20180815 Maybe we lower the accel potential by a bit so as to not get crummy fit moments out?
+        tmpBlkE = fit2DParams[0]
+        ;; candidato = VALUE_CLOSEST2(fit2DStr.energy[(fit2DStr.nEnergy-1):0:-1,(fit2DStr.nBins-1)/2],tmpBlkE,/CONSTRAINED)
+        ;; IF candidato NE 0 AND candidato NE (fit2DStr.nEnergy-1) THEN BEGIN
+
+        ;;    closeE = (fit2DStr.energy[(fit2DStr.nEnergy-1):0:-1,(fit2DStr.nBins-1)/2])[candidato]
+        ;;    IF (tmpBlkE-closeE) GT 0 AND (tmpBlkE-closeE)/closeE LE 0.1 THEN BEGIN
+        ;;       tmpBlkE = (tmpblkE+closeE)/2.
+        ;;    ENDIF
+        ;; ENDIF
+
         fit2DStr.data[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1] = CALL_FUNCTION( $
                         fit2D_info.fitFunc, $
                         fit2DStr.energy[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
                         ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
                         fit2DStr.theta[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
-                        [fit2DParams[0],fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $
+                        [tmpBlkE,fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 

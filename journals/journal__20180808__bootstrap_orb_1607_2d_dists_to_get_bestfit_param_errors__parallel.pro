@@ -15,14 +15,14 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
                 ['KAPPA_FIT2D__MONTECARLO_UNCERTAINTY', $
                  'KAPPA_FIT2D__MONTECARLO__1DINIT']) + '.pro'
 
-  sRate = 1.89
+  sRate = 0.95
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180808-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  fil = '20180815-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_95-01_03_53__988-01_06_15__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_95-01_03_53__988-01_06_15__000.sav'
 
   orbit = 1607
   orbString = STRING(FORMAT='(I0)',orbit)
@@ -34,7 +34,7 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   IDLChildDir    = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/'
   IDLChildOutput = IDLChildDir + IDLChildPref + STRCOMPRESS(INDGEN(nCPUs),/REMOVE_ALL) + '.txt'
 
-  ;; 7 processors to work withe
+  ;; 7 processors to work with
   ;; an interval of 06m15s-03m50s = 2m25s = 145s
   ;; 20*2+21*5 = 145s
   carloTimeArr  = '1997-01-17/' + [['01:03:50','01:04:10'], $
@@ -46,8 +46,8 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
                                    ['01:05:54','01:06:15']]
 
   ;; Do some quick catchup
-  carloTimeArr  = '1997-01-17/' + [['01:04:06','01:04:07'], $
-                                   ['01:04:08','01:04:09']]
+  ;; carloTimeArr  = '1997-01-17/' + [['01:04:06','01:04:07'], $
+  ;;                                  ['01:04:08','01:04:09']]
 
   nCPUsToRun = N_ELEMENTS(carloTimeArr[0,*])
 

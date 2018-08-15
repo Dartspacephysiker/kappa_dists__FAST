@@ -10,8 +10,8 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180814/'
-  nRolls         = 10000
+  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/'
+  nRolls         = 1000
 
   maxwellian     = 0
 
@@ -52,7 +52,7 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
   avgItvlStr = "-sRate1_25"
   ;; file =
   
-  dateToCheck = '20180814'
+  dateToCheck = '20180815'
 
   use_density_moment__not_fit_param = 1
 
@@ -60,7 +60,8 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
   dirForCheck = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/' + dateToCheck + '/'
   filsPref    = 'orb4682_2DMCarlo_ests__09'
   orbDate     = '1997-10-28'
-  tBoundsStr  = orbDate + '/' + ['09:06:51','09:06:52'] ;fokusert
+  tBoundsStr  = orbDate + '/' + ['09:06:31','09:06:32'] ;fokusert
+  ;; tBoundsStr  = orbDate + '/' + ['09:06:51','09:06:52'] ;fokusert
   tBounds     = S2T(tBoundsStr)
   
   IF FILE_TEST(dirForCheck,/DIRECTORY) AND KEYWORD_SET(checkForFiles) THEN BEGIN

@@ -7,16 +7,16 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
   nRolls  = 10000               ;2018/04/13
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
-  sRate = 1.89
+  sRate = 0.95
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
-  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180809/'
+  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/'
   filPref = 'orb1607_2DMCarlo_ests__'
   filSuff = '_synthetic_wGauss-' + nRollStr + '-fit2DParams' + avgItvlStr + '.sav'
 
   ;; The file that provides the original fit stuff
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180808-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-01_03_50__000-01_06_15__000.sav'
+  fil = '20180815-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_95-01_03_53__988-01_06_15__000.sav'
 
   calcUncertaintyBars = 1
 
@@ -66,17 +66,17 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
   NMin          = 0.
 
   ;;physical limits of various quants
-  lowLimK       = [bulkEMin,TMin,kMin,NMin]
-  lowLimG       = [bulkEMin,TMin     ,NMin]
+  lowLimK       = [bulkEMin,TMin,kMin,NMin,NMin]
+  lowLimG       = [bulkEMin,TMin     ,NMin,NMin]
 
   nHere = N_ELEMENTS(fileList)
 
   ;; Assemble bin and step sizes
-  binSizesK  = [bulkEBinSize ,TBinSize ,kBinSize ,NBinSize ]
-  stepSizesK = [bulkEStepSize,TStepSize,kStepSize,NStepSize]
+  binSizesK  = [bulkEBinSize ,TBinSize ,kBinSize ,NBinSize ,NBinSize ]
+  stepSizesK = [bulkEStepSize,TStepSize,kStepSize,NStepSize,NStepSize]
 
-  binSizesG  = [bulkEBinSize ,TBinSize ,NBinSize ]
-  stepSizesG = [bulkEStepSize,TStepSize,NStepSize]
+  binSizesG  = [bulkEBinSize ,TBinSize ,NBinSize ,NBinSize ]
+  stepSizesG = [bulkEStepSize,TStepSize,NStepSize,NStepSize]
 
 
   IF KEYWORD_SET(showPlots) THEN BEGIN
@@ -103,8 +103,8 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
   IF KEYWORD_SET(calcUncertaintyBars) THEN BEGIN
 
      ;; Set up arrays with spreads
-     fKSprArr = MAKE_ARRAY(2,4,nHere,/FLOAT)
-     fGSprArr = MAKE_ARRAY(2,3,nHere,/FLOAT)
+     fKSprArr = MAKE_ARRAY(2,5,nHere,/FLOAT)
+     fGSprArr = MAKE_ARRAY(2,4,nHere,/FLOAT)
 
      nBadKArr = MAKE_ARRAY(nHere,/LONG  )
      nBadGArr = MAKE_ARRAY(nHere,/LONG  )
@@ -115,24 +115,24 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
 
         multFac = [-1.,1.]
 
-        fKMostProb = MAKE_ARRAY(4,nHere,/FLOAT)
-        fGMostProb = MAKE_ARRAY(3,nHere,/FLOAT)
+        fKMostProb = MAKE_ARRAY(5,nHere,/FLOAT)
+        fGMostProb = MAKE_ARRAY(4,nHere,/FLOAT)
 
-        fKSprArr   = MAKE_ARRAY(2,4,nHere,/FLOAT)
-        fGSprArr   = MAKE_ARRAY(2,3,nHere,/FLOAT)
+        fKSprArr   = MAKE_ARRAY(2,5,nHere,/FLOAT)
+        fGSprArr   = MAKE_ARRAY(2,4,nHere,/FLOAT)
 
      ENDIF ELSE BEGIN
 
         multFac = 1.
 
-        fKSprArr = MAKE_ARRAY(4,nHere,/FLOAT)
-        fGSprArr = MAKE_ARRAY(3,nHere,/FLOAT)
+        fKSprArr = MAKE_ARRAY(5,nHere,/FLOAT)
+        fGSprArr = MAKE_ARRAY(4,nHere,/FLOAT)
 
      ENDELSE
      
      IF KEYWORD_SET(make_2D_uncert) THEN $
-        PRINT,FORMAT='(A8,TR3,A8,TR3,A7,TR3,A6,TR5,A8,TR3,A8,TR3,A6)', $
-              "KBulkE","KTemp","kappa","K N","GBulkE","GTemp","G N"
+        PRINT,FORMAT='(A8,TR3,A8,TR3,A7,TR3,A6,TR3,A6,TR5,A8,TR3,A8,TR3,A6,TR3,A6)', $
+              "KBulkE","KTemp","kappa","K N","K N2","GBulkE","GTemp","G N","G N2"
      
      FOR k=0,nHere-1 DO BEGIN
         
@@ -148,11 +148,11 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
               tidKArr[k]-tidKArr[(k-1)>0]
 
         ;; Pick up original fitParams
-        K2Dparm = fit2DKappa_info.fitParams
-        g2Dparm = fit2DGauss_info.fitParams
+        ;; K2Dparm = fit2DKappa_info.fitParams
+        ;; g2Dparm = fit2DGauss_info.fitParams
 
-        K2Dparm[3] = fit2DKappa_info.fitmoms.scDens
-        g2Dparm[3] = fit2DGauss_info.fitmoms.scDens
+        ;; K2Dparm[3] = fit2DKappa_info.fitmoms.scDens
+        ;; g2Dparm[3] = fit2DGauss_info.fitmoms.scDens
 
         fKArr = TEMPORARY(kappaFit2DParamArr)
         fGArr = TEMPORARY(gaussFit2DParamArr)
@@ -166,20 +166,23 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
         ;; Some checks
         ;; IF nfKHere  NE nRolls THEN nBadKArr[k] = nRolls - nfKHere
         IF nfKHere  NE nRolls THEN STOP
-        IF nfKParms NE 5      THEN STOP
+        IF nfKParms NE 6      THEN STOP
 
         ;; IF nfGHere  NE nRolls THEN nBadGArr[k] = nRolls - nfGHere
         IF nfGHere  NE nRolls THEN STOP
-        IF nfGParms NE 5      THEN STOP
+        IF nfGParms NE 6      THEN STOP
 
-        ;; Shrink Gaussian fit2D array to drop kappa, which is always 100 for Gaussian fits
-        fGArr   = [fGArr[0,*],fGArr[1,*],fGArr[3,*]]
-        g2DParm = [g2DParm[0],g2DParm[1],g2DParm[3]]
+        ;; Shrink kappa fit2D array to drop bogus angle thing
+        fKArr   = [fKArr[0,*],fKArr[1,*],fKArr[2,*],fKArr[3,*],fKArr[5,*]]
+
+        ;; Shrink Gaussian fit2D array to drop bogus angle and kappa, which is always 100 for Gaussian fits
+        fGArr   = [fGArr[0,*],fGArr[1,*],fGArr[3,*],fGArr[5,*]]
+        ;; g2DParm = [g2DParm[0],g2DParm[1],g2DParm[3]]
 
         CASE 1 OF
            KEYWORD_SET(make_2D_uncert): BEGIN
 
-              FOR kk=0,3 DO BEGIN
+              FOR kk=0,4 DO BEGIN
                  
                  fKMostProb[kk,k] = MOST_PROB_FOR_MC_PARMS(fKArr[kk,*],stepSizesK[kk],binSizesK[kk])
                  fKSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fKMostProb[kk,k], $
@@ -194,7 +197,7 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
 
               ENDFOR
 
-              FOR kk=0,2 DO BEGIN
+              FOR kk=0,3 DO BEGIN
                  
                  fGMostProb[kk,k] = MOST_PROB_FOR_MC_PARMS(fGArr[kk,*],stepSizesG[kk],binSizesG[kk])
                  fGSprArr[*,kk,k] = GET_SPREAD_FOR_MC_PARMS(fGMostProb[kk,k], $
@@ -209,14 +212,16 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
 
               ENDFOR
 
-              PRINT,FORMAT='(G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3)', $
+              PRINT,FORMAT='(G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3,TR3,F6.3)', $
                     fKMostProb[0,k], $
                     fKMostProb[1,k], $
                     fKMostProb[2,k], $
                     fKMostProb[3,k], $
+                    fKMostProb[4,k], $
                     fGMostProb[0,k], $
                     fGMostProb[1,k], $
-                    fGMostProb[2,k]
+                    fGMostProb[2,k], $
+                    fGMostProb[3,k]
 
            END
            ELSE: BEGIN
@@ -248,11 +253,13 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
            mostProbK   = {bulk_energy : REFORM(fKMostProb[0,*]), $
                           temperature : REFORM(fKMostProb[1,*]), $
                           kappa       : REFORM(fKMostProb[2,*]), $
-                          N           : REFORM(fKMostProb[3,*])}
+                          N           : REFORM(fKMostProb[3,*]), $
+                          N2          : REFORM(fKMostProb[4,*])}
 
            mostProbG   = {bulk_energy : REFORM(fGMostProb[0,*]), $
                           temperature : REFORM(fGMostProb[1,*]), $
-                          N           : REFORM(fGMostProb[2,*])}
+                          N           : REFORM(fGMostProb[2,*]), $
+                          N2          : REFORM(fGMostProb[3,*])}
 
            ;; k2DParmErr  = {time        : tidKArr, $
            ;;                bulk_energy : REFORM(fKSprArr[*,0,*],2,nHere), $
@@ -273,12 +280,14 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
                           temperature : ABS(REFORM(fKSprArr[*,1,*],2,nHere)), $
                           kappa       : ABS(REFORM(fKSprArr[*,2,*],2,nHere)), $
                           N           : ABS(REFORM(fKSprArr[*,3,*],2,nHere)), $
+                          N2          : ABS(REFORM(fKSprArr[*,4,*],2,nHere)), $
                           mostProb    : mostProbK}
 
            g2DParmErr  = {time        : tidGArr, $
                           bulk_energy : ABS(REFORM(fGSprArr[*,0,*],2,nHere)), $
                           temperature : ABS(REFORM(fGSprArr[*,1,*],2,nHere)), $
                           N           : ABS(REFORM(fGSprArr[*,2,*],2,nHere)), $
+                          N2          : ABS(REFORM(fGSprArr[*,3,*],2,nHere)), $
                           mostProb    : mostProbG}
 
         END
@@ -289,30 +298,36 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
                           bulk_energy : REFORM(fKSprArr[0,*],nHere), $
                           temperature : REFORM(fKSprArr[1,*],nHere), $
                           kappa       : REFORM(fKSprArr[2,*],nHere), $
-                          N           : REFORM(fKSprArr[3,*],nHere)}
+                          N           : REFORM(fKSprArr[3,*],nHere), $
+                          N2          : REFORM(fKSprArr[4,*],nHere)}
 
            g2DParmErr  = {time        : tidGArr, $
                           bulk_energy : REFORM(fGSprArr[0,*],nHere), $
                           temperature : REFORM(fGSprArr[1,*],nHere), $
-                          N           : REFORM(fGSprArr[2,*],nHere)}
+                          N           : REFORM(fGSprArr[2,*],nHere), $
+                          N2          : REFORM(fGSprArr[3,*],nHere)}
 
 
         END
      ENDCASE
 
-     PRINT,FORMAT='(A5,TR3,A8,TR3,A8,TR3,A8,TR3,A7,TR3,A6,TR5,A8,TR3,A8,TR3,A6)', $
-           "Ind","Time","KBulkE","KTemp","kappa","K N","GBulkE","GTemp","G N"
+     PRINT,FORMAT='(A5,TR3,A8,TR3,A8,TR3,A8,TR3,A7,TR3,A6,TR3,A6,TR5,A8,TR3,A8,TR3,A6,TR3,A6)', $
+           "Ind","Time","KBulkE","KTemp","kappa","K N","K N2","GBulkE","GTemp","G N","G N2"
+     ;; PRINT,FORMAT='(A8,TR3,A8,TR3,A7,TR3,A6,TR3,A6,TR5,A8,TR3,A8,TR3,A6,TR3,A6)', $
+     ;;       "KBulkE","KTemp","kappa","K N","K N2","GBulkE","GTemp","G N","G N2"
      FOR k=0,nHere-1 DO BEGIN
-        PRINT,FORMAT='(I5,TR3,A8,TR3,G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3)', $
+        PRINT,FORMAT='(I5,TR3,A8,TR3,G8.4,TR3,G8.4,TR3,F7.3,TR3,F6.3,TR3,F6.3,TR5,G8.4,TR3,G8.4,TR3,F6.3,TR3,F6.3)', $
               k, $
               STRMID(fileList[k],STRLEN(filPref),13), $
               k2DParmErr.mostProb.(0)[k], $
               k2DParmErr.mostProb.(1)[k], $
               k2DParmErr.mostProb.(2)[k], $
               k2DParmErr.mostProb.(3)[k], $
+              k2DParmErr.mostProb.(4)[k], $
               g2DParmErr.mostProb.(0)[k], $
               g2DParmErr.mostProb.(1)[k], $
-              g2DParmErr.mostProb.(2)[k]
+              g2DParmErr.mostProb.(2)[k], $
+              g2DParmErr.mostProb.(3)[k]
 
      ENDFOR
 

@@ -176,6 +176,10 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
               UNITS=units, $
               MASS=curDataStr.mass)
 
+           junk = WHERE(fit2DStr.data GT 1E10)
+           IF junk[0] NE -1 THEN BEGIN
+              fit2DStr.data[junk] = !VALUES.F_NaN
+           ENDIF
            ;; fit2DStr.data = KAPPA_FLUX2D__HORSESHOE__ENERGY_ANISOTROPY__COMMON( $
            ;;                 fit2DStr.energy, $
            ;;                 ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
@@ -205,6 +209,8 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
                                  ;; ENERGY=eRange_fit, $
                                  ENERGY=KF2D__Curvefit_opt.tmpEBoundsForMom, $
                                  ANGLE=tmpDensSourceConeRange)
+
+     IF fit_scDens GT 50 THEN STOP
 
      ;; fit2DParams[3] = TEMPORARY(fit_scDens)
      fit2DParams = [fit2DParams,fit_scDens]

@@ -3,12 +3,14 @@
 
 PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL
 
-  mainRoutine = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/journal__20180808__bootstrap_orb_1607_2d_dists_to_get_bestfit_param_errors.pro'
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
-  routineName = 'JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL'
+  mainRoutine = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/journal__20180814__bootstrap_orb_4682_2d_dists_to_get_bestfit_param_errors.pro'
+
+  routineName = 'JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS'
 
   check_for_and_only_do_baddies = 0
-  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180814/"
+  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/"
 
   proDir1     = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/'
   routineArr1 = STRLOWCASE( $
@@ -19,13 +21,13 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180814-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
+  fil = '20180815-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
   diff_eFlux_fil = 'orb_4682-diff_eflux-ees'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
 
-  ;; orbit = 4682
-  ;; orbString = STRING(FORMAT='(I0)',orbit)
+  orbit = 4682
+  orbString = STRING(FORMAT='(I0)',orbit)
   ;; south = 1
   ;; hemi  = "south"
 
@@ -39,13 +41,13 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   ;; 7 processors to work with
   ;; an interval of 06m55s-05m40s = 1m15s = 75s
   ;; 10*2+11*5 = 75
-  carloTimeArr  = '1997-10-28//' + [['09:05:40','09:05:50'], $
-                                    ['09:05:50','09:06:00'], $
-                                    ['09:06:00','09:06:11'], $
-                                    ['09:06:11','09:06:22'], $
-                                    ['09:06:22','09:06:33'], $
-                                    ['09:06:33','09:06:44'], $
-                                    ['09:06:44','09:06:55']]
+  carloTimeArr  = '1997-10-28/' + [['09:05:40','09:05:50'], $
+                                   ['09:05:50','09:06:00'], $
+                                   ['09:06:00','09:06:11'], $
+                                   ['09:06:11','09:06:22'], $
+                                   ['09:06:22','09:06:33'], $
+                                   ['09:06:33','09:06:44'], $
+                                   ['09:06:44','09:06:55']]
 
   nCPUsToRun = N_ELEMENTS(carloTimeArr[0,*])
 
@@ -53,6 +55,7 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
 
   IF ~KEYWORD_SET(startCPU  ) THEN startCPU   = 0
   stopCPU = (N_ELEMENTS(stopCPU) GT 0 ? stopCPU : (startCPU + nCPUsToRun - 1) < (nCPUs - 1))
+  ;; stopCPU = startCPU
 
   ;;Show user before beginning
   PRINT,"Here's what I'm going to do: "

@@ -171,7 +171,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
         PEAK_ENERGY__START_AT_HIGHE=KF2D__Curvefit_opt.peak_energy__start_at_highE, $
         /CONTINUE_IF_NOMATCH, $
         /TEST_NOREV, $
-        ONECOUNT_STR=oneCurve     
+        ONECOUNT_STR=oneCurve, $
+        WHICHWY=whichWy
 
      kappaParamStruct.value = pKappa
      gaussParamStruct.value = pGauss
@@ -183,7 +184,6 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      KF2D__Curvefit_opt.tmpEBoundsForMom = [Xorig[tmpMaxEInd], $
                                             Xorig[tmpMinEInd]]
 
-     STOP 
      ;; Need to reduce these by number of fitAngles---'s'way too high!
      ;; Decided to do this in JOURNAL__20180406__BOOTSTRAP_ORB_1612_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS
      ;; extraDensDivFac = 5.
