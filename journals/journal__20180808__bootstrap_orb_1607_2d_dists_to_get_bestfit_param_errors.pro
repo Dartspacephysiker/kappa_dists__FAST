@@ -4,6 +4,7 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
    CARLOTIMESTART=carloTimeStart, $
    CARLOTIMESTOP=carloTimeStop, $
    CHECK_FOR_AND_ONLY_DO_BADDIES=check_for_and_only_do_baddies, $
+   SKIP_EXISTING=skip_existing, $
    DIR_TO_CHECK=dir_to_check, $
    IN_SRATE=in_sRate
 
@@ -24,20 +25,29 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      PRINT,FORMAT='("Extra factor          : ",F0.2)',extraFactor
   ENDIF
 
-  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 0.95
+  sRate = KEYWORD_SET(in_sRate) ? in_sRate : 1.89
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_95-01_03_53__988-01_06_15__000.sav'
+  CASE sRate OF
+     0.63: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
+        diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_63-01_04_20__500-01_05_54__000.sav'
+     END
+     1.89: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_89-01_03_53__988-01_06_15__000.sav'
+        diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate1_89-01_03_53__988-01_06_15__000.sav'
+     END
+  ENDCASE
+  ;; fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_95-01_03_53__988-01_06_15__000.sav'
 
   orbit = 1607
   orbString = STRING(FORMAT='(I0)',orbit)
 
   ;; nRolls         = 1000
-  nRolls         = 10000
+  nRolls         = 5000
   ;; nRolls         = 10000
 
   make_fit2D_info     = 0       ;Much more info than we need
@@ -63,14 +73,10 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; print_2DWinInfo = 1
 
   ;; 'chine 1
-  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:00:29.79'
-  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:00:48.7'
-  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/12:01:12.044'
-  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/12:01:12.999'
-
-  ;; Testing CHECK_FOR_BADDIES stuff
+  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/01:04:28'
+  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/01:04:42'
   carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-01-17/01:04:28'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/01:04:42'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-01-17/01:04:29'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
@@ -232,6 +238,8 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   saveInfStr  = KEYWORD_SET(make_fit2D_info      ) ? '-info_lists'  : ''
   saveParmStr = KEYWORD_SET(make_fit2DParamArrs  ) ? '-fit2DParams' : ''
 
+  IF KEYWORD_SET(skip_existing) THEN PRINT,"Will skip existing ..."
+
   ;; inds = [match_iStart[0]:match_iStop[0]]
   nHjar = N_ELEMENTS(inds)
   FOR k=0,nHjar-1 DO BEGIN
@@ -248,6 +256,15 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      utFil = saveSuff + tidFNStr +obsString+gaussString+nRollStr+saveInfStr+saveParmStr + avgItvlStr
      utFil = utFil+'.sav'
 
+     IF KEYWORD_SET(skip_existing) THEN BEGIN
+
+        IF FILE_TEST(saveDir+utFil) THEN BEGIN
+           PRINT,FORMAT='("Already exists: ",A0)',utFil
+           PRINT,"Continuing!"
+           CONTINUE
+        ENDIF
+
+     ENDIF
 
      IF KEYWORD_SET(check_for_and_only_do_baddies) THEN BEGIN
 

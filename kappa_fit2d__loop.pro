@@ -1096,8 +1096,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               k2DParms = kappaFit2D.fitparams
               g2DParms = gaussFit2D.fitparams
 
-              k2DParms[3] /= kappaFit2D.nAngle
-              g2DParms[3] /= gaussFit2D.nAngle
+              ;; k2DParms[3] /= kappaFit2D.nAngle
+              ;; g2DParms[3] /= gaussFit2D.nAngle
 
               tmpKappaFit1D.chi2 = kappaFit2D.chi2/(kappaFit2D.dof-$
                                                  kappaFit2D.nPegged)
@@ -1112,8 +1112,8 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
               ;; Do this for fitParams text and plot
               tmpKappaFit1D.A = k2DParms
               tmpGaussFit1D.A = g2DParms
-              tmpKappaFit1D.A[3] *= kappaFit2D.nAngle
-              tmpGaussFit1D.A[3] *= kappaFit2D.nAngle
+              ;; tmpKappaFit1D.A[3] *= kappaFit2D.nAngle
+              ;; tmpGaussFit1D.A[3] *= kappaFit2D.nAngle
 
               tmpKappaFit1D.name = STRING(FORMAT='(A0,F0.2)',"$\kappa$ = ",tmpKappaFit1D.A[2])
            ENDIF

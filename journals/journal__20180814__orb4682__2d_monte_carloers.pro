@@ -4,19 +4,19 @@ PRO JOURNAL__20180814__ORB4682__2D_MONTE_CARLOERS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  nRolls  = 10000               ;2018/04/14
+  nRolls  = 5000               ;2018/04/14
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
   sRate = 1.25
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
-  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/'
+  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180816/'
   filPref = 'orb4682_2DMCarlo_ests__'
   filSuff = '_synthetic_wGauss-' + nRollStr + '-fit2DParams' + avgItvlStr + '.sav'
 
   ;; The file that provides the original fit stuff
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_25-09_05_40__000-09_06_55__000.sav'
+  fil = '20180816-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_25-09_05_40__000-09_06_55__000.sav'
 
   calcUncertaintyBars = 1
 
@@ -50,13 +50,13 @@ PRO JOURNAL__20180814__ORB4682__2D_MONTE_CARLOERS
   ;; Histogram bin sizes
   BulkEBinSize  = 5.
   TBinSize      = 5.
-  NBinSize      = 0.01
+  NBinSize      = 0.02
   kBinSize      = 0.05
 
   ;; stepsizes for getting percentages
   BulkEStepSize = 2.5
-  TStepSize     = 2.5
-  NStepSize     = 0.01
+  TStepSize     = 1
+  NStepSize     = 0.001
   kStepSize     = 0.025
 
   ;; min set by physics

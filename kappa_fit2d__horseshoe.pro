@@ -136,7 +136,7 @@ PRO KAPPA_FIT2D__HORSESHOE,curDataStr, $
   ENDIF
 
   ;; Added 2018/02/22 because it seems dumb to calculate the density as a moment of the best-fit distribution---Right?
-  fit2DParams[3] *= fit2D_dens_angleInfo.nAngle
+  ;; fit2DParams[3] *= fit2D_dens_angleInfo.nAngle
 
   IF KEYWORD_SET(make_fit2D_info) THEN BEGIN
 

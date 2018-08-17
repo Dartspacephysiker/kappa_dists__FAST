@@ -10,18 +10,18 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/'
+  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180816/'
   nRolls         = 1000
 
-  maxwellian     = 0
+  maxwellian     = 1
 
 ; P[0]: E_b,       Plasma bulk energy (eV)
 ; P[1]: T,         Plasma kinetic temperature (eV)
 ; P[2]: kappa,     Kappa (of course!)--or more specifically 3D kappa index, so that kappa eq kappa_0 + 3/2
 ; P[3]: n,         Plasma density (cm^-3)
   layoutNommers  = [2,3,4,1]
-  binSizes       = [5.,5.,0.025,0.2]
-  xMaxList       = LIST(!NULL,!NULL,4,30.)
+  binSizes       = [5.,5.,0.025,0.01]
+  xMaxList       = LIST(!NULL,!NULL,4,5)
   ;; redStdDevFacs  = LIST(10.,!NULL,10.,10.)
   ;; redStdDevFacs  = LIST(!NULL,!NULL,!NULL,!NULL)
   val = 4. & redStdDevFacs  = LIST(val,val,val,val)
@@ -52,7 +52,7 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
   avgItvlStr = "-sRate1_25"
   ;; file =
   
-  dateToCheck = '20180815'
+  dateToCheck = '20180816'
 
   use_density_moment__not_fit_param = 1
 
@@ -60,7 +60,8 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
   dirForCheck = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/' + dateToCheck + '/'
   filsPref    = 'orb4682_2DMCarlo_ests__09'
   orbDate     = '1997-10-28'
-  tBoundsStr  = orbDate + '/' + ['09:06:31','09:06:32'] ;fokusert
+  ;; tBoundsStr  = orbDate + '/' + ['09:06:31','09:06:32'] ;fokusert
+  tBoundsStr  = orbDate + '/' + ['09:06:41','09:06:42'] ;fokusert
   ;; tBoundsStr  = orbDate + '/' + ['09:06:51','09:06:52'] ;fokusert
   tBounds     = S2T(tBoundsStr)
   
@@ -115,6 +116,9 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
            gEstListK      = LIST()
            gEstListG      = LIST()
 
+           PRINT,"Kappa"
+           PRINT,FORMAT='(A10,TR3,A11,TR3,A11,TR3,A11)',"Param","orig Est","gFitCoeff","SimpleMean"
+
            nowMaxwellian  = 0
            FOR k=0,3 DO BEGIN
 
@@ -161,6 +165,8 @@ PRO JOURNAL__20180814__CHECKOUT_ORB4682_MONTECARLO_OUTPUT, $
               ests        = gOrigEsts
               winTitle    = 'Maxwellian (' + T2S(fit2DKappa_info.sdt.time,/MS) + ')'
               
+              PRINT,"Maxwellian"
+              PRINT,FORMAT='(A10,TR3,A11,TR3,A11,TR3,A11)',"Param","orig Est","gFitCoeff","SimpleMean"
               FOR k=0,3 DO BEGIN
 
                  IF KEYWORD_SET(nowMaxwellian) AND k EQ 2 THEN k++

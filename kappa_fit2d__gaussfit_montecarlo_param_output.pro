@@ -117,6 +117,8 @@ PRO KAPPA_FIT2D__GAUSSFIT_MONTECARLO_PARAM_OUTPUT, $
   p4 = PLOT(REPLICATE(gMeanEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='-.',COLOR='GREEN',CURRENT=window)
   p5 = PLOT(REPLICATE(origParamEst,20),LINDGEN(20)/19.*yRange[1],/OVERPLOT,LINESTYLE='__',COLOR='BLUE',CURRENT=window)
 
+  PRINT,FORMAT='(A10,TR3,G11.3,TR3,G11.3,TR3,G11.3)',name,origParamEst,gCoeffs[1],gMeanEst
+
   gEst = {name            : name      , $
           coeff           : gCoeffs   , $
           ;; CI              : 

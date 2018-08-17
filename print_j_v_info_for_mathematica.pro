@@ -69,6 +69,7 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
    ADD_PARM_ERRORS_FROM_FILE=add_parm_errors_from_file, $
    ADD_PARM_ERRORS__NROLLS=add_parm_errors__nRolls, $
    ADD_PARM_ERRORS__USE_MOST_PROB=add_parm_errors__use_most_prob, $
+   ADD_PARM_ERRORS__DENSMOM__NOT_FIT_PARAM=add_parm_errors__densMom__not_fit_param, $
    FIT2DPARMERRFILE=fit2DParmErrFile, $
    FIT2DPARMERRDIR=fit2DParmErrDir
 
@@ -193,7 +194,15 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
         k2DPArms.kappa      [matchieK]  = k2DParmErr.mostProb.kappa[matchieK2]
         k2DParms.bulk_energy[matchieK]  = k2DParmErr.mostProb.bulk_energy[matchieK2]
         k2DParms.temperature[matchieK]  = k2DParmErr.mostProb.temperature[matchieK2]
-        k2DParms.N          [matchieK]  = k2DParmErr.mostProb.N[matchieK2]
+        CASE 1 OF
+           KEYWORD_SET(add_parm_errors__densMom__not_fit_param): BEGIN
+              k2DParms.N    [matchieK]  = k2DParmErr.mostProb.N2[matchieK2]
+           END
+           ELSE: BEGIN
+              k2DParms.N    [matchieK]  = k2DParmErr.mostProb.N[matchieK2]
+           END
+        ENDCASE
+        
 
      ENDIF
 
@@ -201,8 +210,14 @@ PRO PRINT_J_V_INFO_FOR_MATHEMATICA, $
 
         g2DParms.bulk_energy[matchieG]  = g2DParmErr.mostProb.bulk_energy[matchieG2]
         g2DParms.temperature[matchieG]  = g2DParmErr.mostProb.temperature[matchieG2]
-        g2DParms.N          [matchieG]  = g2DParmErr.mostProb.N[matchieG2]
-
+        CASE 1 OF
+           KEYWORD_SET(add_parm_errors__densMom__not_fit_param): BEGIN
+              g2DParms.N    [matchieG]  = g2DParmErr.mostProb.N2[matchieG2]
+           END
+           ELSE: BEGIN
+              g2DParms.N    [matchieG]  = g2DParmErr.mostProb.N[matchieG2]
+           END
+        ENDCASE
      ENDIF
 
   ENDIF

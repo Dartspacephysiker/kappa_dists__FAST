@@ -68,15 +68,6 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      ;; ENDCASE
   ENDIF
 
-  swapEnergyBounds = TAG_EXIST(KF2D__SDTData_opt,'energy_electron_tBounds')
-  IF swapEnergyBounds THEN BEGIN
-
-     PRINT,"Need to figure out what to do with KF2D__SDTData_opt.energy_electrons_curInd when (I presume) it comes to this routine after having already been altered by KAPPA_FIT2D__LOOP."
-     PRINT,"Maybe just reinitialize????"
-     PRINT,"I've already got the machinery located inside KAPPA_FIT2D__MONTECARLO__1DINIT; you just need to fickit!"
-     STOP
-  ENDIF
-
   IF KEYWORD_SET(KF2D__Curvefit_opt.fit__linear_energy_shift) THEN BEGIN
 
      nEnergies         = N_ELEMENTS(kappaDataStr.energy[*,0])

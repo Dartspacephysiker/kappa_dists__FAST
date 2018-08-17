@@ -29,7 +29,7 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
+  fil = '20180816-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_25-09_05_40__000-09_06_55__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
   diff_eFlux_fil = 'orb_4682-diff_eflux-ees'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
@@ -41,7 +41,7 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
 
   ;; nRolls         = 1000
   ;; nRolls         = 1000
-  nRolls         = 10000
+  nRolls         = 5000
 
   make_fit2D_info     = 0       ;Much more info than we need
   make_fit2DParamArrs = 1       ;Juuust right
@@ -70,11 +70,19 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
   ;; 'chine 1
   ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-10-28/09:06:51'
   ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-10-28/09:06:52'
-  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-10-28/09:06:31'
-  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-10-28/09:06:32'
+  ;; carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-10-28/09:06:31'
+  ;; carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-10-28/09:06:32'
+  carloTimeStart = KEYWORD_SET(carloTimeStart) ? carloTimeStart : '1997-10-28/09:06:41'
+  carloTimeStop  = KEYWORD_SET(carloTimeStop ) ? carloTimeStop  : '1997-10-28/09:06:42'
 
   RESTORE,dir+fil
   RESTORE,diff_eFlux_dir+diff_eFlux_fil
+
+  ;; Reinitialize index if we have it
+  swapEnergyBounds = TAG_EXIST(KF2D__SDTData_opt,'energy_electron_tBounds')
+  IF swapEnergyBounds THEN BEGIN
+     KF2D__SDTData_opt.energy_electrons_curInd = 0
+  ENDIF
 
   kFit2DParam_struct = 1
   gFit2DParam_struct = 1
@@ -331,6 +339,24 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS, 
      ;;                      /OVERPLOT, $
      ;;                      LINESTYLE='--', $
      ;;                      COLOR='RED')
+
+     IF swapEnergyBounds THEN BEGIN
+
+        ;; PRINT,"Need to figure out what to do with KF2D__SDTData_opt.energy_electrons_curInd when (I presume) it comes to this routine after having already been altered by KAPPA_FIT2D__LOOP."
+        ;; PRINT,"Maybe just reinitialize????"
+        ;; PRINT,"I've already got the machinery located inside KAPPA_FIT2D__MONTECARLO__1DINIT; you just need to fickit!"
+
+        KF2D__SDTData_opt.energy_electrons = KAPPA__UPDATE_ENERGY_ELECTRONS( $
+                                             curDataStr.time, $
+                                             KF2D__SDTData_opt.energy_electron_tBounds, $
+                                             KF2D__SDTData_opt.energy_electrons_arr, $
+                                             KF2D__SDTData_opt.energy_electrons_curInd, $
+                                             KF2D__SDTData_opt.energy_electron_NtBounds, $
+                                             UPDATED_INDEX=updateInd)
+        KF2D__SDTData_opt.energy_electrons_curInd = updateInd
+        KF2D__Curvefit_opt.min_peak_energy = KF2D__SDTData_opt.energy_electrons[0]
+
+     ENDIF
 
      KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,carloK,carloG,Pkappa,Pgauss, $
                                          CURDATASTR=curDataStr, $

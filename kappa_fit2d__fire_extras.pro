@@ -70,7 +70,7 @@ PRO KAPPA_FIT2D__FIRE_EXTRAS,fit2DStr,curDataStr,hadSuccess, $
                         fit2DStr.energy[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
                         ;; SHIFT(fit2DStr.theta,0,shiftTheta), $
                         fit2DStr.theta[0:fit2DStr.nEnergy-1,0:fit2DStr.nBins-1], $
-                        [tmpBlkE,fit2DParams[1],fit2DParams[2],fit2DParams[3]/fit2D_info.nAngle,fit2DParams[4]], $
+                        [tmpBlkE,fit2DParams[1],fit2DParams[2],fit2DParams[3],fit2DParams[4]], $
                         UNITS=units, $
                         MASS=curDataStr.mass)
 

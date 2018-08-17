@@ -21,7 +21,7 @@ PRO JOURNAL__20180814__BOOTSTRAP_ORB_4682_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'
+  fil = '20180816-orb_4682-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_25-09_05_40__000-09_06_55__000.sav'
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
   diff_eFlux_fil = 'orb_4682-diff_eflux-ees'+avgItvlStr+'-09_05_40__000-09_06_55__000.sav'

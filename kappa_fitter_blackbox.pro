@@ -738,6 +738,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
         ADD_PARM_ERRORS_FROM_FILE=kSum__add_parm_errors_from_file, $
         ADD_PARM_ERRORS__NROLLS=kSum__add_parm_errors__nRolls, $
         ADD_PARM_ERRORS__USE_MOST_PROB=kSum__add_parm_errors__use_most_prob, $
+        ADD_PARM_ERRORS__DENSMOM__NOT_FIT_PARAM=kSum__add_parm_errors__densMom__not_fit_param, $
         FIT2DPARMERRFILE=fit2DParmErrFile, $
         FIT2DPARMERRDIR=outDir
 

@@ -1,6 +1,5 @@
 ;; 2018/08/08
 ;; 'Nother 'nother
-
 PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__PARALLEL
 
   mainRoutine = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/journals/journal__20180808__bootstrap_orb_1607_2d_dists_to_get_bestfit_param_errors.pro'
@@ -8,21 +7,31 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   routineName = 'JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS'
 
   check_for_and_only_do_baddies = 0
-  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180809/"
+  skip_existing = 1
+  dir_to_check = "/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180817/"
 
   proDir1     = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/'
   routineArr1 = STRLOWCASE( $
                 ['KAPPA_FIT2D__MONTECARLO_UNCERTAINTY', $
                  'KAPPA_FIT2D__MONTECARLO__1DINIT']) + '.pro'
 
-  sRate = 0.95
+  ;; sRate = 0.63
+  sRate = 1.89
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_95-01_03_53__988-01_06_15__000.sav'
+  CASE sRate OF
+     0.63: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
+        diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_63-01_04_20__500-01_05_54__000.sav'
+     END
+     1.89: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_89-01_03_53__988-01_06_15__000.sav'
+        diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate1_89-01_03_53__988-01_06_15__000.sav'
+     END
+  ENDCASE
 
   diff_eFlux_dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/diff_eFlux/'
-  diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_95-01_03_53__988-01_06_15__000.sav'
 
   orbit = 1607
   orbString = STRING(FORMAT='(I0)',orbit)
@@ -37,13 +46,34 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
   ;; 7 processors to work with
   ;; an interval of 06m15s-03m50s = 2m25s = 145s
   ;; 20*2+21*5 = 145s
-  carloTimeArr  = '1997-01-17/' + [['01:03:50','01:04:10'], $
-                                   ['01:04:10','01:04:30'], $
-                                   ['01:04:30','01:04:51'], $
-                                   ['01:04:51','01:05:12'], $
-                                   ['01:05:12','01:05:33'], $
-                                   ['01:05:33','01:05:54'], $
-                                   ['01:05:54','01:06:15']]
+  ;; carloTimeArr  = '1997-01-17/' + [['01:03:50','01:04:10'], $
+  ;;                                  ['01:04:10','01:04:30'], $
+  ;;                                  ['01:04:30','01:04:51'], $
+  ;;                                  ['01:04:51','01:05:12'], $
+  ;;                                  ['01:05:12','01:05:33'], $
+  ;;                                  ['01:05:33','01:05:54'], $
+  ;;                                  ['01:05:54','01:06:15']]
+
+  ;; carloTimeArr  = '1997-01-17/' + [['01:04:28','01:04:30'], $
+  ;;                                  ['01:04:30','01:04:32'], $
+  ;;                                  ['01:04:32','01:04:34'], $
+  ;;                                  ['01:04:34','01:04:36'], $
+  ;;                                  ['01:04:36','01:04:38'], $
+  ;;                                  ['01:04:38','01:04:40'], $
+  ;;                                  ['01:04:40','01:04:42']]
+
+  ;; carloTimeArr  = '1997-01-17/' + [['01:04:38','01:04:39'], $
+  ;;                                  ['01:04:39','01:04:40'], $
+  ;;                                  ['01:04:40','01:04:41'], $
+  ;;                                  ['01:04:41','01:04:42']]
+
+  carloTimeArr  = '1997-01-17/' + [['01:04:20','01:04:46'], $
+                                   ['01:04:46','01:04:57'], $
+                                   ['01:04:57','01:05:08'], $
+                                   ['01:05:08','01:05:19'], $
+                                   ['01:05:19','01:05:30'], $
+                                   ['01:05:30','01:05:43'], $
+                                   ['01:05:43','01:05:54']]
 
   ;; Do some quick catchup
   ;; carloTimeArr  = '1997-01-17/' + [['01:04:06','01:04:07'], $
@@ -108,6 +138,10 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
                   'CARLOTIMESTART=carloTimeStart,' + $
                   'CARLOTIMESTOP=carloTimeStop,' + $
                   'IN_SRATE=sRate'
+
+        IF KEYWORD_SET(skip_existing) THEN BEGIN
+           execStr += ',/SKIP_EXISTING'
+        ENDIF
 
         IF KEYWORD_SET(check_for_and_only_do_baddies) THEN BEGIN
            oBridge[i]->SetVar,'dir_to_check', dir_to_check

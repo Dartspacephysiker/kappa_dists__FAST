@@ -8,17 +8,17 @@ PRO JOURNAL__20180809__CHECKOUT_ORB1607_MONTECARLO_OUTPUT, $
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180809/'
-  nRolls         = 10000
+  dir            = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180816/'
+  nRolls         = 5000
 
-  maxwellian     = 0
+  maxwellian     = 1
 
 ; P[0]: E_b,       Plasma bulk energy (eV)
 ; P[1]: T,         Plasma kinetic temperature (eV)
 ; P[2]: kappa,     Kappa (of course!)--or more specifically 3D kappa index, so that kappa eq kappa_0 + 3/2
 ; P[3]: n,         Plasma density (cm^-3)
   layoutNommers  = [2,3,4,1]
-  binSizes       = [5.,5.,0.025,0.2]
+  binSizes       = [5.,5.,0.025,0.1]
   xMaxList       = LIST(!NULL,!NULL,4,30.)
   ;; redStdDevFacs  = LIST(10.,!NULL,10.,10.)
   ;; redStdDevFacs  = LIST(!NULL,!NULL,!NULL,!NULL)
@@ -47,10 +47,10 @@ PRO JOURNAL__20180809__CHECKOUT_ORB1607_MONTECARLO_OUTPUT, $
   ENDIF
 
   nRollsString   = STRING(FORMAT='(I0)',nRolls)
-  avgItvlStr = "-sRate1_89"
+  avgItvlStr = "-sRate0_95"
   ;; file =
   
-  dateToCheck = '20180809'
+  dateToCheck = '20180816'
 
   checkForFiles = 1
   dirForCheck = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/' + dateToCheck + '/'
@@ -58,7 +58,8 @@ PRO JOURNAL__20180809__CHECKOUT_ORB1607_MONTECARLO_OUTPUT, $
   orbDate     = '1997-01-17'
   ;; tBoundsStr  = orbDate + '/' + ['01:03:50','01:06:15'] ;hele interval
   ;; tBoundsStr  = orbDate + '/' + ['01:04:28','01:04:41'] ;porsjon som er interessant
-  tBoundsStr  = orbDate + '/' + ['01:04:27','01:04:33'] ;fokusert
+  ;; tBoundsStr  = orbDate + '/' + ['01:04:27','01:04:33'] ;fokusert
+  tBoundsStr  = orbDate + '/' + ['01:04:28','01:04:29'] ;fokusert
   tBounds     = S2T(tBoundsStr)
   
   IF FILE_TEST(dirForCheck,/DIRECTORY) AND KEYWORD_SET(checkForFiles) THEN BEGIN

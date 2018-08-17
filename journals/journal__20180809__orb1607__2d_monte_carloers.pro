@@ -4,19 +4,28 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  nRolls  = 10000               ;2018/04/13
+  ;; nRolls  = 10000               ;2018/04/13
+  nRolls  = 5000               ;2018/04/13
   nRollStr = STRING(FORMAT='(I0,"Rolls")',nRolls)
 
-  sRate = 0.95
+  ;; sRate = 0.63
+  sRate = 1.89
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
-  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180815/'
+  inDir   = '/SPENCEdata/Research/Satellites/FAST/kappa_dists/saves_output_etc/20180817/'
   filPref = 'orb1607_2DMCarlo_ests__'
   filSuff = '_synthetic_wGauss-' + nRollStr + '-fit2DParams' + avgItvlStr + '.sav'
 
   ;; The file that provides the original fit stuff
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
-  fil = '20180815-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_95-01_03_53__988-01_06_15__000.sav'
+  CASE sRate OF
+     0.63: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
+     END
+     1.89: BEGIN
+        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate1_89-01_03_53__988-01_06_15__000.sav'
+     END
+  ENDCASE
 
   calcUncertaintyBars = 1
 
@@ -50,13 +59,13 @@ PRO JOURNAL__20180809__ORB1607__2D_MONTE_CARLOERS
   ;; Histogram bin sizes
   BulkEBinSize  = 5.
   TBinSize      = 5.
-  NBinSize      = 0.02
+  NBinSize      = 0.1
   kBinSize      = 0.05
 
   ;; stepsizes for getting percentages
   BulkEStepSize = 2.5
-  TStepSize     = 2.5
-  NStepSize     = 0.01
+  TStepSize     = 1
+  NStepSize     = 0.025
   kStepSize     = 0.025
 
   ;; min set by physics
