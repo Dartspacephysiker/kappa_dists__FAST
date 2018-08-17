@@ -40,6 +40,16 @@ nVKappaIntegrate[pot_,RB_,Tm_,nm_,kappa_]
 Perform integral to get the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
 ";
 
+nVKappaIntegrate1D::usage="
+nVKappaIntegrate[pot_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]
+Perform 1-D integral (from kappa 2 paper) to get the Dors and Kletzing density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
+";
+
+nVKappaIntegrate1DPhiBar::usage="
+nVKappaIntegratePhiBar[phiBar_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]
+Perform 1-D integral (from kappa 2 paper) to get the Dors and Kletzing density as a function of phiBar (=pot/Tm, both in eV), RB, Tm (in eV), nm (in cm^-3), and kappa.
+";
+
 JVKappa::usage="
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]
 Gives the Dors and Kletzing current density as a function of pot (in V), RB, Tm (in eV), nm (in cm^-3), and kappa.
@@ -113,6 +123,14 @@ factor=nm 2/Sqrt[\[Pi]] 1/(1-3/(2 kappa))^(3/2) Gamma[kappa+1]/(kappa^(3/2) Gamm
 NIntegrate[
 rho^2 Sin[theta] (1+(rho^2-(pot/Tm))/(kappa-3/2))^-(kappa+1) 
 * Piecewise[{{1,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)>0&&rho>= 0},{0,rho<= 0},{0,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)< 0}}],{theta,0,\[Pi]/2},{rho,0,30}]
+];
+
+nVKappaIntegrate1D[pot_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]:=Module[{factor},
+factor=nm *(pot/Tm)^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar (pot/Tm))/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]}]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar (pot/Tm))/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1}])
+];
+
+nVKappaIntegrate1DPhiBar[phiBar_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]:=Module[{factor},
+factor=nm * phiBar^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar phiBar)/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]}]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar phiBar)/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1}])
 ];
 
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{jParallel},
