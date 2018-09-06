@@ -1,0 +1,126 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3350,        116]
+NotebookOptionsPosition[      2834,         99]
+NotebookOutlinePosition[      3168,        114]
+CellTagsIndexPosition[      3125,        111]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"D", "[", 
+  RowBox[{
+   RowBox[{"nVMaxwellian", "[", 
+    RowBox[{"phi", ",", "RB", ",", "1", ",", "n"}], "]"}], ",", "phi"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.745113204307815*^9, 3.7451132606768303`*^9}, {
+  3.745142288481298*^9, 3.7451422886000557`*^9}},
+ CellLabel->"In[32]:=",ExpressionUUID->"2ea36f0f-d3cb-4585-8431-3a23d8f2c8b0"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", "2"], " ", "n", " ", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"-", 
+     FractionBox["1", 
+      RowBox[{
+       SqrtBox["phi"], " ", 
+       SqrtBox["\[Pi]"]}]]}], "+", 
+    FractionBox[
+     RowBox[{"1", "-", 
+      RowBox[{"2", " ", 
+       SqrtBox[
+        FractionBox["phi", 
+         RowBox[{
+          RowBox[{"-", "1"}], "+", "RB"}]]], " ", 
+       RowBox[{"DawsonF", "[", 
+        SqrtBox[
+         FractionBox["phi", 
+          RowBox[{
+           RowBox[{"-", "1"}], "+", "RB"}]]], "]"}]}]}], 
+     RowBox[{
+      SqrtBox["\[Pi]"], " ", 
+      SqrtBox[
+       FractionBox["phi", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", "RB"}]]], " ", 
+      SqrtBox[
+       RowBox[{
+        RowBox[{"-", "1"}], "+", "RB"}]]}]], "+", 
+    RowBox[{
+     SuperscriptBox["\[ExponentialE]", "phi"], " ", 
+     RowBox[{"Erfc", "[", 
+      SqrtBox["phi"], "]"}]}]}], ")"}]}]], "Output",
+ CellChangeTimes->{3.745113261898514*^9, 3.74514228923687*^9},
+ CellLabel->"Out[32]=",ExpressionUUID->"f4c05be6-ad2e-4538-a0b9-936b27808a1d"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"n", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"  ", 
+       RowBox[{"DawsonF", "[", 
+        SqrtBox[
+         FractionBox["phi", 
+          RowBox[{
+           RowBox[{"-", "1"}], "+", "RB"}]]], "]"}]}], 
+      RowBox[{
+       SqrtBox[
+        RowBox[{"\[Pi]", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"-", "1"}], "+", "RB"}], ")"}]}]], " "}]]}], "+", 
+    RowBox[{
+     FractionBox["1", "2"], "  ", 
+     SuperscriptBox["\[ExponentialE]", "phi"], " ", 
+     RowBox[{"Erfc", "[", 
+      SqrtBox["phi"], "]"}]}]}], ")"}]}]], "Input",
+ CellChangeTimes->{{3.7451423103607483`*^9, 3.745142336126972*^9}, {
+  3.7451423848411703`*^9, 
+  3.745142422204074*^9}},ExpressionUUID->"caaedc91-5a82-453e-ada1-\
+10bcb3840c48"]
+},
+WindowSize->{1853, 1018},
+WindowMargins->{{Automatic, 0}, {0, Automatic}},
+FrontEndVersion->"11.3 for Linux x86 (64-bit) (March 6, 2018)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 368, 8, 32, "Input",ExpressionUUID->"2ea36f0f-d3cb-4585-8431-3a23d8f2c8b0"],
+Cell[951, 32, 1070, 36, 116, "Output",ExpressionUUID->"f4c05be6-ad2e-4538-a0b9-936b27808a1d"]
+}, Open  ]],
+Cell[2036, 71, 794, 26, 121, InheritFromParent,ExpressionUUID->"caaedc91-5a82-453e-ada1-10bcb3840c48"]
+}
+]
+*)
+
+(* End of internal cache information *)
+
