@@ -193,7 +193,7 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      ;; R_B_axis_names   = [R_B_axis_vals,(R_B_axis_vals[-1]*10) < MAX(mMagDat.K.magRat)]
 
      R_B_axis_names   = STRING(FORMAT='(I0)',R_B_axis_vals)
-     R_B_axis_names   = ['5','10','100','10!U3!N','10!U4!N']
+     ;; R_B_axis_names   = ['5','10','100','10!U3!N','10!U4!N']
 
      R_E_axis_vals    = INTERPOL(tRB_fLineRE,REFORM(tRB_RBpairs[1,*]),R_B_axis_vals)
      ;; R_B_FAST  = INTERPOL(REFORM(tRB_RBpairs[0,*]),REFORM(tRB_RBpairs[1,*]),R_B)
@@ -201,8 +201,8 @@ PRO PLOT_J_V_MAP__R_B_AND_KAPPA__FIXED_T_AND_N,mMagDat,jvPlotData,avgs_JVFit, $
      ;; nValsStr         = STRING('(I0)',nVals)
      ;; R_E_axis_names   = STRING(FORMAT='('+nValsStr+'(F0.1))',R_E_axis_vals)
 
-     ;; R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
-     R_E_axis_names   = ['1.8','2.2','4.7','12.1','36.4']
+     R_E_axis_names   = STRING(FORMAT='(F0.2)',R_E_axis_vals)
+     ;; R_E_axis_names   = ['1.8','2.2','4.7','12.1','36.4']
 
   ENDIF
 
