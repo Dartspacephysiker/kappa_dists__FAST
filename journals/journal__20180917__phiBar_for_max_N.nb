@@ -1,0 +1,111 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3303,        103]
+NotebookOptionsPosition[      2579,         82]
+NotebookOutlinePosition[      2915,         97]
+CellTagsIndexPosition[      2872,         94]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"phiBarForMaxN", "[", "RB_", "]"}], ":=", 
+  RowBox[{"FindRoot", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"Exp", "[", "phiBar", "]"}], " ", 
+      RowBox[{"Erfc", "[", 
+       SqrtBox["phiBar"], "]"}]}], "\[Equal]", 
+     RowBox[{
+      FractionBox["2", 
+       SqrtBox[
+        RowBox[{"\[Pi]", " ", 
+         RowBox[{"(", 
+          RowBox[{"RB", "-", "1"}], ")"}]}]]], 
+      RowBox[{"DawsonF", "[", 
+       SqrtBox[
+        FractionBox["phiBar", 
+         RowBox[{"RB", "-", "1"}]]], "]"}]}]}], ",", 
+    RowBox[{"{", 
+     RowBox[{"phiBar", ",", 
+      RowBox[{
+       SqrtBox["RB"], "/", "2"}]}], "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.746149063164324*^9, 3.7461492172949533`*^9}, 
+   3.746149308177548*^9, {3.746149380403411*^9, 3.746149394190505*^9}, {
+   3.746149431265882*^9, 3.746149459151401*^9}, 
+   3.746149503730939*^9},ExpressionUUID->"d12a8c43-93ca-4b21-b342-\
+fb8d97a5f82b"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"phiBarForMaxN", "[", "30", "]"}]], "Input",
+ CellChangeTimes->{{3.746149221743361*^9, 3.746149222981888*^9}, {
+   3.746149301468985*^9, 3.7461493143012466`*^9}, 
+   3.7461495042321777`*^9},ExpressionUUID->"972b9aea-a592-4386-b3d3-\
+af548586c6f1"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"phiBar", "\[Rule]", "23.811625952420233`"}], "}"}]], "Output",
+ CellChangeTimes->{3.746149315873384*^9, 3.746149397074388*^9, 
+  3.7461494606327143`*^9},
+ CellLabel->"Out[7]=",ExpressionUUID->"147350ed-5e6b-41e9-b68c-f76fdcb005ad"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"phiBarForMaxN", "[", "300", "]"}]], "Input",
+ CellChangeTimes->{{3.7461494675667667`*^9, 3.746149470655995*^9}, 
+   3.746149504683318*^9},ExpressionUUID->"a6c12670-ed31-4727-8e02-\
+b05a4627107d"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"phiBar", "\[Rule]", "254.36034449152763`"}], "}"}]], "Output",
+ CellChangeTimes->{3.746149471210166*^9},
+ CellLabel->"Out[8]=",ExpressionUUID->"729852ff-66ba-4baa-b6bb-ec80d5f42e3b"]
+}, Open  ]]
+},
+WindowSize->{808, 911},
+WindowMargins->{{489, Automatic}, {115, Automatic}},
+FrontEndVersion->"11.3 for Linux x86 (64-bit) (March 6, 2018)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 955, 28, 147, "Input",ExpressionUUID->"d12a8c43-93ca-4b21-b342-fb8d97a5f82b"],
+Cell[CellGroupData[{
+Cell[1538, 52, 270, 5, 32, "Input",ExpressionUUID->"972b9aea-a592-4386-b3d3-af548586c6f1"],
+Cell[1811, 59, 271, 5, 36, "Output",ExpressionUUID->"147350ed-5e6b-41e9-b68c-f76fdcb005ad"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2119, 69, 219, 4, 32, "Input",ExpressionUUID->"a6c12670-ed31-4727-8e02-b05a4627107d"],
+Cell[2341, 75, 222, 4, 69, "Output",ExpressionUUID->"729852ff-66ba-4baa-b6bb-ec80d5f42e3b"]
+}, Open  ]]
+}
+]
+*)
+
