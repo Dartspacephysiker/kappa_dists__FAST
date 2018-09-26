@@ -101,6 +101,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                           KSUM__ADD_PARM_ERRORS__DENSMOM__NOT_FIT_PARAM=kSum__add_parm_errors__densMom__not_fit_param, $
                           KSUM__TIMEBAR_FROM_ION_BEAMS=kSum__timeBar_from_ion_beams, $
                           KSUM__MSPH_SOURCECONE_HALFWIDTH=kSum__msph_sourcecone_halfWidth, $
+                          KSUM__ADD_LC_LINES=kSum__add_LC_lines, $
                           OUT_FIT2DK=fit2DK, $
                           OUT_FIT2DGAUSS=fit2DG, $
                           OUT_KAPPAFIT1DSTRUCTS=kappaFit1Ds, $
@@ -856,6 +857,7 @@ PRO KAPPA_FITTER_BLACKBOX,orbit, $
                              ADD_PARM_ERRORS__DENSMOM__NOT_FIT_PARAM=kSum__add_parm_errors__densMom__not_fit_param, $
                              IONEVENTS=ionEvents, $                             
                              MSPH_SOURCECONE_HALFWIDTH=kSum__msph_sourcecone_halfWidth, $
+                             ADD_LC_LINES=kSum__add_LC_lines, $
                              FIT2DPARMERRFILE=fit2DParmErrFile, $
                              FIT2DPARMERRDIR=outDir, $
                              TIMEBARS=timeBars, $
