@@ -11,8 +11,21 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE,diff_eFlux,ind, $
 
   data3d = diff_eFlux[ind]
 
+  ;; 20181006 Added while working on ELECTRON_MOMENTS_AND_SPECTRAL_IDENTIFICATION_V0
+  nUniqEdgery = N_ELEMENTS(UNIQ(FLOOR(data3d.energy),SORT(FLOOR(data3d.energy))))
+  xtraString = ''
+  IF nUniqEdgery LT 10 AND data3d.project_name EQ 'FAST' THEN BEGIN
+     ;; PRINT,FORMAT='("MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE: Only have ",I0," unique energies; Making diff_eFlux member invalid ...")',nUniqEdgery
+     xtraString = STRING(FORMAT='("(Only have ",I0," unique energies)")',nUniqEdgery)
+
+     diff_eFlux[ind].valid = 0
+     data3d.valid = 0
+     RETURN, data3d
+  ENDIF
+
   IF ~data3d.valid OR ((WHERE(FINITE(data3d.data)))[0] EQ -1) THEN BEGIN
-     PRINT,"Bogus diff eFlux struct"
+     ;; PRINT,"Bogus diff eFlux struct"
+     PRINT,FORMAT='("MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE: invalid at ",A0," ",A0)',T2S(data3d.time,/MS),xtraString
      RETURN,data3d
   ENDIF
 
