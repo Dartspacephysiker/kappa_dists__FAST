@@ -264,7 +264,7 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      END
   ENDCASE
 
-  fit1Denergies = arrDiffE ? diff_eFlux[N_ELEMENTS(bounds)/2].energy[1:-1,0] : diff_eFlux.energy[1:-1,0,0]
+  fit1Denergies = arrDiffE ? diff_eFlux[N_ELEMENTS(bounds)/2].energy[1:diff_eFlux[N_ELEMENTS(bounds2)/2].nEnergy-1,0] : diff_eFlux.energy[1:diff_eFlux.nEnergy-1,0,0]
 
   synthKappa                     = diff_eFlux
   IF arrDiffE THEN BEGIN

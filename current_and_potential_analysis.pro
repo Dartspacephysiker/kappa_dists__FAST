@@ -1005,7 +1005,7 @@ PRO CURRENT_AND_POTENTIAL_ANALYSIS, $
 
         IF KEYWORD_SET(e_above_peak_temp[k]) THEN BEGIN
            energyArr_forTemp[0,*]    = peak_EBoundsArr[0,*] > energy[0,*]
-           energyArr_forTemp[1,*]    = peak_EBoundsArr[1,*] > energy[1,*]
+           energyArr_forTemp[1,*]    = peak_EBoundsArr[1,*] < energy[1,*]
            eRange__temp              = TEMPORARY(energyArr_forTemp)
         ENDIF ELSE IF N_ELEMENTS(eRange__temp_list[k]) GT 0 THEN BEGIN
            eRange__temp              = eRange__temp_list[k]
