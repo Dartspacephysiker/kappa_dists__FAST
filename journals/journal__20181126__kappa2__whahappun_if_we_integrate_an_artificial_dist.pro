@@ -68,7 +68,7 @@ PRO JOURNAL__20181126__KAPPA2__WHAHAPPUN_IF_WE_INTEGRATE_AN_ARTIFICIAL_DIST
   xWinSize    = 700
   yWinSize    = 700
 
-  outdir = '/SPENCEdata/software/sdt/batch_jobs/kappas_Maxwellians_for_inverted_Vs/'
+  outDir = '/SPENCEdata/software/sdt/batch_jobs/kappas_Maxwellians_for_inverted_Vs/'
   outPS = 'Orb1773-contour'
   POPEN,outDir+outPS, $
         XSIZE=xSize, $
