@@ -125,12 +125,12 @@ rho^2 Sin[theta] (1+(rho^2-(pot/Tm))/(kappa-3/2))^-(kappa+1)
 * Piecewise[{{1,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)>0&&rho>= 0},{0,rho<= 0},{0,rho^2 (1- (Sin[theta])^2/RB)-(pot/Tm)< 0}}],{theta,0,\[Pi]/2},{rho,0,30}]
 ];
 
-nVKappaIntegrate1D[pot_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]:=Module[{factor},
-factor=nm *(pot/Tm)^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar (pot/Tm))/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]}]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar (pot/Tm))/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1}])
+nVKappaIntegrate1D[pot_Real,RB_Real,Tm_Real,nm_Real,kappa_Real,opts:OptionsPattern[]]:=Module[{factor},
+factor=nm *(pot/Tm)^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar (pot/Tm))/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]},Evaluate[FilterRules[{opts},Options[NIntegrate]]]]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar (pot/Tm))/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1},Evaluate[FilterRules[{opts},Options[NIntegrate]]]])
 ];
 
-nVKappaIntegrate1DPhiBar[phiBar_Real,RB_Real,Tm_Real,nm_Real,kappa_Real]:=Module[{factor},
-factor=nm * phiBar^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar phiBar)/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]}]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar phiBar)/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1}])
+nVKappaIntegrate1DPhiBar[phiBar_Real,RB_Real,Tm_Real,nm_Real,kappa_Real,opts:OptionsPattern[]]:=Module[{factor},
+factor=nm * phiBar^(3/2)/Sqrt[\[Pi]] Gamma[kappa+1]/((kappa-3/2)^(3/2) Gamma[kappa-1/2]) (NIntegrate[Sqrt[Ebar+1] (1+(Ebar phiBar)/(kappa-3/2))^-(kappa+1),{Ebar,0,\[Infinity]},Evaluate[FilterRules[{opts},Options[NIntegrate]]]]-1/(RB-1) NIntegrate[Sqrt[1-Ebar] (1+(Ebar phiBar)/((kappa-3/2) (RB-1)))^-(kappa+1),{Ebar,0,1},Evaluate[FilterRules[{opts},Options[NIntegrate]]]])
 ];
 
 JVKappa[pot_,RB_,Tm_,nm_,kappa_]:=Module[{jParallel},
