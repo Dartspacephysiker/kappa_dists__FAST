@@ -15,14 +15,17 @@ PRO JOURNAL__20180808__BOOTSTRAP_ORB_1607_2D_DISTS_TO_GET_BESTFIT_PARAM_ERRORS__
                 ['KAPPA_FIT2D__MONTECARLO_UNCERTAINTY', $
                  'KAPPA_FIT2D__MONTECARLO__1DINIT']) + '.pro'
 
-  ;; sRate = 0.63
-  sRate = 1.89
+  sRate = 0.63
+  ;; sRate = 1.89
   avgItvlStr = (STRING(FORMAT='("-sRate",F4.2)',sRate)).Replace(".","_")
 
   dir = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/'
   CASE sRate OF
      0.63: BEGIN
-        fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
+        ;; fil = '20180817-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
+        ;; diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_63-01_04_20__500-01_05_54__000.sav'
+
+        fil = '20181130-orb_1607-KandGfits-ees-2NDKAPPA-only_fit_peak_eRange-sRate0_63-01_04_20__500-01_05_54__000.sav'
         diff_eFlux_fil = 'orb_1607-diff_eflux-ees-sRate0_63-01_04_20__500-01_05_54__000.sav'
      END
      1.89: BEGIN

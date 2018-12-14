@@ -229,7 +229,8 @@ PRO KAPPA_FIT2D__MONTECARLO_UNCERTAINTY,kappaDataStr,gaussDataStr,Pkappa,Pgauss,
      randomInds = FIX(Norig * RANDOMU(seed__eIndex,Norig, $
                                       nMaxTry))
   ENDIF
-  simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,nMaxTry))
+  ;; simKappas = 1.5 + (33.5 * RANDOMU(seed__kappa,nMaxTry))
+  simKappas = 1.5D/(0.015 + (0.983 * RANDOMU(seed__kappa,nMaxTry)))
 
   dataK_gaussError = RANDOMN(seed__data_error,nA,nB, $
                             nMaxTry)
