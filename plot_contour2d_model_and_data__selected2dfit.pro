@@ -2,6 +2,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
    ONLY_DATA=only_data, $ 
    FOR_HORSESHOE_FIT=for_horseshoe_fit, $
    LIMITS=limits, $
+   RETRACE=retrace,   $
    ADD_FITPARAMS_TEXT=add_fitParams_text, $
    FITSTRING=fitString, $
    SKIP_ORNAMENTATION=skip_ornamentation, $
@@ -42,6 +43,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /FILL, $
                   ;; /OVERPLOT, $
                   /MSEC, $
+                  RETRACE=retrace,   $
                   LIMITS=limits, $
                   /LABEL, $
                   THICK=thick
@@ -52,6 +54,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /POLAR, $
                   /FILL, $
                   /MSEC, $
+                  RETRACE=retrace,   $
                   LIMITS=limits, $
                   /LABEL, $
                   NCONT=nCont
@@ -60,6 +63,7 @@ PRO PLOT_CONTOUR2D_MODEL_AND_DATA__SELECTED2DFIT,fit2DStruct,dataSDT, $
                   /POLAR, $
                   /OVERPLOT, $
                   /MSEC, $
+                  RETRACE=retrace,   $
                   LIMITS=limits, $
                   /LABEL, $
                   NCONT=nCont, $
