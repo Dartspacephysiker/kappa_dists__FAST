@@ -323,6 +323,18 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      yMin                      = MIN(data[WHERE(data GT 0)])
   ENDELSE
   
+  ;; 20190302 Don't remember if/when I allowed losscone angles to be specified as neg instead of some angle less than 360
+
+  IF (KF2D__SDTData_opt.electron_angleRange[0] LT 0) AND $
+     (KF2D__SDTData_opt.electron_angleRange[0] LT KF2D__SDTData_opt.electron_angleRange[1]) THEN BEGIN
+     PRINT,"YOU NEED TO CHECK THIS BECAUSE YOU CAN'T REMEMBER WHY ONE OF THE ANGLES IN THE LOSS-CONE ANGLE RANGE SPECIFICATION IS NEGATIVE. IS WHAT YOU HAVE WHAT YOU WANT?"
+     PRINT,KF2D__SDTData_opt.electron_angleRange
+     ;; STOP
+
+     KF2D__SDTData_opt.electron_angleRange[0] += 360.
+
+  ENDIF
+
   ;;Init source-cone angles
   ;;Init angles we want to hang around
   INIT_KAPPA_FIT2D_PRELIM_ANGLEBIN_I, $
@@ -434,6 +446,11 @@ PRO KAPPA_FIT2D__LOOP,diff_eFlux,dEF_oneCount, $
      IF arrDiffE THEN BEGIN
         nEnergies      = nEnergiesArr[i]
         nTotAngles     = nBinsArr[i]
+     ENDIF
+
+     IF nTotAngles LT 0 THEN BEGIN
+        PRINT,"Bogus N angles! Skipping ..."
+        CONTINUE
      ENDIF
 
      iTime            = bounds[i]

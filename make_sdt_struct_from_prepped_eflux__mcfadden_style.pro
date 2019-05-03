@@ -66,7 +66,7 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE,diff_eFlux,ind, $
                             dtheta          :(twoD_geom_and_dTheta                             ? $
                                               data3d.dtheta[0:data3d.nenergy-1,0:data3d.nbins-1] : $
                                               data3d.dtheta[0:data3d.nenergy-1]), $
-                            eff             :data3d.eff          [*] , $
+                            eff             :data3d.eff          [0:data3d.nenergy-1] , $
                             mass            :data3d.mass             , $
                             geomfactor      :data3d.geomfactor       , $
                             header_bytes    :data3d.header_bytes [*] , $
