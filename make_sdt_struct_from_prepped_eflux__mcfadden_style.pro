@@ -3,7 +3,8 @@
 ;MAKE_ESA_CDF.pro)
 FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE,diff_eFlux,ind, $
    HAS_SC_POT=has_sc_pot, $
-   UNITS=units
+   UNITS=units, $
+   QUIET=quiet
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -25,7 +26,9 @@ FUNCTION MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE,diff_eFlux,ind, $
 
   IF ~data3d.valid OR ((WHERE(FINITE(data3d.data)))[0] EQ -1) THEN BEGIN
      ;; PRINT,"Bogus diff eFlux struct"
-     PRINT,FORMAT='("MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE: invalid at ",A0," ",A0)',T2S(data3d.time,/MS),xtraString
+     IF ~KEYWORD_SET(quiet) THEN BEGIN
+        PRINT,FORMAT='("MAKE_SDT_STRUCT_FROM_PREPPED_EFLUX__MCFADDEN_STYLE: invalid at ",A0," ",A0)',T2S(data3d.time,/MS),xtraString
+     ENDIF
      RETURN,data3d
   ENDIF
 

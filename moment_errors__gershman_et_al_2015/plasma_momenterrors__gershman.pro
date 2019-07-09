@@ -137,7 +137,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
   ENDCASE
 
   vs                      = SQRT(2*energy*energy_1eV/mass) ; convert energy (eV) array to velocity (m/s)
-  IF KEYWORD_SET(dEnergy) THEN BEGIN
+  IF N_ELEMENTS(dEnergy) GT 0 THEN BEGIN
      dVel                 = SQRT(2*dEnergy*energy_1eV/mass) ; convert energy (eV) array to velocity (m/s)
   ENDIF ELSE BEGIN
      dVel                 = [vs[0],vs[1:-1]-vs[0:-2]]
@@ -149,7 +149,7 @@ FUNCTION PLASMA_MOMENTERRORS__GERSHMAN,f,sigma_f,species,energy,theta,phi, $
   ;; ENDELSE
   ENDELSE
 
-  IF KEYWORD_SET(dTheta) THEN BEGIN
+  IF N_ELEMENTS(dTheta) GT 0 THEN BEGIN
      dTh    = dTheta*!DTOR
   ENDIF ELSE BEGIN
      dTh    = (theta[tii]-theta[tii-1])*!DTOR
